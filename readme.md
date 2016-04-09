@@ -10,6 +10,9 @@ This is a very early version of BitCity. As such, most of the functionality is
 missing. The only finished part is the editor mode. This is not playable. This
 is just the skeleton of the game it may become in a not so far away future.
 
+It is developed using BGB (http://bgb.bircd.org/), and is tested on hardware
+every once in a while.
+
 General to do list:
 - Budget screen
 - Minimap screen (with different maps)
@@ -30,10 +33,11 @@ Credits
 
 Game made by AntonioND/SkyLyrac (Antonio Niño Díaz)
 
-Email:  antonio_nd@outlook.com / antonionidi@gmail.com
+Email: antonio_nd@outlook.com / antonionidi@gmail.com
 
-Web:    http://antoniond_blog.drunkencoders.com/
-        http://antoniond.drunkencoders.com/
+Web:
+- http://antoniond_blog.drunkencoders.com/
+- http://antoniond.drunkencoders.com/
 
 GitHub: https://github.com/AntonioND
 
@@ -58,7 +62,7 @@ This game is licensed under the GPL v3 license. You may have received the source
 code of this game along with the ROM file. If not, the source code is freely 
 available at the following address:
 
-        https://github.com/AntonioND/bitcity
+    https://github.com/AntonioND/bitcity
 
 Not all source code files are licensed under the GPL v3, though, only the ones
 with the GPL header are. There other source files are licensed under different
