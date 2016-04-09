@@ -510,12 +510,12 @@ BuildSelectMenuRefreshSprites::
     inc     hl
     inc     hl
     inc     hl
-    set     OAMF_YFLIP_BIT,[hl]
+    set     OAMB_YFLIP,[hl]
     inc     hl
     inc     hl
     inc     hl
     inc     hl
-    set     OAMF_YFLIP_BIT,[hl]
+    set     OAMB_YFLIP,[hl]
 
     ret
 

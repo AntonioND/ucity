@@ -68,11 +68,11 @@ OAMF_BANK1      EQU %00001000 ; Bank number; 0,1 (GBC)
 
 OAMF_PALMASK    EQU %00000111 ; Palette (GBC)
 
-OAMF_PRI_BIT    EQU 7 ; Priority
-OAMF_YFLIP_BIT  EQU 6 ; Y flip
-OAMF_XFLIP_BIT  EQU 5 ; X flip
-OAMF_PAL1_BIT   EQU 4 ; Palette number; 0,1 (DMG)
-OAMF_BANK1_BIT  EQU 3 ; Bank number; 0,1 (GBC)
+OAMB_PRI        EQU 7 ; Priority
+OAMB_YFLIP      EQU 6 ; Y flip
+OAMB_XFLIP      EQU 5 ; X flip
+OAMB_PAL1       EQU 4 ; Palette number; 0,1 (DMG)
+OAMB_BANK1      EQU 3 ; Bank number; 0,1 (GBC)
 
 
 ;***************************************************************************
