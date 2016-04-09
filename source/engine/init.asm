@@ -154,7 +154,7 @@ wait_vbl:
     NINTENDO_LOGO
 
     ;        0123456789ABC
-    DB      "BITCITY V1.0 "
+    DB      "BITCITY      "
     DW      $0000
     DB      CART_COMPATIBLE_GBC ; GBC flag
     DB      $00,$00,$00 ;Super Game Boy
