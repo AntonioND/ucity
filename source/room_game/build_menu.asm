@@ -50,6 +50,8 @@ menu_active:    DS 1
 
 build_overlay_icon_active: DS 1
 
+menu_overlay_sprites_active:: DS 1 ; LCDCF_OBJON or 0
+
 ;###############################################################################
 
     SECTION "City Map Draw Menu Functions",ROMX
@@ -66,12 +68,12 @@ NUM_SPRITES EQU NUM_TILES / 2
 
 SPRITE_TILE_BASE    EQU 0 ; 2 VRAM banks, start at 1 and continue at 0
 
-NUM_ROWS_MENU   EQU ((144-16)/16)-1 ; ( scrn height - status bar ) / icon height
+NUM_ROWS_MENU   EQU (144/16) ; scrn height / icon height
 
 OVERLAY_ICON_TILE_BASE EQU 4 ; Sprite base for overlay icon (4 needed)
 
-MENU_BASE_X EQU 8+4
-MENU_BASE_Y EQU 16+4
+MENU_BASE_X EQU 8+(4) ; 4 pixels from left
+MENU_BASE_Y EQU 16+(-8) ; 8 pixels overflow from top
 
 ;-------------------------------------------------------------------------------
 
@@ -304,6 +306,8 @@ _BuildSelectMenuDrawIcon: ; a = icon (not NULL!), c = spr base, d = x, e = y
 
     ret
 
+;---------------------------------------
+
 ; returns b=0 if nothing was drawn, b=1 if it was drawn
 ; c is updated when returning
 _BuildSelectMenuDrawRow: ; a = row number, b = is selected, c = spr base, e = y
@@ -416,6 +420,8 @@ _BuildSelectMenuDrawRow: ; a = row number, b = is selected, c = spr base, e = y
     ld      b,1 ; at least one icon was drawn, return B=1
     ret
 
+;---------------------------------------
+
 BuildSelectMenuRefreshSprites::
 
     ld      a,[menu_has_changed]
@@ -447,9 +453,12 @@ BuildSelectMenuRefreshSprites::
     ; Get the first row that has to be drawn. Total = NUM_ROWS_MENU
 
     ld      a,[menu_selected_group]
-    sub     a,(NUM_ROWS_MENU/2)+1
+    sub     a,(NUM_ROWS_MENU/2)
     jr      nc,.not_limit
-    xor     a,a ; start in 0
+    ld      a,16
+    add     a,e
+    ld      e,a ; add 16 to first Y
+    xor     a,a ; start in menu row 0
 .not_limit:
 
     ; a = first row to draw
@@ -492,31 +501,6 @@ BuildSelectMenuRefreshSprites::
 
     ENDR
 
-    ; Draw botton arrow if not reached the end of the list
-    cp      a,Icon_Number_Groups
-    ret     z
-
-    ld      d,MENU_BASE_X ; X
-    ld      a,-8
-    add     a,e
-    ld      e,a ; d = d-8
-    ld      a,Icon_Cursor ; a = icon, c = spr base, de = xy
-    call    _BuildSelectMenuDrawIcon
-    dec     c
-    dec     c
-
-    ld      l,c
-    call    sprite_get_base_pointer ; return = hl
-    inc     hl
-    inc     hl
-    inc     hl
-    set     OAMB_YFLIP,[hl]
-    inc     hl
-    inc     hl
-    inc     hl
-    inc     hl
-    set     OAMB_YFLIP,[hl]
-
     ret
 
 ;-------------------------------------------------------------------------------
@@ -541,6 +525,9 @@ BuildSelectMenuShow::
     ld      a,MENU_CURSOR_MOVEMENT_SPEED
     ld      [menu_cursor_countdown],a
 
+    xor     a,a
+    ld      [menu_overlay_sprites_active],a
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -560,6 +547,9 @@ BuildSelectMenuHide::
     ld      hl,OAM_Copy
     ld      b,4*40
     call    memset_fast
+
+    ld      a,LCDCF_OBJON
+    ld      [menu_overlay_sprites_active],a
 
     ret
 

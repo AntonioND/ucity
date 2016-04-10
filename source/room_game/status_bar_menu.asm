@@ -144,8 +144,12 @@ StatusBarHandlerSTAT:
         ; At the bottom
         call    wait_screen_blank
 
+        ld      a,[menu_overlay_sprites_active]
+        ld      b,a
         ld      a,[game_sprites_8x16]
-        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8000
+        or      a,b
+        or      a,LCDCF_BG9C00|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8000
+
         ld      [rLCDC],a
 
         ld      a,7
@@ -192,8 +196,11 @@ StatusBarHandlerVBL::
 .on_top:
 
         ; On top
+        ld      a,[menu_overlay_sprites_active]
+        ld      b,a
         ld      a,[game_sprites_8x16]
-        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8000
+        or      a,b
+        or      a,LCDCF_BG9C00|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8000
         ld      [rLCDC],a
 
         ld      a,7
