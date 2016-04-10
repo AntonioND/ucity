@@ -280,6 +280,7 @@ PauseMenuHandleOption:
     jr      nz,.not_minimap
 
         ; Minimap
+        call    RoomMinimap
 
         ret
 

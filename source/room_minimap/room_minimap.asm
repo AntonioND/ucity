@@ -23,43 +23,36 @@
     INCLUDE "hardware.inc"
     INCLUDE "engine.inc"
 
-;-------------------------------------------------------------------------------
-
-    INCLUDE "map_load.inc"
-
 ;###############################################################################
 
-    SECTION "Room Menu Variables",WRAM0
-
-menu_selection: DS 1
-menu_exit:      DS 1
-
-;###############################################################################
-
-    SECTION "Room Menu Data",ROMX
+    SECTION "Room Minimap Variables",WRAM0
 
 ;-------------------------------------------------------------------------------
 
-MAIN_MENU_BG_MAP::
-    INCBIN "data/main_menu_bg_map.bin"
+minimap_room_exit: DS 1 ; set to 1 to exit room
 
 ;###############################################################################
 
-    SECTION "Room Menu Code Data",ROM0
+    SECTION "Room Minimap Data",ROMX
 
 ;-------------------------------------------------------------------------------
 
-InputHandleMenu:
+;###############################################################################
+
+    SECTION "Room Minimap Code Bank 0",ROM0
+
+;-------------------------------------------------------------------------------
+
+InputHandleMinimap:
 
     ld      a,[joy_pressed]
     and     a,PAD_A
     jr      z,.not_a
 
-        ld      a,0
-        call    CityMapSet
+
 
         ld      a,1
-        ld      [menu_exit],a
+        ld      [minimap_room_exit],a
         ret
 .not_a:
 
@@ -67,11 +60,10 @@ InputHandleMenu:
     and     a,PAD_B
     jr      z,.not_b
 
-        ld      a,0|CITY_MAP_SRAM_FLAG
-        call    CityMapSet
+
 
         ld      a,1
-        ld      [menu_exit],a
+        ld      [minimap_room_exit],a
         ret
 .not_b:
 
@@ -79,7 +71,7 @@ InputHandleMenu:
 
 ;-------------------------------------------------------------------------------
 
-RoomMenuVBLHandler:
+RoomMinimapVBLHandler:
 
     call    refresh_OAM
 
@@ -87,8 +79,23 @@ RoomMenuVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
-RoomMenuLoadBG:
+RoomMinimapLoadBG:
 
+    xor     a,a
+    ld      [rSCX],a
+    ld      [rSCY],a
+
+    LONG_CALL   APA_BufferClear
+    LONG_CALL   APA_ResetBackgroundMapping
+
+    LONG_CALL   APA_LoadGFX
+    di
+    ld      b,144
+    call    wait_ly
+    LONG_CALL   APA_LoadPalette
+    ei
+
+IF 0
     ld      b,BANK(MAIN_MENU_BG_MAP)
     call    rom_bank_push_set
 
@@ -144,19 +151,22 @@ RoomMenuLoadBG:
     jr      nz,.loop2
 
     call    rom_bank_pop
+ENDC
 
     ret
 
 ;-------------------------------------------------------------------------------
 
-RoomMenu::
+RoomMinimap::
+
+    ret ; This is not ready!
 
     call    SetPalettesAllBlack
 
-    ld      bc,RoomMenuVBLHandler
+    ld      bc,RoomMinimapVBLHandler
     call    irq_set_VBL
 
-    call    RoomMenuLoadBG
+    call    RoomMinimapLoadBG
 
     call    LoadText
     ld      b,144
@@ -169,7 +179,7 @@ RoomMenu::
     xor     a,a
     ld      [rIF],a
 
-    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
+    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
     ld      [rLCDC],a
 
     ei
@@ -181,9 +191,9 @@ RoomMenu::
     call    scan_keys
     call    KeyAutorepeatHandle
 
-    call    InputHandleMenu
+    call    InputHandleMinimap
 
-    ld      a,[menu_exit]
+    ld      a,[minimap_room_exit]
     and     a,a
     jr      z,.loop
 
