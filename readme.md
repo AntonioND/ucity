@@ -13,6 +13,9 @@ is just the skeleton of the game it may become in a not so far away future.
 It is developed using BGB (http://bgb.bircd.org/), and is tested on hardware
 every once in a while.
 
+NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
+you are interested please contact me at my email (antonio_nd@outlook.com).
+
 General to do list:
 - Budget screen
 - Minimap screen (with different maps)
