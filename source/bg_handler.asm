@@ -251,6 +251,10 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
     ld      c,rSTAT & $FF
 
     REPT 22
+        ld      a,d
+        cp      a,$E0 ; prevent reads from ECHO RAM or higher
+        jp      nc,.end
+
 .wait\@: ; wait until mode 0 or 1
         ld      a,[$FF00+c]
         bit     1,a
@@ -271,6 +275,7 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
         ld      b,0
 .not_wrap\@:
     ENDR
+.end:
 
     ret
 
@@ -297,15 +302,22 @@ ____vram_copy_column_wrap: ; b = x, c = y, hl = source address
     ; read 20 tiles and save to temp space
 
     push    bc
+
     ld      a,[bg_w]
     ld      b,0
     ld      c,a
     REPT 20
+        ld      a,h
+        cp      a,$E0 ; prevent reads from ECHO RAM or higher
+        jp      nc,.end
+
         ld      a,[hl]
         add     hl,bc
         ld      [de],a
         inc     de
     ENDR
+.end:
+
     pop     bc
 
     ; get addresses
