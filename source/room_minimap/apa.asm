@@ -29,6 +29,14 @@
 
 ;###############################################################################
 
+    SECTION "All Points Addressable Variables",WRAM0
+
+;-------------------------------------------------------------------------------
+
+apa_color: DS 1 ; color being used to draw
+
+;###############################################################################
+
     SECTION "All Points Addressable Data",ROMX
 
 ;-------------------------------------------------------------------------------
@@ -50,8 +58,135 @@ APA_BufferClear::
     call    vram_memset
 
     ld      bc,APA_TILE_NUMBER*(8*8/4) ; size to clear
+    ld      d,0
     ld      hl,$8800
-    call     memset_rand
+    call     memset
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+APA_SetColor:: ; a = color (0 to 3)
+
+    ld      [apa_color],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+APA_Plot:: ; b = x, c = y (0-127!)
+
+    ld      a,b
+    sra     a
+    sra     a
+    sra     a
+    ld      d,a ; d = tile x
+    ld      a,b
+    and     a,7
+    ld      b,a ; b = x inside tile
+
+    ld      a,c
+    sra     a
+    sra     a
+    sra     a
+    ld      e,a ; e = tile y
+    ld      a,c
+    and     a,7
+    ld      c,a ; c = y inside tile
+
+    ld      a,e
+    swap    a ; a = tile y * 16
+    add     a,d ; a = tile x + tile y * 16
+
+    ld      l,a
+    ld      h,0
+    add     hl,hl
+    add     hl,hl
+    add     hl,hl
+    add     hl,hl ; multiply tile number * tile size (16)
+    ; hl = tile offset
+
+    ; b = x inside tile
+    ; c = y inside tile
+
+    ld      e,c
+    ld      d,0 ; de = y inside tile
+    add     hl,de
+    add     hl,de ; hl = tile + y*2
+
+    ld      de,$8800
+    add     hl,de ; hl = base tiles + tile + y*2
+
+    ; b = x inside tile
+    ; hl = pointer to the 2 bytes that form the row
+
+    ld      c,rSTAT & $FF
+.wait_read_loop\@:
+    ld      a,[$FF00+c]
+    bit     1,a
+    jr      nz,.wait_read_loop\@ ; Not mode 0 or 1
+
+    ; b = x inside tile
+
+    ld      a,[apa_color]
+    ld      d,a
+    and     a,1
+    ld      e,a ; e = low color bit
+
+    ld      a,d
+    rra
+    and     a,1
+    ld      d,a ; d = high color bit
+
+    ld      a,7
+    sub     a,b
+    ld      b,a ; b = b - 7, for the shift loop
+
+    ld      a,(~1) & $FF ; bit mask
+
+    inc     b
+.shift_loop:
+    dec     b
+    jr      z,.shift_end
+    rlca ; rotate A not through carry
+    sla     e
+    sla     d
+    jr      .shift_loop
+.shift_end:
+
+    ld      b,a
+
+    ; b = bit mask
+    ; e = low color bit
+    ; d = high color bit
+    ; hl = pointer
+
+.loop\@:
+    ld      a,[rSTAT]
+    bit     1,a
+    jr      nz,.loop\@ ; Not mode 0 or 1
+
+    ld      a,[hl+]
+    ld      c,a ; c = low byte
+    ld      a,[hl-] ; a = high byte
+
+    and     a,b ; high & bit mask
+    or      a,d ; high & bit mask | color
+    ld      d,a ; d = high final byte
+
+    ld      a,c
+    and     a,b ; low & bit mask
+    or      a,e ; low & bit mask | color
+    ld      e,a ; e = low final byte
+
+.loop2\@:
+    ld      a,[rSTAT]
+    bit     1,a
+    jr      nz,.loop2\@ ; Not mode 0 or 1
+
+    ld      a,e
+    ld      [hl+],a
+    ld      [hl],d
 
     ret
 
@@ -74,6 +209,60 @@ APA_LoadPalette:: ; Load palette to slot APA_PALETTE_INDEX. Do this during VBL!
 ;-------------------------------------------------------------------------------
 
 APA_LoadGFX::
+
+    ld      a,2
+    call    APA_SetColor
+
+    ld      b,40
+.loop1:
+    ld      c,50
+    push    bc
+    call    APA_Plot ; b = x, c = y (0-127!)
+    pop     bc
+    dec     b
+    jr      nz,.loop1
+
+    ld      a,3
+    call    APA_SetColor
+
+    ld      b,10
+.loop2:
+    push    bc
+    call    APA_Plot ; b = x, c = y (0-127!)
+    pop     bc
+    dec     c
+    jr      nz,.loop2
+
+
+    ld      a,0
+.loop:
+    push    af
+
+    ld      d,a
+
+    ld      h,(Sine>>8) & $FF
+    ld      l,a
+    ld      a,[hl] ; x
+    sra     a
+    sra     a
+    add     a,64
+    ld      b,a
+
+    ld      a,d
+
+    ld      h,(Cosine>>8) & $FF
+    ld      l,a
+    ld      a,[hl] ; x
+    sra     a
+    sra     a
+    add     a,64
+    ld      c,a
+
+    call    APA_Plot ; b = x, c = y (0-127!)
+
+    pop     af
+    inc     a
+    jr      nz,.loop
 
     ret
 

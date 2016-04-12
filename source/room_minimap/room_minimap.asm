@@ -159,8 +159,6 @@ ENDC
 
 RoomMinimap::
 
-    ret ; This is not ready!
-
     call    SetPalettesAllBlack
 
     ld      bc,RoomMinimapVBLHandler
