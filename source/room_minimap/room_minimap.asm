@@ -302,7 +302,7 @@ RoomMinimapLoadBG:
     ld      [rSCX],a
     ld      [rSCY],a
 
-    LONG_CALL   APA_BufferClear
+    call    APA_BufferClear
     LONG_CALL   APA_ResetBackgroundMapping
 
     LONG_CALL   APA_LoadGFX
@@ -315,6 +315,7 @@ RoomMinimapLoadBG:
     ei
 
     LONG_CALL   MinimapDrawRCI
+    call    APA_BufferUpdate
 
 IF 0
     ld      b,BANK(MAIN_MENU_BG_MAP)

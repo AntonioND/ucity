@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "apa.inc"
+    INCLUDE "room_game.inc"
 
 ;###############################################################################
 
@@ -34,6 +35,11 @@
 ;-------------------------------------------------------------------------------
 
 apa_color: DS 1 ; color being used to draw
+
+MINIMAP_BACKBUFFER_BASE       EQU $D000
+MINIMAP_BACKBUFFER_WRAMX_BANK EQU BANK_CITY_MAP_TILE_OK_FLAGS
+
+MINIMAP_VRAM_BASE EQU $8800
 
 ;###############################################################################
 
@@ -47,26 +53,10 @@ apa_color: DS 1 ; color being used to draw
 
 ;-------------------------------------------------------------------------------
 
-APA_BufferClear::
-
-    ld      a,1
-    ld      [rVBK],a
-
-    ld      bc,APA_TILE_NUMBER*(8*8/4) ; size to clear
-    ld      d,0
-    ld      hl,$8800
-    call    vram_memset
-
-    ld      bc,APA_TILE_NUMBER*(8*8/4) ; size to clear
-    ld      d,0
-    ld      hl,$8800
-    call     memset
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 APA_Plot:: ; b = x, c = y (0-127!)
+
+    ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
+    ld      [rSVBK],a
 
     ld      a,b
     sra     a
@@ -106,17 +96,18 @@ APA_Plot:: ; b = x, c = y (0-127!)
     add     hl,de
     add     hl,de ; hl = tile + y*2
 
-    ld      de,$8800
+    ld      de,MINIMAP_BACKBUFFER_BASE
     add     hl,de ; hl = base tiles + tile + y*2
 
     ; b = x inside tile
     ; hl = pointer to the 2 bytes that form the row
-
+IF 0
     ld      c,rSTAT & $FF
 .wait_read_loop\@:
     ld      a,[$FF00+c]
     bit     1,a
     jr      nz,.wait_read_loop\@ ; Not mode 0 or 1
+ENDC
 
     ; b = x inside tile
 
@@ -154,11 +145,12 @@ APA_Plot:: ; b = x, c = y (0-127!)
     ; d = high color bit
     ; hl = pointer
 
+IF 0
 .loop\@:
     ld      a,[rSTAT]
     bit     1,a
     jr      nz,.loop\@ ; Not mode 0 or 1
-
+ENDC
     ld      a,[hl+]
     ld      c,a ; c = low byte
     ld      a,[hl-] ; a = high byte
@@ -171,12 +163,12 @@ APA_Plot:: ; b = x, c = y (0-127!)
     and     a,b ; low & bit mask
     or      a,e ; low & bit mask | color
     ld      e,a ; e = low final byte
-
+IF 0
 .loop2\@:
     ld      a,[rSTAT]
     bit     1,a
     jr      nz,.loop2\@ ; Not mode 0 or 1
-
+ENDC
     ld      a,e
     ld      [hl+],a
     ld      [hl],d
@@ -340,6 +332,37 @@ ENDC
 ;###############################################################################
 
     SECTION "All Points Addressable Functions Bank 0",ROM0
+
+;-------------------------------------------------------------------------------
+
+APA_BufferClear::
+
+    ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
+    ld      [rSVBK],a
+
+    ld      bc,APA_TILE_NUMBER*(8*8/4) ; size to clear
+    ld      d,0
+    ld      hl,MINIMAP_VRAM_BASE
+    call    memset
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+APA_BufferUpdate::
+
+    ld      a,1
+    ld      [rVBK],a
+
+    ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
+    ld      [rSVBK],a
+
+    ld      bc,APA_TILE_NUMBER ; bc = tiles
+    ld      de,128 ; de = start index
+    ld      hl,MINIMAP_BACKBUFFER_BASE ; hl = source
+    call    vram_copy_tiles
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
