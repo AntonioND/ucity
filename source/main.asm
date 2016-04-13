@@ -160,6 +160,8 @@ Main:
     and     a,a
     call    z,NotGBC
 
+    call    CPU_fast
+
     LONG_CALL   SRAM_PowerOnCheck
 
     ld      a,LCDCF_ON
