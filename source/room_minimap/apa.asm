@@ -66,14 +66,6 @@ APA_BufferClear::
 
 ;-------------------------------------------------------------------------------
 
-APA_SetColor:: ; a = color (0 to 3)
-
-    ld      [apa_color],a
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 APA_Plot:: ; b = x, c = y (0-127!)
 
     ld      a,b
@@ -129,6 +121,7 @@ APA_Plot:: ; b = x, c = y (0-127!)
     ; b = x inside tile
 
     ld      a,[apa_color]
+
     ld      d,a
     and     a,1
     ld      e,a ; e = low color bit
@@ -192,7 +185,10 @@ APA_Plot:: ; b = x, c = y (0-127!)
 
 ;-------------------------------------------------------------------------------
 
-APA_PALETTE:: ; To be loaded in slot 7
+APA_PALETTE:: ; To be loaded in slot APA_PALETTE_INDEX
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
+    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
+
     DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
     DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
 
@@ -208,8 +204,19 @@ APA_LoadPalette:: ; Load palette to slot APA_PALETTE_INDEX. Do this during VBL!
 
 ;-------------------------------------------------------------------------------
 
+APA_LoadGFXPalettes::
+
+    ; TODO
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 APA_LoadGFX::
 
+    ; TODO Load border graphics. Don't load palettes
+
+IF 0
     ld      a,2
     call    APA_SetColor
 
@@ -263,6 +270,8 @@ APA_LoadGFX::
     pop     af
     inc     a
     jr      nz,.loop
+
+ENDC
 
     ret
 
@@ -333,5 +342,11 @@ ENDC
     SECTION "All Points Addressable Functions Bank 0",ROM0
 
 ;-------------------------------------------------------------------------------
+
+APA_SetColor:: ; a = color (0 to 3)
+
+    ld      [apa_color],a
+
+    ret
 
 ;###############################################################################

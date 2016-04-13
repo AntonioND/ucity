@@ -23,6 +23,10 @@
     INCLUDE "hardware.inc"
     INCLUDE "engine.inc"
 
+;-------------------------------------------------------------------------------
+
+    INCLUDE "room_game.inc"
+
 ;###############################################################################
 
     SECTION "Room Minimap Variables",WRAM0
@@ -31,11 +35,224 @@
 
 minimap_room_exit: DS 1 ; set to 1 to exit room
 
+drawing_color: DS 4
+
 ;###############################################################################
 
     SECTION "Room Minimap Data",ROMX
 
 ;-------------------------------------------------------------------------------
+
+IF 1
+MinimapDrawRCI::
+
+    ld      c,0 ; c = y
+.loopy:
+
+        ld      b,0 ; b = x
+.loopx:
+        push    bc
+        ld      e,b
+        ld      d,c
+        LONG_CALL_ARGS  CityMapGetType ; Arguments: e = x , d = y
+        pop     bc
+
+        ; Set color from tile
+        ld      d,a
+        and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+        ld      a,d
+        jr      z,.not_road_train
+        ld      a,3
+        ld      [drawing_color+0],a
+        ld      [drawing_color+1],a
+        ld      [drawing_color+2],a
+        ld      [drawing_color+3],a
+        jr      .end_compare
+.not_road_train:
+        cp      a,TYPE_RESIDENTIAL
+        jr      nz,.not_residential
+        ld      a,2
+        ld      [drawing_color+0],a
+        ld      a,1
+        ld      [drawing_color+1],a
+        ld      a,1
+        ld      [drawing_color+2],a
+        ld      a,2
+        ld      [drawing_color+3],a
+        jr      .end_compare
+.not_residential:
+        cp      a,TYPE_INDUSTRIAL
+        jr      nz,.not_industrial
+        ld      a,2
+        ld      [drawing_color+0],a
+        ld      [drawing_color+1],a
+        ld      [drawing_color+2],a
+        ld      [drawing_color+3],a
+        jr      .end_compare
+.not_industrial:
+        cp      a,TYPE_COMMERCIAL
+        jr      nz,.not_commercial
+        ld      a,1
+        ld      [drawing_color+0],a
+        ld      [drawing_color+1],a
+        ld      [drawing_color+2],a
+        ld      [drawing_color+3],a
+        jr      .end_compare
+.not_commercial:
+        cp      a,TYPE_WATER
+        jr      nz,.not_water
+        ld      a,0
+        ld      [drawing_color+0],a
+        ld      [drawing_color+1],a
+        ld      [drawing_color+2],a
+        ld      [drawing_color+3],a
+        jr      .end_compare
+.not_water:
+        cp      a,TYPE_DOCK
+        jr      nz,.not_dock
+        ld      a,0
+        ld      [drawing_color+0],a
+        ld      [drawing_color+1],a
+        ld      [drawing_color+2],a
+        ld      [drawing_color+3],a
+        jr      .end_compare
+.not_dock:
+        ; Default
+        ld      a,0
+        ld      [drawing_color+0],a
+        ld      [drawing_color+1],a
+        ld      [drawing_color+2],a
+        ld      [drawing_color+3],a
+.end_compare:
+
+        push    bc
+            ld      a,[drawing_color+0]
+            call    APA_SetColor
+            sla     b
+            sla     c
+            push    bc
+            LONG_CALL_ARGS  APA_Plot ; b = x, c = y (0-127!)
+            pop     bc
+
+            ld      a,[drawing_color+1]
+            call    APA_SetColor
+            inc     b
+            push    bc
+            LONG_CALL_ARGS  APA_Plot
+            pop     bc
+
+            ld      a,[drawing_color+3]
+            call    APA_SetColor
+            inc     c
+            push    bc
+            LONG_CALL_ARGS  APA_Plot
+            pop     bc
+
+            ld      a,[drawing_color+2]
+            call    APA_SetColor
+            dec     b
+            LONG_CALL_ARGS  APA_Plot
+        pop     bc
+
+        inc     b
+        ld      a,64
+        cp      a,b
+        jp      nz,.loopx
+
+    inc     c
+    ld      a,64
+    cp      a,c
+    jp      nz,.loopy
+
+    ret
+
+ELSE
+
+MinimapDrawRCI::
+
+    ld      c,0 ; c = y
+.loopy:
+
+        ld      b,0 ; b = x
+.loopx:
+        push    bc
+        ld      e,b
+        ld      d,c
+        LONG_CALL_ARGS  CityMapGetType ; Arguments: e = x , d = y
+        pop     bc
+
+        ; Set color from tile
+        ld      d,a
+        and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+        ld      a,d
+        jr      z,.not_road_train
+        ld      a,3
+        jr      .end_compare
+.not_road_train:
+        cp      a,TYPE_RESIDENTIAL
+        jr      nz,.not_residential
+        ld      a,2
+        jr      .end_compare
+.not_residential:
+        cp      a,TYPE_INDUSTRIAL
+        jr      nz,.not_industrial
+        ld      a,2
+        jr      .end_compare
+.not_industrial:
+        cp      a,TYPE_COMMERCIAL
+        jr      nz,.not_commercial
+        ld      a,2
+        jr      .end_compare
+.not_commercial:
+        cp      a,TYPE_WATER
+        jr      nz,.not_water
+        ld      a,1
+        jr      .end_compare
+.not_water:
+        cp      a,TYPE_DOCK
+        jr      nz,.not_dock
+        ld      a,1 ; like water
+        jr      .end_compare
+.not_dock:
+        ; Default
+        ld      a,0
+.end_compare:
+
+        call    APA_SetColor
+
+        push    bc
+            sla     b
+            sla     c
+            push    bc
+            LONG_CALL_ARGS  APA_Plot ; b = x, c = y (0-127!)
+            pop     bc
+
+            inc     b
+            push    bc
+            LONG_CALL_ARGS  APA_Plot
+            pop     bc
+
+            inc     c
+            push    bc
+            LONG_CALL_ARGS  APA_Plot
+            pop     bc
+
+            dec     b
+            LONG_CALL_ARGS  APA_Plot
+        pop     bc
+
+        inc     b
+        ld      a,64
+        cp      a,b
+        jr      nz,.loopx
+
+    inc     c
+    ld      a,64
+    cp      a,c
+    jr      nz,.loopy
+
+    ret
+ENDC
 
 ;###############################################################################
 
@@ -89,11 +306,15 @@ RoomMinimapLoadBG:
     LONG_CALL   APA_ResetBackgroundMapping
 
     LONG_CALL   APA_LoadGFX
+
     di
     ld      b,144
     call    wait_ly
     LONG_CALL   APA_LoadPalette
+    LONG_CALL   APA_LoadGFXPalettes
     ei
+
+    LONG_CALL   MinimapDrawRCI
 
 IF 0
     ld      b,BANK(MAIN_MENU_BG_MAP)
