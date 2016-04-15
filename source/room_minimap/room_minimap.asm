@@ -43,6 +43,29 @@ drawing_color: DS 4
 
 ;-------------------------------------------------------------------------------
 
+MINIMAP_PALETTES:
+    DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
+    DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
+MINIMAP_PALETTE_NUM EQU 1
+
+MINIMAP_BG_MAP:
+    INCBIN "minimap_bg_map.bin"
+
+MINIMAP_WIDTH  EQU 20
+MINIMAP_HEIGHT EQU 18
+
+MINIMAP_TILES:
+    INCBIN "minimap_tiles.bin"
+.e:
+
+MINIMAP_TILE_NUM EQU ((.e-MINIMAP_TILES)/16)
+
+;###############################################################################
+
+    SECTION "Room Minimap Functions",ROMX
+
+;-------------------------------------------------------------------------------
+
 MinimapDrawRCI::
 
     LONG_CALL   APA_PixelStreamStart
@@ -192,7 +215,7 @@ RoomMinimapVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
-APA_PALETTE:: ; To be loaded in slot APA_PALETTE_INDEX
+APA_PALETTE: ; To be loaded in slot APA_PALETTE_INDEX
     DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
     DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
 
@@ -201,15 +224,105 @@ APA_PALETTE:: ; To be loaded in slot APA_PALETTE_INDEX
 
 RoomMinimapLoadBG:
 
+    call    SetPalettesAllBlack
+
     xor     a,a
     ld      [rSCX],a
     ld      [rSCY],a
 
+    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
+    ld      [rLCDC],a
+
+    ld      b,BANK(MINIMAP_TILES)
+    call    rom_bank_push_set
+
+        ; Load tiles
+        ; ----------
+
+        ld      bc,MINIMAP_TILE_NUM
+        ld      de,256
+        ld      hl,MINIMAP_TILES
+        call    vram_copy_tiles
+
+        ; Load map
+        ; --------
+
+        ; Tiles
+        xor     a,a
+        ld      [rVBK],a
+
+        ld      de,$9800
+        ld      hl,MINIMAP_BG_MAP
+
+        ld      a,MINIMAP_HEIGHT
+.loop1:
+        push    af
+
+        ld      b,MINIMAP_WIDTH
+        call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+        push    hl
+        ld      hl,32-MINIMAP_WIDTH
+        add     hl,de
+        ld      d,h
+        ld      e,l
+        pop     hl
+
+        pop     af
+        dec     a
+        jr      nz,.loop1
+
+        ; Attributes
+        ld      a,1
+        ld      [rVBK],a
+
+        ld      de,$9800
+
+        ld      a,MINIMAP_HEIGHT
+.loop2:
+        push    af
+
+        ld      b,MINIMAP_WIDTH
+        call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+        push    hl
+        ld      hl,32-MINIMAP_WIDTH
+        add     hl,de
+        ld      d,h
+        ld      e,l
+        pop     hl
+
+        pop     af
+        dec     a
+        jr      nz,.loop2
+
+        ; Load palettes
+        ; -------------
+
+        di
+        ld      b,144
+        call    wait_ly
+
+        xor     a,a
+        ld      hl,MINIMAP_PALETTES
+.loop_pal:
+        push    af
+        call    bg_set_palette ; a = palette number - hl = pointer to data
+        pop     af
+        inc     a
+        cp      a,MINIMAP_PALETTE_NUM
+        jr      nz,.loop_pal
+
+        ei
+
+    call    rom_bank_pop
+
+    ; Prepare APA buffer
+    ; ------------------
+
     call    APA_BufferClear
     LONG_CALL   APA_ResetBackgroundMapping
     call    APA_BufferUpdate
-
-    LONG_CALL   APA_LoadGFX
 
     di
     ld      b,144
@@ -217,78 +330,13 @@ RoomMinimapLoadBG:
 
     ld      hl,APA_PALETTE
     call   APA_LoadPalette
-
-    LONG_CALL   APA_LoadGFXPalettes
     ei
-
-    LONG_CALL   MinimapDrawRCI
-    call    APA_BufferUpdate
-
-IF 0
-    ld      b,BANK(MAIN_MENU_BG_MAP)
-    call    rom_bank_push_set
-
-    ; Tiles
-
-    xor     a,a
-    ld      [rVBK],a
-
-    ld      de,$9800
-    ld      hl,MAIN_MENU_BG_MAP
-
-    ld      a,18
-.loop1:
-    push    af
-
-    ld      b,20
-    call    vram_copy_fast ; b = size - hl = source address - de = dest
-
-    push    hl
-    ld      hl,12
-    add     hl,de
-    ld      d,h
-    ld      e,l
-    pop     hl
-
-    pop     af
-    dec     a
-    jr      nz,.loop1
-
-    ; Attributes
-
-    ld      a,1
-    ld      [rVBK],a
-
-    ld      de,$9800
-
-    ld      a,18
-.loop2:
-    push    af
-
-    ld      b,20
-    call    vram_copy_fast ; b = size - hl = source address - de = dest
-
-    push    hl
-    ld      hl,12
-    add     hl,de
-    ld      d,h
-    ld      e,l
-    pop     hl
-
-    pop     af
-    dec     a
-    jr      nz,.loop2
-
-    call    rom_bank_pop
-ENDC
 
     ret
 
 ;-------------------------------------------------------------------------------
 
 RoomMinimap::
-
-    call    SetPalettesAllBlack
 
     ld      bc,RoomMinimapVBLHandler
     call    irq_set_VBL
@@ -300,14 +348,14 @@ RoomMinimap::
     call    wait_ly
     call    LoadTextPalette
 
+    LONG_CALL   MinimapDrawRCI
+    call    APA_BufferUpdate
+
     ld      hl,rIE
     set     0,[hl] ; IEF_VBLANK
 
     xor     a,a
     ld      [rIF],a
-
-    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
 
     ei
 

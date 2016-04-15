@@ -38,7 +38,7 @@ APA_TILE_NUMBER EQU (APA_TILE_WIDTH*APA_TILE_HEIGHT)
 APA_TILE_OFFSET_X EQU ((20-APA_TILE_WIDTH)/2) ; Center of the screen
 APA_TILE_OFFSET_Y EQU (18-APA_TILE_HEIGHT) ; Bottom of the screen
 
-APA_PALETTE_INDEX EQU 0 ; Palette index used by the minimap
+APA_PALETTE_INDEX EQU 6 ; Palette index used by the minimap
 
 ;###############################################################################
 
