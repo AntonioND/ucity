@@ -46,109 +46,107 @@ drawing_color: DS 4
 MinimapDrawRCI::
 
     LONG_CALL   APA_PixelStreamStart
-    ld      c,0 ; c = y
+
+    ld      d,0 ; d = y
 .loopy:
 
-        ld      b,0 ; b = x
+        ld      e,0 ; e = x
 .loopx:
-        push    bc
-        ld      e,b
-        ld      d,c
-        LONG_CALL_ARGS  CityMapGetType ; Arguments: e = x , d = y
-        pop     bc
 
-        ; Set color from tile
-        ld      d,a
-        and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
-        ld      a,d
-        jr      z,.not_road_train
-        ld      a,3
-        ld      [drawing_color+0],a
-        ld      [drawing_color+1],a
-        ld      [drawing_color+2],a
-        ld      [drawing_color+3],a
-        jr      .end_compare
-.not_road_train:
-        cp      a,TYPE_RESIDENTIAL
-        jr      nz,.not_residential
-        ld      a,2
-        ld      [drawing_color+0],a
-        ld      a,1
-        ld      [drawing_color+1],a
-        ld      a,1
-        ld      [drawing_color+2],a
-        ld      a,2
-        ld      [drawing_color+3],a
-        jr      .end_compare
+        push    de ; (*)
+
+            LONG_CALL_ARGS  CityMapGetType ; Arguments: e = x , d = y
+
+            ; Set color from tile type
+
+            ; Flags have priority over type. Also, road > train > power
+
+            bit     TYPE_HAS_ROAD_BIT,a
+            jr      z,.not_road
+                ld      a,3
+                ld      b,3
+                ld      c,3
+                ld      d,3
+                jr      .end_compare
+.not_road:
+            bit     TYPE_HAS_TRAIN_BIT,a
+            jr      z,.not_train
+                ld      a,0
+                ld      b,3
+                ld      c,3
+                ld      d,0
+                jr      .end_compare
+.not_train:
+            bit     TYPE_HAS_POWER_BIT,a
+            jr      z,.not_power
+                ld      a,0
+                ld      b,2
+                ld      c,2
+                ld      d,0
+                jr      .end_compare
+.not_power:
+
+            and     a,TYPE_MASK ; Get type without extra flags
+
+            cp      a,TYPE_RESIDENTIAL
+            jr      nz,.not_residential
+                ld      a,2
+                ld      b,1
+                ld      c,1
+                ld      d,2
+                jr      .end_compare
 .not_residential:
-        cp      a,TYPE_INDUSTRIAL
-        jr      nz,.not_industrial
-        ld      a,2
-        ld      [drawing_color+0],a
-        ld      [drawing_color+1],a
-        ld      [drawing_color+2],a
-        ld      [drawing_color+3],a
-        jr      .end_compare
+            cp      a,TYPE_INDUSTRIAL
+            jr      nz,.not_industrial
+                ld      a,2
+                ld      b,2
+                ld      c,2
+                ld      d,2
+                jr      .end_compare
 .not_industrial:
-        cp      a,TYPE_COMMERCIAL
-        jr      nz,.not_commercial
-        ld      a,1
-        ld      [drawing_color+0],a
-        ld      [drawing_color+1],a
-        ld      [drawing_color+2],a
-        ld      [drawing_color+3],a
-        jr      .end_compare
+            cp      a,TYPE_COMMERCIAL
+            jr      nz,.not_commercial
+                ld      a,1
+                ld      b,1
+                ld      c,1
+                ld      d,1
+                jr      .end_compare
 .not_commercial:
-        cp      a,TYPE_WATER
-        jr      nz,.not_water
-        ld      a,0
-        ld      [drawing_color+0],a
-        ld      [drawing_color+1],a
-        ld      [drawing_color+2],a
-        ld      [drawing_color+3],a
-        jr      .end_compare
+            cp      a,TYPE_WATER
+            jr      nz,.not_water
+                ld      a,0
+                ld      b,1
+                ld      c,1
+                ld      d,0
+                jr      .end_compare
 .not_water:
-        cp      a,TYPE_DOCK
-        jr      nz,.not_dock
-        ld      a,0
-        ld      [drawing_color+0],a
-        ld      [drawing_color+1],a
-        ld      [drawing_color+2],a
-        ld      [drawing_color+3],a
-        jr      .end_compare
+            cp      a,TYPE_DOCK
+            jr      nz,.not_dock
+                ld      a,0
+                ld      b,1
+                ld      c,1
+                ld      d,0
+                jr      .end_compare
 .not_dock:
-        ; Default
-        ld      a,0
-        ld      [drawing_color+0],a
-        ld      [drawing_color+1],a
-        ld      [drawing_color+2],a
-        ld      [drawing_color+3],a
+            ; Default
+            xor     a,a
+            ld      b,a
+            ld      c,a
+            ld      d,a
 .end_compare:
 
-        push    bc
-            ld      a,[drawing_color+3]
-            ld      d,a
-            ld      a,[drawing_color+2]
-            ld      c,a
-            ld      a,[drawing_color+1]
-            ld      b,a
-            ld      a,[drawing_color+0]
-            call    APA_SetColors ; b,c,d,e = color (0 to 3)
-            ;ld      a,[drawing_color+0]
-            ;ld      c,a
-            ;LONG_CALL_ARGS  APA_PixelStreamPlot
+            call    APA_SetColors ; a,b,c,d = color (0 to 3)
             LONG_CALL   APA_PixelStreamPlot2x2
-        pop     bc
 
-        inc     b
-        ld      a,64
-        cp      a,b
-        jp      nz,.loopx
+        pop     de ; (*)
 
-    inc     c
-    ld      a,64
-    cp      a,c
-    jp      nz,.loopy
+        inc     e
+        bit     6,e
+        jp      z,.loopx
+
+    inc     d
+    bit     6,d
+    jp      z,.loopy
 
     ret
 
@@ -194,6 +192,13 @@ RoomMinimapVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
+APA_PALETTE:: ; To be loaded in slot APA_PALETTE_INDEX
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
+    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
+
+    DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
+    DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
+
 RoomMinimapLoadBG:
 
     xor     a,a
@@ -209,7 +214,10 @@ RoomMinimapLoadBG:
     di
     ld      b,144
     call    wait_ly
-    LONG_CALL   APA_LoadPalette
+
+    ld      hl,APA_PALETTE
+    call   APA_LoadPalette
+
     LONG_CALL   APA_LoadGFXPalettes
     ei
 
@@ -302,6 +310,9 @@ RoomMinimap::
     ld      [rLCDC],a
 
     ei
+
+    xor     a,a
+    ld      [minimap_room_exit],a
 
 .loop:
 

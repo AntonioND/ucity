@@ -276,6 +276,9 @@ PauseMenuHandleOption:
         ; Minimap
         call    RoomMinimap
 
+        ld      a,0 ; load gfx only
+        call    RoomGameLoad
+
         ret
 
 .not_minimap:
@@ -536,22 +539,43 @@ RoomGameVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
-RoomGame::
+RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
+    push    af
     call    SetPalettesAllBlack
+    pop     af
 
-    ; Load map and city data.
-    call    CityMapLoad ; Returns starting coordinates in d = x and e = y
-    push    de ; (*) Save coordinates to pass to bg_load_main
+    and     a,a
+    jr      z,.only_gfx
 
-    call    LoadText
-    LONG_CALL   BuildSelectMenuLoadGfx
-    call    BuildSelectMenuReset
-    call    StatusBarMenuLoadGfx
-    call    CursorLoad
+        ; Load map and city data. Load GFX
 
-    pop     de ; (*) Restore coordinates to pass to bg_load_main
-    call    bg_load_main
+        call    CityMapLoad ; Returns starting coordinates in d = x and e = y
+        push    de ; (*) Save coordinates to pass to bg_load_main
+
+        call    LoadText
+        LONG_CALL   BuildSelectMenuLoadGfx
+        call    BuildSelectMenuReset
+        call    StatusBarMenuLoadGfx
+        call    CursorLoad
+
+        pop     de ; (*) Restore coordinates to pass to bg_load_main
+        call    bg_load_main
+
+        jr      .continue
+.only_gfx:
+
+        ; Load GFX
+
+        call    LoadText
+        LONG_CALL   BuildSelectMenuLoadGfx
+        call    BuildSelectMenuReset
+        call    StatusBarMenuLoadGfx
+        call    CursorLoad
+
+        call    bg_reload_main
+
+.continue:
 
     ld      a,[game_sprites_8x16]
     or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
@@ -583,6 +607,14 @@ RoomGame::
     ld      [last_frame_y],a
 
     call    InitKeyAutorepeat
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomGame::
+
+    ld      a,1 ; load everything
+    call    RoomGameLoad
 
 .loop:
 

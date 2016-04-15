@@ -430,25 +430,6 @@ APA_Plot:: ; b = x, c = y (0-127!)
 
 ;-------------------------------------------------------------------------------
 
-APA_PALETTE:: ; To be loaded in slot APA_PALETTE_INDEX
-    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
-    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
-
-    DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
-    DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
-
-APA_LoadPalette:: ; Load palette to slot APA_PALETTE_INDEX. Do this during VBL!
-
-    ; TODO: Allow different palettes
-
-    ld      a,APA_PALETTE_INDEX
-    ld      hl,APA_PALETTE
-    call    bg_set_palette
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 APA_LoadGFXPalettes::
 
     ; TODO
@@ -614,6 +595,15 @@ APA_BufferUpdate::
     ld      de,128 ; de = start index
     ld      hl,MINIMAP_BACKBUFFER_BASE ; hl = source
     call    vram_copy_tiles
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX. Do this during VBL!
+
+    ld      a,APA_PALETTE_INDEX
+    call    bg_set_palette
 
     ret
 
