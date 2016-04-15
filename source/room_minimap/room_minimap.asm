@@ -43,9 +43,9 @@ drawing_color: DS 4
 
 ;-------------------------------------------------------------------------------
 
-IF 1
 MinimapDrawRCI::
 
+    LONG_CALL   APA_PixelStreamStart
     ld      c,0 ; c = y
 .loopy:
 
@@ -126,32 +126,18 @@ MinimapDrawRCI::
 .end_compare:
 
         push    bc
-            ld      a,[drawing_color+0]
-            call    APA_SetColor
-            sla     b
-            sla     c
-            push    bc
-            LONG_CALL_ARGS  APA_Plot ; b = x, c = y (0-127!)
-            pop     bc
-
-            ld      a,[drawing_color+1]
-            call    APA_SetColor
-            inc     b
-            push    bc
-            LONG_CALL_ARGS  APA_Plot
-            pop     bc
-
             ld      a,[drawing_color+3]
-            call    APA_SetColor
-            inc     c
-            push    bc
-            LONG_CALL_ARGS  APA_Plot
-            pop     bc
-
+            ld      d,a
             ld      a,[drawing_color+2]
-            call    APA_SetColor
-            dec     b
-            LONG_CALL_ARGS  APA_Plot
+            ld      c,a
+            ld      a,[drawing_color+1]
+            ld      b,a
+            ld      a,[drawing_color+0]
+            call    APA_SetColors ; b,c,d,e = color (0 to 3)
+            ;ld      a,[drawing_color+0]
+            ;ld      c,a
+            ;LONG_CALL_ARGS  APA_PixelStreamPlot
+            LONG_CALL   APA_PixelStreamPlot2x2
         pop     bc
 
         inc     b
@@ -165,94 +151,6 @@ MinimapDrawRCI::
     jp      nz,.loopy
 
     ret
-
-ELSE
-
-MinimapDrawRCI::
-
-    ld      c,0 ; c = y
-.loopy:
-
-        ld      b,0 ; b = x
-.loopx:
-        push    bc
-        ld      e,b
-        ld      d,c
-        LONG_CALL_ARGS  CityMapGetType ; Arguments: e = x , d = y
-        pop     bc
-
-        ; Set color from tile
-        ld      d,a
-        and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
-        ld      a,d
-        jr      z,.not_road_train
-        ld      a,3
-        jr      .end_compare
-.not_road_train:
-        cp      a,TYPE_RESIDENTIAL
-        jr      nz,.not_residential
-        ld      a,2
-        jr      .end_compare
-.not_residential:
-        cp      a,TYPE_INDUSTRIAL
-        jr      nz,.not_industrial
-        ld      a,2
-        jr      .end_compare
-.not_industrial:
-        cp      a,TYPE_COMMERCIAL
-        jr      nz,.not_commercial
-        ld      a,2
-        jr      .end_compare
-.not_commercial:
-        cp      a,TYPE_WATER
-        jr      nz,.not_water
-        ld      a,1
-        jr      .end_compare
-.not_water:
-        cp      a,TYPE_DOCK
-        jr      nz,.not_dock
-        ld      a,1 ; like water
-        jr      .end_compare
-.not_dock:
-        ; Default
-        ld      a,0
-.end_compare:
-
-        call    APA_SetColor
-
-        push    bc
-            sla     b
-            sla     c
-            push    bc
-            LONG_CALL_ARGS  APA_Plot ; b = x, c = y (0-127!)
-            pop     bc
-
-            inc     b
-            push    bc
-            LONG_CALL_ARGS  APA_Plot
-            pop     bc
-
-            inc     c
-            push    bc
-            LONG_CALL_ARGS  APA_Plot
-            pop     bc
-
-            dec     b
-            LONG_CALL_ARGS  APA_Plot
-        pop     bc
-
-        inc     b
-        ld      a,64
-        cp      a,b
-        jr      nz,.loopx
-
-    inc     c
-    ld      a,64
-    cp      a,c
-    jr      nz,.loopy
-
-    ret
-ENDC
 
 ;###############################################################################
 
@@ -304,6 +202,7 @@ RoomMinimapLoadBG:
 
     call    APA_BufferClear
     LONG_CALL   APA_ResetBackgroundMapping
+    call    APA_BufferUpdate
 
     LONG_CALL   APA_LoadGFX
 

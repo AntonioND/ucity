@@ -34,7 +34,11 @@
 
 ;-------------------------------------------------------------------------------
 
-apa_color: DS 1 ; color being used to draw
+APA_BUFFER_ROWS    EQU 2
+APA_BUFFER_COLUMNS EQU 2
+
+; Colors being used to draw (left to right, top to bottom)
+apa_colors: DS (APA_BUFFER_ROWS*APA_BUFFER_COLUMNS)
 
 MINIMAP_BACKBUFFER_BASE       EQU $D000
 MINIMAP_BACKBUFFER_WRAMX_BANK EQU BANK_CITY_MAP_TILE_OK_FLAGS
@@ -43,13 +47,282 @@ MINIMAP_VRAM_BASE EQU $8800
 
 ;###############################################################################
 
-    SECTION "All Points Addressable Data",ROMX
+    SECTION "All Points Addressable Variables",WRAM0
 
 ;-------------------------------------------------------------------------------
+
+pixel_stream_ptr: DS 2 ; LSB first, pointer to part the buffer to be drawn
+
+pixel_stream_cur_y_in_tile: DS 1 ; y inside tile
+pixel_stream_cur_x_tile: DS 1 ; x tile
+pixel_stream_cur_x_in_tile: DS 1 ; x inside tile
+
+; 8 pixels to be drawn the next 2 rows
+pixel_stream_row_buffers: DS (APA_BUFFER_ROWS*2)
 
 ;###############################################################################
 
     SECTION "All Points Addressable Functions",ROMX
+
+;-------------------------------------------------------------------------------
+
+APA_PixelStreamStart::
+
+    xor     a,a
+    ld      [pixel_stream_cur_y_in_tile],a
+    ld      [pixel_stream_cur_x_in_tile],a
+    ld      [pixel_stream_cur_x_tile],a
+    ld      [pixel_stream_row_buffers+0],a
+    ld      [pixel_stream_row_buffers+1],a
+    ld      [pixel_stream_row_buffers+2],a
+    ld      [pixel_stream_row_buffers+3],a
+
+    ld      a,MINIMAP_BACKBUFFER_BASE & $FF
+    ld      [pixel_stream_ptr+0],a
+    ld      a,(MINIMAP_BACKBUFFER_BASE>>8) & $FF
+    ld      [pixel_stream_ptr+1],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+APA_PixelStreamPlot2x2::
+
+    ld      hl,pixel_stream_row_buffers
+
+    ; Top Left
+    ld      a,[apa_colors+0]
+    ld      c,a
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,1
+    or      a,b ; new color
+    ld      [hl+],a
+
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,2
+    rra
+    or      a,b ; new color
+    ld      [hl-],a
+
+    ; Top Right
+    ld      a,[apa_colors+1]
+    ld      c,a
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,1
+    or      a,b ; new color
+    ld      [hl+],a
+
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,2
+    rra
+    or      a,b ; new color
+    ld      [hl+],a
+
+    ; Bottom Left
+    ld      a,[apa_colors+2]
+    ld      c,a
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,1
+    or      a,b ; new color
+    ld      [hl+],a
+
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,2
+    rra
+    or      a,b ; new color
+    ld      [hl-],a
+
+    ; Bottom Right
+    ld      a,[apa_colors+3]
+    ld      c,a
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,1
+    or      a,b ; new color
+    ld      [hl+],a
+
+    ld      a,[hl]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,2
+    rra
+    or      a,b ; new color
+    ld      [hl+],a
+
+    ld      a,[pixel_stream_cur_x_in_tile]
+    add     a,2
+    ld      [pixel_stream_cur_x_in_tile],a
+    cp      a,8
+    ret     nz ; nothing else to do for now
+
+    xor     a,a
+    ld      [pixel_stream_cur_x_in_tile],a
+
+    ; change map
+
+    ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
+    ld      [rSVBK],a
+
+    ; completed row, draw and advance
+
+    ld      a,[pixel_stream_ptr+0]
+    ld      l,a
+    ld      a,[pixel_stream_ptr+1]
+    ld      h,a
+
+    ld      a,[pixel_stream_row_buffers+0]
+    ld      [hl+],a
+    ld      a,[pixel_stream_row_buffers+1]
+    ld      [hl+],a
+    ld      a,[pixel_stream_row_buffers+2]
+    ld      [hl+],a
+    ld      a,[pixel_stream_row_buffers+3]
+    ld      [hl+],a
+
+    ; next horizontal tile
+
+    ld      bc,16-APA_BUFFER_ROWS*2 ; tile size - row size
+    add     hl,bc
+
+    ld      a,[pixel_stream_cur_x_tile]
+    inc     a
+    ld      [pixel_stream_cur_x_tile],a
+    cp      a,APA_TILE_WIDTH
+    jr      nz,.save_ptr
+
+    xor     a,a
+    ld      [pixel_stream_cur_x_tile],a
+
+    ld      bc,(APA_BUFFER_ROWS*2)-(16*APA_TILE_WIDTH) ; + pixel row - map row
+    add     hl,bc
+
+    ld      a,[pixel_stream_cur_y_in_tile]
+    add     a,2
+    ld      [pixel_stream_cur_y_in_tile],a
+    cp      a,8
+    jr      nz,.save_ptr
+
+    xor     a,a
+    ld      [pixel_stream_cur_y_in_tile],a
+
+    ld      bc,16*(APA_TILE_WIDTH-1) ; next tile row
+    add     hl,bc
+
+.save_ptr:
+    ld      a,l
+    ld      [pixel_stream_ptr+0],a
+    ld      a,h
+    ld      [pixel_stream_ptr+1],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+APA_PixelStreamPlot::
+
+    ld      a,[apa_colors+0]
+    ld      c,a
+
+    ld      a,[pixel_stream_row_buffers+0]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,1
+    or      a,b ; new color
+    ld      [pixel_stream_row_buffers+0],a
+
+    ld      a,[pixel_stream_row_buffers+1]
+    sla     a ; advance position
+    ld      b,a
+    ld      a,c
+    and     a,2
+    rra
+    or      a,b ; new color
+    ld      [pixel_stream_row_buffers+1],a
+
+    ld      a,[pixel_stream_cur_x_in_tile]
+    inc     a
+    ld      [pixel_stream_cur_x_in_tile],a
+    cp      a,8
+    ret     nz ; nothing else to do for now
+
+    xor     a,a
+    ld      [pixel_stream_cur_x_in_tile],a
+
+    ; change map
+
+    ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
+    ld      [rSVBK],a
+
+    ; completed row, draw and advance
+
+    ld      a,[pixel_stream_ptr+0]
+    ld      l,a
+    ld      a,[pixel_stream_ptr+1]
+    ld      h,a
+
+    ld      a,[pixel_stream_row_buffers+0]
+    ld      [hl+],a
+    ld      a,[pixel_stream_row_buffers+1]
+    ld      [hl+],a
+
+    ; next horizontal tile
+
+    ld      bc,16-2 ; tile size - row size
+    add     hl,bc
+
+    ld      a,[pixel_stream_cur_x_tile]
+    inc     a
+    ld      [pixel_stream_cur_x_tile],a
+    cp      a,APA_TILE_WIDTH
+    jr      nz,.save_ptr
+
+    xor     a,a
+    ld      [pixel_stream_cur_x_tile],a
+
+    ld      bc,2-(16*APA_TILE_WIDTH) ; + pixel row - map row
+    add     hl,bc
+
+    ld      a,[pixel_stream_cur_y_in_tile]
+    inc     a
+    ld      [pixel_stream_cur_y_in_tile],a
+    cp      a,8
+    jr      nz,.save_ptr
+
+    xor     a,a
+    ld      [pixel_stream_cur_y_in_tile],a
+
+    ld      bc,16*(APA_TILE_WIDTH-1) ; next tile row
+    add     hl,bc
+
+.save_ptr:
+    ld      a,l
+    ld      [pixel_stream_ptr+0],a
+    ld      a,h
+    ld      [pixel_stream_ptr+1],a
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -101,17 +374,8 @@ APA_Plot:: ; b = x, c = y (0-127!)
 
     ; b = x inside tile
     ; hl = pointer to the 2 bytes that form the row
-IF 0
-    ld      c,rSTAT & $FF
-.wait_read_loop\@:
-    ld      a,[$FF00+c]
-    bit     1,a
-    jr      nz,.wait_read_loop\@ ; Not mode 0 or 1
-ENDC
 
-    ; b = x inside tile
-
-    ld      a,[apa_color]
+    ld      a,[apa_colors]
 
     ld      d,a
     and     a,1
@@ -145,12 +409,6 @@ ENDC
     ; d = high color bit
     ; hl = pointer
 
-IF 0
-.loop\@:
-    ld      a,[rSTAT]
-    bit     1,a
-    jr      nz,.loop\@ ; Not mode 0 or 1
-ENDC
     ld      a,[hl+]
     ld      c,a ; c = low byte
     ld      a,[hl-] ; a = high byte
@@ -163,12 +421,7 @@ ENDC
     and     a,b ; low & bit mask
     or      a,e ; low & bit mask | color
     ld      e,a ; e = low final byte
-IF 0
-.loop2\@:
-    ld      a,[rSTAT]
-    bit     1,a
-    jr      nz,.loop2\@ ; Not mode 0 or 1
-ENDC
+
     ld      a,e
     ld      [hl+],a
     ld      [hl],d
@@ -342,7 +595,7 @@ APA_BufferClear::
 
     ld      bc,APA_TILE_NUMBER*(8*8/4) ; size to clear
     ld      d,0
-    ld      hl,MINIMAP_VRAM_BASE
+    ld      hl,MINIMAP_BACKBUFFER_BASE
     call    memset
 
     ret
@@ -366,9 +619,15 @@ APA_BufferUpdate::
 
 ;-------------------------------------------------------------------------------
 
-APA_SetColor:: ; a = color (0 to 3)
+APA_SetColors:: ; a,b,c,d = color (0 to 3)
 
-    ld      [apa_color],a
+    ld      [apa_colors+0],a
+    ld      a,b
+    ld      [apa_colors+1],a
+    ld      a,c
+    ld      [apa_colors+2],a
+    ld      a,d
+    ld      [apa_colors+3],a
 
     ret
 
