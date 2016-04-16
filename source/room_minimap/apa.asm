@@ -238,7 +238,7 @@ APA_PixelStreamPlot2x2::
     ret
 
 ;-------------------------------------------------------------------------------
-
+IF 0
 APA_PixelStreamPlot::
 
     ld      a,[apa_colors+0]
@@ -323,9 +323,9 @@ APA_PixelStreamPlot::
     ld      [pixel_stream_ptr+1],a
 
     ret
-
+ENDC
 ;-------------------------------------------------------------------------------
-
+IF 0
 APA_Plot:: ; b = x, c = y (0-127!)
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
@@ -427,7 +427,7 @@ APA_Plot:: ; b = x, c = y (0-127!)
     ld      [hl],d
 
     ret
-
+ENDC
 ;-------------------------------------------------------------------------------
 
 APA_ResetBackgroundMapping:: ; de = bg base pointer
