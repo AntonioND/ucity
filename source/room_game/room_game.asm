@@ -553,6 +553,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         call    CityMapLoad ; Returns starting coordinates in d = x and e = y
         push    de ; (*) Save coordinates to pass to bg_load_main
 
+        ld      b,0 ; bank at 8000h
         call    LoadText
         LONG_CALL   BuildSelectMenuLoadGfx
         call    BuildSelectMenuReset
@@ -567,6 +568,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
         ; Load GFX
 
+        ld      b,0 ; bank at 8000h
         call    LoadText
         LONG_CALL   BuildSelectMenuLoadGfx
         call    BuildSelectMenuReset

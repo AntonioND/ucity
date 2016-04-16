@@ -158,6 +158,7 @@ RoomMenu::
 
     call    RoomMenuLoadBG
 
+    ld      b,0 ; bank at 8000h
     call    LoadText
     ld      b,144
     call    wait_ly

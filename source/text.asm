@@ -59,18 +59,35 @@ LoadTextPalette:: ; Load text palette into slot 7. Do this during VBL!
 
     ret
 
-LoadText::
+LoadText:: ; b = 1 -> load at bank 8800h, b = 0 -> load at bank at 8000h
 
     xor     a,a
     ld      [rVBK],a
 
+    push    bc
+
     ld      b,BANK(TextTilesData)
     call    rom_bank_push_set
 
-    ld      bc,TextTilesNumber
-    ld      de,TEXT_BASE_TILE ; Bank at 8800h
-    ld      hl,TextTilesData
-    call    vram_copy_tiles
+    pop     bc
+
+    bit     0,b
+    jr      nz,.bank_8800
+
+        ld      bc,TextTilesNumber
+        ld      de,TEXT_BASE_TILE ; Bank at 8000h
+        ld      hl,TextTilesData
+        call    vram_copy_tiles
+
+        jr      .end_load
+.bank_8800:
+
+        ld      bc,TextTilesNumber
+        ld      de,TEXT_BASE_TILE+256 ; Bank at 8800h
+        ld      hl,TextTilesData
+        call    vram_copy_tiles
+
+.end_load:
 
     call    rom_bank_pop
 

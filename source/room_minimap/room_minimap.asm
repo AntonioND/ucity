@@ -236,6 +236,7 @@ RoomMinimap::
 
     call    RoomMinimapLoadBG
 
+    ld      b,1 ; bank at 8800h
     call    LoadText
     ld      b,144
     call    wait_ly
