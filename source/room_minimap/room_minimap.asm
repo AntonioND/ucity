@@ -175,20 +175,23 @@ RoomMinimapVBLHandler:
 
 RoomMinimapLoadBG:
 
-    call    SetPalettesAllBlack
+    ; Clear APA buffer
+    ; ----------------
 
-    xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    call    APA_BufferClear
+    call    APA_BufferUpdate
 
-    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ; Load border
+    ; -----------
 
     ld      b,BANK(MINIMAP_TILES)
     call    rom_bank_push_set
 
         ; Load tiles
         ; ----------
+
+        xor     a,a
+        ld      [rVBK],a
 
         ld      bc,MINIMAP_TILE_NUM
         ld      de,256
@@ -247,6 +250,11 @@ RoomMinimapLoadBG:
         dec     a
         jr      nz,.loop2
 
+        ; Prepare APA map
+        ; ---------------
+
+        LONG_CALL   APA_ResetBackgroundMapping
+
         ; Load palettes
         ; -------------
 
@@ -264,18 +272,12 @@ RoomMinimapLoadBG:
         cp      a,MINIMAP_PALETTE_NUM
         jr      nz,.loop_pal
 
+        ld      hl,APA_PALETTE_DEFAULT
+        call    APA_LoadPalette
+
         ei
 
     call    rom_bank_pop
-
-    ; Prepare APA buffer
-    ; ------------------
-
-    call    APA_BufferClear
-    LONG_CALL   APA_ResetBackgroundMapping
-    call    APA_BufferUpdate
-
-    call    MinimapSetDefaultPalette
 
     ret
 
@@ -347,8 +349,17 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
 
 RoomMinimap::
 
+    call    SetPalettesAllBlack
+
     ld      bc,RoomMinimapVBLHandler
     call    irq_set_VBL
+
+    xor     a,a
+    ld      [rSCX],a
+    ld      [rSCY],a
+
+    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
+    ld      [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText
