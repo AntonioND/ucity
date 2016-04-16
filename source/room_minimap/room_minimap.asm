@@ -36,7 +36,10 @@
 minimap_room_exit: DS 1 ; set to 1 to exit room
 
 minimap_selected_map: DS 1
-MINIMAP_SELECTION_RCI EQU 0
+MINIMAP_SELECTION_GENERAL   EQU 0
+MINIMAP_SELECTION_RCI       EQU 1
+MINIMAP_SELECTION_ROADS     EQU 2
+MINIMAP_SELECTION_MAX       EQU 2
 
 ;###############################################################################
 
@@ -69,18 +72,25 @@ MINIMAP_TILE_NUM EQU ((.e-MINIMAP_TILES)/16)
 
 MinimapDrawSelectedMap:
 
+    ; Not needed to clear first, the drawing functions draw over everything
+
     ld      a,[minimap_selected_map]
+
+    cp      a,MINIMAP_SELECTION_GENERAL
+    jr      nz,.not_general
+        LONG_CALL   MinimapDrawGeneral
+        ret
+.not_general:
 
     cp      a,MINIMAP_SELECTION_RCI
     jr      nz,.not_rci
         LONG_CALL   MinimapDrawRCI
-        jr      .end
+        ret
 .not_rci:
 
-
-    ; Default - Clear
+    ld      b,b ; Not found!
+    call    MinimapSetDefaultPalette
     call    APA_BufferClear
-.end:
     call    APA_BufferUpdate
 
     ret
@@ -91,29 +101,65 @@ MinimapDrawSelectedMap:
 
 ;-------------------------------------------------------------------------------
 
+APA_PALETTE_DEFAULT:
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(31<<5)|(31<<0)
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(31<<5)|(31<<0)
+
+MinimapSetDefaultPalette::
+
+    di
+
+    ld      b,144
+    call    wait_ly
+
+    ld      hl,APA_PALETTE_DEFAULT
+    call    APA_LoadPalette
+
+    ei
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 InputHandleMinimap:
 
     ld      a,[joy_pressed]
     and     a,PAD_A
-    jr      z,.not_a
-
-
-
+    jr      z,.end_a
         ld      a,1
         ld      [minimap_room_exit],a
-        ret
-.not_a:
+        ret ; return in order not to update anything
+.end_a:
 
     ld      a,[joy_pressed]
     and     a,PAD_B
-    jr      z,.not_b
-
-
-
+    jr      z,.end_b
         ld      a,1
         ld      [minimap_room_exit],a
-        ret
-.not_b:
+        ret ; return in order not to update anything
+.end_b:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_LEFT
+    jr      z,.end_left
+        ld      a,[minimap_selected_map]
+        and     a,a
+        jr      z,.end_left
+            dec     a
+            ld      [minimap_selected_map],a
+            LONG_CALL   MinimapDrawSelectedMap
+.end_left:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_RIGHT
+    jr      z,.end_right
+        ld      a,[minimap_selected_map]
+        cp      a,MINIMAP_SELECTION_MAX
+        jr      z,.end_right
+            inc     a
+            ld      [minimap_selected_map],a
+            LONG_CALL   MinimapDrawSelectedMap
+.end_right:
 
     ret
 
@@ -229,14 +275,9 @@ RoomMinimapLoadBG:
     LONG_CALL   APA_ResetBackgroundMapping
     call    APA_BufferUpdate
 
-    ld      hl,APA_PALETTE_DEFAULT
-    call    APA_LoadPalette
+    call    MinimapSetDefaultPalette
 
     ret
-
-APA_PALETTE_DEFAULT:
-    DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
-    DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
 
 ;-------------------------------------------------------------------------------
 
@@ -245,9 +286,23 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
     xor     a,a
     ld      [rVBK],a
 
+    push    hl ; save string (*)
+
+    ; Clear previous title
+
+    ld      hl,$9800
+    ld      b,20
+.clear_loop:
+    WAIT_SCREEN_BLANK ; Clobbers A and C
+    xor     a,a
+    ld      [hl+],a
+    dec     b
+    jr      nz,.clear_loop
+
     ; Calculate length and store in b
 
-    push    hl
+    pop     hl ; get string (*)
+    push    hl ; save string (**)
 
     ld      b,0
 .count_loop:
@@ -258,15 +313,11 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
     jr      .count_loop
 .count_end:
 
-    pop     hl
-
     ; Calculate starting point of text string
 
     ld      a,20 ; Screen tile width
     sub     a,b
     sra     a ; a = (20-length)/2
-
-    push    hl
 
     ld      l,a
     ld      h,0
@@ -274,9 +325,9 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
     add     hl,de
     LD_DE_HL
 
-    pop     hl
-
     ; Draw
+
+    pop     hl ; get string (**)
 
 .loop:
     ld      a,[hl+]
@@ -312,7 +363,7 @@ RoomMinimap::
 
     ei
 
-    ld      a,MINIMAP_SELECTION_RCI
+    ld      a,MINIMAP_SELECTION_GENERAL
     ld      [minimap_selected_map],a
     LONG_CALL   MinimapDrawSelectedMap
 
