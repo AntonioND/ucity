@@ -160,12 +160,12 @@ RoomMenu::
 
     ld      b,0 ; bank at 8000h
     call    LoadText
+
+    di
     ld      b,144
     call    wait_ly
     call    LoadTextPalette
-
-    ld      hl,rIE
-    set     0,[hl] ; IEF_VBLANK
+    ei
 
     xor     a,a
     ld      [rIF],a
@@ -187,6 +187,8 @@ RoomMenu::
     ld      a,[menu_exit]
     and     a,a
     jr      z,.loop
+
+    call    SetDefaultVBLHandler
 
     ret
 

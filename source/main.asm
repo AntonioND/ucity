@@ -167,10 +167,34 @@ Main:
     ld      a,LCDCF_ON
     ld      [rLCDC],a
 
+    ld      hl,rIE
+    set     0,[hl] ; IEF_VBLANK
+
+    call    SetDefaultVBLHandler
+
+    ei
+
 .main_loop:
     call    RoomMenu
     call    RoomGame
     jr      .main_loop
+
+;-------------------------------------------------------------------------------
+
+DefaultVBLHandler:
+
+    ; TODO Update music here and in the rest of the VBL handlers
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+SetDefaultVBLHandler::
+
+    ld      bc,DefaultVBLHandler
+    call    irq_set_VBL
+
+    ret
 
 ;-------------------------------------------------------------------------------
 

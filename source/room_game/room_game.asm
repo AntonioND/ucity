@@ -591,16 +591,11 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ld      bc,RoomGameVBLHandler
     call    irq_set_VBL
 
-    ld      hl,rIE
-    set     0,[hl] ; IEF_VBLANK
-
-    ld      a,GAME_STATE_WATCH
-    call    GameStateMachineStateSet ; After loading gfx
-
     xor     a,a
     ld      [rIF],a
 
-    ei
+    ld      a,GAME_STATE_WATCH
+    call    GameStateMachineStateSet ; After loading gfx
 
     call    CursorGetGlobalCoords
     ld      a,e
@@ -628,6 +623,8 @@ RoomGame::
     call    GameStateMachineHandle
 
     jr      .loop
+
+    call    SetDefaultVBLHandler
 
     ret
 

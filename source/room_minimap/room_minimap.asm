@@ -218,11 +218,13 @@ RoomMinimapLoadBG:
     call    APA_BufferUpdate
 
     di
+
     ld      b,144
     call    wait_ly
 
     ld      hl,APA_PALETTE
     call   APA_LoadPalette
+
     ei
 
     ret
@@ -238,20 +240,20 @@ RoomMinimap::
 
     ld      b,1 ; bank at 8800h
     call    LoadText
+
+    di
+
     ld      b,144
     call    wait_ly
     call    LoadTextPalette
 
-    LONG_CALL   MinimapDrawRCI
-    call    APA_BufferUpdate
-
-    ld      hl,rIE
-    set     0,[hl] ; IEF_VBLANK
+    ei
 
     xor     a,a
     ld      [rIF],a
 
-    ei
+    LONG_CALL   MinimapDrawRCI ; TODO remove from here
+    call    APA_BufferUpdate
 
     xor     a,a
     ld      [minimap_room_exit],a
@@ -268,6 +270,8 @@ RoomMinimap::
     ld      a,[minimap_room_exit]
     and     a,a
     jr      z,.loop
+
+    call    SetDefaultVBLHandler
 
     ret
 
