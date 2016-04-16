@@ -231,6 +231,57 @@ RoomMinimapLoadBG:
 
 ;-------------------------------------------------------------------------------
 
+RoomMinimapDrawTitle:: ; hl = ptr to text string
+
+    ; Calculate length and store in b
+
+    push    hl
+
+    ld      b,0
+.count_loop:
+    ld      a,[hl+]
+    and     a,a
+    jr      z,.count_end
+    inc     b
+    jr      .count_loop
+.count_end:
+
+    pop     hl
+
+    ; Calculate starting point of text string
+
+    ld      a,20 ; Screen tile width
+    sub     a,b
+    sra     a ; a = (20-length)/2
+
+    push    hl
+
+    ld      l,a
+    ld      h,0
+    ld      de,$9800
+    add     hl,de
+    LD_DE_HL
+
+    pop     hl
+
+    ; Draw
+
+.loop:
+    ld      a,[hl+]
+    and     a,a
+    ret     z ; return from function from here!
+
+    ld      b,a
+    WAIT_SCREEN_BLANK ; Clobbers A and C
+    ld      a,b
+
+    ld      [de],a
+    inc     de
+
+    jr      .loop
+
+;-------------------------------------------------------------------------------
+
 RoomMinimap::
 
     ld      bc,RoomMinimapVBLHandler

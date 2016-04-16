@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "text.inc"
 
 ;###############################################################################
 
@@ -33,7 +34,26 @@
 
 ;-------------------------------------------------------------------------------
 
+MINIMAP_RCI_TITLE:
+    DB O_A_UPPERCASE + "R" - "A"
+    DB O_A_UPPERCASE + "C" - "A"
+    DB O_A_UPPERCASE + "I" - "A"
+    DB O_SPACE
+    DB O_A_UPPERCASE + "Z" - "A"
+    DB O_A_LOWERCASE + "o" - "a"
+    DB O_A_LOWERCASE + "n" - "a"
+    DB O_A_LOWERCASE + "e" - "a"
+    DB O_A_LOWERCASE + "s" - "a"
+    DB 0
+
 MinimapDrawRCI::
+
+    ; Draw title
+
+    ld      hl,MINIMAP_RCI_TITLE
+    call    RoomMinimapDrawTitle
+
+    ; Draw map
 
     LONG_CALL   APA_PixelStreamStart
 
