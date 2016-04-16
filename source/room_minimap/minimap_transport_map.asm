@@ -36,12 +36,12 @@
 
 C_WHITE  EQU 0
 C_BLUE   EQU 1
-C_BROWN  EQU 2
+C_RED    EQU 2
 C_BLACK  EQU 3
 
 MINIMAP_TRANSPORT_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
-    DW (0<<10)|(0<<5)|(15<<0), (0<<10)|(0<<5)|(0<<0)
+    DW (0<<10)|(0<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
 
 MINIMAP_TRANSPORT_MAP_TYPE_COLOR_ARRAY:
     DB C_WHITE, C_WHITE, C_WHITE, C_WHITE ; TYPE_FIELD
@@ -60,10 +60,10 @@ MINIMAP_TRANSPORT_MAP_TYPE_COLOR_ARRAY:
     DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_UNIVERSITY
     DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_MUSEUM
     DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_LIBRARY
-    DB C_BLACK, C_BROWN, C_BROWN, C_BLACK ; TYPE_TRAIN_STATION
-    DB C_BLACK, C_BROWN, C_BROWN, C_BLACK ; TYPE_AIRPORT
-    DB C_BLACK, C_BROWN, C_BROWN, C_BLACK ; TYPE_PORT
-    DB C_BROWN, C_BLUE,  C_BLUE,  C_BROWN ; TYPE_DOCK
+    DB C_BLACK, C_RED,   C_RED,   C_BLACK ; TYPE_TRAIN_STATION
+    DB C_BLACK, C_RED,   C_RED,   C_BLACK ; TYPE_AIRPORT
+    DB C_BLACK, C_RED,   C_RED,   C_BLACK ; TYPE_PORT
+    DB C_RED,   C_BLUE,  C_BLUE,  C_RED ; TYPE_DOCK
     DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_POWER_PLANT
 
 MINIMAP_TRANSPORT_MAP_TITLE:
@@ -111,8 +111,8 @@ MinimapDrawTransportMap::
             ld      a,d
             jr      nz,.not_rt
                 ld      a,C_BLACK
-                ld      b,C_BROWN
-                ld      c,C_BROWN
+                ld      b,C_RED
+                ld      c,C_RED
                 ld      d,C_BLACK
                 jr      .end_compare
 .not_rt:
@@ -128,10 +128,10 @@ MinimapDrawTransportMap::
 
             bit     TYPE_HAS_TRAIN_BIT,a
             jr      z,.not_train
-                ld      a,C_BROWN
-                ld      b,C_BROWN
-                ld      c,C_BROWN
-                ld      d,C_BROWN
+                ld      a,C_RED
+                ld      b,C_RED
+                ld      c,C_RED
+                ld      d,C_RED
                 jr      .end_compare
 .not_train:
 
