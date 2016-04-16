@@ -30,60 +30,61 @@
 
 ;###############################################################################
 
-    SECTION "Minimap General Functions",ROMX
+    SECTION "Minimap Transport Map Functions",ROMX
 
 ;-------------------------------------------------------------------------------
 
-C_WHITE EQU 0
-C_BLUE  EQU 1
-C_GREEN EQU 2
-C_BLACK EQU 3
+C_WHITE  EQU 0
+C_BLUE   EQU 1
+C_BROWN  EQU 2
+C_BLACK  EQU 3
 
-MINIMAP_GENERAL_PALETTE:
+MINIMAP_TRANSPORT_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
-    DW (0<<10)|(31<<5)|(0<<0), (0<<10)|(0<<5)|(0<<0)
+    DW (0<<10)|(0<<5)|(15<<0), (0<<10)|(0<<5)|(0<<0)
 
-MINIMAP_GENERAL_TYPE_COLOR_ARRAY:
-    DB C_WHITE,C_WHITE,C_WHITE,C_WHITE ; TYPE_FIELD
-    DB C_GREEN,C_WHITE,C_WHITE,C_GREEN ; TYPE_FOREST
-    DB C_BLUE, C_WHITE,C_WHITE,C_BLUE  ; TYPE_WATER
-    DB C_BLUE, C_GREEN,C_GREEN,C_BLUE  ; TYPE_RESIDENTIAL
-    DB C_BLUE, C_GREEN,C_GREEN,C_BLUE  ; TYPE_INDUSTRIAL
-    DB C_BLUE, C_GREEN,C_GREEN,C_BLUE  ; TYPE_COMMERCIAL
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_POLICE
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_FIREMEN
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_HOSPITAL
-    DB C_GREEN,C_GREEN,C_GREEN,C_GREEN ; TYPE_PARK
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_STADIUM
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_SCHOOL
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_HIGH_SCHOOL
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_UNIVERSITY
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_MUSEUM
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_LIBRARY
-    DB C_BLACK,C_BLACK,C_BLACK,C_BLACK ; TYPE_TRAIN_STATION
-    DB C_BLACK,C_BLACK,C_BLACK,C_BLACK ; TYPE_AIRPORT
-    DB C_BLACK,C_BLACK,C_BLACK,C_BLACK ; TYPE_PORT
-    DB C_BLACK,C_BLUE, C_BLUE, C_BLACK ; TYPE_DOCK
-    DB C_GREEN,C_BLACK,C_BLACK,C_GREEN ; TYPE_POWER_PLANT
+MINIMAP_TRANSPORT_MAP_TYPE_COLOR_ARRAY:
+    DB C_WHITE, C_WHITE, C_WHITE, C_WHITE ; TYPE_FIELD
+    DB C_WHITE, C_WHITE, C_WHITE, C_WHITE ; TYPE_FOREST
+    DB C_BLUE,  C_WHITE, C_WHITE, C_BLUE  ; TYPE_WATER
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_RESIDENTIAL
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_INDUSTRIAL
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_COMMERCIAL
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_POLICE
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_FIREMEN
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_HOSPITAL
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_PARK
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_STADIUM
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_SCHOOL
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_HIGH_SCHOOL
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_UNIVERSITY
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_MUSEUM
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_LIBRARY
+    DB C_BLACK, C_BROWN, C_BROWN, C_BLACK ; TYPE_TRAIN_STATION
+    DB C_BLACK, C_BROWN, C_BROWN, C_BLACK ; TYPE_AIRPORT
+    DB C_BLACK, C_BROWN, C_BROWN, C_BLACK ; TYPE_PORT
+    DB C_BROWN, C_BLUE,  C_BLUE,  C_BROWN ; TYPE_DOCK
+    DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_POWER_PLANT
 
-MINIMAP_GENERAL_TITLE:
-    DB O_A_UPPERCASE + "G" - "A"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "n" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
+MINIMAP_TRANSPORT_MAP_TITLE:
+    DB O_A_UPPERCASE + "T" - "A"
     DB O_A_LOWERCASE + "r" - "a"
     DB O_A_LOWERCASE + "a" - "a"
-    DB O_A_LOWERCASE + "l" - "a"
+    DB O_A_LOWERCASE + "n" - "a"
+    DB O_A_LOWERCASE + "s" - "a"
+    DB O_A_LOWERCASE + "p" - "a"
+    DB O_A_LOWERCASE + "o" - "a"
+    DB O_A_LOWERCASE + "r" - "a"
+    DB O_A_LOWERCASE + "t" - "a"
     DB O_SPACE
-    DB O_A_UPPERCASE + "V" - "A"
-    DB O_A_LOWERCASE + "i" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "w" - "a"
+    DB O_A_UPPERCASE + "M" - "A"
+    DB O_A_LOWERCASE + "a" - "a"
+    DB O_A_LOWERCASE + "p" - "a"
     DB 0
 
 ;-------------------------------------------------------------------------------
 
-MinimapDrawGeneral::
+MinimapDrawTransportMap::
 
     ; Draw map
     ; --------
@@ -102,7 +103,19 @@ MinimapDrawGeneral::
 
             ; Set color from tile type
 
-            ; Flags have priority over type. Also, road > train > power
+            ; Flags have priority over type.
+
+            ld      d,a
+            and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+            cp      a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+            ld      a,d
+            jr      nz,.not_rt
+                ld      a,C_BLACK
+                ld      b,C_BROWN
+                ld      c,C_BROWN
+                ld      d,C_BLACK
+                jr      .end_compare
+.not_rt:
 
             bit     TYPE_HAS_ROAD_BIT,a
             jr      z,.not_road
@@ -112,39 +125,22 @@ MinimapDrawGeneral::
                 ld      d,C_BLACK
                 jr      .end_compare
 .not_road:
+
             bit     TYPE_HAS_TRAIN_BIT,a
             jr      z,.not_train
-                ld      a,C_BLACK
-                ld      b,C_BLACK
-                ld      c,C_BLACK
-                ld      d,C_BLACK
+                ld      a,C_BROWN
+                ld      b,C_BROWN
+                ld      c,C_BROWN
+                ld      d,C_BROWN
                 jr      .end_compare
 .not_train:
-
-            cp      a,TYPE_HAS_POWER|TYPE_FIELD
-            jr      nz,.not_power_field
-                ld      a,C_WHITE
-                ld      b,C_BLACK
-                ld      c,C_BLACK
-                ld      d,C_WHITE
-                jr      .end_compare
-.not_power_field:
-
-            cp      a,TYPE_HAS_POWER|TYPE_WATER
-            jr      nz,.not_power_water
-                ld      a,C_BLUE
-                ld      b,C_BLACK
-                ld      c,C_BLACK
-                ld      d,C_BLUE
-                jr      .end_compare
-.not_power_water:
 
             and     a,TYPE_MASK ; Get type without extra flags
             ld      l,a
             ld      h,0
             add     hl,hl
             add     hl,hl
-            ld      de,MINIMAP_GENERAL_TYPE_COLOR_ARRAY
+            ld      de,MINIMAP_TRANSPORT_MAP_TYPE_COLOR_ARRAY
             add     hl,de
             ld      a,[hl+]
             ld      b,[hl]
@@ -152,13 +148,6 @@ MinimapDrawGeneral::
             ld      c,[hl]
             inc     hl
             ld      d,[hl]
-            jr      .end_compare
-
-            ; Default
-            ld      a,C_WHITE
-            ld      b,a
-            ld      c,a
-            ld      d,a
 .end_compare:
 
             call    APA_SetColors ; a,b,c,d = color (0 to 3)
@@ -180,13 +169,13 @@ MinimapDrawGeneral::
     ; Refresh screen with backbuffer data
     call    APA_BufferUpdate
 
-    ; Draw title
-    ld      hl,MINIMAP_GENERAL_TITLE
-    call    RoomMinimapDrawTitle
-
     ; Load palette
-    ld      hl,MINIMAP_GENERAL_PALETTE
+    ld      hl,MINIMAP_TRANSPORT_MAP_PALETTE
     call    APA_LoadPalette
+
+    ; Draw title
+    ld      hl,MINIMAP_TRANSPORT_MAP_TITLE
+    call    RoomMinimapDrawTitle
 
     ret
 

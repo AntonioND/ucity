@@ -30,7 +30,7 @@
 
 ;###############################################################################
 
-    SECTION "Minimap RCI Functions",ROMX
+    SECTION "Minimap Zone Map Functions",ROMX
 
 ;-------------------------------------------------------------------------------
 
@@ -39,48 +39,47 @@ C_BLUE   EQU 1
 C_GREEN  EQU 2
 C_YELLOW EQU 3
 
-MINIMAP_RCI_PALETTE:
+MINIMAP_ZONE_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
     DW (0<<10)|(31<<5)|(0<<0), (0<<10)|(31<<5)|(31<<0)
 
-MINIMAP_RCI_TYPE_COLOR_ARRAY:
+MINIMAP_ZONE_MAP_TYPE_COLOR_ARRAY:
     DB C_WHITE, C_WHITE, C_WHITE, C_WHITE  ; TYPE_FIELD
     DB C_GREEN, C_WHITE, C_WHITE, C_GREEN  ; TYPE_FOREST
     DB C_BLUE,  C_WHITE, C_WHITE, C_BLUE   ; TYPE_WATER
     DB C_GREEN, C_GREEN, C_GREEN, C_GREEN  ; TYPE_RESIDENTIAL
     DB C_YELLOW,C_YELLOW,C_YELLOW,C_YELLOW ; TYPE_INDUSTRIAL
     DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE   ; TYPE_COMMERCIAL
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_POLICE
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_FIREMEN
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_HOSPITAL
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_PARK
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_STADIUM
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_SCHOOL
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_HIGH_SCHOOL
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_UNIVERSITY
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_MUSEUM
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_LIBRARY
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_TRAIN_STATION
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_AIRPORT
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_PORT
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_POLICE
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_FIREMEN
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_HOSPITAL
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_PARK
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_STADIUM
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_SCHOOL
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_HIGH_SCHOOL
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_UNIVERSITY
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_MUSEUM
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_LIBRARY
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_TRAIN_STATION
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_AIRPORT
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_PORT
     DB C_BLUE,  C_YELLOW,C_YELLOW,C_BLUE   ; TYPE_DOCK
-    DB C_GREEN, C_YELLOW,C_YELLOW,C_GREEN  ; TYPE_POWER_PLANT
+    DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_POWER_PLANT
 
-MINIMAP_RCI_TITLE:
-    DB O_A_UPPERCASE + "R" - "A"
-    DB O_A_UPPERCASE + "C" - "A"
-    DB O_A_UPPERCASE + "I" - "A"
-    DB O_SPACE
+MINIMAP_ZONE_MAP_TITLE:
     DB O_A_UPPERCASE + "Z" - "A"
     DB O_A_LOWERCASE + "o" - "a"
     DB O_A_LOWERCASE + "n" - "a"
     DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "s" - "a"
+    DB O_SPACE
+    DB O_A_UPPERCASE + "M" - "A"
+    DB O_A_LOWERCASE + "a" - "a"
+    DB O_A_LOWERCASE + "p" - "a"
     DB 0
 
 ;-------------------------------------------------------------------------------
 
-MinimapDrawRCI::
+MinimapDrawZoneMap::
 
     ; Draw map
     ; --------
@@ -104,7 +103,7 @@ MinimapDrawRCI::
             ld      h,0
             add     hl,hl
             add     hl,hl
-            ld      de,MINIMAP_RCI_TYPE_COLOR_ARRAY
+            ld      de,MINIMAP_ZONE_MAP_TYPE_COLOR_ARRAY
             add     hl,de
             ld      a,[hl+]
             ld      b,[hl]
@@ -132,13 +131,13 @@ MinimapDrawRCI::
     ; Refresh screen with backbuffer data
     call    APA_BufferUpdate
 
-    ; Draw title
-    ld      hl,MINIMAP_RCI_TITLE
-    call    RoomMinimapDrawTitle
-
     ; Load palette
-    ld      hl,MINIMAP_RCI_PALETTE
+    ld      hl,MINIMAP_ZONE_MAP_PALETTE
     call    APA_LoadPalette
+
+    ; Draw title
+    ld      hl,MINIMAP_ZONE_MAP_TITLE
+    call    RoomMinimapDrawTitle
 
     ret
 

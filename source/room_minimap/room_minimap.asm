@@ -36,10 +36,10 @@
 minimap_room_exit: DS 1 ; set to 1 to exit room
 
 minimap_selected_map: DS 1
-MINIMAP_SELECTION_GENERAL   EQU 0
-MINIMAP_SELECTION_RCI       EQU 1
-MINIMAP_SELECTION_ROADS     EQU 2
-MINIMAP_SELECTION_MAX       EQU 2
+MINIMAP_SELECTION_GENERAL_VIEW  EQU 0
+MINIMAP_SELECTION_ZONE_MAP      EQU 1
+MINIMAP_SELECTION_TRANSPORT_MAP EQU 2
+MINIMAP_SELECTION_MAX           EQU 2
 
 ;###############################################################################
 
@@ -76,17 +76,23 @@ MinimapDrawSelectedMap:
 
     ld      a,[minimap_selected_map]
 
-    cp      a,MINIMAP_SELECTION_GENERAL
-    jr      nz,.not_general
-        LONG_CALL   MinimapDrawGeneral
+    cp      a,MINIMAP_SELECTION_GENERAL_VIEW
+    jr      nz,.not_general_view
+        LONG_CALL   MinimapDrawGeneralView
         ret
-.not_general:
+.not_general_view:
 
-    cp      a,MINIMAP_SELECTION_RCI
-    jr      nz,.not_rci
-        LONG_CALL   MinimapDrawRCI
+    cp      a,MINIMAP_SELECTION_ZONE_MAP
+    jr      nz,.not_zone_map
+        LONG_CALL   MinimapDrawZoneMap
         ret
-.not_rci:
+.not_zone_map:
+
+    cp      a,MINIMAP_SELECTION_TRANSPORT_MAP
+    jr      nz,.not_transport_map
+        LONG_CALL   MinimapDrawTransportMap
+        ret
+.not_transport_map:
 
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
@@ -374,7 +380,7 @@ RoomMinimap::
 
     ei
 
-    ld      a,MINIMAP_SELECTION_GENERAL
+    ld      a,MINIMAP_SELECTION_GENERAL_VIEW
     ld      [minimap_selected_map],a
     LONG_CALL   MinimapDrawSelectedMap
 
