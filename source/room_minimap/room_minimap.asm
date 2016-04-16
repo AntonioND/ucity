@@ -35,7 +35,8 @@
 
 minimap_room_exit: DS 1 ; set to 1 to exit room
 
-drawing_color: DS 4
+minimap_selected_map: DS 1
+MINIMAP_SELECTION_RCI EQU 0
 
 ;###############################################################################
 
@@ -65,6 +66,24 @@ MINIMAP_TILE_NUM EQU ((.e-MINIMAP_TILES)/16)
     SECTION "Room Minimap Functions",ROMX
 
 ;-------------------------------------------------------------------------------
+
+MinimapDrawSelectedMap:
+
+    ld      a,[minimap_selected_map]
+
+    cp      a,MINIMAP_SELECTION_RCI
+    jr      nz,.not_rci
+        LONG_CALL   MinimapDrawRCI
+        jr      .end
+.not_rci:
+
+
+    ; Default - Clear
+    call    APA_BufferClear
+.end:
+    call    APA_BufferUpdate
+
+    ret
 
 ;###############################################################################
 
@@ -107,13 +126,6 @@ RoomMinimapVBLHandler:
     ret
 
 ;-------------------------------------------------------------------------------
-
-APA_PALETTE: ; To be loaded in slot APA_PALETTE_INDEX
-    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
-    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
-
-    DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
-    DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
 
 RoomMinimapLoadBG:
 
@@ -217,21 +229,21 @@ RoomMinimapLoadBG:
     LONG_CALL   APA_ResetBackgroundMapping
     call    APA_BufferUpdate
 
-    di
-
-    ld      b,144
-    call    wait_ly
-
-    ld      hl,APA_PALETTE
-    call   APA_LoadPalette
-
-    ei
+    ld      hl,APA_PALETTE_DEFAULT
+    call    APA_LoadPalette
 
     ret
+
+APA_PALETTE_DEFAULT:
+    DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
+    DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
 
 ;-------------------------------------------------------------------------------
 
 RoomMinimapDrawTitle:: ; hl = ptr to text string
+
+    xor     a,a
+    ld      [rVBK],a
 
     ; Calculate length and store in b
 
@@ -287,10 +299,10 @@ RoomMinimap::
     ld      bc,RoomMinimapVBLHandler
     call    irq_set_VBL
 
-    call    RoomMinimapLoadBG
-
     ld      b,1 ; bank at 8800h
     call    LoadText
+
+    call    RoomMinimapLoadBG
 
     di
 
@@ -300,11 +312,9 @@ RoomMinimap::
 
     ei
 
-    xor     a,a
-    ld      [rIF],a
-
-    LONG_CALL   MinimapDrawRCI ; TODO remove from here
-    call    APA_BufferUpdate
+    ld      a,MINIMAP_SELECTION_RCI
+    ld      [minimap_selected_map],a
+    LONG_CALL   MinimapDrawSelectedMap
 
     xor     a,a
     ld      [minimap_room_exit],a

@@ -527,10 +527,17 @@ APA_BufferUpdate::
 
 ;-------------------------------------------------------------------------------
 
-APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX. Do this during VBL!
+APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX. Waits until VBL!
+
+    di
+
+    ld      b,144
+    call    wait_ly
 
     ld      a,APA_PALETTE_INDEX
     call    bg_set_palette
+
+    ei
 
     ret
 

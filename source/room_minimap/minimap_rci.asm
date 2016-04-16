@@ -34,6 +34,10 @@
 
 ;-------------------------------------------------------------------------------
 
+MINIMAP_RCI_PALETTE:
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
+    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
+
 MINIMAP_RCI_TITLE:
     DB O_A_UPPERCASE + "R" - "A"
     DB O_A_UPPERCASE + "C" - "A"
@@ -52,6 +56,11 @@ MinimapDrawRCI::
 
     ld      hl,MINIMAP_RCI_TITLE
     call    RoomMinimapDrawTitle
+
+    ; Load palette
+
+    ld      hl,MINIMAP_RCI_PALETTE
+    call   APA_LoadPalette
 
     ; Draw map
 
