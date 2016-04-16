@@ -36,9 +36,9 @@ BANK_CITY_MAP_TILES         EQU 1
 BANK_CITY_MAP_ATTR          EQU 2
 BANK_CITY_MAP_TYPE          EQU 3
 BANK_CITY_MAP_TRAFFIC       EQU 4
-BANK_CITY_MAP_something     EQU 5 ; Unused (for now)
-BANK_CITY_MAP_SCRATCH_RAM   EQU 6 ; For temporary calculations
-BANK_CITY_MAP_TILE_OK_FLAGS EQU 7 ; To calculate how good each tile is
+BANK_CITY_MAP_TILE_OK_FLAGS EQU 5 ; To calculate how good each tile is
+BANK_SCRATCH_RAM            EQU 6 ; For temporary calculations (simulation)
+BANK_SCRATCH_RAM_2          EQU 7 ; For temporary calculations (APA, simulation)
 
 ;-------------------------------------------------------------------------------
 
