@@ -134,16 +134,13 @@ MinimapSelectMap:: ; a = map to select
 
 InputHandleMinimap:
 
-    ld      a,[joy_pressed]
-    and     a,PAD_B|PAD_START
-    jr      z,.end_b_start
-        ld      a,1
-        ld      [minimap_room_exit],a
-        ret ; return in order not to update anything
-.end_b_start:
+    call    MinimapMenuMandleInput ; If it returns 1, exit room
+    and     a,a
+    ret     z ; don't exit
 
-    call    MinimapMenuMandleInput
-
+    ; Exit
+    ld      a,1
+    ld      [minimap_room_exit],a
     ret
 
 ;-------------------------------------------------------------------------------
@@ -386,6 +383,8 @@ RoomMinimap::
     jr      z,.loop
 
     call    SetDefaultVBLHandler
+
+    call    SetPalettesAllBlack
 
     ret
 

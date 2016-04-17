@@ -84,6 +84,22 @@ MINIMAP_MENU_SPRITE_PALETTE:
 
 MinimapMenuRefresh::
 
+
+
+    ; Set sprite X
+    ld      a,16
+
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+    call    sprite_get_base_pointer ; l = sprite / return = hl / destroys de
+
+    inc     hl
+    ld      [hl+],a
+    add     a,8
+    inc     hl
+    inc     hl
+    inc     hl
+    ld      [hl],a
+
     ret
 
 ;###############################################################################
@@ -92,19 +108,29 @@ MinimapMenuRefresh::
 
 ;-------------------------------------------------------------------------------
 
-MinimapMenuMandleInput::
+MinimapMenuMandleInput:: ; If it returns 1, exit room. If 0, continue
 
     ld      a,[minimap_menu_active]
     and     a,a
     jr      nz,.menu_is_active
 
-        ; Menu is inactive, activate it
+        ; Menu is inactive
 
+        ; Exit if menu is inactive and B or START are pressed
+        ld      a,[joy_pressed]
+        and     a,PAD_B|PAD_START
+        jr      z,.end_b_start
+            ld      a,1
+            ret ; return in order not to update anything
+.end_b_start:
+
+        ; Show menu if A, LEFT or RIGHT are pressed
         ld      a,[joy_pressed]
         and     a,PAD_A|PAD_LEFT|PAD_RIGHT
-        ret     z
+        ret     z ; returning 0
 
         call    MinimapMenuShow
+        xor     a,a
         ret
 
 
@@ -113,16 +139,24 @@ MinimapMenuMandleInput::
     ; Menu is active, handle
 
     ld      a,[joy_pressed]
+    and     a,PAD_B
+    jr      z,.end_b
+        ; Deactivate
+        call    MinimapMenuHide
+        xor     a,a
+        ret ; return in order not to update anything else
+.end_b:
+
+    ld      a,[joy_pressed]
     and     a,PAD_A
     jr      z,.end_a
-
         ; Deactivate and load next map
         call    MinimapMenuHide
         ld      a,[minimap_menu_selection]
         call    MinimapSelectMap
         LONG_CALL   MinimapDrawSelectedMap
+        xor     a,a
         ret ; return in order not to update anything else
-
 .end_a:
 
     ld      a,[joy_pressed]
@@ -147,6 +181,7 @@ MinimapMenuMandleInput::
             LONG_CALL   MinimapMenuRefresh
 .end_right:
 
+    xor     a,a
     ret
 
 ;-------------------------------------------------------------------------------
@@ -161,8 +196,6 @@ MinimapMenuShow::
 
     ld      a,MINIMAP_CURSOR_COUNTDOWN_MOVEMENT
     ld      [minimap_cursor_y_offset_countdown],a
-
-    LONG_CALL   MinimapMenuRefresh
 
     xor     a,a
     ld      [rIF],a ; clear pending interrupts
@@ -191,6 +224,8 @@ MinimapMenuShow::
     ld      a,MINIMAP_SPRITE_PALETTE_INDEX
     ld      l,MINIMAP_SPRITE_OAM_INDEX+1
     call    sprite_set_params ; a = params    l = sprite number
+
+    LONG_CALL   MinimapMenuRefresh
 
     ret
 
