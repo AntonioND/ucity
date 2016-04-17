@@ -34,8 +34,10 @@
 
 ;-------------------------------------------------------------------------------
 
-minimap_menu_selection: DS 1 ; selected item
-minimap_menu_active: DS 1 ; 0 if not active, 1 if active
+minimap_menu_selection:  DS 1 ; selected item
+minimap_menu_active:     DS 1 ; 0 if not active, 1 if active
+minimap_cursor_y_offset: DS 1 ; value to add to base Y
+minimap_cursor_y_offset_countdown: DS 1 ; frames to move
 
 ;###############################################################################
 
@@ -53,13 +55,16 @@ MINIMAP_MENU_TILES:
     INCBIN "minimap_menu_tiles.bin"
 .e:
 
-MINIMAP_MENU_NUM_TILES EQU ((.e-MINIMAP_MENU_TILES)/16)
+MINIMAP_MENU_NUM_TILES EQU (.e-MINIMAP_MENU_TILES)/16
+MINIMAP_MENU_BASE_Y    EQU 144-16
+MINIMAP_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
+MINIMAP_MENU_NUM_ICONS EQU (160/16)+1
 
-MINIMAP_MENU_BASE_Y EQU (144-16)
-
-MINIMAP_MENU_TILE_BASE EQU (128) ; Tile 128 onwards
-
-MINIMAP_MENU_NUM_ICONS EQU ((160/16)+1)
+MINIMAP_SPRITE_TILE_INDEX    EQU 180 ; After the menu icons
+MINIMAP_SPRITE_PALETTE_INDEX EQU 0 ; Palette slot to be used by the cursor
+MINIMAP_SPRITE_BASE_Y        EQU (144-16-16)+16
+MINIMAP_SPRITE_OAM_INDEX     EQU 0
+MINIMAP_CURSOR_COUNTDOWN_MOVEMENT EQU 20 ; frames to wait to move
 
 ;-------------------------------------------------------------------------------
 
@@ -151,12 +156,41 @@ MinimapMenuShow::
     ld      a,1
     ld      [minimap_menu_active],a
 
+    xor     a,a
+    ld      [minimap_cursor_y_offset],a
+
+    ld      a,MINIMAP_CURSOR_COUNTDOWN_MOVEMENT
+    ld      [minimap_cursor_y_offset_countdown],a
+
     LONG_CALL   MinimapMenuRefresh
 
-    ld      a,7
-    ld      [rWX],a
-    ld      a,MINIMAP_MENU_BASE_Y
-    ld      [rWY],a ; show window
+    xor     a,a
+    ld      [rIF],a ; clear pending interrupts
+
+    ld      hl,rIE
+    set     1,[hl] ; IEF_LCDC
+
+    ld      b,(160-16)/2
+    ld      c,MINIMAP_SPRITE_BASE_Y
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+    ld      a,MINIMAP_SPRITE_TILE_INDEX
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+    call    sprite_set_tile ; a = tile    l = sprite number
+    ld      a,MINIMAP_SPRITE_PALETTE_INDEX
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+    call    sprite_set_params ; a = params    l = sprite number
+
+    ld      b,8+((160-16)/2)
+    ld      c,MINIMAP_SPRITE_BASE_Y
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+1
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+    ld      a,MINIMAP_SPRITE_TILE_INDEX+2
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+1
+    call    sprite_set_tile ; a = tile    l = sprite number
+    ld      a,MINIMAP_SPRITE_PALETTE_INDEX
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+1
+    call    sprite_set_params ; a = params    l = sprite number
 
     ret
 
@@ -167,28 +201,107 @@ MinimapMenuHide::
     xor     a,a
     ld      [minimap_menu_active],a
 
-    ld      a,7
-    ld      [rWX],a
-    ld      a,144
-    ld      [rWY],a ; hide window
+    ld      hl,rIE
+    res     1,[hl] ; IEF_LCDC
+
+    ld      bc,$0000
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+    ld      bc,$0000
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+1
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
 
     ret
 
 ;-------------------------------------------------------------------------------
 
-MinimapMenuResetLoadGFX::
+MinimapMenuLCDHandler:: ; Only called when it is active, no need to check
 
-    ; Reset
-    ; -----
+    call    wait_screen_blank
+
+    ld      a,[rLCDC]
+    or      a,LCDCF_BG9C00 ; set 9C00h = menu
+    ld      [rLCDC],a
+
+    xor     a,a
+    ld      [rSCX],a
+    ld      a,MINIMAP_MENU_BASE_Y
+    ld      [rSCY],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MinimapMenuVBLHandler::
+
+    xor     a,a
+    ld      [rSCX],a
+    ld      [rSCY],a
+
+    ld      a,[minimap_menu_active]
+    and     a,a
+    ret     z
+
+    ; It is active, handle bg base swaps
+
+    ld      a,[rLCDC]
+    and     a,(~LCDCF_BG9C00) & $FF ; set 9800h = minimap
+    ld      [rLCDC],a
+
+    ; Update sprites if needed
+
+    ld      a,[minimap_cursor_y_offset_countdown]
+    dec     a
+    ld      [minimap_cursor_y_offset_countdown],a
+    ret     nz
+
+    ld      a,MINIMAP_CURSOR_COUNTDOWN_MOVEMENT
+    ld      [minimap_cursor_y_offset_countdown],a
+
+    ld      a,[minimap_cursor_y_offset]
+    xor     a,1
+    ld      [minimap_cursor_y_offset],a
+
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+    call    sprite_get_base_pointer ; l = sprite / return = hl / destroys de
+
+    ld      a,[minimap_cursor_y_offset]
+    ld      b,a ; b = increment
+    ld      a,MINIMAP_SPRITE_BASE_Y
+    sub     a,b
+
+    ld      [hl+],a
+    inc     hl
+    inc     hl
+    inc     hl
+    ld      [hl],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MinimapMenuReset::
 
     xor     a,a
     ld      [minimap_menu_selection],a
+    ld      [minimap_menu_active],a
 
-    ; Set interrupt handler
-    ; ---------------------
+    ld      bc,MinimapMenuLCDHandler
+    call    irq_set_LCD
+
+    ld      a,STATF_LYC
+    ld      [rSTAT],a
+    ld      a,MINIMAP_MENU_BASE_Y-1
+    ld      [rLYC],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MinimapMenuLoadGFX::
 
     ld      a,[rLCDC]
-    or      a,LCDCF_WINON|LCDCF_WIN9C00
+    or      a,LCDCF_OBJON|LCDCF_OBJ16
     ld      [rLCDC],a
 
     call    MinimapMenuHide
@@ -254,7 +367,7 @@ MinimapMenuResetLoadGFX::
 
     ld      hl,MINIMAP_MENU_SPRITE_PALETTE
 
-    ld      a,0
+    ld      a,MINIMAP_SPRITE_PALETTE_INDEX
     call    spr_set_palette
 
     ei

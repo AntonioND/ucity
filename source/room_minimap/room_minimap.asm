@@ -150,6 +150,8 @@ InputHandleMinimap:
 
 RoomMinimapVBLHandler:
 
+    call    MinimapMenuVBLHandler
+
     call    refresh_OAM
 
     ret
@@ -334,6 +336,8 @@ RoomMinimap::
 
     call    SetPalettesAllBlack
 
+    call    MinimapMenuReset
+
     ld      bc,RoomMinimapVBLHandler
     call    irq_set_VBL
 
@@ -363,7 +367,7 @@ RoomMinimap::
 
     ; This can be loaded after the rest, it isn't shown until A is pressed so
     ; there is no hurry.
-    call    MinimapMenuResetLoadGFX
+    call    MinimapMenuLoadGFX
 
     xor     a,a
     ld      [minimap_room_exit],a
