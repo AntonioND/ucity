@@ -28,7 +28,6 @@ ROOM_MINIMAP_INC SET 1
 MINIMAP_SELECTION_GENERAL_VIEW       EQU 0
 MINIMAP_SELECTION_ZONE_MAP           EQU 1
 MINIMAP_SELECTION_TRANSPORT_MAP      EQU 2
-MINIMAP_SELECTION_MAX                EQU 2
 
 ; TODO all maps in this list -> They need simulation routines!
 MINIMAP_SELECTION_POLICE             EQU 3
@@ -41,6 +40,8 @@ MINIMAP_SELECTION_TRAFFIC            EQU 9
 MINIMAP_SELECTION_POPULATION_DENSITY EQU 10
 MINIMAP_SELECTION_POLLUTION          EQU 11
 MINIMAP_SELECTION_HAPPINESS          EQU 12
+
+MINIMAP_SELECTION_MAX                EQU 2 ; TODO update as this is done
 
 ;###############################################################################
 

@@ -108,7 +108,7 @@ RoomMenuLoadBG:
     call    vram_copy_fast ; b = size - hl = source address - de = dest
 
     push    hl
-    ld      hl,12
+    ld      hl,32-20
     add     hl,de
     ld      d,h
     ld      e,l
@@ -133,7 +133,7 @@ RoomMenuLoadBG:
     call    vram_copy_fast ; b = size - hl = source address - de = dest
 
     push    hl
-    ld      hl,12
+    ld      hl,32-20
     add     hl,de
     ld      d,h
     ld      e,l

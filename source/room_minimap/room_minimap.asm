@@ -67,7 +67,7 @@ MINIMAP_TILE_NUM EQU ((.e-MINIMAP_TILES)/16)
 
 ;-------------------------------------------------------------------------------
 
-MinimapDrawSelectedMap:
+MinimapDrawSelectedMap::
 
     ; Not needed to clear first, the drawing functions draw over everything
 
@@ -124,45 +124,25 @@ MinimapSetDefaultPalette::
 
 ;-------------------------------------------------------------------------------
 
+MinimapSelectMap:: ; a = map to select
+
+    ld      [minimap_selected_map],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 InputHandleMinimap:
 
     ld      a,[joy_pressed]
-    and     a,PAD_A
-    jr      z,.end_a
+    and     a,PAD_B|PAD_START
+    jr      z,.end_b_start
         ld      a,1
         ld      [minimap_room_exit],a
         ret ; return in order not to update anything
-.end_a:
+.end_b_start:
 
-    ld      a,[joy_pressed]
-    and     a,PAD_B
-    jr      z,.end_b
-        ld      a,1
-        ld      [minimap_room_exit],a
-        ret ; return in order not to update anything
-.end_b:
-
-    ld      a,[joy_pressed]
-    and     a,PAD_LEFT
-    jr      z,.end_left
-        ld      a,[minimap_selected_map]
-        and     a,a
-        jr      z,.end_left
-            dec     a
-            ld      [minimap_selected_map],a
-            LONG_CALL   MinimapDrawSelectedMap
-.end_left:
-
-    ld      a,[joy_pressed]
-    and     a,PAD_RIGHT
-    jr      z,.end_right
-        ld      a,[minimap_selected_map]
-        cp      a,MINIMAP_SELECTION_MAX
-        jr      z,.end_right
-            inc     a
-            ld      [minimap_selected_map],a
-            LONG_CALL   MinimapDrawSelectedMap
-.end_right:
+    call    MinimapMenuMandleInput
 
     ret
 
@@ -380,6 +360,10 @@ RoomMinimap::
     ld      a,MINIMAP_SELECTION_GENERAL_VIEW
     ld      [minimap_selected_map],a
     LONG_CALL   MinimapDrawSelectedMap
+
+    ; This can be loaded after the rest, it isn't shown until A is pressed so
+    ; there is no hurry.
+    call    MinimapMenuResetLoadGFX
 
     xor     a,a
     ld      [minimap_room_exit],a
