@@ -10,17 +10,18 @@ This is a very early version of BitCity. As such, most of the functionality is
 missing. The only finished part is the editor mode. This is not playable. This
 is just the skeleton of the game it may become in a not so far away future.
 
-It is developed using BGB (http://bgb.bircd.org/), and is tested on hardware
+It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
 every once in a while.
 
 NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
 you are interested please contact me at my email (antonio_nd@outlook.com).
 
 General to do list:
-- Budget screen
 - Minimap screen (with different maps)
-- Save menus
 - Simulation
+- Save menus
+- Budget screen
+- Compression
 
 ![](screenshot.png)
 
@@ -48,9 +49,9 @@ Dependencies:
 - RGBDS: https://github.com/bentley/rgbds/
 - GBT Player: https://github.com/AntonioND/gbt-player
 
-Graphic Editors:
-- GBMB (Game Boy Map Builder)
-- GBTD (Game Boy Tile Designer)
+Tools (for Windows, but they run on Wine):
+- GBMB (Game Boy Map Builder): http://www.devrs.com/gb/hmgd/gbmb.html
+- GBTD (Game Boy Tile Designer): http://www.devrs.com/gb/hmgd/gbtd.html
 
 Compiling
 ---------
