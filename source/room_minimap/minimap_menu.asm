@@ -34,6 +34,7 @@
 
 ;-------------------------------------------------------------------------------
 
+minimap_scroll_x:        DS 1
 minimap_menu_selection:  DS 1 ; selected item
 minimap_menu_active:     DS 1 ; 0 if not active, 1 if active
 minimap_cursor_y_offset: DS 1 ; value to add to base Y
@@ -58,12 +59,12 @@ MINIMAP_MENU_TILES:
 MINIMAP_MENU_NUM_TILES EQU (.e-MINIMAP_MENU_TILES)/16
 MINIMAP_MENU_BASE_Y    EQU 144-16
 MINIMAP_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
-MINIMAP_MENU_NUM_ICONS EQU (160/16)+1
+MINIMAP_MENU_NUM_ICONS_BORDER EQU ((160/16)/2)-2 ; Icons to allow to overflow
 
-MINIMAP_SPRITE_TILE_INDEX    EQU 180 ; After the menu icons
-MINIMAP_SPRITE_PALETTE_INDEX EQU 0 ; Palette slot to be used by the cursor
-MINIMAP_SPRITE_BASE_Y        EQU (144-16-16)+16
-MINIMAP_SPRITE_OAM_INDEX     EQU 0
+MINIMAP_SPRITE_TILE_INDEX     EQU 180 ; After the menu icons
+MINIMAP_SPRITE_PALETTE_INDEX  EQU 0 ; Palette slot to be used by the cursor
+MINIMAP_SPRITE_BASE_Y         EQU (144-16-16)+16
+MINIMAP_SPRITE_OAM_INDEX      EQU 0
 MINIMAP_CURSOR_COUNTDOWN_MOVEMENT EQU 20 ; frames to wait to move
 
 ;-------------------------------------------------------------------------------
@@ -84,7 +85,26 @@ MINIMAP_MENU_SPRITE_PALETTE:
 
 MinimapMenuRefresh::
 
+    ld      a,-8
+    ld      [minimap_scroll_x],a
 
+    ld      b,((160-16)/2)
+    ld      c,MINIMAP_SPRITE_BASE_Y
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+
+    ld      b,8+((160-16)/2)
+    ld      c,MINIMAP_SPRITE_BASE_Y
+    ld      l,MINIMAP_SPRITE_OAM_INDEX+1
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+
+IF 0
+    ld      hl,minimap_menu_selection
+
+    ld      a,MINIMAP_MENU_NUM_ICONS_BORDER
+    cp      a,[hl]
+
+    ld      a,MINIMAP_SELECTION_MAX
 
     ; Set sprite X
     ld      a,16
@@ -99,6 +119,7 @@ MinimapMenuRefresh::
     inc     hl
     inc     hl
     ld      [hl],a
+ENDC
 
     ret
 
@@ -121,17 +142,17 @@ MinimapMenuMandleInput:: ; If it returns 1, exit room. If 0, continue
         and     a,PAD_B|PAD_START
         jr      z,.end_b_start
             ld      a,1
-            ret ; return in order not to update anything
+            ret ; return 1
 .end_b_start:
 
         ; Show menu if A, LEFT or RIGHT are pressed
         ld      a,[joy_pressed]
         and     a,PAD_A|PAD_LEFT|PAD_RIGHT
-        ret     z ; returning 0
+        ret     z ; return 0
 
         call    MinimapMenuShow
         xor     a,a
-        ret
+        ret ; return 0
 
 
 .menu_is_active:
@@ -144,7 +165,7 @@ MinimapMenuMandleInput:: ; If it returns 1, exit room. If 0, continue
         ; Deactivate
         call    MinimapMenuHide
         xor     a,a
-        ret ; return in order not to update anything else
+        ret ; return 0
 .end_b:
 
     ld      a,[joy_pressed]
@@ -156,7 +177,7 @@ MinimapMenuMandleInput:: ; If it returns 1, exit room. If 0, continue
         call    MinimapSelectMap
         LONG_CALL   MinimapDrawSelectedMap
         xor     a,a
-        ret ; return in order not to update anything else
+        ret ; return 0
 .end_a:
 
     ld      a,[joy_pressed]
@@ -182,7 +203,7 @@ MinimapMenuMandleInput:: ; If it returns 1, exit room. If 0, continue
 .end_right:
 
     xor     a,a
-    ret
+    ret ; return 0
 
 ;-------------------------------------------------------------------------------
 
@@ -203,10 +224,6 @@ MinimapMenuShow::
     ld      hl,rIE
     set     1,[hl] ; IEF_LCDC
 
-    ld      b,(160-16)/2
-    ld      c,MINIMAP_SPRITE_BASE_Y
-    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
-    call    sprite_set_xy ; b = x    c = y    l = sprite number
     ld      a,MINIMAP_SPRITE_TILE_INDEX
     ld      l,MINIMAP_SPRITE_OAM_INDEX+0
     call    sprite_set_tile ; a = tile    l = sprite number
@@ -214,10 +231,6 @@ MinimapMenuShow::
     ld      l,MINIMAP_SPRITE_OAM_INDEX+0
     call    sprite_set_params ; a = params    l = sprite number
 
-    ld      b,8+((160-16)/2)
-    ld      c,MINIMAP_SPRITE_BASE_Y
-    ld      l,MINIMAP_SPRITE_OAM_INDEX+1
-    call    sprite_set_xy ; b = x    c = y    l = sprite number
     ld      a,MINIMAP_SPRITE_TILE_INDEX+2
     ld      l,MINIMAP_SPRITE_OAM_INDEX+1
     call    sprite_set_tile ; a = tile    l = sprite number
@@ -258,7 +271,7 @@ MinimapMenuLCDHandler:: ; Only called when it is active, no need to check
     or      a,LCDCF_BG9C00 ; set 9C00h = menu
     ld      [rLCDC],a
 
-    xor     a,a
+    ld      a,[minimap_scroll_x]
     ld      [rSCX],a
     ld      a,MINIMAP_MENU_BASE_Y
     ld      [rSCY],a

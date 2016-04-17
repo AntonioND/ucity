@@ -41,7 +41,7 @@ MINIMAP_SELECTION_POPULATION_DENSITY EQU 10
 MINIMAP_SELECTION_POLLUTION          EQU 11
 MINIMAP_SELECTION_HAPPINESS          EQU 12
 
-MINIMAP_SELECTION_MAX                EQU 2 ; TODO update as this is done
+MINIMAP_SELECTION_MAX                EQU 12
 
 ;###############################################################################
 
