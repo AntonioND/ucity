@@ -20,6 +20,11 @@
 ;
 ;###############################################################################
 
+    IF !DEF(BUILDING_INFO_INC)
+BUILDING_INFO_INC SET 1
+
+;###############################################################################
+
 ; Array of pointers to each building information
     GLOBAL BUILDING_INFO_POINTERS_ARRAY
 BUILDING_INFO_POINTERS_ARRAY_ELEMENT_SIZE EQU 4
@@ -106,5 +111,9 @@ B_IndustrialS3C EQU 64
 B_IndustrialS3D EQU 65
 
 B_Delete         EQU 255 ; Special type
+
+;###############################################################################
+
+    ENDC ; BUILDING_INFO_INC
 
 ;###############################################################################

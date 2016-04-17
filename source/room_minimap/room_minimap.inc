@@ -20,39 +20,30 @@
 ;
 ;###############################################################################
 
-    IF !DEF(TEXT_INC)
-TEXT_INC SET 1
+    IF !DEF(ROOM_MINIMAP_INC)
+ROOM_MINIMAP_INC SET 1
 
 ;###############################################################################
 
-; Offsets
-O_CURSOR        EQU 41
-O_SPACE         EQU 53
-O_BAR           EQU 54
-O_COPYRIGHT     EQU 55 ; Mapped to "%"
-O_COMMA         EQU 56
-O_DOT           EQU 57
-O_UNDERSCORE    EQU 58
-O_AT            EQU 59
-O_COLON         EQU 60
-O_ARROW         EQU 61 ; Mapped to "#"
-O_APOSTROPHE    EQU 62
-O_QUESTION      EQU 63
-O_EXCLAMATION   EQU 64
-O_NTILDE        EQU 65 ; La eñe, leches XD - Mapped to "~"
-O_ZERO          EQU 66
-O_A_UPPERCASE   EQU 76
-O_A_LOWERCASE   EQU 102
-O_NONE          EQU O_QUESTION
+MINIMAP_SELECTION_GENERAL_VIEW       EQU 0
+MINIMAP_SELECTION_ZONE_MAP           EQU 1
+MINIMAP_SELECTION_TRANSPORT_MAP      EQU 2
+MINIMAP_SELECTION_MAX                EQU 2
 
-;-------------------------------------------------------------------------------
-
-BCD2Tile : MACRO ; a = number from 0 to 9. Returns tile number in a
-    add     a,O_ZERO
-ENDM
+; TODO all maps in this list -> They need simulation routines!
+MINIMAP_SELECTION_POLICE             EQU 3
+MINIMAP_SELECTION_FIREMEN            EQU 4
+MINIMAP_SELECTION_HOSPITALS          EQU 5
+MINIMAP_SELECTION_SCHOOLS            EQU 6
+MINIMAP_SELECTION_HIGH_SCHOOLS       EQU 7
+MINIMAP_SELECTION_POWER_DISTRIBUTION EQU 8
+MINIMAP_SELECTION_TRAFFIC            EQU 9
+MINIMAP_SELECTION_POPULATION_DENSITY EQU 10
+MINIMAP_SELECTION_POLLUTION          EQU 11
+MINIMAP_SELECTION_HAPPINESS          EQU 12
 
 ;###############################################################################
 
-    ENDC ; TEXT_INC
+    ENDC ; ROOM_MINIMAP_INC
 
 ;###############################################################################
