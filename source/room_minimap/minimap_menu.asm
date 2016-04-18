@@ -85,41 +85,39 @@ MINIMAP_MENU_SPRITE_PALETTE:
 
 MinimapMenuRefresh::
 
-    ld      a,-8
+    ld      hl,minimap_menu_selection
+
+    ld      a,[hl]
+
+    add     a,a ; sla a
+    add     a,a ; sla a
+    add     a,a ; sla a
+    add     a,a ; sla a
+
+    sub     a,8+(16*4) ; half tile + displacement to the centre
     ld      [minimap_scroll_x],a
 
-    ld      b,((160-16)/2)
+    ld      e,((160-16)/2)+8
+    ;ld      a,MINIMAP_MENU_NUM_ICONS_BORDER
+    ;ld      a,MINIMAP_SELECTION_MAX-MINIMAP_MENU_NUM_ICONS_BORDER-1
+
+    ; Move sprite
+
+    push    de ; e = sprite X
+
+    ld      b,e
     ld      c,MINIMAP_SPRITE_BASE_Y
     ld      l,MINIMAP_SPRITE_OAM_INDEX+0
     call    sprite_set_xy ; b = x    c = y    l = sprite number
 
-    ld      b,8+((160-16)/2)
+    pop     de
+
+    ld      a,8
+    add     a,e
+    ld      b,a
     ld      c,MINIMAP_SPRITE_BASE_Y
     ld      l,MINIMAP_SPRITE_OAM_INDEX+1
     call    sprite_set_xy ; b = x    c = y    l = sprite number
-
-IF 0
-    ld      hl,minimap_menu_selection
-
-    ld      a,MINIMAP_MENU_NUM_ICONS_BORDER
-    cp      a,[hl]
-
-    ld      a,MINIMAP_SELECTION_MAX
-
-    ; Set sprite X
-    ld      a,16
-
-    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
-    call    sprite_get_base_pointer ; l = sprite / return = hl / destroys de
-
-    inc     hl
-    ld      [hl+],a
-    add     a,8
-    inc     hl
-    inc     hl
-    inc     hl
-    ld      [hl],a
-ENDC
 
     ret
 
