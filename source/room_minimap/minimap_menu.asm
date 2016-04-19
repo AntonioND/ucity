@@ -86,8 +86,42 @@ MINIMAP_MENU_SPRITE_PALETTE:
 MinimapMenuRefresh::
 
     ld      hl,minimap_menu_selection
-
     ld      a,[hl]
+
+    cp      a,MINIMAP_MENU_NUM_ICONS_BORDER
+    jr      nc,.not_left_border
+
+        ; Left border
+        sub     a,MINIMAP_MENU_NUM_ICONS_BORDER+1
+        swap    a ; a *= 16
+
+        ld      e,((160-16)/2)+8
+        add     a,e
+        ld      e,a
+
+        ld      a,MINIMAP_MENU_NUM_ICONS_BORDER
+        jr      .end_border_check
+.not_left_border:
+    cp      a,MINIMAP_SELECTION_MAX-MINIMAP_MENU_NUM_ICONS_BORDER+1
+    jr      c,.not_right_border
+
+        ; Right border
+        sub     a,MINIMAP_SELECTION_MAX-MINIMAP_MENU_NUM_ICONS_BORDER
+        swap    a ; a *= 16
+
+        ld      e,((160-16)/2)+8
+        add     a,e
+        ld      e,a
+
+        ld      a,MINIMAP_SELECTION_MAX-MINIMAP_MENU_NUM_ICONS_BORDER
+        jr      .end_border_check
+.not_right_border:
+
+        ; Center
+
+        ld      e,((160-16)/2)+8
+        ; Preserve a from before
+.end_border_check:
 
     add     a,a ; sla a
     add     a,a ; sla a
@@ -97,27 +131,35 @@ MinimapMenuRefresh::
     sub     a,8+(16*4) ; half tile + displacement to the centre
     ld      [minimap_scroll_x],a
 
-    ld      e,((160-16)/2)+8
-    ;ld      a,MINIMAP_MENU_NUM_ICONS_BORDER
-    ;ld      a,MINIMAP_SELECTION_MAX-MINIMAP_MENU_NUM_ICONS_BORDER-1
-
     ; Move sprite
 
     push    de ; e = sprite X
 
-    ld      b,e
-    ld      c,MINIMAP_SPRITE_BASE_Y
-    ld      l,MINIMAP_SPRITE_OAM_INDEX+0
-    call    sprite_set_xy ; b = x    c = y    l = sprite number
+        ld      b,e
+
+        ld      a,[minimap_cursor_y_offset]
+        ld      d,a
+        ld      a,MINIMAP_SPRITE_BASE_Y
+        sub     a,d
+        ld      c,a
+
+        ld      l,MINIMAP_SPRITE_OAM_INDEX+0
+        call    sprite_set_xy ; b = x    c = y    l = sprite number
 
     pop     de
 
-    ld      a,8
-    add     a,e
-    ld      b,a
-    ld      c,MINIMAP_SPRITE_BASE_Y
-    ld      l,MINIMAP_SPRITE_OAM_INDEX+1
-    call    sprite_set_xy ; b = x    c = y    l = sprite number
+        ld      a,8
+        add     a,e
+        ld      b,a
+
+        ld      a,[minimap_cursor_y_offset]
+        ld      d,a
+        ld      a,MINIMAP_SPRITE_BASE_Y
+        sub     a,d
+        ld      c,a
+
+        ld      l,MINIMAP_SPRITE_OAM_INDEX+1
+        call    sprite_set_xy ; b = x    c = y    l = sprite number
 
     ret
 
