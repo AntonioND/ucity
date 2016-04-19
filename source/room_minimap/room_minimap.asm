@@ -91,6 +91,12 @@ MinimapDrawSelectedMap::
         ret
 .not_transport_map:
 
+    cp      a,MINIMAP_SELECTION_POLICE
+    jr      nz,.not_police
+        LONG_CALL   MinimapDrawPolice
+        ret
+.not_police:
+
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
     call    APA_BufferClear

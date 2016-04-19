@@ -443,6 +443,7 @@ BUILDING_INFO_STRUCTS_ARRAY::
     BUILDING_ADD Data_Train, 1, 1, T_TRAIN_LR ; Tile doesn't matter
     BUILDING_ADD Data_PowerLines, 1, 1, T_POWER_LINES_LR ; Tile doesn't matter
 
+    ; Modify the corresponding file in 'simulation' folder if changing this:
     BUILDING_ADD Data_Police, 3, 3, T_POLICE
     BUILDING_ADD Data_Firemen, 3, 3, T_FIREMEN
     BUILDING_ADD Data_Hospital, 3, 3, T_HOSPITAL

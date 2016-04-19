@@ -90,7 +90,7 @@ TYPE_PORT               EQU 18
 TYPE_DOCK               EQU 19
 TYPE_POWER_PLANT        EQU 20
 
-TYPE_OTHER              EQU 21 ; Decoration
+TYPE_OTHER              EQU 21 ; Decoration (Unused)
 
 TYPE_NUMBER             EQU 32 ; Max. number. Upper 3 bits used as flags
 

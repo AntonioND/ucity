@@ -160,6 +160,7 @@ _CityMapFixBorderCoordinates: ; Arguments: e = x , d = y
 ;-------------------------------------------------------------------------------
 
 ; Returns type of the tile + extra flags -> register A
+;          - Address -> Register HL
 CityMapGetType:: ; Arguments: e = x , d = y
 
     ld      a,e
@@ -179,8 +180,39 @@ CityMapGetType:: ; Arguments: e = x , d = y
 
 ;-------------------------------------------------------------------------------
 
+; Returns: - Tile -> Register DE
+;          - Address -> Register HL
+CityMapGetTile:: ; Arguments: e = x , d = y
+
+    ld      a,e
+    or      a,d
+    and     a,128+64 ; ~63
+    ; if x or y less than 0 or higher than 63 expand map to sea or field
+    jp      nz,_CityMapFixBorderCoordinates ; returns from there
+
+    call    GetMapAddress
+
+    ld      a,BANK_CITY_MAP_TILES
+    ld      [rSVBK],a
+
+    ld      e,[hl]
+
+    ld      a,BANK_CITY_MAP_ATTR
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    rla
+    swap    a
+    and     a,1 ; get bank bit
+    ld      d,a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Returns: - Type of the tile + extra flags -> register A
 ;          - Tile -> Register DE
+;          - Address -> Register HL
 CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
 
     ld      a,e
