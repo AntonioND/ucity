@@ -34,14 +34,19 @@
 
 ;-------------------------------------------------------------------------------
 
-C_WHITE  EQU 0
-C_BLUE   EQU 1
-C_RED    EQU 2
-C_BLACK  EQU 3
-
 MINIMAP_POLICE_PALETTE:
-    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
-    DW (0<<10)|(0<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(15<<5)|(15<<0)
+    DW (31<<10)|(0<<5)|(0<<0), (15<<10)|(0<<5)|(0<<0)
+
+MINIMAP_TILE_COLORS:
+    DB 0,0,0,0
+    DB 0,1,1,0
+    DB 1,1,1,1
+    DB 1,2,2,1
+    DB 2,2,2,2
+    DB 2,3,3,2
+    DB 3,3,3,3
+    DB 3,3,3,3
 
 MINIMAP_POLICE_TITLE:
     DB O_A_UPPERCASE + "P" - "A"
@@ -66,6 +71,8 @@ MinimapDrawPolice::
 
     LONG_CALL   APA_PixelStreamStart
 
+    ld      hl,SCRATCH_RAM
+
     ld      d,0 ; d = y
 .loopy:
 
@@ -73,33 +80,41 @@ MinimapDrawPolice::
 .loopx:
 
         push    de ; (*)
+        push    hl
 
-            call    GetMapAddress ; e = x , d = y. returns address in hl
+            ; TODO Check if water?
 
             ld      a,BANK_SCRATCH_RAM
             ld      [rSVBK],a
 
             ld      a,[hl]
-            and     a,a
-            jr      z,.zero
+            srl     a
+            srl     a
+            srl     a
+            srl     a
+            srl     a ; Reduce from 8 to 3 bits
 
-            ld      a,3
-            ld      b,3
-            ld      c,3
-            ld      d,3
-            jr      .end
-.zero:
+            ld      de,MINIMAP_TILE_COLORS
+            ld      l,a
+            ld      h,0
+            add     hl,hl
+            add     hl,hl ; a *= 4
+            add     hl,de
 
-            ld      a,0
-            ld      b,0
-            ld      c,0
-            ld      d,0
-.end:
+            ld      a,[hl+]
+            ld      b,[hl]
+            inc     hl
+            ld      c,[hl]
+            inc     hl
+            ld      d,[hl]
 
             call    APA_SetColors ; a,b,c,d = color (0 to 3)
             LONG_CALL   APA_PixelStreamPlot2x2
 
+        pop     hl
         pop     de ; (*)
+
+        inc     hl
 
         inc     e
         bit     6,e
