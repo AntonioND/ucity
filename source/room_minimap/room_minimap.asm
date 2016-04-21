@@ -97,6 +97,18 @@ MinimapDrawSelectedMap::
         ret
 .not_police:
 
+    cp      a,MINIMAP_SELECTION_FIREMEN
+    jr      nz,.not_firemen
+        LONG_CALL   MinimapDrawFiremen
+        ret
+.not_firemen:
+
+    cp      a,MINIMAP_SELECTION_HOSPITALS
+    jr      nz,.not_hospitals
+        LONG_CALL   MinimapDrawHospitals
+        ret
+.not_hospitals:
+
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
     call    APA_BufferClear
