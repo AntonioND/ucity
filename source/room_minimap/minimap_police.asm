@@ -27,6 +27,7 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "text.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -64,7 +65,8 @@ MinimapDrawPolice::
     ; Simulate and get data!
     ; ----------------------
 
-    LONG_CALL   Simulation_Police
+    ld      bc,T_POLICE+4 ; Central tile. 4=3+1 (3x3 building)
+    LONG_CALL_ARGS  Simulation_Services
 
     ; Draw map
     ; --------

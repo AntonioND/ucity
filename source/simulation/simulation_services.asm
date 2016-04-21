@@ -26,15 +26,14 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
-    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
-    SECTION "Simulation Police",ROMX
+    SECTION "Simulation Services Functions",ROMX
 
 ;-------------------------------------------------------------------------------
 
-POLICE_INFLUENCE_MASK: ; 32x32
+SERVICES_INFLUENCE_MASK: ; 32x32
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$04,$0B,$10,$14,$17
@@ -100,12 +99,12 @@ POLICE_INFLUENCE_MASK: ; 32x32
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$04,$0B,$10,$14,$17
     DB $18,$17,$14,$10,$0B,$04,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
-POLICE_MASK_CENTER_X EQU 16
-POLICE_MASK_CENTER_Y EQU 16
+SERVICES_MASK_CENTER_X EQU 16
+SERVICES_MASK_CENTER_Y EQU 16
 
 ;-------------------------------------------------------------------------------
 
-Simulation_PoliceApplyMask: ; e=x d=y (center)
+Simulation_ServicesApplyMask: ; e=x d=y (center)
 
     add     sp,-1
 
@@ -115,11 +114,11 @@ Simulation_PoliceApplyMask: ; e=x d=y (center)
     ; Get top left corner
 
     ld      a,e
-    sub     a,POLICE_MASK_CENTER_X
+    sub     a,SERVICES_MASK_CENTER_X
     ld      e,a
 
     ld      a,d
-    sub     a,POLICE_MASK_CENTER_Y
+    sub     a,SERVICES_MASK_CENTER_Y
     ld      d,a
 
     ld      hl,sp+0
@@ -157,7 +156,7 @@ Simulation_PoliceApplyMask: ; e=x d=y (center)
             ld      a,c
             add     a,l ; y*32+x
             ld      l,a
-            ld      bc,POLICE_INFLUENCE_MASK
+            ld      bc,SERVICES_INFLUENCE_MASK
             add     hl,bc ; MASK + 32*y + x
 
             ld      a,[hl] ; new val
@@ -198,9 +197,18 @@ Simulation_PoliceApplyMask: ; e=x d=y (center)
 
 ;-------------------------------------------------------------------------------
 
-Simulation_Police:: ; Output data to WRAMX bank BANK_SCRATCH_RAM
+; Output data to WRAMX bank BANK_SCRATCH_RAM
+Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
+
+    add     sp,-2
+
+    ld      hl,sp+0
+    ld      [hl],b
+    inc     hl
+    ld      [hl],c
 
     ; Clean
+    ; -----
 
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
@@ -219,27 +227,28 @@ Simulation_Police:: ; Output data to WRAMX bank BANK_SCRATCH_RAM
 .loopx:
         push    de
 
-        call    CityMapGetTile ; e = x , d = y. Returns tile = DE, address = HL
+        call    CityMapGetTile ; e = x , d = y. Returns tile = de
 
-        ld      a,((T_POLICE+4)>>8) & $FF ; Central tile. 4=3+1 (3x3 building)
+        ld      hl,sp+2
+        ld      a,[hl+]
         cp      a,d
-        jr      nz,.not_police_center
-        ld      a,(T_POLICE+4) & $FF
+        jr      nz,.not_tile
+        ld      a,[hl]
         cp      a,e
-        jr      nz,.not_police_center
+        jr      nz,.not_tile
 
-            ; Police center tile
-            ; ------------------
+            ; Desired tile tile
+            ; -----------------
 
-            ; Check if there is power in this station
+            ; Check if there is power
 
             ; TODO - Get info from "tile OK flags" map to check power
 
             pop     de
             push    de
-            call    Simulation_PoliceApplyMask
+            call    Simulation_ServicesApplyMask
 
-.not_police_center:
+.not_tile:
 
         pop     de
 
@@ -252,6 +261,8 @@ Simulation_Police:: ; Output data to WRAMX bank BANK_SCRATCH_RAM
     ld      a,64
     cp      a,d
     jr      nz,.loopy
+
+    add     sp,+2
 
     ret
 
