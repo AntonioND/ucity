@@ -132,13 +132,14 @@ Simulation_PoliceApplyMask: ; e=x d=y (center)
         ld      e,[hl] ; restore left x
 
 .loopx:
+
+        ld      a,e
+        or      a,d
+        and     a,128+64 ; ~63
+        jr      nz,.skip
+
         push    bc
         push    de
-
-            ld      a,e
-            or      a,d
-            and     a,128+64 ; ~63
-            jr      nz,.skip
 
             push    bc
             call    GetMapAddress ; e = x , d = y
@@ -157,9 +158,11 @@ Simulation_PoliceApplyMask: ; e=x d=y (center)
             add     a,l ; y*32+x
             ld      l,a
             ld      bc,POLICE_INFLUENCE_MASK
-            add     hl,bc
+            add     hl,bc ; MASK + 32*y + x
 
             ld      a,[hl] ; new val
+            and     a,a
+            jr      z,.dont_add
 
             ; Add the previous value
             ld      b,a
@@ -168,12 +171,14 @@ Simulation_PoliceApplyMask: ; e=x d=y (center)
             jr      nc,.not_saturated
             ld      a,$FF ; saturate
 .not_saturated:
-
             ld      [de],a ; save
 
-.skip:
+.dont_add:
+
         pop     de
         pop     bc
+
+.skip:
 
         inc     e
         inc     c
