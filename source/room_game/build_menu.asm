@@ -538,15 +538,17 @@ BuildSelectMenuHide::
     and     a,a
     ret     z ; return if not shown
 
-    xor     a,a
-    ld      [menu_active],a
-
     ; Clear all sprites
 
     xor     a,a
     ld      hl,OAM_Copy
     ld      b,4*40
     call    memset_fast
+
+    call    wait_vbl
+
+    xor     a,a
+    ld      [menu_active],a
 
     ld      a,LCDCF_OBJON
     ld      [menu_overlay_sprites_active],a
