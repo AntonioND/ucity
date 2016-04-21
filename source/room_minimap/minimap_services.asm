@@ -45,33 +45,7 @@ MINIMAP_TILE_COLORS: ; Common to all services
     DB 3,3,3,3
     DB 3,3,3,3
 
-;-------------------------------------------------------------------------------
-
-MINIMAP_POLICE_PALETTE:
-    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(15<<5)|(15<<0)
-    DW (31<<10)|(0<<5)|(0<<0), (15<<10)|(0<<5)|(0<<0)
-
-MINIMAP_POLICE_TITLE:
-    DB O_A_UPPERCASE + "P" - "A"
-    DB O_A_LOWERCASE + "o" - "a"
-    DB O_A_LOWERCASE + "l" - "a"
-    DB O_A_LOWERCASE + "i" - "a"
-    DB O_A_LOWERCASE + "c" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB 0
-
-;-------------------------------------------------------------------------------
-
-MinimapDrawPolice::
-
-    ; Simulate and get data!
-    ; ----------------------
-
-    ld      bc,T_POLICE_CENTER
-    LONG_CALL_ARGS  Simulation_Services
-
-    ; Draw map
-    ; --------
+MinimapServicesCommonDrawMap:
 
     LONG_CALL   APA_PixelStreamStart
 
@@ -128,7 +102,36 @@ MinimapDrawPolice::
     bit     6,d
     jp      z,.loopy
 
-    ; Set White
+    ret
+
+;-------------------------------------------------------------------------------
+
+MINIMAP_POLICE_PALETTE:
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(15<<5)|(15<<0)
+    DW (31<<10)|(0<<5)|(0<<0), (15<<10)|(0<<5)|(0<<0)
+
+MINIMAP_POLICE_TITLE:
+    DB O_A_UPPERCASE + "P" - "A"
+    DB O_A_LOWERCASE + "o" - "a"
+    DB O_A_LOWERCASE + "l" - "a"
+    DB O_A_LOWERCASE + "i" - "a"
+    DB O_A_LOWERCASE + "c" - "a"
+    DB O_A_LOWERCASE + "e" - "a"
+    DB 0
+
+MinimapDrawPolice::
+
+    ; Simulate and get data!
+    ; ----------------------
+
+    ld      bc,T_POLICE_CENTER
+    LONG_CALL_ARGS  Simulation_Services
+
+    ; Draw map
+    ; --------
+    call    MinimapServicesCommonDrawMap
+
+    ; Set screen white
     call    MinimapSetDefaultPalette
 
     ; Refresh screen with backbuffer data
@@ -160,8 +163,6 @@ MINIMAP_FIREMEN_TITLE:
     DB O_A_LOWERCASE + "n" - "a"
     DB 0
 
-;-------------------------------------------------------------------------------
-
 MinimapDrawFiremen::
 
     ; Simulate and get data!
@@ -172,63 +173,9 @@ MinimapDrawFiremen::
 
     ; Draw map
     ; --------
+    call    MinimapServicesCommonDrawMap
 
-    LONG_CALL   APA_PixelStreamStart
-
-    ld      hl,SCRATCH_RAM
-
-    ld      d,0 ; d = y
-.loopy:
-
-        ld      e,0 ; e = x
-.loopx:
-
-        push    de ; (*)
-        push    hl
-
-            ; TODO Check if water?
-
-            ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
-
-            ld      a,[hl]
-            srl     a
-            srl     a
-            srl     a
-            srl     a
-            srl     a ; Reduce from 8 to 3 bits
-
-            ld      de,MINIMAP_TILE_COLORS
-            ld      l,a
-            ld      h,0
-            add     hl,hl
-            add     hl,hl ; a *= 4
-            add     hl,de
-
-            ld      a,[hl+]
-            ld      b,[hl]
-            inc     hl
-            ld      c,[hl]
-            inc     hl
-            ld      d,[hl]
-
-            call    APA_SetColors ; a,b,c,d = color (0 to 3)
-            LONG_CALL   APA_PixelStreamPlot2x2
-
-        pop     hl
-        pop     de ; (*)
-
-        inc     hl
-
-        inc     e
-        bit     6,e
-        jp      z,.loopx
-
-    inc     d
-    bit     6,d
-    jp      z,.loopy
-
-    ; Set White
+    ; Set screen white
     call    MinimapSetDefaultPalette
 
     ; Refresh screen with backbuffer data
@@ -262,8 +209,6 @@ MINIMAP_HOSPITALS_TITLE:
     DB O_A_LOWERCASE + "s" - "a"
     DB 0
 
-;-------------------------------------------------------------------------------
-
 MinimapDrawHospitals::
 
     ; Simulate and get data!
@@ -274,63 +219,9 @@ MinimapDrawHospitals::
 
     ; Draw map
     ; --------
+    call    MinimapServicesCommonDrawMap
 
-    LONG_CALL   APA_PixelStreamStart
-
-    ld      hl,SCRATCH_RAM
-
-    ld      d,0 ; d = y
-.loopy:
-
-        ld      e,0 ; e = x
-.loopx:
-
-        push    de ; (*)
-        push    hl
-
-            ; TODO Check if water?
-
-            ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
-
-            ld      a,[hl]
-            srl     a
-            srl     a
-            srl     a
-            srl     a
-            srl     a ; Reduce from 8 to 3 bits
-
-            ld      de,MINIMAP_TILE_COLORS
-            ld      l,a
-            ld      h,0
-            add     hl,hl
-            add     hl,hl ; a *= 4
-            add     hl,de
-
-            ld      a,[hl+]
-            ld      b,[hl]
-            inc     hl
-            ld      c,[hl]
-            inc     hl
-            ld      d,[hl]
-
-            call    APA_SetColors ; a,b,c,d = color (0 to 3)
-            LONG_CALL   APA_PixelStreamPlot2x2
-
-        pop     hl
-        pop     de ; (*)
-
-        inc     hl
-
-        inc     e
-        bit     6,e
-        jp      z,.loopx
-
-    inc     d
-    bit     6,d
-    jp      z,.loopy
-
-    ; Set White
+    ; Set screen white
     call    MinimapSetDefaultPalette
 
     ; Refresh screen with backbuffer data
