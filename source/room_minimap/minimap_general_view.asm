@@ -67,19 +67,7 @@ MINIMAP_GENERAL_VIEW_TYPE_COLOR_ARRAY:
     DB C_GREEN,C_BLACK,C_BLACK,C_GREEN ; TYPE_POWER_PLANT
 
 MINIMAP_GENERAL_VIEW_TITLE:
-    DB O_A_UPPERCASE + "G" - "A"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "n" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "r" - "a"
-    DB O_A_LOWERCASE + "a" - "a"
-    DB O_A_LOWERCASE + "l" - "a"
-    DB O_SPACE
-    DB O_A_UPPERCASE + "V" - "A"
-    DB O_A_LOWERCASE + "i" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "w" - "a"
-    DB 0
+    DB "General View",0
 
 ;-------------------------------------------------------------------------------
 

@@ -111,13 +111,7 @@ MINIMAP_POLICE_PALETTE:
     DW (31<<10)|(0<<5)|(0<<0), (15<<10)|(0<<5)|(0<<0)
 
 MINIMAP_POLICE_TITLE:
-    DB O_A_UPPERCASE + "P" - "A"
-    DB O_A_LOWERCASE + "o" - "a"
-    DB O_A_LOWERCASE + "l" - "a"
-    DB O_A_LOWERCASE + "i" - "a"
-    DB O_A_LOWERCASE + "c" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB 0
+    DB "Police",0
 
 MinimapDrawPolice::
 
@@ -154,14 +148,7 @@ MINIMAP_FIREMEN_PALETTE:
     DW (0<<10)|(15<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
 MINIMAP_FIREMEN_TITLE:
-    DB O_A_UPPERCASE + "F" - "A"
-    DB O_A_LOWERCASE + "i" - "a"
-    DB O_A_LOWERCASE + "r" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "m" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_A_LOWERCASE + "n" - "a"
-    DB 0
+    DB "Firemen",0
 
 MinimapDrawFiremen::
 
@@ -198,16 +185,7 @@ MINIMAP_HOSPITALS_PALETTE:
     DW (15<<10)|(31<<5)|(0<<0), (0<<10)|(31<<5)|(0<<0)
 
 MINIMAP_HOSPITALS_TITLE:
-    DB O_A_UPPERCASE + "H" - "A"
-    DB O_A_LOWERCASE + "o" - "a"
-    DB O_A_LOWERCASE + "s" - "a"
-    DB O_A_LOWERCASE + "p" - "a"
-    DB O_A_LOWERCASE + "i" - "a"
-    DB O_A_LOWERCASE + "t" - "a"
-    DB O_A_LOWERCASE + "a" - "a"
-    DB O_A_LOWERCASE + "l" - "a"
-    DB O_A_LOWERCASE + "s" - "a"
-    DB 0
+    DB "Hospitals",0
 
 MinimapDrawHospitals::
 

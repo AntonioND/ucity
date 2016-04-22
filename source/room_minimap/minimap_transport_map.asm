@@ -67,20 +67,7 @@ MINIMAP_TRANSPORT_MAP_TYPE_COLOR_ARRAY:
     DB C_BLUE,  C_BLUE,  C_BLUE,  C_BLUE  ; TYPE_POWER_PLANT
 
 MINIMAP_TRANSPORT_MAP_TITLE:
-    DB O_A_UPPERCASE + "T" - "A"
-    DB O_A_LOWERCASE + "r" - "a"
-    DB O_A_LOWERCASE + "a" - "a"
-    DB O_A_LOWERCASE + "n" - "a"
-    DB O_A_LOWERCASE + "s" - "a"
-    DB O_A_LOWERCASE + "p" - "a"
-    DB O_A_LOWERCASE + "o" - "a"
-    DB O_A_LOWERCASE + "r" - "a"
-    DB O_A_LOWERCASE + "t" - "a"
-    DB O_SPACE
-    DB O_A_UPPERCASE + "M" - "A"
-    DB O_A_LOWERCASE + "a" - "a"
-    DB O_A_LOWERCASE + "p" - "a"
-    DB 0
+    DB "Transport Map",0
 
 ;-------------------------------------------------------------------------------
 

@@ -67,15 +67,7 @@ MINIMAP_ZONE_MAP_TYPE_COLOR_ARRAY:
     DB C_GREEN, C_YELLOW,C_BLUE,  C_GREEN  ; TYPE_POWER_PLANT
 
 MINIMAP_ZONE_MAP_TITLE:
-    DB O_A_UPPERCASE + "Z" - "A"
-    DB O_A_LOWERCASE + "o" - "a"
-    DB O_A_LOWERCASE + "n" - "a"
-    DB O_A_LOWERCASE + "e" - "a"
-    DB O_SPACE
-    DB O_A_UPPERCASE + "M" - "A"
-    DB O_A_LOWERCASE + "a" - "a"
-    DB O_A_LOWERCASE + "p" - "a"
-    DB 0
+    DB "Zone Map",0
 
 ;-------------------------------------------------------------------------------
 
