@@ -105,6 +105,179 @@ SERVICES_INFLUENCE_MASK: ; 32x32
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$04,$0B,$10,$14,$17
     DB $18,$17,$14,$10,$0B,$04,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
+;-------------------------------------------------------------------------------
+
+Simulation_ServicesApplyMask: ; e=x d=y (center)
+
+    add     sp,-1
+
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
+    ; Get top left corner
+
+    ld      a,e
+    sub     a,SERVICES_MASK_CENTER_X
+    ld      e,a
+
+    ld      a,d
+    sub     a,SERVICES_MASK_CENTER_Y
+    ld      d,a
+
+    ld      hl,sp+0
+    ld      [hl],e ; save left X
+
+    ld      b,0 ; y
+.loopy:
+        ld      c,0 ; x
+        ld      hl,sp+0
+        ld      e,[hl] ; restore left x
+
+.loopx:
+
+        ld      a,e
+        or      a,d
+        and     a,128+64 ; ~63
+        jr      nz,.skip
+
+        push    bc
+        push    de
+
+            push    bc
+            call    GetMapAddress ; e = x , d = y
+            pop     bc
+
+            LD_DE_HL ; de = destination
+
+            ld      l,b
+            ld      h,0
+            add     hl,hl
+            add     hl,hl
+            add     hl,hl
+            add     hl,hl
+            add     hl,hl ; b<<5 = b*32 (SERVICES_MASK_WIDTH)
+IF SERVICES_MASK_WIDTH != 32
+    FAIL "Fix this."
+ENDC
+            ld      a,c
+            add     a,l ; y*32+x
+            ld      l,a
+            ld      bc,SERVICES_INFLUENCE_MASK
+            add     hl,bc ; MASK + 32*y + x
+
+            ld      a,[hl] ; new val
+            and     a,a
+            jr      z,.dont_add
+
+            ; Add the previous value
+            ld      b,a
+            ld      a,[de]
+            add     a,b
+            jr      nc,.not_saturated
+            ld      a,$FF ; saturate
+.not_saturated:
+            ld      [de],a ; save
+
+.dont_add:
+
+        pop     de
+        pop     bc
+
+.skip:
+
+        inc     e
+        inc     c
+        ld      a,SERVICES_MASK_WIDTH
+        cp      a,c
+        jr      nz,.loopx
+
+    inc     d
+    inc     b
+    ld      a,SERVICES_MASK_HEIGHT
+    cp      a,b
+    jr      nz,.loopy
+
+    add     sp,+1
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Output data to WRAMX bank BANK_SCRATCH_RAM
+Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
+
+    add     sp,-2
+
+    ld      hl,sp+0
+    ld      [hl],b
+    inc     hl
+    ld      [hl],c
+
+    ; Clean
+    ; -----
+
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
+    ld      bc,$1000
+    ld      d,0
+    ld      hl,SCRATCH_RAM
+    call    memset
+
+    ; For each tile check if it is the central tile of a police station
+    ; -----------------------------------------------------------------
+
+    ld      d,0 ; y
+.loopy:
+        ld      e,0 ; x
+.loopx:
+        push    de
+
+        call    CityMapGetTile ; e = x , d = y. Returns tile = de
+
+        ld      hl,sp+2
+        ld      a,[hl+]
+        cp      a,d
+        jr      nz,.not_tile
+        ld      a,[hl]
+        cp      a,e
+        jr      nz,.not_tile
+
+            ; Desired tile tile
+            ; -----------------
+
+            ; Check if there is power
+
+            ; TODO - Get info from "tile OK flags" map to check power
+
+            pop     de
+            push    de
+            call    Simulation_ServicesApplyMask
+
+.not_tile:
+
+        pop     de
+
+        inc     e
+        ld      a,CITY_MAP_WIDTH
+        cp      a,e
+        jr      nz,.loopx
+
+    inc     d
+    ld      a,CITY_MAP_HEIGHT
+    cp      a,d
+    jr      nz,.loopy
+
+    add     sp,+2
+
+    ret
+
+;###############################################################################
+
+    SECTION "Simulation Big Services Functions",ROMX
+
+;-------------------------------------------------------------------------------
+
 SERVICES_MASK_BIG_WIDTH  EQU 64
 SERVICES_MASK_BIG_HEIGHT EQU 64
 
@@ -369,174 +542,7 @@ SERVICES_INFLUENCE_MASK_BIG: ; 64x64
     DB $0C,$0B,$0B,$0A,$08,$07,$05,$02,$00,$00,$00,$00,$00,$00,$00,$00
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
-;###############################################################################
-
-Simulation_ServicesApplyMask: ; e=x d=y (center)
-
-    add     sp,-1
-
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
-
-    ; Get top left corner
-
-    ld      a,e
-    sub     a,SERVICES_MASK_CENTER_X
-    ld      e,a
-
-    ld      a,d
-    sub     a,SERVICES_MASK_CENTER_Y
-    ld      d,a
-
-    ld      hl,sp+0
-    ld      [hl],e ; save left X
-
-    ld      b,0 ; y
-.loopy:
-        ld      c,0 ; x
-        ld      hl,sp+0
-        ld      e,[hl] ; restore left x
-
-.loopx:
-
-        ld      a,e
-        or      a,d
-        and     a,128+64 ; ~63
-        jr      nz,.skip
-
-        push    bc
-        push    de
-
-            push    bc
-            call    GetMapAddress ; e = x , d = y
-            pop     bc
-
-            LD_DE_HL ; de = destination
-
-            ld      l,b
-            ld      h,0
-            add     hl,hl
-            add     hl,hl
-            add     hl,hl
-            add     hl,hl
-            add     hl,hl ; b<<5 = b*32 (SERVICES_MASK_WIDTH)
-IF SERVICES_MASK_WIDTH != 32
-    FAIL "Fix this."
-ENDC
-            ld      a,c
-            add     a,l ; y*32+x
-            ld      l,a
-            ld      bc,SERVICES_INFLUENCE_MASK
-            add     hl,bc ; MASK + 32*y + x
-
-            ld      a,[hl] ; new val
-            and     a,a
-            jr      z,.dont_add
-
-            ; Add the previous value
-            ld      b,a
-            ld      a,[de]
-            add     a,b
-            jr      nc,.not_saturated
-            ld      a,$FF ; saturate
-.not_saturated:
-            ld      [de],a ; save
-
-.dont_add:
-
-        pop     de
-        pop     bc
-
-.skip:
-
-        inc     e
-        inc     c
-        ld      a,SERVICES_MASK_WIDTH
-        cp      a,c
-        jr      nz,.loopx
-
-    inc     d
-    inc     b
-    ld      a,SERVICES_MASK_HEIGHT
-    cp      a,b
-    jr      nz,.loopy
-
-    add     sp,+1
-
-    ret
-
 ;-------------------------------------------------------------------------------
-
-; Output data to WRAMX bank BANK_SCRATCH_RAM
-Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
-
-    add     sp,-2
-
-    ld      hl,sp+0
-    ld      [hl],b
-    inc     hl
-    ld      [hl],c
-
-    ; Clean
-    ; -----
-
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
-
-    ld      bc,$1000
-    ld      d,0
-    ld      hl,SCRATCH_RAM
-    call    memset
-
-    ; For each tile check if it is the central tile of a police station
-    ; -----------------------------------------------------------------
-
-    ld      d,0 ; y
-.loopy:
-        ld      e,0 ; x
-.loopx:
-        push    de
-
-        call    CityMapGetTile ; e = x , d = y. Returns tile = de
-
-        ld      hl,sp+2
-        ld      a,[hl+]
-        cp      a,d
-        jr      nz,.not_tile
-        ld      a,[hl]
-        cp      a,e
-        jr      nz,.not_tile
-
-            ; Desired tile tile
-            ; -----------------
-
-            ; Check if there is power
-
-            ; TODO - Get info from "tile OK flags" map to check power
-
-            pop     de
-            push    de
-            call    Simulation_ServicesApplyMaskBig
-
-.not_tile:
-
-        pop     de
-
-        inc     e
-        ld      a,CITY_MAP_WIDTH
-        cp      a,e
-        jr      nz,.loopx
-
-    inc     d
-    ld      a,CITY_MAP_HEIGHT
-    cp      a,d
-    jr      nz,.loopy
-
-    add     sp,+2
-
-    ret
-
-;###############################################################################
 
 Simulation_ServicesApplyMaskBig: ; e=x d=y (center)
 
@@ -636,7 +642,7 @@ ENDC
 ;-------------------------------------------------------------------------------
 
 ; Output data to WRAMX bank BANK_SCRATCH_RAM
-Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
+Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
 
     add     sp,-2
 
@@ -684,7 +690,7 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
 
             pop     de
             push    de
-            call    Simulation_ServicesApplyMask
+            call    Simulation_ServicesApplyMaskBig
 
 .not_tile:
 
