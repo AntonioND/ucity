@@ -252,4 +252,41 @@ MinimapDrawSchools::
 
     ret
 
+;-------------------------------------------------------------------------------
+
+MINIMAP_HIGH_SCHOOLS_PALETTE:
+    DW (31<<10)|(31<<5)|(31<<0), (15<<10)|(31<<5)|(31<<0)
+    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(15<<5)|(15<<0)
+
+MINIMAP_HIGH_SCHOOLS_TITLE:
+    DB "High Schools",0
+
+MinimapDrawHighSchools::
+
+    ; Simulate and get data!
+    ; ----------------------
+
+    ld      bc,T_HIGH_SCHOOL_CENTER
+    LONG_CALL_ARGS  Simulation_ServicesBig
+
+    ; Draw map
+    ; --------
+    call    MinimapServicesCommonDrawMap
+
+    ; Set screen white
+    call    MinimapSetDefaultPalette
+
+    ; Refresh screen with backbuffer data
+    call    APA_BufferUpdate
+
+    ; Load palette
+    ld      hl,MINIMAP_HIGH_SCHOOLS_PALETTE
+    call    APA_LoadPalette
+
+    ; Draw title
+    ld      hl,MINIMAP_HIGH_SCHOOLS_TITLE
+    call    RoomMinimapDrawTitle
+
+    ret
+
 ;###############################################################################

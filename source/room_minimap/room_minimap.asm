@@ -115,6 +115,12 @@ MinimapDrawSelectedMap::
         ret
 .not_schools:
 
+    cp      a,MINIMAP_SELECTION_HIGH_SCHOOLS
+    jr      nz,.not_high_schools
+        LONG_CALL   MinimapDrawHighSchools
+        ret
+.not_high_schools:
+
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
     call    APA_BufferClear
