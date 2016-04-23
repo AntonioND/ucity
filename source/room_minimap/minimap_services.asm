@@ -182,7 +182,7 @@ MinimapDrawFiremen::
 
 MINIMAP_HOSPITALS_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(31<<5)|(0<<0)
-    DW (15<<10)|(31<<5)|(0<<0), (0<<10)|(31<<5)|(0<<0)
+    DW (0<<10)|(31<<5)|(0<<0), (0<<10)|(15<<5)|(0<<0)
 
 MINIMAP_HOSPITALS_TITLE:
     DB "Hospitals",0
@@ -211,6 +211,43 @@ MinimapDrawHospitals::
 
     ; Draw title
     ld      hl,MINIMAP_HOSPITALS_TITLE
+    call    RoomMinimapDrawTitle
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MINIMAP_SCHOOLS_PALETTE:
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(15<<5)|(31<<0)
+    DW (31<<10)|(0<<5)|(31<<0), (15<<10)|(0<<5)|(15<<0)
+
+MINIMAP_SCHOOLS_TITLE:
+    DB "Schools",0
+
+MinimapDrawSchools::
+
+    ; Simulate and get data!
+    ; ----------------------
+
+    ld      bc,T_SCHOOL_CENTER
+    LONG_CALL_ARGS  Simulation_Services
+
+    ; Draw map
+    ; --------
+    call    MinimapServicesCommonDrawMap
+
+    ; Set screen white
+    call    MinimapSetDefaultPalette
+
+    ; Refresh screen with backbuffer data
+    call    APA_BufferUpdate
+
+    ; Load palette
+    ld      hl,MINIMAP_SCHOOLS_PALETTE
+    call    APA_LoadPalette
+
+    ; Draw title
+    ld      hl,MINIMAP_SCHOOLS_TITLE
     call    RoomMinimapDrawTitle
 
     ret
