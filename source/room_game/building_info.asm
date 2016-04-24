@@ -582,8 +582,9 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-    BUILDING_SET_INDEX 0
 BUILDING_INFO_POINTERS_ARRAY:: ; Pointers to structs. Indexes are B_Xxxxxx
+    BUILDING_SET_INDEX 0
+
     BUILDING_ADD_ENTRY B_Residential, Data_Residential
     BUILDING_ADD_ENTRY B_Commercial, Data_Commercial
     BUILDING_ADD_ENTRY B_Industrial, Data_Industrial
