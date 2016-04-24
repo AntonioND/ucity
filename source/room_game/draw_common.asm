@@ -243,6 +243,27 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
     ld      a,[hl]
 
     ret
+;-------------------------------------------------------------------------------
+
+; Note: This doesn't check bounds or anything!
+; Returns: - Tile -> Register DE
+CityMapGetTileAtAddress:: ; Arguments: hl = address
+
+    ld      a,BANK_CITY_MAP_TILES
+    ld      [rSVBK],a
+
+    ld      e,[hl]
+
+    ld      a,BANK_CITY_MAP_ATTR
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    rla
+    swap    a
+    and     a,1 ; get bank bit
+    ld      d,a
+
+    ret
 
 ;-------------------------------------------------------------------------------
 

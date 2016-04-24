@@ -121,6 +121,16 @@ MinimapDrawSelectedMap::
         ret
 .not_high_schools:
 
+
+
+    cp      a,MINIMAP_SELECTION_POPULATION_DENSITY
+    jr      nz,.not_population_density
+        LONG_CALL   MinimapDrawPopulationDensityMap
+        ret
+.not_population_density:
+
+
+
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
     call    APA_BufferClear

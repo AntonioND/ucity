@@ -27,6 +27,7 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "tileset_info.inc"
+    INCLUDE "building_density.inc"
 
 ;###############################################################################
 
@@ -42,13 +43,17 @@ T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost
         FAIL "ERROR : building_density.asm : Tile already in use!"
     ENDC
 
+    ; Fill previous building
     IF (\1) > CURTILE ; The first call both are 0 and this has to be skipped
-        REPT (\1) - CURTILE ; Fill previous building
+        REPT (\1) - CURTILE
             DB POPULATION, ENERGY_COST
         ENDR
     ENDC
 
-CURTILE SET (\1)
+    ; Set parameters for this building
+CURTILE     SET (\1)
+POPULATION  SET (\2)
+ENERGY_COST SET (\3)
 
 ENDM
 
@@ -58,7 +63,11 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-TILE_DENSITY: ; 512 entries
+IF CITY_TILE_DENSITY_ELEMENT_SIZE != 2
+    FAIL "Fix this!"
+ENDC
+
+CITY_TILE_DENSITY:: ; 512 entries
 
     T_ADD   0, 0,0 ; Start array (set to 0 density the roads, terrains, etc)
 
@@ -92,50 +101,50 @@ TILE_DENSITY: ; 512 entries
     T_ADD   T_POWER_PLANT_FUSION,  0,0
 
     T_ADD   T_RESIDENTIAL_S1_A, 1,1
-    T_ADD   T_RESIDENTIAL_S1_B, 1,1
-    T_ADD   T_RESIDENTIAL_S1_C, 1,1
-    T_ADD   T_RESIDENTIAL_S1_D, 1,1
+    T_ADD   T_RESIDENTIAL_S1_B, 2,1
+    T_ADD   T_RESIDENTIAL_S1_C, 2,1
+    T_ADD   T_RESIDENTIAL_S1_D, 3,1
 
-    T_ADD   T_RESIDENTIAL_S2_A, 3,3
-    T_ADD   T_RESIDENTIAL_S2_B, 3,3
-    T_ADD   T_RESIDENTIAL_S2_C, 3,3
-    T_ADD   T_RESIDENTIAL_S2_D, 3,3
+    T_ADD   T_RESIDENTIAL_S2_A, 7,3
+    T_ADD   T_RESIDENTIAL_S2_B, 7,3
+    T_ADD   T_RESIDENTIAL_S2_C, 8,3
+    T_ADD   T_RESIDENTIAL_S2_D, 9,3
 
-    T_ADD   T_RESIDENTIAL_S3_A, 5,5
-    T_ADD   T_RESIDENTIAL_S3_B, 5,5
-    T_ADD   T_RESIDENTIAL_S3_C, 5,5
-    T_ADD   T_RESIDENTIAL_S3_D, 5,5
+    T_ADD   T_RESIDENTIAL_S3_A, 12,5
+    T_ADD   T_RESIDENTIAL_S3_B, 14,5
+    T_ADD   T_RESIDENTIAL_S3_C, 15,5
+    T_ADD   T_RESIDENTIAL_S3_D, 15,5
 
     T_ADD   T_COMMERCIAL_S1_A, 1,1
-    T_ADD   T_COMMERCIAL_S1_B, 1,1
-    T_ADD   T_COMMERCIAL_S1_C, 1,1
-    T_ADD   T_COMMERCIAL_S1_D, 1,1
+    T_ADD   T_COMMERCIAL_S1_B, 2,1
+    T_ADD   T_COMMERCIAL_S1_C, 2,1
+    T_ADD   T_COMMERCIAL_S1_D, 3,1
 
-    T_ADD   T_COMMERCIAL_S2_A, 3,3
-    T_ADD   T_COMMERCIAL_S2_B, 3,3
-    T_ADD   T_COMMERCIAL_S2_C, 3,3
-    T_ADD   T_COMMERCIAL_S2_D, 3,3
+    T_ADD   T_COMMERCIAL_S2_A, 4,3
+    T_ADD   T_COMMERCIAL_S2_B, 5,3
+    T_ADD   T_COMMERCIAL_S2_C, 6,3
+    T_ADD   T_COMMERCIAL_S2_D, 7,3
 
-    T_ADD   T_COMMERCIAL_S3_A, 5,5
-    T_ADD   T_COMMERCIAL_S3_B, 5,5
-    T_ADD   T_COMMERCIAL_S3_C, 5,5
-    T_ADD   T_COMMERCIAL_S3_D, 5,5
+    T_ADD   T_COMMERCIAL_S3_A, 10,5
+    T_ADD   T_COMMERCIAL_S3_B, 11,5
+    T_ADD   T_COMMERCIAL_S3_C, 12,5
+    T_ADD   T_COMMERCIAL_S3_D, 13,5
 
     T_ADD   T_INDUSTRIAL_S1_A, 1,2 ; Industrial zones consume more power than
-    T_ADD   T_INDUSTRIAL_S1_B, 1,2 ; the population density
-    T_ADD   T_INDUSTRIAL_S1_C, 1,2
-    T_ADD   T_INDUSTRIAL_S1_D, 1,2
+    T_ADD   T_INDUSTRIAL_S1_B, 2,2 ; the population density
+    T_ADD   T_INDUSTRIAL_S1_C, 2,2
+    T_ADD   T_INDUSTRIAL_S1_D, 3,2
 
-    T_ADD   T_INDUSTRIAL_S2_A, 3,6
-    T_ADD   T_INDUSTRIAL_S2_B, 3,6
-    T_ADD   T_INDUSTRIAL_S2_C, 3,6
-    T_ADD   T_INDUSTRIAL_S2_D, 3,6
+    T_ADD   T_INDUSTRIAL_S2_A, 6,6
+    T_ADD   T_INDUSTRIAL_S2_B, 7,6
+    T_ADD   T_INDUSTRIAL_S2_C, 8,6
+    T_ADD   T_INDUSTRIAL_S2_D, 9,6
 
-    T_ADD   T_INDUSTRIAL_S3_A, 5,10
-    T_ADD   T_INDUSTRIAL_S3_B, 5,10
-    T_ADD   T_INDUSTRIAL_S3_C, 5,10
-    T_ADD   T_INDUSTRIAL_S3_D, 5,10
+    T_ADD   T_INDUSTRIAL_S3_A, 13,10
+    T_ADD   T_INDUSTRIAL_S3_B, 14,10
+    T_ADD   T_INDUSTRIAL_S3_C, 15,10
+    T_ADD   T_INDUSTRIAL_S3_D, 15,10
 
-    T_ADD   512 ; Fill array
+    T_ADD   512, 0,0 ; Fill array
 
 ;###############################################################################

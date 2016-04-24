@@ -209,7 +209,7 @@ T_INDUSTRIAL_S3_B  EQU 451
 T_INDUSTRIAL_S3_C  EQU 460
 T_INDUSTRIAL_S3_D  EQU 469
 
-; Unique buildings (only one per map) ?
+; TODO Unique buildings (only one per map) ?
 T_CITY_HALL EQU 478
 T_RESEARCH_CENTRE EQU 500
 T_LANDMARK EQU 510
