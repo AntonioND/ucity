@@ -513,7 +513,7 @@ BUILDING_INFO_STRUCTS_ARRAY::
 
 ;-------------------------------------------------------------------------------
 
-BuildingGetSizeFromBaseTile:: ; bc = base tile. returns size in d=y, e=x
+BuildingGetSizeFromBaseTile:: ; bc = base tile. returns size: d=height, e=width
 
 IF BUILDING_INFO_POINTERS_ARRAY_ELEMENT_SIZE != 4
     FAIL "ERROR: Modify element size at building_info.inc"
@@ -550,7 +550,7 @@ ENDC
     ld      e,[hl]
     inc     hl
     ld      d,[hl]
-    ret ; return e = x, d = y
+    ret ; return e = width, d = heigth
 
 .continue:
     ld      de,3

@@ -243,8 +243,8 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
         cp      a,e
         jr      nz,.not_tile
 
-            ; Desired tile tile
-            ; -----------------
+            ; Desired tile found
+            ; ------------------
 
             ; Check if there is power
 
@@ -681,8 +681,8 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
         cp      a,e
         jr      nz,.not_tile
 
-            ; Desired tile tile
-            ; -----------------
+            ; Desired tile found
+            ; ------------------
 
             ; Check if there is power
 
