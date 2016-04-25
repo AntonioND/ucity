@@ -121,7 +121,13 @@ MinimapDrawSelectedMap::
         ret
 .not_high_schools:
 
+    cp      a,MINIMAP_SELECTION_POWER_DISTRIBUTION
+    jr      nz,.not_power_distribution
+        LONG_CALL   MinimapDrawPowerDistributionMap
+        ret
+.not_power_distribution:
 
+    ; TODO Traffic
 
     cp      a,MINIMAP_SELECTION_POPULATION_DENSITY
     jr      nz,.not_population_density
@@ -129,7 +135,9 @@ MinimapDrawSelectedMap::
         ret
 .not_population_density:
 
+    ; TODO Pollution
 
+    ; TODO Happiness (tile ok flags)
 
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette

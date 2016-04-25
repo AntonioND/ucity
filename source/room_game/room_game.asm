@@ -72,6 +72,7 @@ SCRATCH_RAM_2:: DS $1000
 
 ;-------------------------------------------------------------------------------
 
+; Returns address in HL. Preserves de
 GetMapAddress:: ; e = x , d = y
 
     ld      bc,CITY_MAP_TILES ; = CITY_MAP_ATTR = CITY_MAP_TYPE ...
