@@ -29,9 +29,105 @@
 
 ;###############################################################################
 
+    SECTION "Queue Variables",HRAM
+
+;-------------------------------------------------------------------------------
+
+; FIFO circular buffer
+queue_in_ptr:  DS 2 ; LSB first
+queue_out_ptr: DS 2; LSB first
+
+;###############################################################################
+
     SECTION "Simulation Services Functions",ROMX
 
 ;-------------------------------------------------------------------------------
+
+QueueInit: ; Reset pointers
+    ld      a,SCRATCH_RAM_2 & $FF ; LSB first
+    ldh     [queue_in_ptr+0],a
+    ldh     [queue_out_ptr+0],a
+    ld      a,(SCRATCH_RAM_2>>8) & $FF
+    ldh     [queue_in_ptr+1],a
+    ldh     [queue_out_ptr+1],a
+    ret
+
+QueueAdd: ; Add register DE to the queue. Preserves DE
+
+    ld      a,BANK_SCRATCH_RAM_2
+    ld      [rSVBK],a
+
+    ldh     a,[queue_in_ptr+0] ; Get pointer to next empty space
+    ld      l,a
+    ldh     a,[queue_in_ptr+1]
+    ld      h,a
+
+    ld      [hl],d ; Save and increment pointer
+    inc     hl
+    ld      [hl],e
+    inc     hl
+
+    ld      a,$0F ; Wrap pointer and store
+    and     a,h
+    or      a,$D0
+    ldh     [queue_in_ptr+1],a
+    ld      a,l
+    ldh     [queue_in_ptr+0],a
+
+    ret
+
+QueueGet: ; Get queue element from DE
+
+    ld      a,BANK_SCRATCH_RAM_2
+    ld      [rSVBK],a
+
+    ldh     a,[queue_out_ptr+0] ; Get pointer to next element to get
+    ld      l,a
+    ldh     a,[queue_out_ptr+1]
+    ld      h,a
+
+    ld      d,[hl] ; Read and increment pointer
+    inc     hl
+    ld      e,[hl]
+    inc     hl
+
+    ld      a,$0F ; Wrap pointer and store
+    and     a,h
+    or      a,$D0
+    ldh     [queue_out_ptr+1],a
+    ld      a,l
+    ldh     [queue_out_ptr+0],a
+
+    ret
+
+QueueIsEmpty: ; Returns a=1 if empty
+
+    ldh     a,[queue_out_ptr+0]
+    ld      b,a
+    ldh     a,[queue_in_ptr+0]
+    cp      a,b
+    jr      z,.equal0
+    xor     a,a
+    ret ; Different, return 0
+.equal0:
+
+    ldh     a,[queue_out_ptr+1]
+    ld      b,a
+    ldh     a,[queue_in_ptr+1]
+    cp      a,b
+    jr      z,.equal1
+    xor     a,a
+    ret ; Different, return 0
+.equal1:
+
+    ld      a,1
+    ret ; Equal, return 1
+
+;-------------------------------------------------------------------------------
+
+TILE_HANDLED          EQU %10000000
+TILE_IS_POWER_PLANT   EQU %01000000
+TILE_POWER_LEVEL_MASK EQU %00111111 ; Bits used to tell how much power there is
 
 ; Flood fill from the power plant on the specified coordinates. This function is
 ; supposed to receive only the top left corner of a power plant. If not, it will
@@ -44,19 +140,40 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ld      a,BANK_SCRATCH_RAM ; Get current state
     ld      [rSVBK],a
 
+    push    de
+    call    GetMapAddress ; e=x , d=y ret: address=hl
+    pop     de
     ld      a,[hl]
-    and     a,a
+    and     a,TILE_IS_POWER_PLANT
     ret     nz ; If not 0, this power plant has already been handled
+
+    ; Reset all TILE_HANDLED flags
+    ; ----------------------------
+
+    push    de
+    ld      hl,SCRATCH_RAM
+    ld      bc,$1000
+    ld      d,(~TILE_HANDLED) & $FF
+.loop_clear:
+    ld      a,[hl]
+    and     a,d
+    ld      [hl+],a
+    dec     bc
+    ld      a,b
+    or      a,c
+    jr      nz,.loop_clear
+    pop     de
 
     ; Flag power plant as handled (set to $FF)
     ; ----------------------------------------
 
     push    de
-    call    CityMapGetTileAtAddress ; Returns tile -> Register DE
+    call    CityMapGetTile ; Returns tile -> Register DE
     LD_BC_DE
     pop     de
 
     push    bc ; Save base tile to calculate the power in the next step (*)
+    push    de ; Save coordinates too
 
         push    de ; save coords
         ; bc = base tile
@@ -92,7 +209,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
             pop     de
             pop     bc
 
-            ld      [hl],$FF ; flag as used
+            ld      [hl],TILE_IS_POWER_PLANT ; flag as used
 
             inc     b ; x
             dec     c ; width
@@ -104,7 +221,8 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
         dec     e ; height
         jr      nz,.height_loop
 
-    pop     bc ; Restore base tile (*)
+    pop     de
+    pop     bc ; Restore base tile and coordinates (*)
 
     ; Get power plant power
     ; ---------------------
@@ -119,6 +237,104 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ; and add the energy given to that tile to the scratch RAM. Power lines have
     ; no energetic cost. Beware unconnected power line bridges -> Sometimes they
     ; are not connected to the ground next to them.
+    push    de
+    call    QueueInit
+    pop     de
+    call    QueueAdd ; Add first element
+
+.loop_fill:
+
+    ; Get Queue element
+
+    call    QueueGet
+
+ld b,b
+    ; First, if not already filled, try to fill current coordinates
+
+    push    de
+    call    GetMapAddress
+    pop     de
+
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    and     a,TILE_HANDLED
+    jr      nz,.end_handle
+
+    ld      a,TILE_HANDLED|TILE_POWER_LEVEL_MASK
+    or      a,[hl]
+    ld      [hl],a
+.handled:
+
+    ; Then, add to queue all valid neighbours (power plants, buildings, lines)
+
+    ; TODO Power line bridges aren't connected if the orientation is wrong!
+
+    push    de
+    dec     d
+    ld      a,e ; Check map border
+    or      a,d
+    and     a,128+64 ; ~63
+    jr      nz,.skip0
+    call    CityMapGetTypeNoBoundCheck
+    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
+    and     a,TYPE_HAS_POWER
+    jr      z,.skip0
+    call    QueueAdd
+.skip0:
+    pop     de
+
+    push    de
+    inc     d
+    ld      a,e ; Check map border
+    or      a,d
+    and     a,128+64 ; ~63
+    jr      nz,.skip1
+    call    CityMapGetTypeNoBoundCheck
+    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
+    and     a,TYPE_HAS_POWER
+    jr      z,.skip1
+    call    QueueAdd
+.skip1:
+    pop     de
+
+    push    de
+    dec     e
+    ld      a,e ; Check map border
+    or      a,d
+    and     a,128+64 ; ~63
+    jr      nz,.skip2
+    call    CityMapGetTypeNoBoundCheck
+    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
+    and     a,TYPE_HAS_POWER
+    jr      z,.skip2
+    call    QueueAdd
+.skip2:
+    pop     de
+
+    push    de
+    inc     e
+    ld      a,e ; Check map border
+    or      a,d
+    and     a,128+64 ; ~63
+    jr      nz,.skip3
+    call    CityMapGetTypeNoBoundCheck
+    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
+    and     a,TYPE_HAS_POWER
+    jr      z,.skip3
+    call    QueueAdd
+.skip3:
+    pop     de
+
+.end_handle:
+    ; Last, check if queue is empty. If so, exit loop
+    call    QueueIsEmpty
+    and     a,a
+    jr      z,.loop_fill
+
+    ; Done!
+    ; -----
 
     ret
 

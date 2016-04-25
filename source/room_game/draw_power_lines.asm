@@ -30,14 +30,14 @@
 
 ;###############################################################################
 
-    SECTION "City Map Draw Power Lines Functions",ROMX
+    SECTION "City Map Draw Power Lines Functions Bank 0",ROM0
 
 ;-------------------------------------------------------------------------------
 
 ; Checks if power lines or buildings that need electriciy
 ; Argument: a (type)
 ; Return: a = TYPE_HAS_POWER or 0 if not
-TypeHasElectricityExtended: ; preserves c, de, hl
+TypeHasElectricityExtended:: ; preserves c, de, hl
 
     ld      b,a ; save type
     and     a,TYPE_HAS_POWER
@@ -63,7 +63,12 @@ TypeHasElectricityExtended: ; preserves c, de, hl
     ld      a,TYPE_HAS_POWER
     ret
 
+;###############################################################################
+
+    SECTION "City Map Draw Power Lines Functions",ROMX
+
 ;-------------------------------------------------------------------------------
+
 
 POWER_LINES_MASK_TABLE: ; MASK, EXPECTED RESULT, RESULTING TILE
 

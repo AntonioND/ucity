@@ -79,15 +79,10 @@ MinimapDrawPowerDistributionMap::
             ld      [rSVBK],a
 
             ld      a,[hl]
-
-            cp      a,$FF
-            jr      nz,.notplant
-            ld      a,7
-            jr      .endplant
-.notplant:
-            xor     a,a
-.endplant:
-
+            and     a,$3F
+            sra     a
+            sra     a
+            sra     a ; From 6 bits to 3
 
 IF 0
             call    CityMapGetTileAtAddress ; hl = address, returns de = tile

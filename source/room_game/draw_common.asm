@@ -177,6 +177,20 @@ CityMapGetType:: ; Arguments: e = x , d = y
     ld      a,[hl]
 
     ret
+;-------------------------------------------------------------------------------
+
+; Returns type of the tile + extra flags -> register A
+;          - Address -> Register HL
+CityMapGetTypeNoBoundCheck:: ; Arguments: e = x , d = y
+
+    call    GetMapAddress
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
