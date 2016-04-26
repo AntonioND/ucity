@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -125,9 +126,21 @@ QueueIsEmpty: ; Returns a=1 if empty
 
 ;-------------------------------------------------------------------------------
 
-TILE_HANDLED          EQU %10000000
-TILE_IS_POWER_PLANT   EQU %01000000
-TILE_POWER_LEVEL_MASK EQU %00111111 ; Bits used to tell how much power there is
+TILE_HANDLED_BIT             EQU 7
+TILE_HANDLED_POWER_PLANT_BIT EQU 6
+
+TILE_HANDLED                 EQU %10000000
+TILE_HANDLED_POWER_PLANT     EQU %01000000
+TILE_POWER_LEVEL_MASK        EQU %00111111 ; How much power there is now
+
+POWER_PLANT_POWER: ; Base tile, energetic power - LSB first
+    DW T_POWER_PLANT_COAL,     3000
+    DW T_POWER_PLANT_OIL,      2000
+    DW T_POWER_PLANT_WIND,      100 ; TODO Change this depending on the season
+    DW T_POWER_PLANT_SOLAR,    1000
+    DW T_POWER_PLANT_NUCLEAR,  5000
+    DW T_POWER_PLANT_FUSION,  10000
+    DW 0,0 ; End
 
 ; Flood fill from the power plant on the specified coordinates. This function is
 ; supposed to receive only the top left corner of a power plant. If not, it will
@@ -140,37 +153,37 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ld      a,BANK_SCRATCH_RAM ; Get current state
     ld      [rSVBK],a
 
-    push    de
-    call    GetMapAddress ; e=x , d=y ret: address=hl
-    pop     de
+    call    GetMapAddress ; e=x , d=y ret: address=hl, preserves DE
     ld      a,[hl]
-    and     a,TILE_IS_POWER_PLANT
+    and     a,TILE_HANDLED_POWER_PLANT
     ret     nz ; If not 0, this power plant has already been handled
 
     ; Reset all TILE_HANDLED flags
     ; ----------------------------
 
-    push    de
     ld      hl,SCRATCH_RAM
-    ld      bc,$1000
-    ld      d,(~TILE_HANDLED) & $FF
+    ld      a,(SCRATCH_RAM+$1000)>>8
 .loop_clear:
-    ld      a,[hl]
-    and     a,d
-    ld      [hl+],a
-    dec     bc
-    ld      a,b
-    or      a,c
+    REPT    $20 ; Unroll to increase speed
+    res     TILE_HANDLED_BIT,[hl]
+    inc     hl
+    ENDR
+    cp      a,h
     jr      nz,.loop_clear
-    pop     de
 
-    ; Flag power plant as handled (set to $FF)
-    ; ----------------------------------------
+    ; Flag power plant as handled
+    ; ---------------------------
+
+    ; This is faster than setting the power of all other tiles of the central to
+    ; have power 0 because the TILE_HANDLED flag doesn't have to be cleared this
+    ; way.
 
     push    de
     call    CityMapGetTile ; Returns tile -> Register DE
     LD_BC_DE
     pop     de
+
+    ; bc = tile, de = coordinates
 
     push    bc ; Save base tile to calculate the power in the next step (*)
     push    de ; Save coordinates too
@@ -209,7 +222,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
             pop     de
             pop     bc
 
-            ld      [hl],TILE_IS_POWER_PLANT ; flag as used
+            set     TILE_HANDLED_POWER_PLANT_BIT,[hl] ; flag as used
 
             inc     b ; x
             dec     c ; width
@@ -227,7 +240,39 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ; Get power plant power
     ; ---------------------
 
+    push    de ; (*)
 
+    ; Base tile won't be needed after calculating the energetic power
+
+        ld      hl,POWER_PLANT_POWER ; Base tile, energetic power
+.loop_search:
+        ld      a,[hl+]
+        ld      e,a
+        ld      d,[hl]
+
+        ld      a,b
+        cp      a,d
+        jr      nz,.next
+        ld      a,c
+        cp      a,e
+        jr      nz,.next
+
+            inc     hl
+            ld      a,[hl+]
+            ld      c,a
+            ld      b,[hl] ; bc = energetic power
+            jr      .exit_search
+.next:
+        inc     hl
+        inc     hl
+        inc     hl
+        jr      .loop_search
+
+.exit_search:
+
+    pop     de ; (*)
+
+    ; BC now holds the energetic power!
 
     ; Flood fill
     ; ----------
@@ -248,94 +293,170 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
 
     call    QueueGet
 
-ld b,b
     ; First, if not already filled, try to fill current coordinates
 
-    push    de
-    call    GetMapAddress
-    pop     de
+    call    GetMapAddress ; Preserves DE
 
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
 
-    ld      a,[hl]
+    ld      a,[hl] ; Already handled by this power plant, ignore
     and     a,TILE_HANDLED
-    jr      nz,.end_handle
+    jp      nz,.end_handle
 
     ld      a,TILE_HANDLED|TILE_POWER_LEVEL_MASK
     or      a,[hl]
     ld      [hl],a
-.handled:
 
     ; Then, add to queue all valid neighbours (power plants, buildings, lines)
 
-    ; TODO Power line bridges aren't connected if the orientation is wrong!
+    ; If this is a vertical bridge only try to power top and bottom. If it is
+    ; horizontal, only left and right!
 
+    ; HL holds the address from before
     push    de
-    dec     d
-    ld      a,e ; Check map border
-    or      a,d
-    and     a,128+64 ; ~63
-    jr      nz,.skip0
-    call    CityMapGetTypeNoBoundCheck
-    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
-    and     a,TYPE_HAS_POWER
-    jr      z,.skip0
-    call    QueueAdd
-.skip0:
+    call    CityMapGetTileAtAddress ; de = tile
+    LD_BC_DE
+    pop     de
+    ; bc = tile
+
+    ; If not horizontal bridge, check top and bottom
+    ld      a,b
+IF (T_POWER_LINES_LR_BRIDGE>>8) != 0
+    FAIL "Tile number > 255, fix comparison!"
+ENDC
+    and     a,a
+    jr      nz,.continue_top_bottom
+    ld      a,c
+    cp      a,T_POWER_LINES_LR_BRIDGE & $FF
+    jr      z,.end_top_bottom
+.continue_top_bottom:
+    push    de
+    dec     d ; Top
+    call    AddToQueueVerticalDisplacement
     pop     de
 
     push    de
-    inc     d
-    ld      a,e ; Check map border
-    or      a,d
-    and     a,128+64 ; ~63
-    jr      nz,.skip1
-    call    CityMapGetTypeNoBoundCheck
-    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
-    and     a,TYPE_HAS_POWER
-    jr      z,.skip1
-    call    QueueAdd
-.skip1:
+    inc     d ; Bottom
+    call    AddToQueueVerticalDisplacement
+    pop     de
+.end_top_bottom:
+
+    ; If not vertical bridge, check top and bottom
+    ld      a,b
+IF (T_POWER_LINES_TB_BRIDGE>>8) != 0
+    FAIL "Tile number > 255, fix comparison!"
+ENDC
+    and     a,a
+    jr      nz,.continue_left_right
+    ld      a,c
+    cp      a,T_POWER_LINES_TB_BRIDGE & $FF
+    jr      z,.end_left_right
+.continue_left_right:
+    push    de
+    dec     e ; Left
+    call    AddToQueueHorizontalDisplacement
     pop     de
 
     push    de
-    dec     e
-    ld      a,e ; Check map border
-    or      a,d
-    and     a,128+64 ; ~63
-    jr      nz,.skip2
-    call    CityMapGetTypeNoBoundCheck
-    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
-    and     a,TYPE_HAS_POWER
-    jr      z,.skip2
-    call    QueueAdd
-.skip2:
+    inc     e ; Right
+    call    AddToQueueHorizontalDisplacement
     pop     de
-
-    push    de
-    inc     e
-    ld      a,e ; Check map border
-    or      a,d
-    and     a,128+64 ; ~63
-    jr      nz,.skip3
-    call    CityMapGetTypeNoBoundCheck
-    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
-    and     a,TYPE_HAS_POWER
-    jr      z,.skip3
-    call    QueueAdd
-.skip3:
-    pop     de
+.end_left_right:
 
 .end_handle:
     ; Last, check if queue is empty. If so, exit loop
     call    QueueIsEmpty
     and     a,a
-    jr      z,.loop_fill
+    jp      z,.loop_fill
 
     ; Done!
     ; -----
 
+    ret
+
+;--------------------------------------
+
+AddToQueueVerticalDisplacement: ; d=y e=x
+
+    ld      a,d ; Check map border
+    and     a,128+64 ; ~63
+    ret     nz
+
+    ld      a,BANK_SCRATCH_RAM ; Check if already handled
+    ld      [rSVBK],a
+    call    GetMapAddress
+    ld      a,[hl]
+    bit     TILE_HANDLED_BIT,a
+    ret     nz
+
+    push    hl ; save address
+    call    CityMapGetTypeNoBoundCheck ; Check if it transmits power
+    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
+    bit     TYPE_HAS_POWER_BIT,a
+    pop     hl
+    ret     z
+
+    ; Check if it is a bridge with incorrect orientation
+    ; Return if horizontal bridge!
+    push    de
+    call    CityMapGetTileAtAddress ; hl = address, returns tile in de
+    LD_BC_DE
+    pop     de
+    ld      a,b
+IF (T_POWER_LINES_LR_BRIDGE>>8) != 0
+    FAIL "Tile number > 255, fix comparison!"
+ENDC
+    and     a,a
+    jr      nz,.continue
+    ld      a,c
+    cp      a,T_POWER_LINES_LR_BRIDGE & $FF
+    ret     z
+.continue:
+
+    ; Add to queue!
+    call    QueueAdd
+    ret
+
+AddToQueueHorizontalDisplacement: ; d=y e=x
+
+    ld      a,e ; Check map border
+    and     a,128+64 ; ~63
+    ret     nz
+
+    ld      a,BANK_SCRATCH_RAM ; Check if already handled
+    ld      [rSVBK],a
+    call    GetMapAddress
+    ld      a,[hl]
+    bit     TILE_HANDLED_BIT,a
+    ret     nz
+
+    push    hl ; save address
+    call    CityMapGetTypeNoBoundCheck ; Check if it transmits power
+    call    TypeHasElectricityExtended ; in: A=type, out: A = TYPE_HAS_POWER / 0
+    bit     TYPE_HAS_POWER_BIT,a
+    pop     hl
+    ret     z
+
+    ; Check if it is a bridge with incorrect orientation
+    ; Return if vertical bridge!
+    push    de
+    call    CityMapGetTileAtAddress ; hl = address, returns tile in de
+    LD_BC_DE
+    pop     de
+    ld      a,b
+IF (T_POWER_LINES_TB_BRIDGE>>8) != 0
+    FAIL "Tile number > 255, fix comparison!"
+ENDC
+    and     a,a
+    jr      nz,.continue
+    ld      a,c
+    cp      a,T_POWER_LINES_TB_BRIDGE & $FF
+    ret     z
+.continue:
+
+    ; Add to queue!
+    call    QueueAdd
     ret
 
 ;-------------------------------------------------------------------------------
