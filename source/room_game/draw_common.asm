@@ -79,7 +79,7 @@ CityMapRefreshTypeMap::
     add     hl,hl
     add     hl,hl ; tile number * 4
 
-    ld      a,$4000>>8
+    ld      a,TILESET_INFO>>8
     or      a,h
     ld      h,a ; TILESET_INFO base is $4000 -> TILESET_INFO + tile * 2
     inc     hl ; first byte is the palette, second one is the type
@@ -118,7 +118,7 @@ _CityMapFixBorderCoordinates: ; Arguments: e = x , d = y
 .not_negative_x:
     bit     6,e
     jr      z,.greater_than_64_x
-    ld      e,63
+    ld      e,CITY_MAP_WIDTH-1
 .greater_than_64_x:
 
 .end_x:
@@ -131,7 +131,7 @@ _CityMapFixBorderCoordinates: ; Arguments: e = x , d = y
 .not_negative_y:
     bit     6,d
     jr      z,.greater_than_64_y
-    ld      d,63
+    ld      d,CITY_MAP_HEIGHT-1
 .greater_than_64_y:
 
 .end_y:
@@ -261,7 +261,7 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
 
 ; Note: This doesn't check bounds or anything!
 ; Returns: - Tile -> Register DE
-CityMapGetTileAtAddress:: ; Arguments: hl = address
+CityMapGetTileAtAddress:: ; Arguments: hl = address. Preserves BC
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
