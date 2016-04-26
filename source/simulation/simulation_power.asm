@@ -27,6 +27,7 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "tileset_info.inc"
+    INCLUDE "building_density.inc"
 
 ;###############################################################################
 
@@ -36,7 +37,9 @@
 
 ; FIFO circular buffer
 queue_in_ptr:  DS 2 ; LSB first
-queue_out_ptr: DS 2; LSB first
+queue_out_ptr: DS 2 ; LSB first
+
+power_plant_energy_left: DS 2 ; LSB first
 
 ;###############################################################################
 
@@ -141,6 +144,95 @@ POWER_PLANT_POWER: ; Base tile, energetic power - LSB first
     DW T_POWER_PLANT_NUCLEAR,  5000
     DW T_POWER_PLANT_FUSION,  10000
     DW 0,0 ; End
+
+;--------------------------------------
+
+; Give as much energy as possible to tile at coordinates d=y, e=x (address hl)
+AddPowerToTile: ; de = coordinates, hl = address
+
+    ; If this is a power plant, flag as handled and return right away
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+    bit     TILE_HANDLED_POWER_PLANT_BIT,[hl]
+    jr      z,.not_power_plant
+    set     TILE_HANDLED_BIT,[hl]
+    ret
+.not_power_plant:
+
+    ; If not, give power
+    push    hl ; save for later
+
+IF CITY_TILE_DENSITY_ELEMENT_SIZE != 2
+    FAIL "Fix this!"
+ENDC
+        call    CityMapGetTileAtAddress ; de = tile
+        call    CityTileDensity ; returns energy consumption in E
+
+        ; Now, get what the tile has right now and subtract from the total
+        ld      a,BANK_SCRATCH_RAM
+        ld      [rSVBK],a
+        pop     hl
+        push    hl
+        ld      a,[hl]
+        and     a,TILE_POWER_LEVEL_MASK
+        ld      b,a
+        ld      a,e
+        sub     a,b
+        ld      e,a ; e = real energy consumption
+
+        ; Get current power plant power left
+        ldh     a,[power_plant_energy_left+0] ; LSB first
+        ld      c,a
+        ldh     a,[power_plant_energy_left+1]
+        ld      b,a
+
+        ; bc = power plant remaining energy
+        ; e = energy consumption
+        ld      a,c
+        sub     a,e
+        ld      l,a
+        ld      a,b
+        sbc     a,0
+        ld      h,a
+        ; hl = bc - e
+        ; a) if HL < 0 set power plant power to  0 and fill tile with C
+        ; b) if HL > 0 set power plant power to HL and fill tile with E
+
+        bit     7,h
+        jr      z,.case_b
+        ; a) if HL < 0 set power plant power to  0 and fill tile with C
+        xor     a,a
+        ld      [power_plant_energy_left+0],a ; LSB first
+        ld      [power_plant_energy_left+1],a
+        ld      e,c ; e = energy to fill the tile with
+        jr      .end_case
+.case_b:
+        ; b) if HL > 0 set power plant power to HL and fill tile with E
+        ld      a,l
+        ld      [power_plant_energy_left+0],a ; LSB first
+        ld      a,h
+        ld      [power_plant_energy_left+1],a
+        ;ld      e,e ; e = energy to fill the tile with
+        jr      .end_case
+.end_case:
+
+        ; Add to tile energy
+
+        ld      a,BANK_SCRATCH_RAM
+        ld      [rSVBK],a
+        pop     hl
+        push    hl ; get address
+        ld      a,[hl]
+        and     a,TILE_POWER_LEVEL_MASK
+        add     a,e
+        set     TILE_HANDLED_BIT,a
+        ld      [hl],a
+
+    pop     hl
+
+    ret
+
+;--------------------------------------
 
 ; Flood fill from the power plant on the specified coordinates. This function is
 ; supposed to receive only the top left corner of a power plant. If not, it will
@@ -272,7 +364,12 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
 
     pop     de ; (*)
 
-    ; BC now holds the energetic power!
+    ; BC now holds the energetic power! Save for the flood fill loop
+
+    ld      a,c
+    ldh     [power_plant_energy_left+0],a ; LSB first
+    ld      a,b
+    ldh     [power_plant_energy_left+1],a
 
     ; Flood fill
     ; ----------
@@ -289,11 +386,19 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
 
 .loop_fill:
 
-    ; Get Queue element
+    ; Check remaining power plant energy. If 0, exit loop.
+
+    ldh     a,[power_plant_energy_left+0] ; LSB first
+    ld      b,a
+    ldh     a,[power_plant_energy_left+1]
+    or      a,b
+    jr      z,.exit_loop
+
+    ; 1) Get Queue element
 
     call    QueueGet
 
-    ; First, if not already filled, try to fill current coordinates
+    ; 2) If not already handled by this plant, try to fill current coordinates
 
     call    GetMapAddress ; Preserves DE
 
@@ -304,16 +409,23 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     and     a,TILE_HANDLED
     jp      nz,.end_handle
 
-    ld      a,TILE_HANDLED|TILE_POWER_LEVEL_MASK
-    or      a,[hl]
-    ld      [hl],a
+    ; Not handled. Get energy consumption of the tile and give as much energy as
+    ; needed. If there is not enough energy left for that, give as much as
+    ; possible, flag as handled and exit loop next iteration (at the check at
+    ; the top of the loop.
 
-    ; Then, add to queue all valid neighbours (power plants, buildings, lines)
+    push    de ; save coordinates and address for later!
+    push    hl
+    call    AddPowerToTile ; de = coordinates, hl = address
+    pop     hl ; restore coordinates and address
+    pop     de
+
+    ; 3) Add to queue all valid neighbours (power plants, buildings, lines)
 
     ; If this is a vertical bridge only try to power top and bottom. If it is
     ; horizontal, only left and right!
 
-    ; HL holds the address from before
+    ; HL holds the address from before, DE the coordinates
     push    de
     call    CityMapGetTileAtAddress ; de = tile
     LD_BC_DE
@@ -365,10 +477,12 @@ ENDC
 .end_left_right:
 
 .end_handle:
-    ; Last, check if queue is empty. If so, exit loop
+
+    ; 4) Check if queue is empty. If so, exit loop
     call    QueueIsEmpty
     and     a,a
     jp      z,.loop_fill
+.exit_loop:
 
     ; Done!
     ; -----
@@ -510,6 +624,25 @@ Simulation_PowerDistribution::
     cp      a,d
     jr      nz,.loopy
 
+    ; Reset all remaining flags
+    ; -------------------------
+
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
+    ld      hl,SCRATCH_RAM
+    ld      c,(SCRATCH_RAM+$1000)>>8
+    ld      b,TILE_POWER_LEVEL_MASK
+.loop_clear_flags:
+    REPT    $20 ; Unroll to increase speed
+    ld      a,[hl]
+    and     a,b
+    ld      [hl+],a
+    ENDR
+    ld      a,c
+    cp      a,h
+    jr      nz,.loop_clear_flags
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -517,6 +650,9 @@ Simulation_PowerDistribution::
 Simulation_PowerDistributionSetTileOkFlag::
 
     ; TODO - Fill BANK_CITY_MAP_TILE_OK_FLAGS from BANK_SCRATCH_RAM
+
+    ; Make sure that the energy assigned to a tile is the same as the energy
+    ; consumption. If so, flag as "power ok".
 
     ret
 

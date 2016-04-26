@@ -59,6 +59,36 @@ ENDM
 
 ;###############################################################################
 
+    SECTION "Building Density Functions Bank 0",ROM0
+
+;-------------------------------------------------------------------------------
+
+CityTileDensity:: ; de = tile, returns d=population, e=energy
+
+    push    de
+    ld      b,BANK(CITY_TILE_DENSITY)
+    call    rom_bank_push_set
+    pop     de
+
+IF CITY_TILE_DENSITY_ELEMENT_SIZE != 2
+    FAIL "Fix this!"
+ENDC
+
+    ld      hl,CITY_TILE_DENSITY
+    add     hl,de
+    add     hl,de
+    ld      a,[hl+]
+    ld      d,a
+    ld      e,[hl]
+
+    push    de
+    call    rom_bank_pop
+    pop     de
+
+    ret
+
+;###############################################################################
+
     SECTION "Building Density Data",ROMX
 
 ;-------------------------------------------------------------------------------
@@ -71,9 +101,39 @@ CITY_TILE_DENSITY:: ; 512 entries
 
     T_ADD   0, 0,0 ; Start array (set to 0 density the roads, terrains, etc)
 
-    T_ADD   T_POLICE,   0,0
-    T_ADD   T_FIREMEN,  0,0
-    T_ADD   T_HOSPITAL, 0,0
+    T_ADD   T_RESIDENTIAL,  0,1
+    T_ADD   T_COMMERCIAL,   0,1
+    T_ADD   T_INDUSTRIAL,   0,1
+
+    T_ADD   T_DEMOLISHED, 0,0 ; Fill with 0s...
+
+    T_ADD   T_ROAD_TB_POWER_LINES,  0,1
+    T_ADD   T_ROAD_LR_POWER_LINES,  0,1
+
+    T_ADD   T_ROAD_TB_BRIDGE, 0,0 ; Fill with 0s...
+
+    T_ADD   T_TRAIN_TB_POWER_LINES,  0,1
+    T_ADD   T_TRAIN_LR_POWER_LINES,  0,1
+
+    T_ADD   T_TRAIN_TB_BRIDGE, 0,0 ; Fill with 0s...
+
+    T_ADD   T_POWER_LINES_TB,  0,1
+    T_ADD   T_POWER_LINES_LR,  0,1
+    T_ADD   T_POWER_LINES_RB,  0,1
+    T_ADD   T_POWER_LINES_LB,  0,1
+    T_ADD   T_POWER_LINES_TR,  0,1
+    T_ADD   T_POWER_LINES_TL,  0,1
+    T_ADD   T_POWER_LINES_TRB,  0,1
+    T_ADD   T_POWER_LINES_LRB,  0,1
+    T_ADD   T_POWER_LINES_TLB,  0,1
+    T_ADD   T_POWER_LINES_TLR,  0,1
+    T_ADD   T_POWER_LINES_TLRB,  0,1
+    T_ADD   T_POWER_LINES_TB_BRIDGE,  0,1
+    T_ADD   T_POWER_LINES_LR_BRIDGE,  0,1
+
+    T_ADD   T_POLICE,   0,1
+    T_ADD   T_FIREMEN,  0,1
+    T_ADD   T_HOSPITAL, 0,1
 
     T_ADD   T_PARK_SMALL, 0,1
     T_ADD   T_PARK_BIG,   0,1
@@ -88,22 +148,22 @@ CITY_TILE_DENSITY:: ; 512 entries
     T_ADD   T_TRAIN_STATION, 0,3
     T_ADD   T_AIRPORT,       0,10
     T_ADD   T_PORT,          0,8
-    T_ADD   T_PORT_WATER_L,  0,0
-    T_ADD   T_PORT_WATER_R,  0,0
-    T_ADD   T_PORT_WATER_D,  0,0
-    T_ADD   T_PORT_WATER_U,  0,0
+    T_ADD   T_PORT_WATER_L,  0,1
+    T_ADD   T_PORT_WATER_R,  0,1
+    T_ADD   T_PORT_WATER_D,  0,1
+    T_ADD   T_PORT_WATER_U,  0,1
 
-    T_ADD   T_POWER_PLANT_COAL,    0,0 ; No energetic cost, they are generators!
-    T_ADD   T_POWER_PLANT_OIL,     0,0
+    T_ADD   T_POWER_PLANT_COAL,    0,0 ; They don't have cost, power plants are
+    T_ADD   T_POWER_PLANT_OIL,     0,0 ; generators!
     T_ADD   T_POWER_PLANT_WIND,    0,0
     T_ADD   T_POWER_PLANT_SOLAR,   0,0
     T_ADD   T_POWER_PLANT_NUCLEAR, 0,0
     T_ADD   T_POWER_PLANT_FUSION,  0,0
 
-    T_ADD   T_RESIDENTIAL_S1_A, 1,1
-    T_ADD   T_RESIDENTIAL_S1_B, 2,1
-    T_ADD   T_RESIDENTIAL_S1_C, 2,1
-    T_ADD   T_RESIDENTIAL_S1_D, 3,1
+    T_ADD   T_RESIDENTIAL_S1_A, 1,2
+    T_ADD   T_RESIDENTIAL_S1_B, 2,2
+    T_ADD   T_RESIDENTIAL_S1_C, 2,2
+    T_ADD   T_RESIDENTIAL_S1_D, 3,2
 
     T_ADD   T_RESIDENTIAL_S2_A, 7,3
     T_ADD   T_RESIDENTIAL_S2_B, 7,3
@@ -115,10 +175,10 @@ CITY_TILE_DENSITY:: ; 512 entries
     T_ADD   T_RESIDENTIAL_S3_C, 15,5
     T_ADD   T_RESIDENTIAL_S3_D, 15,5
 
-    T_ADD   T_COMMERCIAL_S1_A, 1,1
-    T_ADD   T_COMMERCIAL_S1_B, 2,1
-    T_ADD   T_COMMERCIAL_S1_C, 2,1
-    T_ADD   T_COMMERCIAL_S1_D, 3,1
+    T_ADD   T_COMMERCIAL_S1_A, 1,2
+    T_ADD   T_COMMERCIAL_S1_B, 2,2
+    T_ADD   T_COMMERCIAL_S1_C, 2,2
+    T_ADD   T_COMMERCIAL_S1_D, 3,2
 
     T_ADD   T_COMMERCIAL_S2_A, 4,3
     T_ADD   T_COMMERCIAL_S2_B, 5,3

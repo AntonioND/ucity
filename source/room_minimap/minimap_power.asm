@@ -35,19 +35,14 @@
 
 ;-------------------------------------------------------------------------------
 
-MINIMAP_TILE_COLORS:
-    DB 0,0,0,0
-    DB 0,1,1,0
-    DB 1,1,1,1
-    DB 1,2,2,1
-    DB 2,2,2,2
-    DB 2,3,3,2
-    DB 3,3,3,3
-    DB 3,3,3,3
+C_WHITE EQU 0 ; Other tiles
+C_GREEN EQU 1 ; Tile power OK
+C_RED   EQU 2 ; Tile with no power. Mix of green and red -> Not all power
+C_BLUE  EQU 3 ; Power plants
 
 MINIMAP_POWER_DISTRIBUTION_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(0<<0)
-    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
+    DW (0<<10)|(0<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
 
 MINIMAP_POWER_DISTRIBUTION_MAP_TITLE:
     DB "Power Distribution",0
@@ -75,54 +70,70 @@ MinimapDrawPowerDistributionMap::
         push    de ; (*)
         push    hl
 
+            push    de
+            call    CityMapGetType ; Arguments: e = x , d = y, ret = a
+            pop     de
+            cp      a,TYPE_POWER_PLANT
+            jr      nz,.not_power_plant
+                ld      a,C_BLUE
+                ld      b,a
+                ld      c,a
+                ld      d,a
+                jr      .end_color
+.not_power_plant:
             ld      a,BANK_SCRATCH_RAM
             ld      [rSVBK],a
 
-            ld      a,[hl]
-            and     a,$3F
-            sra     a
-            sra     a
-            sra     a ; From 6 bits to 3
+            ld      b,[hl] ; b = current energy
+            push    bc
+            call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
+            call    CityTileDensity ; de = tile, returns d=population, e=energy
+            pop     bc
+            ; e = energy expected
+            ; b = real energy there
+            ld      a,e
+            and     a,a
+            jr      z,.nothing_expected_there
 
-IF 0
-            call    CityMapGetTileAtAddress ; hl = address, returns de = tile
+                ; Some energy expected. 3 cases:
+                ; 1) No energy at all -> Red
+                ; 2) Some energy -> Red/Green
+                ; 3) All energy -> Green
 
-IF CITY_TILE_DENSITY_ELEMENT_SIZE != 2
-    FAIL "Fix this!"
-ENDC
+                ld      a,b
+                and     a,a ; Check real energy on tile
+                jr      nz,.not_1
+                    ; Case 1
+                    ld      a,C_RED
+                    ld      b,a
+                    ld      c,a
+                    ld      d,a
+                    jr      .end_color
+.not_1:
+                ld      a,b
+                cp      a,e ; Check if expected = real or not
+                jr      z,.case_3
+                    ; Case 2
+                    ld      a,C_RED
+                    ld      b,C_GREEN
+                    ld      c,C_GREEN
+                    ld      d,C_RED
+                    jr      .end_color
+.case_3:
+                    ; Case 3
+                    ld      a,C_GREEN
+                    ld      b,a
+                    ld      c,a
+                    ld      d,a
+                    jr      .end_color
 
-            ld      hl, CITY_TILE_DENSITY
-            add     hl,de
-            add     hl,de ; Get first elemennt (population density)
+.nothing_expected_there:
 
-            ld      a,BANK(CITY_TILE_DENSITY)
-            ld      [rSVBK],a
-
-            ld      a,[hl]
-            cp      a,MAX_DISPLAYABLE_POPULATION_DENSITY+1 ; Saturate
-            jr      c,.not_overflow
-            ld      a,MAX_DISPLAYABLE_POPULATION_DENSITY
-.not_overflow:
-
-IF MAX_DISPLAYABLE_POPULATION_DENSITY != 15
-    FAIL "Fix this!"
-ENDC
-            sra     a ; From 4 bits to 3 (15 -> 7)
-ENDC
-
-            ld      de,MINIMAP_TILE_COLORS
-            ld      l,a
-            ld      h,0
-            add     hl,hl
-            add     hl,hl ; a *= 4
-            add     hl,de
-
-            ld      a,[hl+]
-            ld      b,[hl]
-            inc     hl
-            ld      c,[hl]
-            inc     hl
-            ld      d,[hl]
+            ld      a,C_WHITE
+            ld      a,b
+            ld      a,c
+            ld      a,d
+.end_color:
 
             call    APA_SetColors ; a,b,c,d = color (0 to 3)
             LONG_CALL   APA_PixelStreamPlot2x2
