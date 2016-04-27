@@ -647,6 +647,9 @@ Simulation_PowerDistribution::
     cp      a,h
     jr      nz,.loop_clear_flags
 
+    ; TODO : Remove this and place in simulation loop!
+    call    Simulation_PowerDistributionSetTileOkFlag
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -659,7 +662,73 @@ Simulation_PowerDistributionSetTileOkFlag::
     ; Make sure that the energy assigned to a tile is the same as the energy
     ; consumption. If so, flag as "power ok".
 
-    ; TODO - Fill BANK_CITY_MAP_TILE_OK_FLAGS from BANK_SCRATCH_RAM
+    ld      hl,CITY_MAP_TILE_OK_FLAGS ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy:
+
+        ld      e,0 ; e = x
+.loopx:
+
+        push    de ; (*)
+        push    hl
+
+            push    de
+            ; Returns a = type, hl = address
+            call    CityMapGetType ; Arguments: e = x , d = y
+            pop     de
+            cp      a,TYPE_POWER_PLANT
+            jr      z,.tile_set_flag ; If this is a power plant, there is power!
+
+            ; Not a power plant, let's check
+
+            ld      a,BANK_SCRATCH_RAM
+            ld      [rSVBK],a
+
+            ld      b,[hl] ; b = current energy
+            push    bc
+            push    hl
+            call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
+            call    CityTileDensity ; de = tile, returns d=population, e=energy
+            pop     hl
+            pop     bc
+            ; e = energy expected
+            ; b = real energy there
+            ld      a,e
+            and     a,a
+            jr      z,.tile_set_flag ; if no energy expected here flag as ok!
+
+                ; Some energy expected
+                ld      a,b
+                cp      a,e ; Check if expected = real or not
+                jr      z,.tile_set_flag ; Set if expected = real
+                jr      .tile_res_flag ; Res if expected != real
+
+.tile_set_flag:
+            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      [rSVBK],a
+            set     TILE_OK_POWER_BIT,[hl]
+            jr      .tile_end
+
+.tile_res_flag:
+            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      [rSVBK],a
+            res     TILE_OK_POWER_BIT,[hl]
+
+.tile_end:
+
+        pop     hl
+        pop     de ; (*)
+
+        inc     hl
+
+        inc     e
+        bit     6,e
+        jp      z,.loopx
+
+    inc     d
+    bit     6,d
+    jp      z,.loopy
 
     ret
 
