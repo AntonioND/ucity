@@ -17,10 +17,12 @@ NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
 you are interested please contact me at my email (antonio_nd@outlook.com).
 
 General to do list:
-- Minimap screen (with different maps)
+- Minimap screen (with different maps) - Almost finished
 - Simulation
 - Save menus
 - Budget screen
+- Sample cities
+- Random map generator
 - Compression
 
 ![](screenshot.png)
