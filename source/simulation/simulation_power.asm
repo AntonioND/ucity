@@ -432,6 +432,8 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     pop     de
     ; bc = tile
 
+    push    bc ; (*) save for vertical checks later
+
     ; If not horizontal bridge, check top and bottom
     ld      a,b
 IF (T_POWER_LINES_LR_BRIDGE>>8) != 0
@@ -453,6 +455,8 @@ ENDC
     call    AddToQueueVerticalDisplacement
     pop     de
 .end_top_bottom:
+
+    pop     bc ; restore tile
 
     ; If not vertical bridge, check top and bottom
     ld      a,b
