@@ -462,6 +462,10 @@ InputHandleModeEdit:
     ld      b,[hl] ; get old y
     ld      [hl],d ; save new y
 
+    ld      a,[simulation_running]
+    and     a,a ; If something is built mode while a simulation is running bad
+    jr      nz,.end_draw_check  ; things will happen
+
     ld      a,c
     sub     a,e
     ld      c,a ; c = old x - new x
@@ -491,10 +495,6 @@ InputHandleModeSelectBuilding:
     ld      a,[joy_released]
     and     a,PAD_A
     jr      z,.not_a
-        ld      a,[simulation_running]
-        and     a,a ; If edit mode is entered while a simulation is running
-        ret     nz  ; bad things will happen. Return 0
-
         LONG_CALL   BuildSelectMenuHide
         LONG_CALL   BuildSelectMenuSelectBuildingUpdateCursor
         ld      a,GAME_STATE_EDIT
