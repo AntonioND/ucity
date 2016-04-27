@@ -297,7 +297,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
         ; d = y, e = height
         ; b = x, c = width
 
-        ; Fill that square with $FF
+        ; Flag that square as a power plant
 
         ld      a,BANK_SCRATCH_RAM
         ld      [rSVBK],a
@@ -445,20 +445,20 @@ ENDC
     cp      a,T_POWER_LINES_LR_BRIDGE & $FF
     jr      z,.end_top_bottom
 .continue_top_bottom:
-    push    de
-    dec     d ; Top
-    call    AddToQueueVerticalDisplacement
-    pop     de
+        push    de
+        dec     d ; Top
+        call    AddToQueueVerticalDisplacement
+        pop     de
 
-    push    de
-    inc     d ; Bottom
-    call    AddToQueueVerticalDisplacement
-    pop     de
+        push    de
+        inc     d ; Bottom
+        call    AddToQueueVerticalDisplacement
+        pop     de
 .end_top_bottom:
 
     pop     bc ; restore tile
 
-    ; If not vertical bridge, check top and bottom
+    ; If not vertical bridge, check left and right
     ld      a,b
 IF (T_POWER_LINES_TB_BRIDGE>>8) != 0
     FAIL "Tile number > 255, fix comparison!"
@@ -469,15 +469,15 @@ ENDC
     cp      a,T_POWER_LINES_TB_BRIDGE & $FF
     jr      z,.end_left_right
 .continue_left_right:
-    push    de
-    dec     e ; Left
-    call    AddToQueueHorizontalDisplacement
-    pop     de
+        push    de
+        dec     e ; Left
+        call    AddToQueueHorizontalDisplacement
+        pop     de
 
-    push    de
-    inc     e ; Right
-    call    AddToQueueHorizontalDisplacement
-    pop     de
+        push    de
+        inc     e ; Right
+        call    AddToQueueHorizontalDisplacement
+        pop     de
 .end_left_right:
 
 .end_handle:
