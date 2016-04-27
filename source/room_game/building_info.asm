@@ -532,7 +532,7 @@ ENDC
     jr      nz,.not_end_error ; $FFFF = last element...
         ; Error!
         ld      b,b
-        ld      de,$0000 ; Try not to delete anything... This shouldn't happen
+        ld      de,$0101 ; Try not to delete anything... This shouldn't happen
         ret
 .not_end_error:
 

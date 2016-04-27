@@ -52,7 +52,7 @@ MinimapDrawPowerDistributionMap::
     ; Simulate and get data!
     ; ----------------------
 
-    LONG_CALL_ARGS  Simulation_PowerDistribution
+    LONG_CALL   Simulation_PowerDistribution
 
     ; Draw map
     ; --------
