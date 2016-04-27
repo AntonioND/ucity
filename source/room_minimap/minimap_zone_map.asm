@@ -86,7 +86,7 @@ MinimapDrawZoneMap::
 
         push    de ; (*)
 
-            LONG_CALL_ARGS  CityMapGetType ; Arguments: e = x , d = y
+            call    CityMapGetType ; Arguments: e = x , d = y
 
             ; Set color from tile type
 

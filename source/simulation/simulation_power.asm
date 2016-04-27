@@ -656,8 +656,8 @@ Simulation_PowerDistribution::
 
 Simulation_PowerDistributionSetTileOkFlag::
 
-    ; NOTE: Don't call when drawing minimaps, this can only be used from watch
-    ; mode!
+    ; NOTE: Don't call when drawing minimaps, this can only be called from the
+    ; simulation loop!
 
     ; Make sure that the energy assigned to a tile is the same as the energy
     ; consumption. If so, flag as "power ok".
