@@ -42,6 +42,17 @@ BANK_SCRATCH_RAM_2          EQU 7 ; For temporary calculations (APA, simulation)
 
 ;-------------------------------------------------------------------------------
 
+TILE_OK_POWER_BIT     EQU 0
+TILE_OK_POLICE_BIT    EQU 1
+TILE_OK_FIREMEN_BIT   EQU 2
+TILE_OK_HOSPITALS_BIT EQU 3
+TILE_OK_EDUCATION_BIT EQU 4
+TILE_OK_POLLUTION_BIT EQU 5
+TILE_OK_TRAFFIC_BIT   EQU 6
+TILE_OK_unused_BIT    EQU 7
+
+;-------------------------------------------------------------------------------
+
 GAME_STATE_WATCH            EQU 0
 GAME_STATE_EDIT             EQU 1
 GAME_STATE_WATCH_FAST_MOVE  EQU 2
