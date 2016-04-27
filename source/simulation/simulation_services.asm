@@ -248,10 +248,15 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
 
             ; Check if there is power
 
-            ; TODO - Get info from "tile OK flags" map to check power
-
             pop     de
             push    de
+            call    GetMapAddress ; preserves de
+
+            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      [rSVBK],a
+            bit     TILE_OK_POWER_BIT,[hl]
+            jr      z,.not_tile ; If there is no power, the building can't work
+
             call    Simulation_ServicesApplyMask
 
 .not_tile:
@@ -686,10 +691,15 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
 
             ; Check if there is power
 
-            ; TODO - Get info from "tile OK flags" map to check power
-
             pop     de
             push    de
+            call    GetMapAddress ; preserves de
+
+            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      [rSVBK],a
+            bit     TILE_OK_POWER_BIT,[hl]
+            jr      z,.not_tile ; If there is no power, the building can't work
+
             call    Simulation_ServicesApplyMaskBig
 
 .not_tile:
