@@ -71,7 +71,8 @@ MinimapDrawPowerDistributionMap::
         push    hl
 
             push    de
-            call    CityMapGetType ; Arguments: e = x , d = y, ret = a
+            ; Returns a = type, hl = address
+            call    CityMapGetType ; Arguments: e = x , d = y
             pop     de
             cp      a,TYPE_POWER_PLANT
             jr      nz,.not_power_plant
