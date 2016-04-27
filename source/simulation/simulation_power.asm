@@ -647,9 +647,6 @@ Simulation_PowerDistribution::
     cp      a,h
     jr      nz,.loop_clear_flags
 
-    ; TODO : Remove this and place in simulation loop!
-    call    Simulation_PowerDistributionSetTileOkFlag
-
     ret
 
 ;-------------------------------------------------------------------------------

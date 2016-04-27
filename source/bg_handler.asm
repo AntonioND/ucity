@@ -255,6 +255,8 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
         cp      a,$E0 ; prevent reads from ECHO RAM or higher
         jp      nc,.end
 
+        di
+
 .wait\@: ; wait until mode 0 or 1
         ld      a,[$FF00+c]
         bit     1,a
@@ -263,6 +265,8 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
         ld      a,[de]
         inc     de
         ld      [hl+],a
+
+        ei
 
         inc     b
 
@@ -349,6 +353,8 @@ ____vram_copy_column_wrap: ; b = x, c = y, hl = source address
     ld      c,rSTAT & $FF
 
     REPT 20
+        di
+
 .wait\@: ; wait until mode 0 or 1
         ld      a,[$FF00+c]
         bit     1,a
@@ -357,6 +363,9 @@ ____vram_copy_column_wrap: ; b = x, c = y, hl = source address
         ld      a,[de]
         inc     de
         ld      [hl],a
+
+        ei
+
         push    bc
         ld      bc,32
         add     hl,bc

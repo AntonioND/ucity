@@ -408,19 +408,28 @@ rom_handler_init::
 
 rom_bank_pop:: ; should preserve bc
 
+    ld      a,[rIE]
+    ld      d,a
+    xor     a,a
+    ld      [rIE],a
+
     ld      hl,rom_position
     dec     [hl]
 
     ld      hl,rom_stack
 
-    ld      d,$00
     ld      a,[rom_position]
-    ld      e,a
-
-    add     hl,de  ; hl now holds the pointer to the bank we want to change to
+    add     a,l
+    ld      l,a
+    ld      a,0
+    adc     a,h ; hl += a
+    ld      h,a    ; hl now holds the pointer to the bank we want to change to
     ld      a,[hl] ; and a the bank we want to change to
 
     ld      [rROMB0],a ; select rom bank
+
+    ld      a,d
+    ld      [rIE],a
 
     ret
 
@@ -429,6 +438,7 @@ rom_bank_pop:: ; should preserve bc
 ;-------------------------------------------------------------------------------
 
 rom_bank_push::
+
     ld      hl,rom_position
     inc     [hl]
 
@@ -439,6 +449,12 @@ rom_bank_push::
 ;-------------------------------------------------------------------------------
 
 rom_bank_set::
+
+    ld      a,[rIE]
+    ld      c,a
+    xor     a,a
+    ld      [rIE],a
+
     ld      hl,rom_stack
 
     ld      d,$00
@@ -451,6 +467,9 @@ rom_bank_set::
     ld      [hl],a
     ld      [rROMB0],a        ; select rom bank
 
+    ld      a,c
+    ld      [rIE],a
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -458,6 +477,12 @@ rom_bank_set::
 ;-------------------------------------------------------------------------------
 
 rom_bank_push_set::
+
+    ld      a,[rIE]
+    ld      c,a
+    xor     a,a
+    ld      [rIE],a
+
     ld      hl,rom_position
     inc     [hl]
 
@@ -472,6 +497,9 @@ rom_bank_push_set::
 
     ld      [hl],a
     ld      [rROMB0],a        ; select rom bank
+
+    ld      a,c
+    ld      [rIE],a
 
     ret
 

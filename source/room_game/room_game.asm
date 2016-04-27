@@ -43,6 +43,14 @@ game_state: DS 1
 last_frame_x: DS 1
 last_frame_y: DS 1 ; in tiles. for autobuild when moving cursor
 
+; Prevent the VBL handler from handling user input two frames in a row, don't
+; allow any processing apart from graphic updates.
+vbl_handler_working: DS 1
+
+; Set to 0 by the simulation loop when the simulation has finished
+; Until the VBL handler sets it to 1 again, it will wait
+simulation_running:  DS 1
+
 ;###############################################################################
 
     SECTION "City Map Tiles",WRAMX,BANK[BANK_CITY_MAP_TILES]
@@ -107,6 +115,9 @@ GameStateMachineHandle::
 
         call    StatusBarUpdate ; Update status bar text
 
+        ld      a,1
+        ld      [simulation_running],a ; Always simulate in watch mode
+
         ret
 
 .not_watch:
@@ -124,6 +135,9 @@ GameStateMachineHandle::
     jr      nz,.not_watch_fast_move ; GAME_STATE_WATCH_FAST_MOVE
 
         call    InputHandleModeWatchFastMove
+
+        ld      a,1
+        ld      [simulation_running],a ; Always simulate in fast move mode
 
         ret
 
@@ -248,6 +262,15 @@ GameStateMachineStateSet:: ; a = new state
 
 ;-------------------------------------------------------------------------------
 
+WaitSimulationEnds:
+    ld      a,[simulation_running]
+    and     a,a
+    ret     z
+    call    wait_vbl
+    jr      WaitSimulationEnds
+
+;-------------------------------------------------------------------------------
+
     DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,9999999999
 
 PAUSE_MENU_RESUME    EQU 0
@@ -275,7 +298,11 @@ PauseMenuHandleOption:
     jr      nz,.not_minimap
 
         ; Minimap
-        call    RoomMinimap
+        ld      a,[simulation_running]
+        and     a,a ; If minimap room is entered while a simulation is running
+        ret     nz  ; bad things will happen.
+
+        call    RoomMinimap ; TODO Move this to main function?
 
         ld      a,0 ; load gfx only
         call    RoomGameLoad
@@ -464,6 +491,10 @@ InputHandleModeSelectBuilding:
     ld      a,[joy_released]
     and     a,PAD_A
     jr      z,.not_a
+        ld      a,[simulation_running]
+        and     a,a ; If edit mode is entered while a simulation is running
+        ret     nz  ; bad things will happen. Return 0
+
         LONG_CALL   BuildSelectMenuHide
         LONG_CALL   BuildSelectMenuSelectBuildingUpdateCursor
         ld      a,GAME_STATE_EDIT
@@ -535,6 +566,39 @@ RoomGameVBLHandler:
 .not_16:
     ld      a,b
     ld      [game_sprites_8x16],a
+
+
+    ld      a,[vbl_handler_working]
+    and     a,a
+    ret     nz ; already working
+
+    ld      a,[rSVBK]
+    ld      b,a
+    ld      a,[rVBK]
+    ld      c,a
+    push    bc
+
+    ld      a,1
+    ld      [vbl_handler_working],a ; flag as working
+
+    ; Allow another VBL (or STAT) interrupt to happen and update graphics. Since
+    ; vbl_handler_working is set to 1, they will only update graphics and return
+    ; before handling user input.
+    ei
+
+    call    scan_keys
+    call    KeyAutorepeatHandle
+
+    call    GameStateMachineHandle
+
+    pop     bc
+    ld      a,b
+    ld      [rSVBK],a
+    ld      a,c
+    ld      [rVBK],a
+
+    xor     a,a
+    ld      [vbl_handler_working],a ; flag as finished working
 
     ret
 
@@ -608,20 +672,34 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ret
 
 ;-------------------------------------------------------------------------------
-
+INCLUDE "tileset_info.inc"
 RoomGame::
+
+    xor     a,a
+    ld      [vbl_handler_working],a
 
     ld      a,1 ; load everything
     call    RoomGameLoad
+
+    ; This loop only handles simulation, user input goes in the VBL handler.
 
 .loop:
 
     call    wait_vbl
 
-    call    scan_keys
-    call    KeyAutorepeatHandle
+    ld      a,[simulation_running]
+    and     a,a ; Check if simulation has been requested
+    jr      z,.skip_simulation
 
-    call    GameStateMachineHandle
+        LONG_CALL   Simulation_PowerDistribution
+        LONG_CALL   Simulation_PowerDistributionSetTileOkFlag
+
+        ; TODO - Simulate police and set tile ok flags
+        ; Same for firemen, hospitals, schools...
+
+        xor     a,a
+        ld      [simulation_running],a
+.skip_simulation:
 
     jr      .loop
 
