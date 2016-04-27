@@ -127,13 +127,15 @@ MinimapDrawSelectedMap::
         ret
 .not_power_distribution:
 
-    ; TODO Traffic
+    ; TODO Power density
 
     cp      a,MINIMAP_SELECTION_POPULATION_DENSITY
     jr      nz,.not_population_density
         LONG_CALL   MinimapDrawPopulationDensityMap
         ret
 .not_population_density:
+
+    ; TODO Traffic
 
     ; TODO Pollution
 

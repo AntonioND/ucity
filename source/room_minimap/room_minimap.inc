@@ -34,14 +34,15 @@ MINIMAP_SELECTION_HOSPITALS          EQU 5
 MINIMAP_SELECTION_SCHOOLS            EQU 6
 MINIMAP_SELECTION_HIGH_SCHOOLS       EQU 7
 MINIMAP_SELECTION_POWER_DISTRIBUTION EQU 8
-MINIMAP_SELECTION_TRAFFIC            EQU 9
+MINIMAP_SELECTION_POWER_DENSITY      EQU 9
 MINIMAP_SELECTION_POPULATION_DENSITY EQU 10
-MINIMAP_SELECTION_POLLUTION          EQU 11
-MINIMAP_SELECTION_HAPPINESS          EQU 12
+MINIMAP_SELECTION_TRAFFIC            EQU 11
+MINIMAP_SELECTION_POLLUTION          EQU 12
+MINIMAP_SELECTION_HAPPINESS          EQU 13
 
-MINIMAP_SELECTION_MAX                EQU 12
+MINIMAP_SELECTION_MAX                EQU 13
 
-; There's room in the minimap selection menu for just one more!
+; There's no room for any other map with the current selection menu!
 
 ;###############################################################################
 
