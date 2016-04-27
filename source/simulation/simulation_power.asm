@@ -653,10 +653,13 @@ Simulation_PowerDistribution::
 
 Simulation_PowerDistributionSetTileOkFlag::
 
-    ; TODO - Fill BANK_CITY_MAP_TILE_OK_FLAGS from BANK_SCRATCH_RAM
+    ; NOTE: Don't call when drawing minimaps, this can only be used from watch
+    ; mode!
 
     ; Make sure that the energy assigned to a tile is the same as the energy
     ; consumption. If so, flag as "power ok".
+
+    ; TODO - Fill BANK_CITY_MAP_TILE_OK_FLAGS from BANK_SCRATCH_RAM
 
     ret
 

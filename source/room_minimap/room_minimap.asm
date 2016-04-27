@@ -127,7 +127,11 @@ MinimapDrawSelectedMap::
         ret
 .not_power_distribution:
 
-    ; TODO Power density
+    cp      a,MINIMAP_SELECTION_POWER_DENSITY
+    jr      nz,.not_power_density
+        LONG_CALL   MinimapDrawPowerDensityMap
+        ret
+.not_power_density:
 
     cp      a,MINIMAP_SELECTION_POPULATION_DENSITY
     jr      nz,.not_population_density

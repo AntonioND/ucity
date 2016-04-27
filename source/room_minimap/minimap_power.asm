@@ -167,4 +167,120 @@ MinimapDrawPowerDistributionMap::
 
     ret
 
+;-------------------------------------------------------------------------------
+
+MINIMAP_TILE_COLORS:
+    DB 0,0,0,0
+    DB 0,1,1,0
+    DB 1,1,1,1
+    DB 1,2,2,1
+    DB 2,2,2,2
+    DB 2,3,3,2
+    DB 2,3,3,2
+    DB 2,3,3,2
+
+MINIMAP_POWER_DENSITY_MAP_PALETTE:
+    DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(31<<0)
+    DW (0<<10)|(15<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
+
+MINIMAP_POWER_DENSITY_MAP_TITLE:
+    DB "Power Density",0
+
+MinimapDrawPowerDensityMap::
+
+    ; No need to simulate, this will use the expected power density
+
+    ; Draw map
+    ; --------
+
+    LONG_CALL   APA_PixelStreamStart
+
+    ld      hl,CITY_MAP_TILES ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy:
+
+        ld      e,0 ; e = x
+.loopx:
+
+        push    de ; (*)
+        push    hl
+
+            push    de
+            ; returns type = a, address = hl
+            call    CityMapGetType ; Arguments: e = x , d = y
+            pop     de
+            cp      a,TYPE_POWER_PLANT
+            jr      nz,.not_power_plant
+                ld      a,3
+                ld      b,a
+                ld      c,a
+                ld      d,a
+                jr      .end_color
+.not_power_plant:
+
+            call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
+            call    CityTileDensity ; de = tile, returns d=population, e=energy
+            ld      a,e ; a = energy expected
+
+
+            cp      a,MAX_DISPLAYABLE_POWER_DENSITY+1 ; Saturate
+            jr      c,.not_overflow
+            ld      a,MAX_DISPLAYABLE_POWER_DENSITY
+.not_overflow:
+
+IF MAX_DISPLAYABLE_POWER_DENSITY != 14
+    FAIL "Fix this!"
+ENDC
+            inc     a ; Round up
+            sra     a ; From 4 bits to 3 (15 -> 7)
+
+            ld      de,MINIMAP_TILE_COLORS
+            ld      l,a
+            ld      h,0
+            add     hl,hl
+            add     hl,hl ; a *= 4
+            add     hl,de
+
+            ld      a,[hl+]
+            ld      b,[hl]
+            inc     hl
+            ld      c,[hl]
+            inc     hl
+            ld      d,[hl]
+
+.end_color:
+
+            call    APA_SetColors ; a,b,c,d = color (0 to 3)
+            LONG_CALL   APA_PixelStreamPlot2x2
+
+        pop     hl
+        pop     de ; (*)
+
+        inc     hl
+
+        inc     e
+        bit     6,e
+        jp      z,.loopx
+
+    inc     d
+    bit     6,d
+    jp      z,.loopy
+
+    ; Set White
+    call    MinimapSetDefaultPalette
+
+    ; Refresh screen with backbuffer data
+    call    APA_BufferUpdate
+
+    ; Load palette
+    ld      hl,MINIMAP_POWER_DENSITY_MAP_PALETTE
+    call    APA_LoadPalette
+
+    ; Draw title
+    ld      hl,MINIMAP_POWER_DENSITY_MAP_TITLE
+    call    RoomMinimapDrawTitle
+
+    ret
+
 ;###############################################################################

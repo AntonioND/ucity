@@ -89,9 +89,10 @@ ENDC
             ld      a,MAX_DISPLAYABLE_POPULATION_DENSITY
 .not_overflow:
 
-IF MAX_DISPLAYABLE_POPULATION_DENSITY != 15
+IF MAX_DISPLAYABLE_POPULATION_DENSITY != 14
     FAIL "Fix this!"
 ENDC
+            inc     a ; Round up
             sra     a ; From 4 bits to 3 (15 -> 7)
 
             ld      de,MINIMAP_TILE_COLORS
