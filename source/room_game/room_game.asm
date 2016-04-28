@@ -180,6 +180,15 @@ GameStateMachineHandle::
 
 ;-------------------------------------------------------------------------------
 
+GameShowCPUBusyIconIfNeeded:
+    ld      a,[simulation_running]
+    and     a,a
+    call    nz,CPUBusyIconShow
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 GameStateMachineStateGet:: ; return a = state
 
     ld      a,[game_state]
@@ -207,6 +216,8 @@ GameStateMachineStateSet:: ; a = new state
 
         call    CursorShow
 
+        call    CPUBusyIconHide
+
         ret
 
 .not_watch:
@@ -218,6 +229,8 @@ GameStateMachineStateSet:: ; a = new state
         call    BuildOverlayIconShow
 
         call    CursorShow
+
+        call    GameShowCPUBusyIconIfNeeded
 
         ret
 
@@ -251,6 +264,8 @@ GameStateMachineStateSet:: ; a = new state
 
         call    StatusBarHide
         call    StatusBarMenuShow
+
+        call    GameShowCPUBusyIconIfNeeded
 
         ret
 
@@ -736,6 +751,9 @@ RoomGame::
 
         xor     a,a
         ld      [simulation_running],a
+
+        call    CPUBusyIconHide
+
 .skip_simulation:
 
     jr      .loop

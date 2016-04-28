@@ -75,8 +75,17 @@ OVERLAY_ICON_TILE_BASE EQU 4 ; Sprite base for overlay icon (4 needed)
 MENU_BASE_X EQU 8+(4) ; 4 pixels from left
 MENU_BASE_Y EQU 16+(-8) ; 8 pixels overflow from top
 
+; Building selection menu arrow icon equates
 BUILD_SELECT_CURSOR_TILE    EQU $14
 BUILD_SELECT_CURSOR_PALETTE EQU 5
+
+; CPU busy icon equates
+CPU_BUSY_ICON_OAM_BASE      EQU 39
+CPU_BUSY_ICON_XCOORD        EQU ((160-8)+8)
+CPU_BUSY_ICON_YCOORD_TOP    EQU ((0)+16)
+CPU_BUSY_ICON_YCOORD_BOTTOM EQU ((144-8)+16)
+CPU_BUSY_ICON_TILE          EQU $16 ; 2 tiles, the second one should be empty
+CPU_BUSY_ICON_PALETTE       EQU 1
 
 ;-------------------------------------------------------------------------------
 
@@ -609,7 +618,7 @@ BuildSelectMenuHide::
 
     xor     a,a
     ld      hl,OAM_Copy
-    ld      b,4*40
+    ld      b,4*39 ; Every sprite but the last one (used for cpu busy icon)
     call    memset_fast
 
     call    wait_vbl
@@ -1104,6 +1113,52 @@ BuildOverlayIconHide::
     call    sprite_set_xy ; b = x    c = y    l = sprite number
     ld      bc,$0000
     ld      l,OVERLAY_ICON_TILE_BASE+3
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+CPUBusyIconShow::
+
+    ld      a,CPU_BUSY_ICON_TILE
+    ld      l,CPU_BUSY_ICON_OAM_BASE
+    call    sprite_set_tile ; a = tile    l = sprite number
+
+    ld      a,CPU_BUSY_ICON_PALETTE
+    ld      l,CPU_BUSY_ICON_OAM_BASE
+    call    sprite_set_params ;  a = params    l = sprite number
+
+    ld      a,[status_menu_active]
+    and     a,a
+    jr      nz,.sprite_down
+
+    ld      a,[status_bar_on_top]
+    and     a,a
+    jr      nz,.sprite_down
+
+    ; Sprite Up
+
+    ld      bc,(CPU_BUSY_ICON_XCOORD<<8)|CPU_BUSY_ICON_YCOORD_TOP
+    ld      l,CPU_BUSY_ICON_OAM_BASE
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+
+    ret
+
+.sprite_down:
+
+    ; Sprite down
+
+    ld      bc,(CPU_BUSY_ICON_XCOORD<<8)|CPU_BUSY_ICON_YCOORD_BOTTOM
+    ld      l,CPU_BUSY_ICON_OAM_BASE
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+
+    ret
+
+CPUBusyIconHide::
+
+    ld      bc,$0000
+    ld      l,CPU_BUSY_ICON_OAM_BASE
     call    sprite_set_xy ; b = x    c = y    l = sprite number
 
     ret

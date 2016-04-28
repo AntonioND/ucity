@@ -48,10 +48,10 @@ STATUS_BAR_MAP_ROWS EQU (((.e-.s)/20)/2)
 
 ;-------------------------------------------------------------------------------
 
-status_bar_active:  DS 1
+status_bar_active:: DS 1
 status_bar_on_top:: DS 1 ; 1 if on top, 0 if on the bottom
 
-status_menu_active:    DS 1 ; if 1, show menu
+status_menu_active::   DS 1 ; if 1, show menu
 status_menu_selection: DS 1
 
 MENU_NUMBER_ELEMENTS EQU 6
@@ -309,7 +309,7 @@ StatusBarMenuShow::
     ld      a,7
     ld      [rWX],a
 
-    ld      a,LCDCF_BG8000|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
+    ld      a,LCDCF_BG8000|LCDCF_WIN9800|LCDCF_WINON|LCDCF_OBJON|LCDCF_ON
     ld      [rLCDC],a
 
     ; Clear cursor positions except for the first one
