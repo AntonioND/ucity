@@ -47,8 +47,8 @@ last_frame_y: DS 1 ; in tiles. for autobuild when moving cursor
 ; allow any processing apart from graphic updates.
 vbl_handler_working: DS 1
 
-; Set to 0 by the simulation loop when the simulation has finished
-; Until the VBL handler sets it to 1 again, it will wait
+; Set to 0 by the simulation loop when the simulation has finished.
+; It can be set by any function to tell the simulation loop to do a step.
 simulation_running:  DS 1
 
 ;###############################################################################
@@ -672,7 +672,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ret
 
 ;-------------------------------------------------------------------------------
-INCLUDE "tileset_info.inc"
+
 RoomGame::
 
     xor     a,a
@@ -683,6 +683,26 @@ RoomGame::
 
     ; This loop only handles simulation, user input goes in the VBL handler.
 
+    ; Simulation loop
+    ; ---------------
+    ;
+    ; There are a few problems related to this pseudo-multithreading:
+    ;
+    ; - Some functions need to be protected from interrupts, mainly ROM bank
+    ;   switching related.
+    ;
+    ; - The part of the VBL handler that can be re-entered during another VBL
+    ;   processing doesn't modify the VRAM, it only uptades a few registers
+    ;   and the OAM (with DMA).
+    ;
+    ; - In the VBL handler the only functions that modify the VRAM are the
+    ;   map scrolling functions, that are thread-safe since they disable
+    ;   interrupts in critical periods.
+    ;
+    ; - During the simulation the VRAM can be modified, and that code must
+    ;   be thread-safe (disable interrupts between "wait to screen blank" and
+    ;   the actual write).
+
 .loop:
 
     call    wait_vbl
@@ -690,6 +710,10 @@ RoomGame::
     ld      a,[simulation_running]
     and     a,a ; Check if simulation has been requested
     jr      z,.skip_simulation
+
+        ; All VRAM-modifying code inside this loop must be thread-safe as it
+        ; can be interrupted by the VBL handler and it can take a long time to
+        ; return control to the simulation loop.
 
         LONG_CALL   Simulation_PowerDistribution
         LONG_CALL   Simulation_PowerDistributionSetTileOkFlag
