@@ -75,6 +75,9 @@ OVERLAY_ICON_TILE_BASE EQU 4 ; Sprite base for overlay icon (4 needed)
 MENU_BASE_X EQU 8+(4) ; 4 pixels from left
 MENU_BASE_Y EQU 16+(-8) ; 8 pixels overflow from top
 
+BUILD_SELECT_CURSOR_TILE    EQU $14
+BUILD_SELECT_CURSOR_PALETTE EQU 5
+
 ;-------------------------------------------------------------------------------
 
 WHITE   EQU (31<<10)|(31<<5)|(31<<0)
@@ -161,8 +164,6 @@ ICON_TO_BUILDING_PAL: ; Get palette and building from icon
     ICON_SET_BUILDING Icon_PowerPlantWind, B_PowerPlantWind, 0,0
     ICON_SET_BUILDING Icon_PowerPlantSolar, B_PowerPlantSolar, 5,5
     ICON_SET_BUILDING Icon_PowerPlantFusion, B_PowerPlantFusion, 1,1
-
-    ICON_SET_BUILDING Icon_Cursor, B_None, 5,5
 
     ; For unused spaces on the menu
     ICON_SET_BUILDING Icon_NULL, B_None, 0,0
@@ -306,6 +307,73 @@ _BuildSelectMenuDrawIcon: ; a = icon (not NULL!), c = spr base, d = x, e = y
 
     ret
 
+;-------------------------------------------------------------------------------
+
+; c is updated when returning
+_BuildSelectMenuDrawIconCursor: ; c = spr base, d = x, e = y
+
+    push    bc ; save for moving the sprites later (***)
+    push    de
+
+        ; C = Sprite base
+
+        ; Set tiles and palettes
+
+        ; Left
+
+        ld      a,BUILD_SELECT_CURSOR_TILE
+        ld      l,c
+        push    bc
+        call    sprite_set_tile ; a = tile    l = sprite number
+        pop     bc
+
+        ld      a,BUILD_SELECT_CURSOR_PALETTE
+        ld      l,c
+        push    bc
+        call    sprite_set_params ;  a = params    l = sprite number
+        pop     bc
+
+        ; Right
+
+        inc     c
+        ld      a,BUILD_SELECT_CURSOR_TILE
+        ld      l,c
+        push    bc
+        call    sprite_set_tile ; a = tile    l = sprite number
+        pop     bc
+
+        ld      a,BUILD_SELECT_CURSOR_PALETTE|OAMF_XFLIP
+        ld      l,c
+        call    sprite_set_params ;  a = params    l = sprite number
+
+    pop     de ; restore for moving the sprites (***)
+    pop     bc
+
+    ; Move sprites last to prevent glitches
+
+    push    bc
+
+    ld      l,c
+    ld      b,d
+    ld      c,e
+    push    hl
+    push    bc
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+    pop     bc
+    pop     hl
+    inc     l
+    ld      a,8
+    add     a,b
+    ld      b,a ; add 8 to X
+    call    sprite_set_xy ; b = x    c = y    l = sprite number
+
+    pop     bc
+
+    inc c
+    inc c ; increase oam base index for next icon
+
+    ret
+
 ;---------------------------------------
 
 ; returns b=0 if nothing was drawn, b=1 if it was drawn
@@ -399,8 +467,7 @@ _BuildSelectMenuDrawRow: ; a = row number, b = is selected, c = spr base, e = y
                         ld      a,c
                         ld      [menu_cursor_oam_base],a ; save oam base
 
-                        ld      a,Icon_Cursor ; a = icon, c = spr base, de = xy
-                        call    _BuildSelectMenuDrawIcon
+                        call    _BuildSelectMenuDrawIconCursor
                         pop     de
 
 .not_the_same:
