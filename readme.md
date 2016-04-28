@@ -18,12 +18,14 @@ you are interested please contact me at my email (antonio_nd@outlook.com).
 
 General to do list:
 - Minimap screen (with different maps) - Almost finished
-- Simulation
+- Simulation - In progress
+  - Graphical response
 - Save menus
 - Budget screen
 - Sample cities
 - Random map generator
 - Compression
+- Cleanup code and document
 
 ![](screenshot.png)
 
