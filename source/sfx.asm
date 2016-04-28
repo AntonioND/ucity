@@ -41,4 +41,7 @@ SFX_Demolish:: ; Building demolished
 SFX_Clear:: ; Remove destroyed tile
     ret
 
+SFX_ErrorUI:: ; Invalid option in menu, etc
+    ret
+
 ;###############################################################################

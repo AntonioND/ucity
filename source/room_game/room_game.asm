@@ -300,9 +300,12 @@ PauseMenuHandleOption:
         ; Minimap
         ld      a,[simulation_running]
         and     a,a ; If minimap room is entered while a simulation is running
-        ret     nz  ; bad things will happen.
+        jr      z,.continue_minimap  ; bad things will happen.
+        call    SFX_ErrorUI
+        ret
 
-        call    RoomMinimap ; TODO Move this to main function?
+.continue_minimap:
+        call    RoomMinimap
 
         ld      a,0 ; load gfx only
         call    RoomGameLoad
@@ -462,10 +465,6 @@ InputHandleModeEdit:
     ld      b,[hl] ; get old y
     ld      [hl],d ; save new y
 
-    ld      a,[simulation_running]
-    and     a,a ; If something is built mode while a simulation is running bad
-    jr      nz,.end_draw_check  ; things will happen
-
     ld      a,c
     sub     a,e
     ld      c,a ; c = old x - new x
@@ -473,18 +472,32 @@ InputHandleModeEdit:
     sub     a,d ; a = old y - new y
 
     or      a,c ; if there is any difference, a != 0
-    jr      z,.check_a_new_press
-    ld      a,[joy_held]
+    jr      z,.check_a_new_press ; if there are no difference, check newpress
+
+    ld      a,[joy_held] ; if there are differences, check movement while hold
     and     a,PAD_A
-    jr      z,.check_a_new_press
-    call    CityMapDraw
-    jr      .end_draw_check
+    jr      nz,.end_draw
+
+    jr      .end_no_draw
+
 .check_a_new_press:
     ld      a,[joy_pressed]
     and     a,PAD_A
-    call    nz,CityMapDraw
-.end_draw_check:
+    jr      nz,.end_draw
 
+.end_no_draw:
+    ret
+
+.end_draw:
+    ld      a,[simulation_running]
+    and     a,a ; If something is built mode while a simulation is running bad
+    jr      nz,.error_draw ; things will happen
+
+    call    CityMapDraw
+    ret
+
+.error_draw:
+    call    SFX_ErrorUI
     ret
 
 ;-------------------------------------------------------------------------------
