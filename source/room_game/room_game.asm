@@ -731,9 +731,7 @@ RoomGame::
     ;   be thread-safe (disable interrupts between "wait to screen blank" and
     ;   the actual write).
 
-.loop:
-
-    call    wait_vbl
+.main_loop:
 
     ld      a,[simulation_running]
     and     a,a ; Check if simulation has been requested
@@ -754,9 +752,17 @@ RoomGame::
 
         call    CPUBusyIconHide
 
+        jr      .end_simulation
+
 .skip_simulation:
 
-    jr      .loop
+        halt
+
+        ;jr      .end_simulation
+
+.end_simulation:
+
+    jr      .main_loop
 
     call    SetDefaultVBLHandler
 
