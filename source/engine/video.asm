@@ -76,18 +76,6 @@ screen_off::
     ret
 
 ;-------------------------------------------------------------------------------
-;- wait_screen_blank()                                                         -
-;-------------------------------------------------------------------------------
-
-wait_screen_blank::
-
-    ld      a,[rSTAT]
-    bit     1,a
-    jr      nz,wait_screen_blank ; Not mode 0 or 1
-
-    ret
-
-;-------------------------------------------------------------------------------
 ;- vram_nitro_copy()    b = size    de = source address    hl = dest address   -
 ;-------------------------------------------------------------------------------
 
@@ -112,15 +100,18 @@ vram_nitro_copy:: ; use only for data != $FF
 
 vram_copy_fast::
 
-    ld      a,[rSTAT]
+    ld      c,rSTAT & $FF
+
+.loop:
+    ld      a,[$FF00+c]
     bit     1,a
-    jr      nz,vram_copy_fast ; Not mode 0 or 1
+    jr      nz,.loop ; Not mode 0 or 1
 
     ld      a,[hl+]
     ld      [de],a
     inc     de
     dec     b
-    jr      nz,vram_copy_fast
+    jr      nz,.loop
 
     ret
 
@@ -187,17 +178,22 @@ vram_copy_tiles::
     ; de = dest
     ; hl = src
 
-._copy_tile:
+.copy_tile:
 
-    push    bc
-    ld      bc,$0010
-    call    vram_copy
-    pop     bc
+    REPT    16
+.vram_wait\@:
+        ld      a,[rSTAT]
+        bit     1,a
+        jr      nz,.vram_wait\@ ; Not mode 0 or 1
+        ld      a,[hl+]
+        ld      [de],a
+        inc     de
+    ENDR
 
     dec     bc
     ld      a,b
-    or      c
-    jr      nz,._copy_tile
+    or      a,c
+    jp      nz,.copy_tile
 
     ret
 
@@ -282,25 +278,10 @@ spr_set_palette::
     set     7,a ; auto increment
     ld      [rOCPS],a
 
-    ld      a,[hl+]
-    ld      [rOCPD],a
-    ld      a,[hl+]
-    ld      [rOCPD],a
-
-    ld      a,[hl+]
-    ld      [rOCPD],a
-    ld      a,[hl+]
-    ld      [rOCPD],a
-
-    ld      a,[hl+]
-    ld      [rOCPD],a
-    ld      a,[hl+]
-    ld      [rOCPD],a
-
-    ld      a,[hl+]
-    ld      [rOCPD],a
-    ld      a,[hl+]
-    ld      [rOCPD],a
+    REPT 8
+        ld      a,[hl+]
+        ld      [rOCPD],a
+    ENDR
 
     ret
 
@@ -373,25 +354,10 @@ bg_set_palette::
     set     7,a ; auto increment
     ld      [rBCPS],a
 
-    ld      a,[hl+]
-    ld      [rBCPD],a
-    ld      a,[hl+]
-    ld      [rBCPD],a
-
-    ld      a,[hl+]
-    ld      [rBCPD],a
-    ld      a,[hl+]
-    ld      [rBCPD],a
-
-    ld      a,[hl+]
-    ld      [rBCPD],a
-    ld      a,[hl+]
-    ld      [rBCPD],a
-
-    ld      a,[hl+]
-    ld      [rBCPD],a
-    ld      a,[hl+]
-    ld      [rBCPD],a
+    REPT 8
+        ld      a,[hl+]
+        ld      [rBCPD],a
+    ENDR
 
     ret
 

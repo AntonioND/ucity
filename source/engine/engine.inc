@@ -280,13 +280,11 @@ PAD_BIT_RIGHT   EQU 0
 ;-------------------------------------------------------------------------------
 ;- wait_ly()    b = ly to wait for                                             -
 ;- wait_frames()    e = frames to wait                                         -
-;- wait_screen_blank()                                                         -
 ;- screen_off()                                                                -
 ;-------------------------------------------------------------------------------
 
     GLOBAL  wait_ly
     GLOBAL  wait_frames
-    GLOBAL  wait_screen_blank
     GLOBAL  screen_off
 
 ;-------------------------------------------------------------------------------

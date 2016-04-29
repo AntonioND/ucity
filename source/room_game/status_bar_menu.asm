@@ -142,7 +142,8 @@ StatusBarHandlerSTAT:
     jr      nz,.on_top
 
         ; At the bottom
-        call    wait_screen_blank
+
+        WAIT_SCREEN_BLANK
 
         ld      a,[menu_overlay_sprites_active]
         ld      b,a
@@ -159,7 +160,9 @@ StatusBarHandlerSTAT:
 .on_top:
 
         ; On top
-        call    wait_screen_blank
+
+        WAIT_SCREEN_BLANK
+
         ld      a,[game_sprites_8x16]
         or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8800
         ld      [rLCDC],a

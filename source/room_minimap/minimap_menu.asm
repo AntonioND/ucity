@@ -305,7 +305,7 @@ MinimapMenuHide::
 
 MinimapMenuLCDHandler:: ; Only called when it is active, no need to check
 
-    call    wait_screen_blank
+    WAIT_SCREEN_BLANK
 
     ld      a,[rLCDC]
     or      a,LCDCF_BG9C00 ; set 9C00h = menu

@@ -327,40 +327,40 @@ joy_released::  DS 1
 scan_keys::
 
     ld      a,[joy_held]
-    ld      [_joy_old],a   ; current state = old state
-    ld      c,a            ; c = old state
+    ld      [_joy_old],a ; current state = old state
+    ld      c,a          ; c = old state
 
     ld      a,$10
-    ld      [rP1],a  ; select P14
+    ld      [rP1],a ; select P14
     ld      a,[rP1]
-    ld      a,[rP1]  ; wait a few cycles
-    cpl              ; complement A
-    and     a,$0F    ; get only first 4 bits
-    swap    a        ; swap it
-    ld      b,a      ; store A in B
+    ld      a,[rP1] ; wait a few cycles
+    cpl             ; complement A
+    and     a,$0F   ; get only first 4 bits
+    swap    a       ; swap it
+    ld      b,a     ; store A in B
     ld      a,$20
-    ld      [rP1],a  ; select P15
+    ld      [rP1],a ; select P15
     ld      a,[rP1]
     ld      a,[rP1]
     ld      a,[rP1]
     ld      a,[rP1]
     ld      a,[rP1]
-    ld      a,[rP1]  ; Wait a few MORE cycles
+    ld      a,[rP1] ; Wait a few MORE cycles
     cpl
     and     a,$0F
-    or      a,b      ; put A and B together
+    or      a,b     ; put A and B together
 
     ld      [joy_held],a
 
-    ld      b,a   ; b = current state
-    ld      a,c   ; c = old state
-    cpl           ; a = not a
-    and     a,b   ; pressed = (NOT old) AND current
+    ld      b,a ; b = current state
+    ld      a,c ; c = old state
+    cpl         ; a = not a
+    and     a,b ; pressed = (NOT old) AND current
 
     ld      [joy_pressed],a
 
-    ld      a,$00    ; deselect P14 and P15
-    ld      [rP1],a  ; RESET Joypad
+    ld      a,$00   ; deselect P14 and P15
+    ld      [rP1],a ; RESET Joypad
 
     ld      a,[_joy_old]
     ld      b,a ; b = old state
@@ -423,7 +423,7 @@ rom_bank_pop:: ; should preserve bc
     ld      l,a
     ld      a,0
     adc     a,h ; hl += a
-    ld      h,a    ; hl now holds the pointer to the bank we want to change to
+    ld      h,a ; hl now holds the pointer to the bank we want to change to
     ld      a,[hl] ; and a the bank we want to change to
 
     ld      [rROMB0],a ; select rom bank
@@ -462,10 +462,10 @@ rom_bank_set::
     ld      e,a
     add     hl,de
 
-    ld      a,b               ; hl = pointer to stack, a = bank to change to
+    ld      a,b ; hl = pointer to stack, a = bank to change to
 
     ld      [hl],a
-    ld      [rROMB0],a        ; select rom bank
+    ld      [rROMB0],a ; select rom bank
 
     ld      a,c
     ld      [rIE],a
@@ -476,7 +476,7 @@ rom_bank_set::
 ;- rom_bank_push_set()    b = bank to change to                                -
 ;-------------------------------------------------------------------------------
 
-rom_bank_push_set::
+rom_bank_push_set:: ; preserves de
 
     ld      a,[rIE]
     ld      c,a
@@ -488,15 +488,17 @@ rom_bank_push_set::
 
     ld      hl,rom_stack
 
-    ld      d,$00
     ld      a,[rom_position]
-    ld      e,a
-    add     hl,de
+    add     a,l
+    ld      l,a
+    ld      a,0
+    adc     a,h
+    ld      h,a
 
-    ld      a,b               ; hl = pointer to stack, a = bank to change to
+    ld      a,b ; hl = pointer to stack, a = bank to change to
 
     ld      [hl],a
-    ld      [rROMB0],a        ; select rom bank
+    ld      [rROMB0],a ; select rom bank
 
     ld      a,c
     ld      [rIE],a
@@ -523,12 +525,10 @@ ___long_call::
 ; Returned values in any register are preserved through this call
 ___long_call_args::
     push    bc
-    push    de
     push    hl
     ld      b,a
-    call    rom_bank_push_set
+    call    rom_bank_push_set ; preserves de
     pop     hl
-    pop     de
     pop     bc
     CALL_HL
     push    af
