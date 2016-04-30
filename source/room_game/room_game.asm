@@ -128,6 +128,8 @@ GameStateMachineHandle::
 
         call    StatusBarUpdate ; Update status bar text
 
+        call    CPUBusyIconHandle ; Not simulating, update busy icon
+
         ret
 
 .not_edit:
@@ -169,10 +171,11 @@ GameStateMachineHandle::
         ; The menu is an extended status bar, so...
         call    StatusBarUpdate ; Update status bar text
 
+        call    CPUBusyIconHandle ; Not simulating, update busy icon
+
         ret
 
 .not_pause_menu:
-
 
     ; Panic!
     ld      b,b ; Breakpoint

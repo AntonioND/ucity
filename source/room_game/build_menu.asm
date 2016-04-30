@@ -52,6 +52,8 @@ build_overlay_icon_active: DS 1
 
 menu_overlay_sprites_active:: DS 1 ; LCDCF_OBJON or 0
 
+cpu_busy_icon_active: DS 1
+
 ;###############################################################################
 
     SECTION "City Map Draw Menu Functions",ROMX
@@ -1119,15 +1121,11 @@ BuildOverlayIconHide::
 
 ;-------------------------------------------------------------------------------
 
-CPUBusyIconShow::
+CPUBusyIconHandle::
 
-    ld      a,CPU_BUSY_ICON_TILE
-    ld      l,CPU_BUSY_ICON_OAM_BASE
-    call    sprite_set_tile ; a = tile    l = sprite number
-
-    ld      a,CPU_BUSY_ICON_PALETTE
-    ld      l,CPU_BUSY_ICON_OAM_BASE
-    call    sprite_set_params ;  a = params    l = sprite number
+    ld      a,[cpu_busy_icon_active]
+    and     a,a
+    ret     z
 
     ld      a,[status_menu_active]
     and     a,a
@@ -1155,11 +1153,35 @@ CPUBusyIconShow::
 
     ret
 
+;-------------------------------------------------------------------------------
+
+CPUBusyIconShow::
+
+    ld      a,CPU_BUSY_ICON_TILE
+    ld      l,CPU_BUSY_ICON_OAM_BASE
+    call    sprite_set_tile ; a = tile    l = sprite number
+
+    ld      a,CPU_BUSY_ICON_PALETTE
+    ld      l,CPU_BUSY_ICON_OAM_BASE
+    call    sprite_set_params ;  a = params    l = sprite number
+
+    ld      a,1
+    ld      [cpu_busy_icon_active],a
+
+    call    CPUBusyIconHandle
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 CPUBusyIconHide::
 
     ld      bc,$0000
     ld      l,CPU_BUSY_ICON_OAM_BASE
     call    sprite_set_xy ; b = x    c = y    l = sprite number
+
+    xor     a,a
+    ld      [cpu_busy_icon_active],a
 
     ret
 
