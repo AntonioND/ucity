@@ -437,7 +437,8 @@ MinimapMenuLoadGFX::
     ; -------------
 
     ; Wait until VBL
-    di
+
+    di ; Entering critical section
 
     ld      b,144
     call    wait_ly
@@ -458,7 +459,7 @@ MinimapMenuLoadGFX::
     ld      a,MINIMAP_SPRITE_PALETTE_INDEX
     call    spr_set_palette
 
-    ei
+    ei ; End of critical section
 
     call    rom_bank_pop
 

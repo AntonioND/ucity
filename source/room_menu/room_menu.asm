@@ -161,11 +161,11 @@ RoomMenu::
     ld      b,0 ; bank at 8000h
     call    LoadText
 
-    di
+    di ; Entering critical section
+
     ld      b,144
     call    wait_ly
     call    LoadTextPalette
-    ei
 
     xor     a,a
     ld      [rIF],a
@@ -173,7 +173,7 @@ RoomMenu::
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
     ld      [rLCDC],a
 
-    ei
+    ei ; End of critical section
 
 .loop:
 

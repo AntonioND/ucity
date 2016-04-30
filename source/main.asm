@@ -156,6 +156,13 @@ NotGBC: ; TODO : Error screen
 
 Main:
 
+    xor     a,a
+    ld      [rIE],a
+
+    ; Enable interrupts forever. No code is allowed to disable them unless it is
+    ; a critical section.
+    ei
+
     ld      a,[EnabledGBC]
     and     a,a
     call    z,NotGBC
@@ -167,12 +174,10 @@ Main:
     ld      a,LCDCF_ON
     ld      [rLCDC],a
 
-    ld      hl,rIE
-    set     0,[hl] ; IEF_VBLANK
-
     call    SetDefaultVBLHandler
 
-    ei
+    ld      hl,rIE
+    set     0,[hl] ; IEF_VBLANK
 
 .main_loop:
     call    RoomMenu
@@ -206,7 +211,7 @@ SetPalettesAllBlack::
     and     a,a
     ret     z
 
-    di
+    di ; Entering critical section
 
     ld      b,144
     call    wait_ly
@@ -230,7 +235,7 @@ SetPalettesAllBlack::
     dec     b
     jr      nz,.loop
 
-    ei
+    ei ; End of critical section
 
     ret
 

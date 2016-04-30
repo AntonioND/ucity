@@ -255,7 +255,7 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
         cp      a,$E0 ; prevent reads from ECHO RAM or higher
         jp      nc,.end
 
-        di
+        di ; Entering critical section
 
 .wait\@: ; wait until mode 0 or 1
         ld      a,[$FF00+c]
@@ -266,7 +266,7 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
         inc     de
         ld      [hl+],a
 
-        ei
+        ei ; End of critical section
 
         inc     b
 
@@ -353,7 +353,7 @@ ____vram_copy_column_wrap: ; b = x, c = y, hl = source address
     ld      c,rSTAT & $FF
 
     REPT 20
-        di
+        di ; Entering critical section
 
 .wait\@: ; wait until mode 0 or 1
         ld      a,[$FF00+c]
@@ -364,7 +364,7 @@ ____vram_copy_column_wrap: ; b = x, c = y, hl = source address
         inc     de
         ld      [hl],a
 
-        ei
+        ei ; End of critical section
 
         push    bc
         ld      bc,32
@@ -727,7 +727,9 @@ _bg_load::
     ; LOAD PALETTES
 
     ; Wait until VBL
-    di
+
+    di ; Entering critical section
+
     ld      b,144
     call    wait_ly
 
@@ -744,7 +746,9 @@ _bg_load::
     inc     a
     cp      a,b
     jr      nz,.pal_loop
-    ei
+
+    ei ; End of critical section
+
     ; FINISHED!
 
     call    rom_bank_pop ; ***

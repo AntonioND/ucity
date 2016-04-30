@@ -529,7 +529,7 @@ APA_BufferUpdate::
 
 APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX. Waits until VBL!
 
-    di
+    di ; Entering critical section
 
     ld      b,144
     call    wait_ly
@@ -537,9 +537,7 @@ APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX. Waits until VBL!
     ld      a,APA_PALETTE_INDEX
     call    bg_set_palette
 
-    ei
-
-    ret
+    reti ; End of critical section
 
 ;-------------------------------------------------------------------------------
 

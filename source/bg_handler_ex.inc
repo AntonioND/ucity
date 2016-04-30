@@ -277,7 +277,8 @@ TILE_SIZE EQU (8*8/4)
     ; LOAD PALETTES
 
     ; Wait until VBL
-    di
+
+    di ; Entering critical section
 
     ld      b,144
     call    wait_ly
@@ -301,7 +302,7 @@ TILE_SIZE EQU (8*8/4)
     ld      a,7
     call    bg_set_palette
 
-    ei
+    ei ; End of critical section
 
     ; FINISHED!
 

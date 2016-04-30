@@ -1033,7 +1033,8 @@ ENDC
     call    rom_bank_set
 
     ; Wait until VBL
-    di
+
+    di ; Entering critical section
 
     ld      b,144
     call    wait_ly
@@ -1053,7 +1054,7 @@ ENDC
     ld      a,5
     call    spr_set_palette
 
-    ei
+    ei ; End of critical section
 
     call    rom_bank_pop
 

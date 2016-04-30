@@ -377,16 +377,23 @@ scan_keys::
 ;#                                                                             #
 ;###############################################################################
 
-    SECTION "RomHandlerVariables",WRAM0
+    SECTION "ROM Handler Stack",WRAM0
 
 ;-------------------------------------------------------------------------------
 
 rom_stack:      DS $20
+
+;###############################################################################
+
+    SECTION "ROM Handler Variables",HRAM
+
+;-------------------------------------------------------------------------------
+
 rom_position:   DS 1
 
 ;###############################################################################
 
-    SECTION "RomHandler",ROM0
+    SECTION "ROM Handler",ROM0
 
 ;-------------------------------------------------------------------------------
 ;- rom_handler_init()                                                          -
@@ -395,7 +402,7 @@ rom_position:   DS 1
 rom_handler_init::
 
     xor     a,a
-    ld      [rom_position],a
+    ldh     [rom_position],a
 
     ld      b,1
     call    rom_bank_set  ; select rom bank 1
@@ -406,19 +413,18 @@ rom_handler_init::
 ;- rom_bank_pop()                                                              -
 ;-------------------------------------------------------------------------------
 
-rom_bank_pop:: ; should preserve bc
+rom_bank_pop:: ; should preserve bc and de
 
-    ld      a,[rIE]
-    ld      d,a
-    xor     a,a
-    ld      [rIE],a
-
-    ld      hl,rom_position
-    dec     [hl]
+    di
 
     ld      hl,rom_stack
 
-    ld      a,[rom_position]
+    ld      hl,rom_position
+    dec     [hl]
+    ld      a,[hl]
+
+    ld      hl,rom_stack
+
     add     a,l
     ld      l,a
     ld      a,0
@@ -428,10 +434,7 @@ rom_bank_pop:: ; should preserve bc
 
     ld      [rROMB0],a ; select rom bank
 
-    ld      a,d
-    ld      [rIE],a
-
-    ret
+    reti
 
 ;-------------------------------------------------------------------------------
 ;- rom_bank_push()                                                             -
@@ -448,47 +451,13 @@ rom_bank_push::
 ;- rom_bank_set()    b = bank to change to                                     -
 ;-------------------------------------------------------------------------------
 
-rom_bank_set::
+rom_bank_set:: ; preserves de
 
-    ld      a,[rIE]
-    ld      c,a
-    xor     a,a
-    ld      [rIE],a
+    di
 
     ld      hl,rom_stack
 
-    ld      d,$00
-    ld      a,[rom_position]
-    ld      e,a
-    add     hl,de
-
-    ld      a,b ; hl = pointer to stack, a = bank to change to
-
-    ld      [hl],a
-    ld      [rROMB0],a ; select rom bank
-
-    ld      a,c
-    ld      [rIE],a
-
-    ret
-
-;-------------------------------------------------------------------------------
-;- rom_bank_push_set()    b = bank to change to                                -
-;-------------------------------------------------------------------------------
-
-rom_bank_push_set:: ; preserves de
-
-    ld      a,[rIE]
-    ld      c,a
-    xor     a,a
-    ld      [rIE],a
-
-    ld      hl,rom_position
-    inc     [hl]
-
-    ld      hl,rom_stack
-
-    ld      a,[rom_position]
+    ldh     a,[rom_position]
     add     a,l
     ld      l,a
     ld      a,0
@@ -500,22 +469,44 @@ rom_bank_push_set:: ; preserves de
     ld      [hl],a
     ld      [rROMB0],a ; select rom bank
 
-    ld      a,c
-    ld      [rIE],a
+    reti
 
-    ret
+;-------------------------------------------------------------------------------
+;- rom_bank_push_set()    b = bank to change to                                -
+;-------------------------------------------------------------------------------
+
+rom_bank_push_set:: ; preserves de
+
+    di
+
+    ld      hl,rom_position
+    inc     [hl]
+    ld      a,[hl]
+
+    ld      hl,rom_stack
+    add     a,l
+    ld      l,a
+    ld      a,0
+    adc     a,h
+    ld      h,a
+
+    ld      a,b ; hl = pointer to stack, a = bank to change to
+
+    ld      [hl],a
+    ld      [rROMB0],a ; select rom bank
+
+    reti
 
 ;-------------------------------------------------------------------------------
 ;- ___long_call()    hl = function    b = bank where it is located             -
 ;-------------------------------------------------------------------------------
 
 ___long_call::
-    push    hl
-    call    rom_bank_push_set
-    pop     hl
+    LD_DE_HL
+    call    rom_bank_push_set ; preserves DE
+    LD_HL_DE
     CALL_HL
-    call    rom_bank_pop
-    ret
+    jr      rom_bank_pop
 
 ;-------------------------------------------------------------------------------
 ;- ___long_call_args()    hl = function    a = bank where it is located        -
@@ -524,19 +515,17 @@ ___long_call::
 ; It can use bc and de for passing arguments
 ; Returned values in any register are preserved through this call
 ___long_call_args::
-    push    bc
+    push    bc ; preserve bc and de, they are arguments
     push    hl
     ld      b,a
     call    rom_bank_push_set ; preserves de
     pop     hl
     pop     bc
     CALL_HL
-    push    af
-    push    de
+    push    af ; all returned values are useful in principle
     push    hl
-    call    rom_bank_pop ; preserves bc
+    call    rom_bank_pop ; preserves bc and de
     pop     hl
-    pop     de
     pop     af
     ret
 

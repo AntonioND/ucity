@@ -164,7 +164,7 @@ APA_PALETTE_DEFAULT:
 
 MinimapSetDefaultPalette::
 
-    di
+    di ; Entering critical section
 
     ld      b,144
     call    wait_ly
@@ -172,7 +172,7 @@ MinimapSetDefaultPalette::
     ld      hl,APA_PALETTE_DEFAULT
     call    APA_LoadPalette
 
-    ei
+    ei ; End of critical section
 
     ret
 
@@ -294,7 +294,8 @@ RoomMinimapLoadBG:
         ; Load palettes
         ; -------------
 
-        di
+        di ; Entering critical section
+
         ld      b,144
         call    wait_ly
 
@@ -311,7 +312,7 @@ RoomMinimapLoadBG:
         ld      hl,APA_PALETTE_DEFAULT
         call    APA_LoadPalette
 
-        ei
+        ei ; End of critical section
 
     call    rom_bank_pop
 
@@ -410,13 +411,13 @@ RoomMinimap::
 
     call    RoomMinimapLoadBG
 
-    di
+    di ; Entering critical section
 
     ld      b,144
     call    wait_ly
     call    LoadTextPalette
 
-    ei
+    ei ; End of critical section
 
     ld      a,MINIMAP_SELECTION_GENERAL_VIEW
     ld      [minimap_selected_map],a
