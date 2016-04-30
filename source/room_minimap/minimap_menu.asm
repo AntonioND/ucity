@@ -436,30 +436,24 @@ MinimapMenuLoadGFX::
     ; Load palettes
     ; -------------
 
-    ; Wait until VBL
-
-    di ; Entering critical section
-
-    ld      b,144
-    call    wait_ly
-
     ld      hl,MINIMAP_MENU_PALETTES
 
     ld      a,0
-    call    bg_set_palette ; hl will increase inside
+    call    bg_set_palette_safe ; hl will increase inside
     ld      a,1
-    call    bg_set_palette
+    call    bg_set_palette_safe
     ld      a,2
-    call    bg_set_palette
+    call    bg_set_palette_safe
     ld      a,3
-    call    bg_set_palette
+    call    bg_set_palette_safe
 
     ld      hl,MINIMAP_MENU_SPRITE_PALETTE
 
     ld      a,MINIMAP_SPRITE_PALETTE_INDEX
-    call    spr_set_palette
+    call    spr_set_palette_safe
 
-    ei ; End of critical section
+    ; End
+    ; ---
 
     call    rom_bank_pop
 

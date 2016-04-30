@@ -165,13 +165,14 @@ RoomMenu::
 
     ld      b,144
     call    wait_ly
-    call    LoadTextPalette
 
     xor     a,a
     ld      [rIF],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
     ld      [rLCDC],a
+
+    call    LoadTextPalette
 
     ei ; End of critical section
 

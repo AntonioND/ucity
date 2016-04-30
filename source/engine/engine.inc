@@ -313,6 +313,7 @@ PAD_BIT_RIGHT   EQU 0
 ;- sprite_set_params()    a = params    l = sprite number                      -
 ;-                                                                             -
 ;- spr_set_palette()    a = palette number    hl = pointer to data             -
+;- spr_set_palette_safe()    a = palette number    hl = pointer to data        -
 ;-------------------------------------------------------------------------------
 
     GLOBAL  init_OAM
@@ -323,6 +324,7 @@ PAD_BIT_RIGHT   EQU 0
     GLOBAL  sprite_set_tile
     GLOBAL  sprite_set_params
     GLOBAL  spr_set_palette
+    GLOBAL  spr_set_palette_safe
 
 ;===============================================================================
 ;=                                  VARIABLES                                  =
@@ -335,11 +337,13 @@ PAD_BIT_RIGHT   EQU 0
 ;- bg_set_tile_wrap()    b = x    c = y    a = tile index                      -
 ;-                                                                             -
 ;- bg_set_palette()    a = palette number    hl = pointer to data              -
+;- bg_set_palette_safe()    a = palette number    hl = pointer to data         -
 ;-------------------------------------------------------------------------------
 
     GLOBAL  bg_set_tile
     GLOBAL  bg_set_tile_wrap
     GLOBAL  bg_set_palette
+    GLOBAL  bg_set_palette_safe
 
 ;###############################################################################
 

@@ -527,7 +527,10 @@ APA_BufferUpdate::
 
 ;-------------------------------------------------------------------------------
 
-APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX. Waits until VBL!
+APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX
+
+    ; The BG is shown as soon as VBL finishes, so the palette must be loaded
+    ; during VBL to prevent half of the BG being shown one frame before the rest
 
     di ; Entering critical section
 

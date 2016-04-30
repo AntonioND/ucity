@@ -286,6 +286,30 @@ spr_set_palette::
     ret
 
 ;-------------------------------------------------------------------------------
+;- spr_set_palette_safe()    a = palette number    hl = pointer to data        -
+;-------------------------------------------------------------------------------
+
+spr_set_palette_safe::
+
+    swap    a ; \  multiply
+    rrca      ; /  palette by 8
+
+    set     7,a ; auto increment
+    ld      [rOCPS],a
+
+    ld      b,8
+.loop:
+
+    WAIT_SCREEN_BLANK
+    ld      a,[hl+]
+    ld      [rOCPD],a
+
+    dec b
+    jr  nz,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
 ;- init_OAM()                                                                  -
 ;-------------------------------------------------------------------------------
 
@@ -358,6 +382,30 @@ bg_set_palette::
         ld      a,[hl+]
         ld      [rBCPD],a
     ENDR
+
+    ret
+
+;-------------------------------------------------------------------------------
+;- bg_set_palette_safe()    a = palette number    hl = pointer to data         -
+;-------------------------------------------------------------------------------
+
+bg_set_palette_safe::
+
+    swap    a ; \  multiply
+    rrca      ; /  palette by 8
+
+    set     7,a ; auto increment
+    ld      [rBCPS],a
+
+    ld      b,8
+.loop:
+
+    WAIT_SCREEN_BLANK
+    ld      a,[hl+]
+    ld      [rBCPD],a
+
+    dec b
+    jr  nz,.loop
 
     ret
 

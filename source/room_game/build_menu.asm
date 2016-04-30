@@ -1032,29 +1032,22 @@ ENDC
     ld      b,BANK(BUILD_SELECT_SPRITES_PALETTES)
     call    rom_bank_set
 
-    ; Wait until VBL
-
-    di ; Entering critical section
-
-    ld      b,144
-    call    wait_ly
+    ; Load palettes - Not critical, the menu isn't shown right away
 
     ld      hl,BUILD_SELECT_SPRITES_PALETTES
 
     ld      a,0
-    call    spr_set_palette ; hl will increase inside
+    call    spr_set_palette_safe ; hl will increase inside
     ld      a,1
-    call    spr_set_palette
+    call    spr_set_palette_safe
     ld      a,2
-    call    spr_set_palette
+    call    spr_set_palette_safe
     ld      a,3
-    call    spr_set_palette
+    call    spr_set_palette_safe
     ld      a,4
-    call    spr_set_palette
+    call    spr_set_palette_safe
     ld      a,5
-    call    spr_set_palette
-
-    ei ; End of critical section
+    call    spr_set_palette_safe
 
     call    rom_bank_pop
 

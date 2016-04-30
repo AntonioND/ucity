@@ -263,10 +263,11 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
         jr      nz,.wait\@
 
         ld      a,[de]
-        inc     de
         ld      [hl+],a
 
         ei ; End of critical section
+
+        inc     de
 
         inc     b
 
@@ -361,10 +362,11 @@ ____vram_copy_column_wrap: ; b = x, c = y, hl = source address
         jr      nz,.wait\@
 
         ld      a,[de]
-        inc     de
         ld      [hl],a
 
         ei ; End of critical section
+
+        inc     de
 
         push    bc
         ld      bc,32
@@ -726,7 +728,7 @@ _bg_load::
 
     ; LOAD PALETTES
 
-    ; Wait until VBL
+    ; Wait until VBL - Palettes must be loaded at once
 
     di ; Entering critical section
 

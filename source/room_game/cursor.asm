@@ -74,18 +74,11 @@ CursorLoad::
 
     ; Load palette
 
-    di ; Entering critical section
-
-    ld      b,144
-    call    wait_ly
-
     ld      a,CURSOR_SPR_PAL
     ld      hl,cursor_palette
-    call    spr_set_palette
+    call    spr_set_palette_safe
 
-    ei ; End of critical section
-
-    ; Load tiles
+    ; Load tiles - Not needed, loaded with text tiles
 
 ;    xor     a,a
 ;    ld      [rVBK],a

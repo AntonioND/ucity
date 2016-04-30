@@ -51,11 +51,11 @@ TEXT_PALETTE:: ; To be loaded in slot 7
     DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
     DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
 
-LoadTextPalette:: ; Load text palette into slot 7. Do this during VBL!
+LoadTextPalette:: ; Load text palette into slot 7
 
     ld      a,7
     ld      hl,TEXT_PALETTE
-    call    bg_set_palette
+    call    bg_set_palette_safe
 
     ret
 

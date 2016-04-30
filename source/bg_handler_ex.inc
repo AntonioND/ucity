@@ -274,7 +274,8 @@ TILE_SIZE EQU (8*8/4)
     ld      hl,CITY_TILESET+TILE_SIZE*(HALF_TILES_ONE_BANK*3)
     call    vram_copy_tiles
 
-    ; LOAD PALETTES
+    ; LOAD PALETTES - Must be done within a VBL period because the will be shown
+    ; as soon as it ends - CRITICAL!
 
     ; Wait until VBL
 

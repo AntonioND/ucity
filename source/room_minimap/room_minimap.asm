@@ -164,15 +164,8 @@ APA_PALETTE_DEFAULT:
 
 MinimapSetDefaultPalette::
 
-    di ; Entering critical section
-
-    ld      b,144
-    call    wait_ly
-
     ld      hl,APA_PALETTE_DEFAULT
     call    APA_LoadPalette
-
-    ei ; End of critical section
 
     ret
 
@@ -294,7 +287,7 @@ RoomMinimapLoadBG:
         ; Load palettes
         ; -------------
 
-        di ; Entering critical section
+        di ; Entering critical section - BG will be shown as soon as VBL ends
 
         ld      b,144
         call    wait_ly
@@ -310,7 +303,7 @@ RoomMinimapLoadBG:
         jr      nz,.loop_pal
 
         ld      hl,APA_PALETTE_DEFAULT
-        call    APA_LoadPalette
+        call    APA_LoadPalette ; This enables the interrupts with a 'reti'
 
         ei ; End of critical section
 
@@ -332,9 +325,11 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
     ld      hl,$9800
     ld      b,20
 .clear_loop:
+    di ; Entering critical section
     WAIT_SCREEN_BLANK ; Clobbers A and C
     xor     a,a
     ld      [hl+],a
+    ei ; End of critical section
     dec     b
     jr      nz,.clear_loop
 
@@ -380,10 +375,12 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
     pop     hl
 
     ld      b,a
+    di ; Entering critical section
     WAIT_SCREEN_BLANK ; Clobbers A and C
     ld      a,b
 
     ld      [de],a
+    ei ; End of critical section
     inc     de
 
     jr      .loop
@@ -411,13 +408,7 @@ RoomMinimap::
 
     call    RoomMinimapLoadBG
 
-    di ; Entering critical section
-
-    ld      b,144
-    call    wait_ly
     call    LoadTextPalette
-
-    ei ; End of critical section
 
     ld      a,MINIMAP_SELECTION_GENERAL_VIEW
     ld      [minimap_selected_map],a
