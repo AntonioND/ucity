@@ -451,8 +451,10 @@ ENDC
 .loop1_out:
     ld      e,APA_TILE_WIDTH
 .loop1_in:
+        di ; Entering critical section
         WAIT_SCREEN_BLANK
         ld      [hl],b
+        ei ; End of critical section
         inc     hl
         inc     b
         dec     e
@@ -476,9 +478,11 @@ ENDC
 .loop2_out:
     ld      e,APA_TILE_WIDTH
 .loop2_in:
+        di ; Entering critical section
         WAIT_SCREEN_BLANK
         ld      a,APA_PALETTE_INDEX|(1<<3) ; BANK 1
         ld      [hl+],a
+        ei ; End of critical section
         dec     e
         jr      nz,.loop2_in
 

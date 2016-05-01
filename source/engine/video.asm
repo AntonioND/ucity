@@ -300,9 +300,11 @@ spr_set_palette_safe::
     ld      b,8
 .loop:
 
+    di ; Entering critical section
     WAIT_SCREEN_BLANK
     ld      a,[hl+]
     ld      [rOCPD],a
+    ei ; End of critical section
 
     dec b
     jr  nz,.loop
@@ -400,9 +402,11 @@ bg_set_palette_safe::
     ld      b,8
 .loop:
 
+    di ; Entering critical section
     WAIT_SCREEN_BLANK
     ld      a,[hl+]
     ld      [rBCPD],a
+    ei ; End of critical section
 
     dec b
     jr  nz,.loop

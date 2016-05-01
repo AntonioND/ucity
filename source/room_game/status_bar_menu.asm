@@ -132,9 +132,13 @@ StatusBarRefreshStatRegisters:
 
 StatusBarHandlerSTAT:
 
+    ; This handler is only called if the status bar is active, no need to check.
 ;    ld      a,[status_bar_active]
 ;    and     a,a
 ;    ret     z
+
+    ; This is a critical section, but as we are inside an interrupt handler
+    ; there is no need to use 'di' and 'ei' with WAIT_SCREEN_BLANK.
 
     ; Check if on top or at the bottom
     ld      a,[status_bar_on_top]

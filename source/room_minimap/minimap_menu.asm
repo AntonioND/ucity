@@ -305,6 +305,9 @@ MinimapMenuHide::
 
 MinimapMenuLCDHandler:: ; Only called when it is active, no need to check
 
+    ; This is a critical section, but inside an interrupt handler, so no need
+    ; to use 'di' and 'ei' with WAIT_SCREEN_BLANK.
+
     WAIT_SCREEN_BLANK
 
     ld      a,[rLCDC]
