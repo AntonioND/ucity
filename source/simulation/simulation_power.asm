@@ -596,19 +596,21 @@ Simulation_PowerDistribution::
     ; For each tile check if it is type TYPE_POWER_PLANT (power plant)
     ; ----------------------------------------------------------------
 
+    ld      hl,CITY_MAP_TYPE ; Map base
+
     ld      d,0 ; y
 .loopy:
         ld      e,0 ; x
 .loopx:
         push    de
+        push    hl
 
-            ; Returns type = a, address = hl
-            call    CityMapGetType ; e = x , d = y
+            ld      a,BANK_CITY_MAP_TYPE
+            ld      [rSVBK],a
+            ld      a,[hl] ; Get type
 
             cp      a,TYPE_POWER_PLANT
             jr      nz,.not_power_plant
-                pop     de
-                push    de
                 ; The coordinates will be the top left corner because of the
                 ; order of iteration when searching the map for power plants.
                 ; After calling this function the whole power plant will be
@@ -616,7 +618,10 @@ Simulation_PowerDistribution::
                 call    Simulation_PowerPlantFloodFill ; e=x, d=y, address=hl
 .not_power_plant:
 
+        pop     hl
         pop     de
+
+        inc     hl
 
         inc     e
         ld      a,CITY_MAP_WIDTH
@@ -670,10 +675,10 @@ Simulation_PowerDistributionSetTileOkFlag::
         push    de ; (*)
         push    hl
 
-            push    de
-            ; Returns a = type, hl = address
-            call    CityMapGetType ; Arguments: e = x , d = y
-            pop     de
+            ld      a,BANK_CITY_MAP_TYPE
+            ld      [rSVBK],a
+            ld      a,[hl] ; Get type
+
             cp      a,TYPE_POWER_PLANT
             jr      z,.tile_set_flag ; If this is a power plant, there is power!
 
