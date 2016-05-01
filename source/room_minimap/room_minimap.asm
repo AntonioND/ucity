@@ -139,7 +139,11 @@ MinimapDrawSelectedMap::
         ret
 .not_population_density:
 
-    ; TODO Traffic
+    cp      a,MINIMAP_SELECTION_TRAFFIC
+    jr      nz,.not_traffic
+        LONG_CALL   MinimapDrawTrafficMap
+        ret
+.not_traffic:
 
     ; TODO Pollution
 
