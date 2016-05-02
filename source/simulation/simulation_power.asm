@@ -136,14 +136,28 @@ TILE_HANDLED                 EQU %10000000
 TILE_HANDLED_POWER_PLANT     EQU %01000000
 TILE_POWER_LEVEL_MASK        EQU %00111111 ; How much power there is now
 
-POWER_PLANT_POWER: ; Base tile, energetic power - LSB first
+POWER_PLANT_POWER: ; Base tile, energetic power - LSB first, x delta, y delta
     DW T_POWER_PLANT_COAL,     3000
+    DB 1,1 ; Origin of power of the power plant
+
     DW T_POWER_PLANT_OIL,      2000
-    DW T_POWER_PLANT_WIND,      100 ; TODO Change this depending on the season
+    DB 1,1
+
+    DW T_POWER_PLANT_WIND,      100
+    DB 0,0
+
     DW T_POWER_PLANT_SOLAR,    1000
+    DB 1,1
+
     DW T_POWER_PLANT_NUCLEAR,  5000
+    DB 1,1
+
     DW T_POWER_PLANT_FUSION,  10000
-    DW 0,0 ; End
+    DB 1,1
+
+    DW 0 ; End
+
+; TODO Change power of solar and wind plants depending on the season.
 
 ;--------------------------------------
 
@@ -329,10 +343,10 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     pop     de
     pop     bc ; Restore base tile and coordinates (*)
 
-    ; Get power plant power
-    ; ---------------------
+    ; Get power plant power and origin of coordinates of power
+    ; --------------------------------------------------------
 
-    push    de ; (*)
+    push    de ; (***1) (***2)
 
     ; Base tile won't be needed after calculating the energetic power
 
@@ -352,17 +366,38 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
             inc     hl
             ld      a,[hl+]
             ld      c,a
-            ld      b,[hl] ; bc = energetic power
+            ld      a,[hl+]
+            ld      b,a ; bc = energetic power
+
+            pop     de ; (***1)
+
+            ; Update coordinates with actual origin of power
+
+            ld      a,[hl+]
+            add     a,e ; X += center of power plant
+            ld      e,a
+
+            ld      a,[hl]
+            add     a,d ; Y += center of power plant
+            ld      d,a
+
             jr      .exit_search
 .next:
-        inc     hl
-        inc     hl
-        inc     hl
+
+        ld      a,d
+        or      a,e
+        jr      nz,.continue
+
+        ld      b,b ; Uh, oh... Power plant not in the list!
+        pop     de ; (***2)
+        ret
+
+.continue:
+        ld      de,5
+        add     hl,de
         jr      .loop_search
 
 .exit_search:
-
-    pop     de ; (*)
 
     ; BC now holds the energetic power! Save for the flood fill loop
 
