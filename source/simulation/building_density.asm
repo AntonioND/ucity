@@ -131,33 +131,33 @@ CITY_TILE_DENSITY:: ; 512 entries
     T_ADD   T_POWER_LINES_TB_BRIDGE,  0,1
     T_ADD   T_POWER_LINES_LR_BRIDGE,  0,1
 
-    T_ADD   T_POLICE,   0,1
-    T_ADD   T_FIREMEN,  0,1
-    T_ADD   T_HOSPITAL, 0,1
+    T_ADD   T_POLICE,   7,1
+    T_ADD   T_FIREMEN,  5,1
+    T_ADD   T_HOSPITAL, 10,1
 
-    T_ADD   T_PARK_SMALL, 0,1
-    T_ADD   T_PARK_BIG,   0,1
-    T_ADD   T_STADIUM,    0,20
+    T_ADD   T_PARK_SMALL, 1,1
+    T_ADD   T_PARK_BIG,   1,1
+    T_ADD   T_STADIUM,    20,20
 
-    T_ADD   T_SCHOOL,      0,5
-    T_ADD   T_HIGH_SCHOOL, 0,6
-    T_ADD   T_UNIVERSITY,  0,7
-    T_ADD   T_MUSEUM,      0,6
-    T_ADD   T_LIBRARY,     0,5
+    T_ADD   T_SCHOOL,      5,5
+    T_ADD   T_HIGH_SCHOOL, 10,6
+    T_ADD   T_UNIVERSITY,  20,7 ; TODO - Set central tile (5x5) to 0?
+    T_ADD   T_MUSEUM,      5,6
+    T_ADD   T_LIBRARY,     10,5
 
-    T_ADD   T_AIRPORT,       0,10
-    T_ADD   T_PORT,          0,8
+    T_ADD   T_AIRPORT,       30,10
+    T_ADD   T_PORT,          10,8
     T_ADD   T_PORT_WATER_L,  0,1
     T_ADD   T_PORT_WATER_R,  0,1
     T_ADD   T_PORT_WATER_D,  0,1
     T_ADD   T_PORT_WATER_U,  0,1
 
-    T_ADD   T_POWER_PLANT_COAL,    0,0 ; They don't have cost, power plants are
-    T_ADD   T_POWER_PLANT_OIL,     0,0 ; generators!
-    T_ADD   T_POWER_PLANT_WIND,    0,0
-    T_ADD   T_POWER_PLANT_SOLAR,   0,0
-    T_ADD   T_POWER_PLANT_NUCLEAR, 0,0
-    T_ADD   T_POWER_PLANT_FUSION,  0,0
+    T_ADD   T_POWER_PLANT_COAL,    5,0 ; They don't have cost, power plants are
+    T_ADD   T_POWER_PLANT_OIL,     5,0 ; generators!
+    T_ADD   T_POWER_PLANT_WIND,    1,0
+    T_ADD   T_POWER_PLANT_SOLAR,   2,0
+    T_ADD   T_POWER_PLANT_NUCLEAR, 7,0
+    T_ADD   T_POWER_PLANT_FUSION,  10,0
 
     T_ADD   T_RESIDENTIAL_S1_A, 1,2
     T_ADD   T_RESIDENTIAL_S1_B, 2,2
