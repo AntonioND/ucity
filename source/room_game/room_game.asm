@@ -740,15 +740,52 @@ RoomGame::
     and     a,a ; Check if simulation has been requested
     jr      z,.skip_simulation
 
-        ; All VRAM-modifying code inside this loop must be thread-safe as it
-        ; can be interrupted by the VBL handler and it can take a long time to
-        ; return control to the simulation loop.
+        ; NOTE: All VRAM-modifying code inside this loop must be thread-safe as
+        ; it can be interrupted by the VBL handler and it can take a long time
+        ; to return control to the simulation loop.
+
+        ; First, get data from last frame and flag new buildings to be built
+        ; or old ones to be destroyed because of a low happiness. Ignore this
+        ; step the first iteration of the simulation loop
+
+        ; TODO
+
+        ; Now, simulate this new map. First, power distribution, as it will be
+        ; needed for other simulations
 
         LONG_CALL   Simulation_PowerDistribution
         LONG_CALL   Simulation_PowerDistributionSetTileOkFlag
 
-        ; TODO - Simulate police and set tile ok flags
-        ; Same for firemen, hospitals, schools...
+        ; After knowing the power distribution, the rest of the simulations can
+        ; be done.
+
+        LONG_CALL   Simulation_Traffic
+        LONG_CALL   Simulation_TrafficSetTileOkFlag
+
+        ; Simulate services, like police and firemen. They depend on the power
+        ; simulation, as they can't work without electricity.
+
+        ; TODO - Simulate police and set tile ok flags .Same for firemen, etc
+
+        ; After simulating traffic, power, etc, simulate pollution
+
+        ; TODO
+
+        ; Calculate total population and other statistics
+
+        ; TODO
+
+        ; After simulating everything, calculate happiness. For example, to know
+        ; if education is good enough, small towns don't need high schools but
+        ; cities from a certain size onwards do.
+
+        ; TODO
+
+        ; Calculate RCI graph
+
+        ; TODO
+
+        ; End of this simulation step
 
         xor     a,a
         ld      [simulation_running],a
