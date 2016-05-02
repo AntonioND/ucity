@@ -78,7 +78,7 @@ MENU_BASE_X EQU 8+(4) ; 4 pixels from left
 MENU_BASE_Y EQU 16+(-8) ; 8 pixels overflow from top
 
 ; Building selection menu arrow icon equates
-BUILD_SELECT_CURSOR_TILE    EQU $14
+BUILD_SELECT_CURSOR_TILE    EQU $10
 BUILD_SELECT_CURSOR_PALETTE EQU 5
 
 ; CPU busy icon equates
@@ -86,7 +86,7 @@ CPU_BUSY_ICON_OAM_BASE      EQU 39
 CPU_BUSY_ICON_XCOORD        EQU ((160-8)+8)
 CPU_BUSY_ICON_YCOORD_TOP    EQU ((0)+16)
 CPU_BUSY_ICON_YCOORD_BOTTOM EQU ((144-8)+16)
-CPU_BUSY_ICON_TILE          EQU $16 ; 2 tiles, the second one should be empty
+CPU_BUSY_ICON_TILE          EQU $12 ; Made of 2 8x8 tiles, the second one empty
 CPU_BUSY_ICON_PALETTE       EQU 1
 
 ;-------------------------------------------------------------------------------
@@ -164,7 +164,6 @@ ICON_TO_BUILDING_PAL: ; Get palette and building from icon
     ICON_SET_BUILDING Icon_Museum, B_Museum, 0,0
     ICON_SET_BUILDING Icon_Library, B_Library, 0,0
 
-    ICON_SET_BUILDING Icon_TrainStation, B_TrainStation, 0,0
     ICON_SET_BUILDING Icon_Port, B_Port, 0,0
     ICON_SET_BUILDING Icon_Airport, B_Airport, 0,0
 
@@ -205,7 +204,7 @@ ICON_MAP: ; Order of icons is right to left
     DB Icon_Museum, Icon_Library, Icon_NULL
 
     DB Icon_Group_Transport
-    DB Icon_TrainStation, Icon_Port, Icon_Airport
+    DB Icon_Port, Icon_Airport, Icon_NULL
 
     DB Icon_Group_PowerFossil
     DB Icon_PowerPlantCoal, Icon_PowerPlantOil, Icon_PowerPlantNuclear
