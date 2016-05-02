@@ -97,13 +97,12 @@ TYPE_HIGH_SCHOOL        EQU 12
 TYPE_UNIVERSITY         EQU 13
 TYPE_MUSEUM             EQU 14
 TYPE_LIBRARY            EQU 15
-TYPE_TRAIN_STATION      EQU 16
-TYPE_AIRPORT            EQU 17
-TYPE_PORT               EQU 18
-TYPE_DOCK               EQU 19
-TYPE_POWER_PLANT        EQU 20
+TYPE_AIRPORT            EQU 16
+TYPE_PORT               EQU 17
+TYPE_DOCK               EQU 18
+TYPE_POWER_PLANT        EQU 19
 
-TYPE_OTHER              EQU 21 ; Decoration (Unused)
+TYPE_OTHER              EQU 20 ; Decoration (Unused type)
 
 TYPE_NUMBER             EQU 32 ; Max. number. Upper 3 bits used as flags
 

@@ -365,8 +365,6 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
     jr      z,.building
     cp      a,TYPE_HOSPITAL
     jr      z,.building
-    cp      a,TYPE_TRAIN_STATION
-    jr      z,.building
     cp      a,TYPE_SCHOOL
     jr      z,.building
     cp      a,TYPE_HIGH_SCHOOL
@@ -459,7 +457,6 @@ BUILDING_INFO_STRUCTS_ARRAY::
     BUILDING_ADD Data_Museum, 4, 3, T_MUSEUM
     BUILDING_ADD Data_Library, 3, 2, T_LIBRARY
 
-    BUILDING_ADD Data_TrainStation, 2, 2, T_TRAIN_STATION
     BUILDING_ADD Data_Airport, 5, 3, T_AIRPORT
     BUILDING_ADD Data_Port, 3, 3, T_PORT
 
@@ -604,7 +601,6 @@ BUILDING_INFO_POINTERS_ARRAY:: ; Pointers to structs. Indexes are B_Xxxxxx
     BUILDING_ADD_ENTRY B_Museum, Data_Museum
     BUILDING_ADD_ENTRY B_Library, Data_Library
 
-    BUILDING_ADD_ENTRY B_TrainStation, Data_TrainStation
     BUILDING_ADD_ENTRY B_Airport, Data_Airport
 
     BUILDING_ADD_ENTRY B_PowerPlantCoal, Data_PowerPlantCoal
@@ -716,7 +712,6 @@ BUILDING_PRICE_ARRAY:
     BUILDING_SET_PRICE B_Museum, MONEY_1000
     BUILDING_SET_PRICE B_Library, MONEY_500
 
-    BUILDING_SET_PRICE B_TrainStation, MONEY_50
     BUILDING_SET_PRICE B_Airport, MONEY_5000
 
     BUILDING_SET_PRICE B_PowerPlantCoal, MONEY_5000

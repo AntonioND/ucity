@@ -145,7 +145,6 @@ CITY_TILE_DENSITY:: ; 512 entries
     T_ADD   T_MUSEUM,      0,6
     T_ADD   T_LIBRARY,     0,5
 
-    T_ADD   T_TRAIN_STATION, 0,3
     T_ADD   T_AIRPORT,       0,10
     T_ADD   T_PORT,          0,8
     T_ADD   T_PORT_WATER_L,  0,1
