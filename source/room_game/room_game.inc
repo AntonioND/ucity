@@ -32,26 +32,26 @@ CITY_MAP_HEIGHT EQU 64
 
 ; This shouldn't be needed, but if removed the assembler will complain when
 ; getting the BANK() of a label that hasn't been used before in that file.
-BANK_CITY_MAP_TILES         EQU 1
-BANK_CITY_MAP_ATTR          EQU 2
-BANK_CITY_MAP_TYPE          EQU 3
-BANK_CITY_MAP_TRAFFIC       EQU 4
-BANK_CITY_MAP_TILE_OK_FLAGS EQU 5 ; To calculate how good each tile is
-BANK_SCRATCH_RAM            EQU 6 ; For temporary calculations (simulation)
-BANK_SCRATCH_RAM_2          EQU 7 ; For temporary calculations (APA, simulation)
+BANK_CITY_MAP_TILES   EQU 1
+BANK_CITY_MAP_ATTR    EQU 2
+BANK_CITY_MAP_TYPE    EQU 3
+BANK_CITY_MAP_TRAFFIC EQU 4
+BANK_CITY_MAP_FLAGS   EQU 5 ; How good each tile is, automatic build commands
+BANK_SCRATCH_RAM      EQU 6 ; For temporary calculations (simulation)
+BANK_SCRATCH_RAM_2    EQU 7 ; For temporary calculations (APA, simulation)
 
 ;-------------------------------------------------------------------------------
 
-TILE_OK_POWER_BIT     EQU 0
-TILE_OK_SERVICES_BIT  EQU 1 ; Hospitals, police and firemen
-TILE_OK_EDUCATION_BIT EQU 2
-TILE_OK_POLLUTION_BIT EQU 3
-TILE_OK_TRAFFIC_BIT   EQU 4 ; - Roads: Traffic lower than threshold.
-                            ; - Buildings: People from this tile could reach a
-                            ;   valid destination.
-TILE_OK_unused0_BIT   EQU 5
-TILE_OK_unused1_BIT   EQU 6
-TILE_OK_unused2_BIT   EQU 7
+TILE_OK_POWER_BIT           EQU 0
+TILE_OK_SERVICES_BIT        EQU 1 ; Hospitals, police and firemen
+TILE_OK_EDUCATION_BIT       EQU 2
+TILE_OK_POLLUTION_BIT       EQU 3
+TILE_OK_TRAFFIC_BIT         EQU 4 ; - Roads: Traffic lower than threshold.
+                                  ; - Buildings: People from this tile could
+                                  ;   reach a valid destination.
+TILE_BUILD_REQUESTED_BIT    EQU 5
+TILE_DEMOLISH_REQUESTED_BIT EQU 6
+TILE_unused2_BIT            EQU 7
 
 ;-------------------------------------------------------------------------------
 

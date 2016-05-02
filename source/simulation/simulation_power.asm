@@ -664,7 +664,7 @@ Simulation_PowerDistributionSetTileOkFlag::
     ; Make sure that the energy assigned to a tile is the same as the energy
     ; consumption. If so, flag as "power ok".
 
-    ld      hl,CITY_MAP_TILE_OK_FLAGS ; Base address of the map!
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
 
     ld      d,0 ; d = y
 .loopy:
@@ -707,13 +707,13 @@ Simulation_PowerDistributionSetTileOkFlag::
                 jr      .tile_res_flag ; Res if expected != real
 
 .tile_set_flag:
-            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
             set     TILE_OK_POWER_BIT,[hl]
             jr      .tile_end
 
 .tile_res_flag:
-            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
             res     TILE_OK_POWER_BIT,[hl]
 

@@ -252,7 +252,7 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
             push    de
             call    GetMapAddress ; preserves de
 
-            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
             bit     TILE_OK_POWER_BIT,[hl]
             jr      z,.not_tile ; If there is no power, the building can't work
@@ -695,7 +695,7 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
             push    de
             call    GetMapAddress ; preserves de
 
-            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
             bit     TILE_OK_POWER_BIT,[hl]
             jr      z,.not_tile ; If there is no power, the building can't work

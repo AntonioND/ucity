@@ -101,7 +101,7 @@ Simulation_TrafficSetTileOkFlag::
     ; zones, and that commercial zones and industrial zones could be reached
     ; by all people.
 
-    ld      hl,CITY_MAP_TILE_OK_FLAGS ; Base address of the map!
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
 
     ld      d,0 ; d = y
 .loopy:
@@ -112,7 +112,7 @@ Simulation_TrafficSetTileOkFlag::
         push    de ; (*)
         push    hl
 
-            ld      a,BANK_CITY_MAP_TILE_OK_FLAGS
+            ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
             res     TILE_OK_TRAFFIC_BIT,[hl]
 
