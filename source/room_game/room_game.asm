@@ -786,7 +786,7 @@ RoomGame::
 
         ; TODO
 
-        ; Update date
+        ; Update date, apply budget, etc.
         ; Note: Only if this is not the first iteration step!
 
         ; TODO
