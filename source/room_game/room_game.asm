@@ -744,9 +744,10 @@ RoomGame::
         ; it can be interrupted by the VBL handler and it can take a long time
         ; to return control to the simulation loop.
 
-        ; First, get data from last frame and flag new buildings to be built
-        ; or old ones to be destroyed because of a low happiness. Ignore this
-        ; step the first iteration of the simulation loop
+        ; First, get data from last frame and build new buildings or destroy
+        ; them (if there haven't been changes since the previous step!)
+        ; depending on the tile ok flags map.
+        ; Note: Only if this is not the first iteration step!
 
         ; TODO
 
@@ -782,6 +783,11 @@ RoomGame::
         ; TODO
 
         ; Calculate RCI graph
+
+        ; TODO
+
+        ; Update date
+        ; Note: Only if this is not the first iteration step!
 
         ; TODO
 
