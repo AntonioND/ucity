@@ -1,7 +1,7 @@
 ;###############################################################################
 ;#                                                                             #
 ;#                                                                             #
-;#                              GBT PLAYER  3.0.4                              #
+;#                              GBT PLAYER  3.0.5                              #
 ;#                                                                             #
 ;#                                             Contact: antonio_nd@outlook.com #
 ;###############################################################################
@@ -189,11 +189,11 @@ ENDC
     ld      hl,gbt_pan
     ld      a,$11 ; L and R
     ld      [hl+],a
-    sla     a
+    add     a,a
     ld      [hl+],a
-    sla     a
+    add     a,a
     ld      [hl+],a
-    sla     a
+    add     a,a
     ld      [hl],a
 
     ld      hl,gbt_vol
@@ -534,8 +534,8 @@ ENDC
     and     a,a
     ret     z ; if changing to step 0, exit
 
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      b,a ; b = iterations = step * 4 (number of channels)
 .next_channel:
 

@@ -1,7 +1,7 @@
 ;###############################################################################
 ;#                                                                             #
 ;#                                                                             #
-;#                              GBT PLAYER  3.0.4                              #
+;#                              GBT PLAYER  3.0.5                              #
 ;#                                                                             #
 ;#                                             Contact: antonio_nd@outlook.com #
 ;###############################################################################
@@ -156,8 +156,8 @@ gbt_channel_1_handle:: ; de = info
     ld      b,a ; save byte
 
     and     a,$30
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      [gbt_instr+0],a ; Instrument
 
     ld      a,b ; restore byte
@@ -193,8 +193,8 @@ gbt_channel_1_handle:: ; de = info
     ld      b,a ; save byte
 
     and     a,$30
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      [gbt_instr+0],a ; Instrument
 
     ld      a,b ; restore byte
@@ -213,8 +213,8 @@ gbt_channel_1_handle:: ; de = info
     ld      b,a ; save byte
 
     and     a,$30
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      [gbt_instr+0],a ; Instrument
 
     ld      a,b ; restore byte
@@ -491,8 +491,8 @@ gbt_channel_2_handle:: ; de = info
     ld      b,a ; save byte
 
     and     a,$30
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      [gbt_instr+1],a ; Instrument
 
     ld      a,b ; restore byte
@@ -528,8 +528,8 @@ gbt_channel_2_handle:: ; de = info
     ld      b,a ; save byte
 
     and     a,$30
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      [gbt_instr+1],a ; Instrument
 
     ld      a,b ; restore byte
@@ -548,8 +548,8 @@ gbt_channel_2_handle:: ; de = info
     ld      b,a ; save byte
 
     and     a,$30
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      [gbt_instr+1],a ; Instrument
 
     ld      a,b ; restore byte
@@ -859,7 +859,7 @@ gbt_channel_3_handle:: ; de = info
     ld      a,b ; restore byte
 
     and     a,$30 ; a = volume
-    sla     a
+    add     a,a
     ld      [gbt_vol+2],a
 
     jr      .refresh_channel3_regs
