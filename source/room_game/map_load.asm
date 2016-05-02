@@ -167,12 +167,11 @@ SRAMMapLoad: ; a = index to load from. Doesn't check bank limits
     ld      de,MONEY_AMOUNT_START
     call    MoneySet ; de = ptr to the amount of money to set
 
-    ; TODO
+    ; TODO - Other information
 
     ; Return start coordinates
     ld      d,(CITY_MAP_WIDTH-20)/2 ; X
     ld      e,(CITY_MAP_HEIGHT-18)/2 ; Y
-
 
     ret
 
@@ -263,11 +262,14 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ; Save map and attributes
     push    af ; (*) preserve index
 
-    inc     a
-    ld      [rRAMB],a
+    ld      b,a
 
     ld      a,CART_RAM_ENABLE
     ld      [rRAMG],a
+
+    ld      a,b
+    inc     a
+    ld      [rRAMB],a
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a

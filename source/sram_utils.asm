@@ -95,7 +95,7 @@ SRAM_PowerOnCheck::
 .restore_loop:
     ld      [rRAMB],a
     ld      b,a
-        ld      [hl-],a
+        ld      a,[hl-]
         ld      [_SRAM+0],a
     ld      a,b
     dec     a
