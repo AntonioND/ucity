@@ -282,7 +282,8 @@ CityMapGetTileAtAddress:: ; Arguments: hl = address. Preserves BC
 ;-------------------------------------------------------------------------------
 
 ; Set tile, attributes and type. Things like roads, train and power lines don't
-; need to have their type set here, but it doesn't hurt either.
+; need to have their type set here, but it doesn't hurt either. It also clears
+; all tile flags to make the previous simulation state invalid.
 
 CityMapDrawTerrainTileAddress:: ; bc = tile, hl = address
 
@@ -301,6 +302,10 @@ _entry_CityMapDrawTerrainTile:
     ld      b,BANK(TILESET_INFO)
     call    rom_bank_push_set
     pop     hl
+
+    ld      a,BANK_CITY_MAP_FLAGS
+    ld      [rSVBK],a
+    ld      [hl],0 ; Clear tile flags of a tile when modifying it
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
