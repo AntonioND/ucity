@@ -90,7 +90,7 @@ __bg_load_tiles: ; hl = tile data struct    b = struct bank
     inc     hl ; hl = pointer to tile data
 
     ld      a,b
-    sla     a ; BIT(1) = 256
+    add     a,a ; BIT(1) = 256
     ld      e,a
     ld      a,c
     rla ; BIT(0) = 128
@@ -443,15 +443,15 @@ __bg_load_map: ; hl = pointer to data    b = struct bank
     ld      [bg_y],a
 
     ld      a,[bg_x]
-    sla     a
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
+    add     a,a
     ld      [bg_scx],a
 
     ld      a,[bg_y]
-    sla     a
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
+    add     a,a
     ld      [bg_scy],a
 
     ld      a,[bg_x]

@@ -77,7 +77,7 @@ BuildingGetSize:: ; Returns b=width, c=height of selected building. Preserves de
     call    rom_bank_push_set
 
     ld      a,[building_selected]
-    sla     a ; * 2
+    add     a,a ; * 2
     ld      c,a
     ld      b,0
     ld      hl,BUILDING_INFO_POINTERS_ARRAY
@@ -122,7 +122,7 @@ BuildingCurrentGetSizeAndBaseTile:: ; Returns b=width, c=height, hl = base tile
     ld      a,[building_selected]
 
 building_get_size_base_tile_common:
-    sla     a ; * 2
+    add     a,a ; * 2
     ld      c,a
     ld      b,0
     ld      hl,BUILDING_INFO_POINTERS_ARRAY

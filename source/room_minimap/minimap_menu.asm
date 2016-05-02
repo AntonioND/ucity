@@ -123,10 +123,10 @@ MinimapMenuRefresh::
         ; Preserve a from before
 .end_border_check:
 
-    add     a,a ; sla a
-    add     a,a ; sla a
-    add     a,a ; sla a
-    add     a,a ; sla a
+    add     a,a
+    add     a,a
+    add     a,a
+    add     a,a
 
     sub     a,8+(16*4) ; half tile + displacement to the centre
     ld      [minimap_scroll_x],a

@@ -66,11 +66,12 @@ MinimapServicesCommonDrawMap:
             ld      [rSVBK],a
 
             ld      a,[hl]
-            srl     a
-            srl     a
-            srl     a
-            srl     a
-            srl     a ; Reduce from 8 to 3 bits
+            rra
+            rra
+            rra
+            rra
+            rra
+            and     a,7 ; Reduce from 8 to 3 bits
 
             ld      de,MINIMAP_TILE_COLORS
             ld      l,a

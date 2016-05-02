@@ -111,16 +111,16 @@ CursorLoad::
 CursorRefreshCoordFromTile:
 
     ld      a,[CursorTileX]
-    sla     a
-    sla     a
-    sla     a ; X * 8
+    add     a,a
+    add     a,a
+    add     a,a ; X * 8
     add     a,4
     ld      [CursorX],a
 
     ld      a,[CursorTileY]
-    sla     a
-    sla     a
-    sla     a ; Y * 8
+    add     a,a
+    add     a,a
+    add     a,a ; Y * 8
     add     a,12
     ld      [CursorY],a
 
@@ -204,9 +204,9 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeY]
-        sla     a
-        sla     a
-        sla     a ; * 8
+        add     a,a
+        add     a,a
+        add     a,a ; * 8
         add     a,d
         ld      c,a
 
@@ -228,9 +228,9 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeX]
-        sla     a
-        sla     a
-        sla     a ; * 8
+        add     a,a
+        add     a,a
+        add     a,a ; * 8
         add     a,d
         ld      c,a
         ld      b,a
@@ -257,9 +257,9 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeX]
-        sla     a
-        sla     a
-        sla     a ; * 8
+        add     a,a
+        add     a,a
+        add     a,a ; * 8
         add     a,d
         ld      c,a
         ld      b,a
@@ -268,9 +268,9 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeY]
-        sla     a
-        sla     a
-        sla     a ; * 8
+        add     a,a
+        add     a,a
+        add     a,a ; * 8
         add     a,d
         ld      c,a
 

@@ -65,15 +65,15 @@ __bg_load_map_main:
     ld      [bg_y],a
 
     ld      a,[bg_x]
-    sla     a
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
+    add     a,a
     ld      [bg_scx],a
 
     ld      a,[bg_y]
-    sla     a
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
+    add     a,a
     ld      [bg_scy],a
 
     ld      a,[bg_x]

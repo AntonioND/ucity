@@ -94,7 +94,7 @@ APA_PixelStreamPlot2x2::
     ld      a,[apa_colors+0]
     ld      c,a
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,1
@@ -102,7 +102,7 @@ APA_PixelStreamPlot2x2::
     ld      [hl+],a
 
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,2
@@ -114,7 +114,7 @@ APA_PixelStreamPlot2x2::
     ld      a,[apa_colors+1]
     ld      c,a
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,1
@@ -122,7 +122,7 @@ APA_PixelStreamPlot2x2::
     ld      [hl+],a
 
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,2
@@ -134,7 +134,7 @@ APA_PixelStreamPlot2x2::
     ld      a,[apa_colors+2]
     ld      c,a
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,1
@@ -142,7 +142,7 @@ APA_PixelStreamPlot2x2::
     ld      [hl+],a
 
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,2
@@ -154,7 +154,7 @@ APA_PixelStreamPlot2x2::
     ld      a,[apa_colors+3]
     ld      c,a
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,1
@@ -162,7 +162,7 @@ APA_PixelStreamPlot2x2::
     ld      [hl+],a
 
     ld      a,[hl]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,2
@@ -245,7 +245,7 @@ APA_PixelStreamPlot::
     ld      c,a
 
     ld      a,[pixel_stream_row_buffers+0]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,1
@@ -253,7 +253,7 @@ APA_PixelStreamPlot::
     ld      [pixel_stream_row_buffers+0],a
 
     ld      a,[pixel_stream_row_buffers+1]
-    sla     a ; advance position
+    add     a,a ; advance position
     ld      b,a
     ld      a,c
     and     a,2

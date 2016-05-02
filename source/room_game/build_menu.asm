@@ -241,8 +241,8 @@ _BuildSelectMenuDrawIcon: ; a = icon (not NULL!), c = spr base, d = x, e = y
         inc     hl
         ld      e,[hl] ; pal right
 
-        sla     a
-        sla     a
+        add     a,a
+        add     a,a
         and     a,$7F ; limit to 128
 
         ; A = Base tile
@@ -394,8 +394,8 @@ _BuildSelectMenuDrawRow: ; a = row number, b = is selected, c = spr base, e = y
     ; Get pointer to array of icons
 
     push    bc
-    sla     a
-    sla     a ; rows are 4 icons max, padded
+    add     a,a
+    add     a,a ; rows are 4 icons max, padded
     ld      hl,ICON_MAP
     ld      c,a
     ld      b,0
@@ -703,8 +703,8 @@ KeypadHandle:
             add     hl,bc
 
             ld      a,[menu_selected_group]
-            sla     a
-            sla     a
+            add     a,a
+            add     a,a
             ld      c,a
             ld      b,0
             add     hl,bc
@@ -793,8 +793,8 @@ _build_select_menu_entrypoint:
     ; ---------------------------------------------------
 
     ld      a,[menu_selected_group]
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     ld      c,a
     ld      b,0
     ld      hl,ICON_MAP
@@ -867,8 +867,8 @@ BuildOverlayIconDraw:
     inc     hl
     ld      e,[hl] ; pal right
 
-    sla     a
-    sla     a
+    add     a,a
+    add     a,a
     and     a,$7F ; limit to 128
 
     ; A = Base tile
