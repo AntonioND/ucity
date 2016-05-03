@@ -72,18 +72,9 @@ MinimapDrawPopulationDensityMap::
 
             call    CityMapGetTileAtAddress ; hl = address, returns de = tile
 
-IF CITY_TILE_DENSITY_ELEMENT_SIZE != 2
-    FAIL "Fix this!"
-ENDC
+            LONG_CALL_ARGS  CityTileDensity ; de = tile, returns d=population
 
-            ld      hl, CITY_TILE_DENSITY
-            add     hl,de
-            add     hl,de ; Get first elemennt (population density)
-
-            ld      a,BANK(CITY_TILE_DENSITY)
-            ld      [rSVBK],a
-
-            ld      a,[hl]
+            ld      a,d
             cp      a,MAX_DISPLAYABLE_POPULATION_DENSITY+1 ; Saturate
             jr      c,.not_overflow
             ld      a,MAX_DISPLAYABLE_POPULATION_DENSITY

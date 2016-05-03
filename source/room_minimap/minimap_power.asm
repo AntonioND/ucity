@@ -224,7 +224,6 @@ MinimapDrawPowerDensityMap::
             call    CityTileDensity ; de = tile, returns d=population, e=energy
             ld      a,e ; a = energy expected
 
-
             cp      a,MAX_DISPLAYABLE_POWER_DENSITY+1 ; Saturate
             jr      c,.not_overflow
             ld      a,MAX_DISPLAYABLE_POWER_DENSITY
