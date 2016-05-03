@@ -112,14 +112,14 @@ MINIMAP_POLICE_PALETTE:
     DW (31<<10)|(0<<5)|(0<<0), (15<<10)|(0<<5)|(0<<0)
 
 MINIMAP_POLICE_TITLE:
-    DB "Police",0
+    DB "Police Influence",0
 
 MinimapDrawPolice::
 
     ; Simulate and get data!
     ; ----------------------
 
-    ld      bc,T_POLICE_CENTER
+    ld      bc,T_POLICE_DEPT_CENTER
     LONG_CALL_ARGS  Simulation_Services
 
     ; Draw map
@@ -144,19 +144,19 @@ MinimapDrawPolice::
 
 ;-------------------------------------------------------------------------------
 
-MINIMAP_FIREMEN_PALETTE:
+MINIMAP_FIRE_PROTECTION_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(31<<0)
     DW (0<<10)|(15<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
-MINIMAP_FIREMEN_TITLE:
-    DB "Firemen",0
+MINIMAP_FIRE_PROTECTION_TITLE:
+    DB "Fire Protection",0
 
-MinimapDrawFiremen::
+MinimapDrawFireProtection::
 
     ; Simulate and get data!
     ; ----------------------
 
-    ld      bc,T_FIREMEN_CENTER
+    ld      bc,T_FIRE_DEPT_CENTER
     LONG_CALL_ARGS  Simulation_Services
 
     ; Draw map
@@ -170,11 +170,11 @@ MinimapDrawFiremen::
     call    APA_BufferUpdate
 
     ; Load palette
-    ld      hl,MINIMAP_FIREMEN_PALETTE
+    ld      hl,MINIMAP_FIRE_PROTECTION_PALETTE
     call    APA_LoadPalette
 
     ; Draw title
-    ld      hl,MINIMAP_FIREMEN_TITLE
+    ld      hl,MINIMAP_FIRE_PROTECTION_TITLE
     call    RoomMinimapDrawTitle
 
     ret

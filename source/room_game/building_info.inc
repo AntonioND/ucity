@@ -34,8 +34,8 @@ B_Residential    EQU 0
 B_Commercial     EQU 1
 B_Industrial     EQU 2
 
-B_Police         EQU 3
-B_Firemen        EQU 4
+B_PoliceDept     EQU 3
+B_FireDept       EQU 4
 B_Hospital       EQU 5
 
 B_ParkSmall      EQU 6

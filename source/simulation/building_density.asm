@@ -101,63 +101,63 @@ CITY_TILE_DENSITY:: ; 512 entries
 
     T_ADD   0, 0,0 ; Start array (set to 0 density the roads, terrains, etc)
 
-    T_ADD   T_RESIDENTIAL,  0,1
-    T_ADD   T_COMMERCIAL,   0,1
-    T_ADD   T_INDUSTRIAL,   0,1
+    T_ADD   T_RESIDENTIAL, 0,1
+    T_ADD   T_COMMERCIAL,  0,1
+    T_ADD   T_INDUSTRIAL,  0,1
 
-    T_ADD   T_DEMOLISHED, 0,0 ; Fill with 0s...
+    T_ADD   T_DEMOLISHED,  0,0 ; Fill with 0s...
 
-    T_ADD   T_ROAD_TB_POWER_LINES,  0,1
-    T_ADD   T_ROAD_LR_POWER_LINES,  0,1
+    T_ADD   T_ROAD_TB_POWER_LINES, 0,1
+    T_ADD   T_ROAD_LR_POWER_LINES, 0,1
 
     T_ADD   T_ROAD_TB_BRIDGE, 0,0 ; Fill with 0s...
 
-    T_ADD   T_TRAIN_TB_POWER_LINES,  0,1
-    T_ADD   T_TRAIN_LR_POWER_LINES,  0,1
+    T_ADD   T_TRAIN_TB_POWER_LINES, 0,1
+    T_ADD   T_TRAIN_LR_POWER_LINES, 0,1
 
     T_ADD   T_TRAIN_TB_BRIDGE, 0,0 ; Fill with 0s...
 
-    T_ADD   T_POWER_LINES_TB,  0,1
-    T_ADD   T_POWER_LINES_LR,  0,1
-    T_ADD   T_POWER_LINES_RB,  0,1
-    T_ADD   T_POWER_LINES_LB,  0,1
-    T_ADD   T_POWER_LINES_TR,  0,1
-    T_ADD   T_POWER_LINES_TL,  0,1
+    T_ADD   T_POWER_LINES_TB,   0,1
+    T_ADD   T_POWER_LINES_LR,   0,1
+    T_ADD   T_POWER_LINES_RB,   0,1
+    T_ADD   T_POWER_LINES_LB,   0,1
+    T_ADD   T_POWER_LINES_TR,   0,1
+    T_ADD   T_POWER_LINES_TL,   0,1
     T_ADD   T_POWER_LINES_TRB,  0,1
     T_ADD   T_POWER_LINES_LRB,  0,1
     T_ADD   T_POWER_LINES_TLB,  0,1
     T_ADD   T_POWER_LINES_TLR,  0,1
-    T_ADD   T_POWER_LINES_TLRB,  0,1
-    T_ADD   T_POWER_LINES_TB_BRIDGE,  0,1
-    T_ADD   T_POWER_LINES_LR_BRIDGE,  0,1
+    T_ADD   T_POWER_LINES_TLRB, 0,1
+    T_ADD   T_POWER_LINES_TB_BRIDGE, 0,1
+    T_ADD   T_POWER_LINES_LR_BRIDGE, 0,1
 
-    T_ADD   T_POLICE,   7,1
-    T_ADD   T_FIREMEN,  5,1
-    T_ADD   T_HOSPITAL, 10,1
+    T_ADD   T_POLICE_DEPT,  7,1
+    T_ADD   T_FIRE_DEPT,    5,1
+    T_ADD   T_HOSPITAL,    10,1
 
-    T_ADD   T_PARK_SMALL, 1,1
-    T_ADD   T_PARK_BIG,   1,1
-    T_ADD   T_STADIUM,    20,20
+    T_ADD   T_PARK_SMALL, 1, 1
+    T_ADD   T_PARK_BIG,   1, 1
+    T_ADD   T_STADIUM,   20,20
 
-    T_ADD   T_SCHOOL,      5,5
+    T_ADD   T_SCHOOL,       5,5
     T_ADD   T_HIGH_SCHOOL, 10,6
     T_ADD   T_UNIVERSITY,  20,7 ; TODO - Set central tile (5x5) to 0?
-    T_ADD   T_MUSEUM,      5,6
+    T_ADD   T_MUSEUM,       5,6
     T_ADD   T_LIBRARY,     10,5
 
-    T_ADD   T_AIRPORT,       30,10
-    T_ADD   T_PORT,          10,8
-    T_ADD   T_PORT_WATER_L,  0,1
-    T_ADD   T_PORT_WATER_R,  0,1
-    T_ADD   T_PORT_WATER_D,  0,1
-    T_ADD   T_PORT_WATER_U,  0,1
+    T_ADD   T_AIRPORT,     30,10
+    T_ADD   T_PORT,        10,8
+    T_ADD   T_PORT_WATER_L, 0,1
+    T_ADD   T_PORT_WATER_R, 0,1
+    T_ADD   T_PORT_WATER_D, 0,1
+    T_ADD   T_PORT_WATER_U, 0,1
 
     T_ADD   T_POWER_PLANT_COAL,    5,0 ; They don't have cost, power plants are
     T_ADD   T_POWER_PLANT_OIL,     5,0 ; generators!
     T_ADD   T_POWER_PLANT_WIND,    1,0
     T_ADD   T_POWER_PLANT_SOLAR,   2,0
     T_ADD   T_POWER_PLANT_NUCLEAR, 7,0
-    T_ADD   T_POWER_PLANT_FUSION,  10,0
+    T_ADD   T_POWER_PLANT_FUSION, 10,0
 
     T_ADD   T_RESIDENTIAL_S1_A, 1,2
     T_ADD   T_RESIDENTIAL_S1_B, 2,2

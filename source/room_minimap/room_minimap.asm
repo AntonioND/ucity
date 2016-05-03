@@ -73,11 +73,11 @@ MinimapDrawSelectedMap::
 
     ld      a,[minimap_selected_map]
 
-    cp      a,MINIMAP_SELECTION_GENERAL_VIEW
-    jr      nz,.not_general_view
-        LONG_CALL   MinimapDrawGeneralView
+    cp      a,MINIMAP_SELECTION_OVERVIEW
+    jr      nz,.not_overview
+        LONG_CALL   MinimapDrawOverview
         ret
-.not_general_view:
+.not_overview:
 
     cp      a,MINIMAP_SELECTION_ZONE_MAP
     jr      nz,.not_zone_map
@@ -97,11 +97,11 @@ MinimapDrawSelectedMap::
         ret
 .not_police:
 
-    cp      a,MINIMAP_SELECTION_FIREMEN
-    jr      nz,.not_firemen
-        LONG_CALL   MinimapDrawFiremen
+    cp      a,MINIMAP_SELECTION_FIRE_PROTECTION
+    jr      nz,.not_fire_protection
+        LONG_CALL   MinimapDrawFireProtection
         ret
-.not_firemen:
+.not_fire_protection:
 
     cp      a,MINIMAP_SELECTION_HOSPITALS
     jr      nz,.not_hospitals
@@ -121,11 +121,11 @@ MinimapDrawSelectedMap::
         ret
 .not_high_schools:
 
-    cp      a,MINIMAP_SELECTION_POWER_DISTRIBUTION
-    jr      nz,.not_power_distribution
-        LONG_CALL   MinimapDrawPowerDistributionMap
+    cp      a,MINIMAP_SELECTION_POWER_GRID
+    jr      nz,.not_power_grid
+        LONG_CALL   MinimapDrawPowerGridMap
         ret
-.not_power_distribution:
+.not_power_grid:
 
     cp      a,MINIMAP_SELECTION_POWER_DENSITY
     jr      nz,.not_power_density
@@ -414,7 +414,7 @@ RoomMinimap::
 
     call    LoadTextPalette
 
-    ld      a,MINIMAP_SELECTION_GENERAL_VIEW
+    ld      a,MINIMAP_SELECTION_OVERVIEW
     ld      [minimap_selected_map],a
     LONG_CALL   MinimapDrawSelectedMap
 

@@ -149,8 +149,8 @@ ICON_TO_BUILDING_PAL: ; Get palette and building from icon
     ICON_SET_BUILDING Icon_Train, B_Train, 4,4
     ICON_SET_BUILDING Icon_PowerLines, B_PowerLines, 0,0
 
-    ICON_SET_BUILDING Icon_Police, B_Police, 2,2
-    ICON_SET_BUILDING Icon_Firemen, B_Firemen, 1,1
+    ICON_SET_BUILDING Icon_Police, B_PoliceDept, 2,2
+    ICON_SET_BUILDING Icon_Firemen, B_FireDept, 1,1
     ICON_SET_BUILDING Icon_Hospital, B_Hospital, 3,3
 
     ICON_SET_BUILDING Icon_ParkSmall, B_ParkSmall, 3,3

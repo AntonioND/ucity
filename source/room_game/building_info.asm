@@ -359,9 +359,9 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
     jr      z,.building
     cp      a,TYPE_COMMERCIAL
     jr      z,.building
-    cp      a,TYPE_POLICE
+    cp      a,TYPE_POLICE_DEPT
     jr      z,.building
-    cp      a,TYPE_FIREMEN
+    cp      a,TYPE_FIRE_DEPT
     jr      z,.building
     cp      a,TYPE_HOSPITAL
     jr      z,.building
@@ -442,8 +442,8 @@ BUILDING_INFO_STRUCTS_ARRAY::
     BUILDING_ADD Data_PowerLines, 1, 1, T_POWER_LINES_LR ; Tile doesn't matter
 
     ; Modify the corresponding file in 'simulation' folder if changing this:
-    BUILDING_ADD Data_Police, 3, 3, T_POLICE
-    BUILDING_ADD Data_Firemen, 3, 3, T_FIREMEN
+    BUILDING_ADD Data_PoliceDept, 3, 3, T_POLICE_DEPT
+    BUILDING_ADD Data_FireDept, 3, 3, T_FIRE_DEPT
     BUILDING_ADD Data_Hospital, 3, 3, T_HOSPITAL
 
     BUILDING_ADD Data_ParkSmall, 1, 1, T_PARK_SMALL
@@ -586,8 +586,8 @@ BUILDING_INFO_POINTERS_ARRAY:: ; Pointers to structs. Indexes are B_Xxxxxx
     BUILDING_ADD_ENTRY B_Commercial, Data_Commercial
     BUILDING_ADD_ENTRY B_Industrial, Data_Industrial
 
-    BUILDING_ADD_ENTRY B_Police, Data_Police
-    BUILDING_ADD_ENTRY B_Firemen, Data_Firemen
+    BUILDING_ADD_ENTRY B_PoliceDept, Data_PoliceDept
+    BUILDING_ADD_ENTRY B_FireDept, Data_FireDept
     BUILDING_ADD_ENTRY B_Hospital, Data_Hospital
 
     BUILDING_ADD_ENTRY B_ParkSmall, Data_ParkSmall
@@ -682,23 +682,30 @@ ENDM
 
     DATA_MONEY_AMOUNT MONEY_0, 0
     DATA_MONEY_AMOUNT MONEY_1, 1
+    DATA_MONEY_AMOUNT MONEY_2, 2
     DATA_MONEY_AMOUNT MONEY_5, 5
     DATA_MONEY_AMOUNT MONEY_10, 10
+    DATA_MONEY_AMOUNT MONEY_12, 12
+    DATA_MONEY_AMOUNT MONEY_14, 14
     DATA_MONEY_AMOUNT MONEY_50, 50
     DATA_MONEY_AMOUNT MONEY_100, 100
     DATA_MONEY_AMOUNT MONEY_500, 500
     DATA_MONEY_AMOUNT MONEY_1000, 1000
+    DATA_MONEY_AMOUNT MONEY_3000, 3000
     DATA_MONEY_AMOUNT MONEY_5000, 5000
+    DATA_MONEY_AMOUNT MONEY_7000, 7000
+    DATA_MONEY_AMOUNT MONEY_10000, 10000
+    DATA_MONEY_AMOUNT MONEY_20000, 20000
 
 ;-------------------------------------------------------------------------------
 
 BUILDING_PRICE_ARRAY:
-    BUILDING_SET_PRICE B_Residential, MONEY_5
-    BUILDING_SET_PRICE B_Commercial, MONEY_5
-    BUILDING_SET_PRICE B_Industrial, MONEY_5
+    BUILDING_SET_PRICE B_Residential, MONEY_10
+    BUILDING_SET_PRICE B_Commercial, MONEY_12
+    BUILDING_SET_PRICE B_Industrial, MONEY_14
 
-    BUILDING_SET_PRICE B_Police, MONEY_500
-    BUILDING_SET_PRICE B_Firemen, MONEY_500
+    BUILDING_SET_PRICE B_PoliceDept, MONEY_500
+    BUILDING_SET_PRICE B_FireDept, MONEY_500
     BUILDING_SET_PRICE B_Hospital, MONEY_500
 
     BUILDING_SET_PRICE B_ParkSmall, MONEY_10
@@ -707,23 +714,23 @@ BUILDING_PRICE_ARRAY:
 
     BUILDING_SET_PRICE B_School, MONEY_100
     BUILDING_SET_PRICE B_HighSchool, MONEY_1000
-    BUILDING_SET_PRICE B_University, MONEY_5000
+    BUILDING_SET_PRICE B_University, MONEY_7000
 
-    BUILDING_SET_PRICE B_Museum, MONEY_1000
+    BUILDING_SET_PRICE B_Museum, MONEY_3000
     BUILDING_SET_PRICE B_Library, MONEY_500
 
-    BUILDING_SET_PRICE B_Airport, MONEY_5000
+    BUILDING_SET_PRICE B_Airport, MONEY_10000
 
-    BUILDING_SET_PRICE B_PowerPlantCoal, MONEY_5000
+    BUILDING_SET_PRICE B_PowerPlantCoal, MONEY_3000
     BUILDING_SET_PRICE B_PowerPlantOil, MONEY_5000
-    BUILDING_SET_PRICE B_PowerPlantWind, MONEY_5000
+    BUILDING_SET_PRICE B_PowerPlantWind, MONEY_1000
     BUILDING_SET_PRICE B_PowerPlantSolar, MONEY_5000
-    BUILDING_SET_PRICE B_PowerPlantNuclear, MONEY_5000
-    BUILDING_SET_PRICE B_PowerPlantFusion, MONEY_5000
+    BUILDING_SET_PRICE B_PowerPlantNuclear, MONEY_10000
+    BUILDING_SET_PRICE B_PowerPlantFusion, MONEY_20000
 
     BUILDING_SET_PRICE B_Road, MONEY_5
-    BUILDING_SET_PRICE B_Train, MONEY_5
-    BUILDING_SET_PRICE B_PowerLines, MONEY_5
+    BUILDING_SET_PRICE B_Train, MONEY_10
+    BUILDING_SET_PRICE B_PowerLines, MONEY_2
     BUILDING_SET_PRICE B_Port, MONEY_1000
 
     BUILDING_SET_PRICE B_ResidentialS1A, MONEY_0

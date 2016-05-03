@@ -30,7 +30,7 @@
 
 ;###############################################################################
 
-    SECTION "Minimap General View Functions",ROMX
+    SECTION "Minimap Overview Functions",ROMX
 
 ;-------------------------------------------------------------------------------
 
@@ -39,19 +39,19 @@ C_BLUE  EQU 1
 C_GREEN EQU 2
 C_BLACK EQU 3
 
-MINIMAP_GENERAL_VIEW_PALETTE:
+MINIMAP_OVERVIEW_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
     DW (0<<10)|(31<<5)|(0<<0), (0<<10)|(0<<5)|(0<<0)
 
-MINIMAP_GENERAL_VIEW_TYPE_COLOR_ARRAY:
+MINIMAP_OVERVIEW_TYPE_COLOR_ARRAY:
     DB C_WHITE,C_WHITE,C_WHITE,C_WHITE ; TYPE_FIELD
     DB C_GREEN,C_WHITE,C_WHITE,C_GREEN ; TYPE_FOREST
     DB C_BLUE, C_WHITE,C_WHITE,C_BLUE  ; TYPE_WATER
     DB C_BLUE, C_GREEN,C_GREEN,C_BLUE  ; TYPE_RESIDENTIAL
     DB C_BLUE, C_GREEN,C_GREEN,C_BLUE  ; TYPE_INDUSTRIAL
     DB C_BLUE, C_GREEN,C_GREEN,C_BLUE  ; TYPE_COMMERCIAL
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_POLICE
-    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_FIREMEN
+    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_POLICE_DEPT
+    DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_FIRE_DEPT
     DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_HOSPITAL
     DB C_GREEN,C_GREEN,C_GREEN,C_GREEN ; TYPE_PARK
     DB C_BLUE, C_BLUE, C_BLUE, C_BLUE  ; TYPE_STADIUM
@@ -65,12 +65,12 @@ MINIMAP_GENERAL_VIEW_TYPE_COLOR_ARRAY:
     DB C_BLACK,C_BLUE, C_BLUE, C_BLACK ; TYPE_DOCK
     DB C_GREEN,C_BLACK,C_BLACK,C_GREEN ; TYPE_POWER_PLANT
 
-MINIMAP_GENERAL_VIEW_TITLE:
-    DB "General View",0
+MINIMAP_OVERVIEW_TITLE:
+    DB "Overview",0
 
 ;-------------------------------------------------------------------------------
 
-MinimapDrawGeneralView::
+MinimapDrawOverview::
 
     ; Draw map
     ; --------
@@ -131,7 +131,7 @@ MinimapDrawGeneralView::
             ld      h,0
             add     hl,hl
             add     hl,hl
-            ld      de,MINIMAP_GENERAL_VIEW_TYPE_COLOR_ARRAY
+            ld      de,MINIMAP_OVERVIEW_TYPE_COLOR_ARRAY
             add     hl,de
             ld      a,[hl+]
             ld      b,[hl]
@@ -168,11 +168,11 @@ MinimapDrawGeneralView::
     call    APA_BufferUpdate
 
     ; Load palette
-    ld      hl,MINIMAP_GENERAL_VIEW_PALETTE
+    ld      hl,MINIMAP_OVERVIEW_PALETTE
     call    APA_LoadPalette
 
     ; Draw title
-    ld      hl,MINIMAP_GENERAL_VIEW_TITLE
+    ld      hl,MINIMAP_OVERVIEW_TITLE
     call    RoomMinimapDrawTitle
 
     ret

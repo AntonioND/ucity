@@ -31,7 +31,7 @@
 
 ;###############################################################################
 
-    SECTION "Minimap Power Distribution Map Functions",ROMX
+    SECTION "Minimap Power Grid Map Functions",ROMX
 
 ;-------------------------------------------------------------------------------
 
@@ -40,14 +40,14 @@ C_GREEN EQU 1 ; Tile power OK
 C_RED   EQU 2 ; Tile with no power. Mix of green and red -> Not all power
 C_BLUE  EQU 3 ; Power plants
 
-MINIMAP_POWER_DISTRIBUTION_MAP_PALETTE:
+MINIMAP_POWER_GRID_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(0<<0)
     DW (0<<10)|(0<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
 
-MINIMAP_POWER_DISTRIBUTION_MAP_TITLE:
-    DB "Power Distribution",0
+MINIMAP_POWER_GRID_MAP_TITLE:
+    DB "Power Grid",0
 
-MinimapDrawPowerDistributionMap::
+MinimapDrawPowerGridMap::
 
     ; Simulate and get data!
     ; ----------------------
@@ -159,11 +159,11 @@ MinimapDrawPowerDistributionMap::
     call    APA_BufferUpdate
 
     ; Load palette
-    ld      hl,MINIMAP_POWER_DISTRIBUTION_MAP_PALETTE
+    ld      hl,MINIMAP_POWER_GRID_MAP_PALETTE
     call    APA_LoadPalette
 
     ; Draw title
-    ld      hl,MINIMAP_POWER_DISTRIBUTION_MAP_TITLE
+    ld      hl,MINIMAP_POWER_GRID_MAP_TITLE
     call    RoomMinimapDrawTitle
 
     ret
