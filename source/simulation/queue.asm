@@ -51,6 +51,8 @@ QueueInit:: ; Reset pointers
     ldh     [queue_out_ptr+1],a
     ret
 
+;-------------------------------------------------------------------------------
+
 QueueAdd:: ; Add register DE to the queue. Preserves DE
 
     ld      a,BANK_SCRATCH_RAM_2
@@ -75,7 +77,40 @@ QueueAdd:: ; Add register DE to the queue. Preserves DE
 
     ret
 
-QueueGet:: ; Get queue element from DE
+;-------------------------------------------------------------------------------
+
+QueueAddEx:: ; Add registers BC and DE to the queue. Preserves BC and DE
+
+    ld      a,BANK_SCRATCH_RAM_2
+    ld      [rSVBK],a
+
+    ldh     a,[queue_in_ptr+0] ; Get pointer to next empty space
+    ld      l,a
+    ldh     a,[queue_in_ptr+1]
+    ld      h,a
+
+    ld      [hl],d ; Save and increment pointer
+    inc     hl
+    ld      [hl],e
+    inc     hl
+
+    ld      [hl],b
+    inc     hl
+    ld      [hl],c
+    inc     hl
+
+    ld      a,$0F ; Wrap pointer and store
+    and     a,h
+    or      a,$D0
+    ldh     [queue_in_ptr+1],a
+    ld      a,l
+    ldh     [queue_in_ptr+0],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+QueueGet:: ; Get value from queue into DE.
 
     ld      a,BANK_SCRATCH_RAM_2
     ld      [rSVBK],a
@@ -98,6 +133,39 @@ QueueGet:: ; Get queue element from DE
     ldh     [queue_out_ptr+0],a
 
     ret
+
+;-------------------------------------------------------------------------------
+
+QueueGetEx:: ; Get values from queue into BC and DE.
+
+    ld      a,BANK_SCRATCH_RAM_2
+    ld      [rSVBK],a
+
+    ldh     a,[queue_out_ptr+0] ; Get pointer to next element to get
+    ld      l,a
+    ldh     a,[queue_out_ptr+1]
+    ld      h,a
+
+    ld      d,[hl] ; Read and increment pointer
+    inc     hl
+    ld      e,[hl]
+    inc     hl
+
+    ld      b,[hl]
+    inc     hl
+    ld      c,[hl]
+    inc     hl
+
+    ld      a,$0F ; Wrap pointer and store
+    and     a,h
+    or      a,$D0
+    ldh     [queue_out_ptr+1],a
+    ld      a,l
+    ldh     [queue_out_ptr+0],a
+
+    ret
+
+;-------------------------------------------------------------------------------
 
 QueueIsEmpty:: ; Returns a=1 if empty
 
