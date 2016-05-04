@@ -37,7 +37,7 @@
 
 C_WHITE EQU 0 ; Other tiles
 C_GREEN EQU 1 ; Tile power OK
-C_RED   EQU 2 ; Tile with no power. Mix of green and red -> Not all power
+C_RED   EQU 2 ; Tile with not enough power
 C_BLUE  EQU 3 ; Power plants
 
 MINIMAP_POWER_GRID_MAP_PALETTE:
@@ -49,10 +49,7 @@ MINIMAP_POWER_GRID_MAP_TITLE:
 
 MinimapDrawPowerGridMap::
 
-    ; Simulate and get data!
-    ; ----------------------
-
-    LONG_CALL   Simulation_PowerDistribution
+    ; No need to simulate, get data from CITY_MAP_FLAGS
 
     ; Draw map
     ; --------
@@ -70,10 +67,8 @@ MinimapDrawPowerGridMap::
         push    de ; (*)
         push    hl
 
-            push    de
             ; Returns a = type, hl = address
             call    CityMapGetType ; Arguments: e = x , d = y
-            pop     de
             cp      a,TYPE_POWER_PLANT
             jr      nz,.not_power_plant
                 ld      a,C_BLUE
@@ -82,58 +77,46 @@ MinimapDrawPowerGridMap::
                 ld      d,a
                 jr      .end_color
 .not_power_plant:
-            ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
 
-            ld      b,[hl] ; b = current energy
-            push    bc
+            ; Check if any energy is expected
+            push    hl
             call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
             call    CityTileDensity ; de = tile, returns d=population, e=energy
-            pop     bc
+            pop     hl
             ; e = energy expected
-            ; b = real energy there
             ld      a,e
             and     a,a
             jr      z,.nothing_expected_there
 
-                ; Some energy expected. 3 cases:
-                ; 1) No energy at all -> Red
-                ; 2) Some energy -> Red/Green
-                ; 3) All energy -> Green
+            ; Energy expected!
+            ld      a,BANK_CITY_MAP_FLAGS
+            ld      [rSVBK],a
 
-                ld      a,b
-                and     a,a ; Check real energy on tile
-                jr      nz,.not_1
-                    ; Case 1
-                    ld      a,C_RED
-                    ld      b,a
-                    ld      c,a
-                    ld      d,a
-                    jr      .end_color
-.not_1:
-                ld      a,b
-                cp      a,e ; Check if expected = real or not
-                jr      z,.case_3
-                    ; Case 2
-                    ld      a,C_RED
-                    ld      b,C_GREEN
-                    ld      c,C_GREEN
-                    ld      d,C_RED
-                    jr      .end_color
-.case_3:
-                    ; Case 3
-                    ld      a,C_GREEN
-                    ld      b,a
-                    ld      c,a
-                    ld      d,a
-                    jr      .end_color
+            ld      a,[hl] ; b = current energy
+            bit     TILE_OK_POWER_BIT,a
+            jr      nz,.enough_power
+
+                ; Not enough power
+                ld      a,C_RED
+                ld      b,a
+                ld      c,a
+                ld      d,a
+                jr      .end_color
+.enough_power:
+
+                ; Enough power
+                ld      a,C_GREEN
+                ld      b,a
+                ld      c,a
+                ld      d,a
+                jr      .end_color
 
 .nothing_expected_there:
 
             ld      a,C_WHITE
-            ld      a,b
-            ld      a,c
-            ld      a,d
+            ld      b,a
+            ld      c,a
+            ld      d,a
 .end_color:
 
             call    APA_SetColors ; a,b,c,d = color (0 to 3)
