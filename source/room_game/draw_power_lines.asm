@@ -67,6 +67,36 @@ TypeHasElectricityExtended:: ; preserves c, de, hl
     ld      a,TYPE_HAS_POWER
     ret
 
+;-------------------------------------------------------------------------------
+
+; Checks if this is a building that needs electriciy
+; Argument: a (type)
+; Return: a = TYPE_HAS_POWER or 0 if not
+TypeBuildingHasElectricity:: ; preserves c, de, hl
+
+    and     a,TYPE_MASK
+    ld      b,a ; save type
+
+    ld      a,b ; get type
+    sub     a,TYPE_FIELD ; if result is 0, return 0. Don't replace sub by cp!
+    ret     z
+
+    ld      a,b ; get type
+    sub     a,TYPE_FOREST ; if result is 0, return 0. Don't replace sub by cp!
+    ret     z
+
+    ld      a,b ; get type
+    sub     a,TYPE_WATER ; if result is 0, return 0. Don't replace sub by cp!
+    ret     z
+
+    ld      a,b ; get type
+    sub     a,TYPE_DOCK ; if result is 0, return 0. Don't replace sub by cp!
+    ret     z
+
+    ; The rest of types need power, even parks (because of lights)
+    ld      a,TYPE_HAS_POWER
+    ret
+
 ;###############################################################################
 
     SECTION "City Map Draw Power Lines Functions",ROMX

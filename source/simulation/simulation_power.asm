@@ -176,7 +176,9 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     call    GetMapAddress ; e=x , d=y ret: address=hl, preserves DE
     ld      a,[hl]
     and     a,TILE_HANDLED_POWER_PLANT
-    ret     nz ; If not 0, this power plant has already been handled
+    ; If not 0, this power plant has already been handled (the top left tile
+    ; has been read and it has marked the rest as handled)
+    ret     nz
 
     ; Reset all TILE_HANDLED flags
     ; ----------------------------
@@ -605,6 +607,132 @@ Simulation_PowerDistribution::
 
 ;-------------------------------------------------------------------------------
 
+; Checks all tiles of this building and flags them as "not powered" unless all
+; of them are powered.
+
+; d = y, e = x
+; b = height c = width
+Simulation_PowerCheckBuildingTileOkFlag:
+
+    ; d = y, e = x
+    ; b = height, c = width
+
+    ld      a,b ; height
+    ld      b,d ; b = y
+    ld      d,a ; d = height
+
+    ; e = x, d = height
+    ; b = y, c = width
+
+    ld      a,d ; height
+    ld      d,c ; d = width
+    ld      c,a ; c = height
+
+    ; e = x, d = width
+    ; b = y, c = height
+
+    push    bc
+    push    de ; save for later (***)
+
+    ld      a,BANK_CITY_MAP_FLAGS
+    ld      [rSVBK],a
+
+    ; Loop rows
+
+.height_loop_check:
+
+    push    de ; save width and x
+.width_loop_check:
+
+        ; Loop
+
+        push    bc
+        push    de
+
+        ; e = x, d = width
+        ; b = y, c = height
+        ld      d,b
+        ; Returns address in HL. Preserves de
+        push    af
+        call    GetMapAddress ; e = x , d = y
+        pop     af
+
+        bit     TILE_OK_POWER_BIT,[hl]
+        jr      nz,.has_power
+
+            xor     a,a ; (*) pass A=0 (not powered) to the end of the loop
+            add     sp,+6
+            jr      .end_check_loop
+
+.has_power: ; continue normally
+
+        pop     de
+        pop     bc
+
+        inc     e ; inc x
+
+        dec     d ; dec width
+        jr      nz,.width_loop_check
+
+    pop     de ; restore width and x
+
+    ; Next row
+    inc     b ; inc y
+
+    dec     c ; dec height
+    jr      nz,.height_loop_check
+
+    ld      a,1 ; (*) pass A=1 (powered) to the end of the loop
+.end_check_loop:
+
+    pop     de
+    pop     bc ; restore for next step (***)
+
+    and     a,a
+    ret     nz ; building is powered, return
+
+    ; Building isn't powered, clear flags
+    ; -----------------------------------
+
+    ; Loop rows
+
+.height_loop_clear:
+
+    push    de ; save width and x
+.width_loop_clear:
+
+        ; Loop
+
+        push    bc
+        push    de
+
+        ; e = x, d = width
+        ; b = y, c = height
+        ld      d,b
+        ; Returns address in HL. Preserves de
+        call    GetMapAddress ; e = x , d = y
+        res     TILE_OK_POWER_BIT,[hl]
+
+        pop     de
+        pop     bc
+
+        inc     e ; inc x
+
+        dec     d ; dec width
+        jr      nz,.width_loop_clear
+
+    pop     de ; restore width and x
+
+    ; Next row
+    inc     b ; inc y
+
+    dec     c ; dec height
+    jr      nz,.height_loop_clear
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 Simulation_PowerDistributionSetTileOkFlag::
 
     ; NOTE: Don't call when drawing minimaps, this can only be called from the
@@ -680,6 +808,59 @@ Simulation_PowerDistributionSetTileOkFlag::
     inc     d
     bit     6,d
     jp      z,.loopy
+
+    ; Now, check complete buildings. If a single tile of a building is not
+    ; powered, flag the whole building as not having power.
+
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy2:
+
+        ld      e,0 ; e = x
+.loopx2:
+
+        push    de ; (*)
+        push    hl
+
+            push    hl
+            push    de
+            call    CityMapGetType ; de=coordinates, returns type in a
+            call    TypeBuildingHasElectricity
+            and     a,a
+            jr      z,.not_powered ; if 0, skip the next function
+            ; de = coordinates of one tile. returns a = 1 if it is, 0 if not
+            call    BuildingIsCoordinateOrigin
+.not_powered:
+            pop     de
+            pop     hl
+            and     a,a
+            jr      z,.not_new_building
+
+                push    de
+                call    CityMapGetTileAtAddress ; returns tile = de
+                LD_BC_DE
+                ; bc = base tile. returns size: d=height, e=width
+                LONG_CALL_ARGS  BuildingGetSizeFromBaseTile
+                LD_BC_DE
+                pop     de
+                ; de = coordinates, b=height c = width
+                call    Simulation_PowerCheckBuildingTileOkFlag
+
+.not_new_building:
+
+        pop     hl
+        pop     de ; (*)
+
+        inc     hl
+
+        inc     e
+        bit     6,e
+        jp      z,.loopx2
+
+    inc     d
+    bit     6,d
+    jp      z,.loopy2
 
     ret
 
