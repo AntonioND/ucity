@@ -377,35 +377,65 @@ MapDeleteBuildingGetTileDestroyed:: ; returns BC = tile, destroys A
 
 ;-------------------------------------------------------------------------------
 
+; de = coordinates of one tile, returns a = 1 if it is the origin, 0 if not
+BuildingIsCoordinateOrigin::
+
+    call    CityMapGetTile ; de = tile number
+
+    ; Get the first tile of the group
+
+IF TILESET_INFO_ELEMENT_SIZE != 4
+    FAIL "draw_city_map_building.asm: Fix this!"
+ENDC
+
+    ld      b,BANK(TILESET_INFO)
+    call    rom_bank_push_set ; preserves de
+
+    ld      hl,TILESET_INFO+2 ; point to delta x and delta y
+    add     hl,de ; Use full 9 bit tile number to access the array.
+    add     hl,de ; hl points to the palette + bank1 bit
+    add     hl,de ; Tile number * 4
+    add     hl,de
+
+    ld      a,[hl+]
+    or      a,[hl] ; a = (delta x) or (delta y)
+
+    ld      b,a
+    call    rom_bank_pop ; should preserve bc and de
+    ld      a,b
+
+    and     a,a
+    jr      z,.is_origin
+    xor     a,a
+    ret ; return 0 if not origin of coordinates
+
+.is_origin:
+    ld      a,1
+    ret ; return 1 if origin of coordinates
+
+;-------------------------------------------------------------------------------
+
 ; de = coordinates of one tile, returns de = coordinates of the origin
 BuildingGetCoordinateOrigin::
 
     push    de ; save x and y for later (***)
 
-    call    CityMapGetTypeAndTile
-    ld      b,d
-    ld      c,e ; bc = tile number
-    ; a = type -> useless here
+    call    CityMapGetTile ; de = tile number
 
     ; Get the first tile of the group
 
-    IF TILESET_INFO_ELEMENT_SIZE != 4
-        FAIL "draw_city_map_building.asm: Fix this!"
-    ENDC
+IF TILESET_INFO_ELEMENT_SIZE != 4
+    FAIL "draw_city_map_building.asm: Fix this!"
+ENDC
 
-    push    bc
     ld      b,BANK(TILESET_INFO)
-    call    rom_bank_push_set
-    pop     bc
+    call    rom_bank_push_set ; preserves de
 
-    ld      hl,TILESET_INFO
-    add     hl,bc ; Use full 9 bit tile number to access the array.
-    add     hl,bc ; hl points to the palette + bank1 bit
-    add     hl,bc ; Tile number * 4
-    add     hl,bc
-
-    inc     hl
-    inc     hl ; point to delta x and delta y
+    ld      hl,TILESET_INFO + 2 ; point to delta x and delta y
+    add     hl,de ; Use full 9 bit tile number to access the array.
+    add     hl,de ; hl points to the palette + bank1 bit
+    add     hl,de ; Tile number * 4
+    add     hl,de
 
     pop     de ; d = y, e = x (***)
 
@@ -417,9 +447,7 @@ BuildingGetCoordinateOrigin::
     add     a,d
     ld      d,a ; d = origin y
 
-    push    de
-    call    rom_bank_pop
-    pop     de
+    call    rom_bank_pop ; should preserve bc and de
 
     ; de = coordinates of the origin
 
@@ -437,13 +465,14 @@ BuildingGetCoordinateOriginAndSize::
 
     ; Get base tile
     push    de
-    call    CityMapGetTypeAndTile ; returns tile in de
+    call    CityMapGetTile ; returns tile in de
     LD_BC_DE
     pop     de
     ; bc = base tile
     ; de = coordinates
 
     push    de
+    ; bc = base tile. returns size: d=height, e=width
     LONG_CALL_ARGS  BuildingGetSizeFromBaseTile
     LD_BC_DE
     pop     de ; de = coordinates
