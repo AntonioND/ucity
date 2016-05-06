@@ -377,6 +377,82 @@ MapDeleteBuildingGetTileDestroyed:: ; returns BC = tile, destroys A
 
 ;-------------------------------------------------------------------------------
 
+; de = coordinates of one tile, returns de = coordinates of the origin
+BuildingGetCoordinateOrigin::
+
+    push    de ; save x and y for later (***)
+
+    call    CityMapGetTypeAndTile
+    ld      b,d
+    ld      c,e ; bc = tile number
+    ; a = type -> useless here
+
+    ; Get the first tile of the group
+
+    IF TILESET_INFO_ELEMENT_SIZE != 4
+        FAIL "draw_city_map_building.asm: Fix this!"
+    ENDC
+
+    push    bc
+    ld      b,BANK(TILESET_INFO)
+    call    rom_bank_push_set
+    pop     bc
+
+    ld      hl,TILESET_INFO
+    add     hl,bc ; Use full 9 bit tile number to access the array.
+    add     hl,bc ; hl points to the palette + bank1 bit
+    add     hl,bc ; Tile number * 4
+    add     hl,bc
+
+    inc     hl
+    inc     hl ; point to delta x and delta y
+
+    pop     de ; d = y, e = x (***)
+
+    ld      a,[hl+] ; a = delta x
+    add     a,e
+    ld      e,a ; e = origin x
+
+    ld      a,[hl] ; a = delta y
+    add     a,d
+    ld      d,a ; d = origin y
+
+    push    de
+    call    rom_bank_pop
+    pop     de
+
+    ; de = coordinates of the origin
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; d=y e=x = coordinates of one tile
+; returns: de = coordinates of the origin
+;          b=width, c=height
+BuildingGetCoordinateOriginAndSize::
+
+    ; de = coordinates of one tile, returns de = coordinates of the origin
+    call    BuildingGetCoordinateOrigin
+
+    ; Get base tile
+    push    de
+    call    CityMapGetTypeAndTile ; returns tile in de
+    LD_BC_DE
+    pop     de
+    ; bc = base tile
+    ; de = coordinates
+
+    push    de
+    LONG_CALL_ARGS  BuildingGetSizeFromBaseTile
+    LD_BC_DE
+    pop     de ; de = coordinates
+    ; bc = size
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Doesn't update VRAM
 
 ; d = y, e = x -> Coordinates of one of the tiles.
@@ -456,48 +532,8 @@ ENDC
     ; Check origin of coordinates of the building
     ; -------------------------------------------
 
-    push    de ; save x and y for later (***)
-
-    call    CityMapGetTypeAndTile
-    ld      b,d
-    ld      c,e ; bc = tile number
-    ; a = type -> useless here
-
-    ; Get the first tile of the group
-
-    IF TILESET_INFO_ELEMENT_SIZE != 4
-        FAIL "draw_city_map_building.asm: Fix this!"
-    ENDC
-
-    push    bc
-    ld      b,BANK(TILESET_INFO)
-    call    rom_bank_push_set
-    pop     bc
-
-    ld      hl,TILESET_INFO
-    add     hl,bc ; Use full 9 bit tile number to access the array.
-    add     hl,bc ; hl points to the palette + bank1 bit
-    add     hl,bc ; Tile number * 4
-    add     hl,bc
-
-    inc     hl
-    inc     hl ; point to delta x and delta y
-
-    pop     de ; d = y, e = x (***)
-
-    ld      a,[hl+] ; a = delta x
-    add     a,e
-    ld      e,a ; e = origin x
-
-    ld      a,[hl] ; a = delta y
-    add     a,d
-    ld      d,a ; d = origin y
-
-    push    de
-    call    rom_bank_pop
-    pop     de
-
-    ; de = original coordinates
+    ; de = coordinates of one tile, returns de = coordinates of the origin
+    call    BuildingGetCoordinateOrigin
 
     ; All there's left to calculate is the building type! Save coordinates for
     ; later, we'll need them together with the building type.
