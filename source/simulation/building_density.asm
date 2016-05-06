@@ -147,10 +147,10 @@ CITY_TILE_DENSITY:: ; 512 entries
 
     T_ADD   T_AIRPORT,     30,10
     T_ADD   T_PORT,        10,8
-    T_ADD   T_PORT_WATER_L, 0,1
-    T_ADD   T_PORT_WATER_R, 0,1
-    T_ADD   T_PORT_WATER_D, 0,1
-    T_ADD   T_PORT_WATER_U, 0,1
+    T_ADD   T_PORT_WATER_L, 0,0
+    T_ADD   T_PORT_WATER_R, 0,0
+    T_ADD   T_PORT_WATER_D, 0,0
+    T_ADD   T_PORT_WATER_U, 0,0
 
     T_ADD   T_POWER_PLANT_COAL,    5,0 ; They don't have cost, power plants are
     T_ADD   T_POWER_PLANT_OIL,     5,0 ; generators!

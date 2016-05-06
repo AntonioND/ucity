@@ -59,6 +59,10 @@ TypeHasElectricityExtended:: ; preserves c, de, hl
     sub     a,TYPE_WATER ; if result is 0, return 0. Don't replace sub by cp!
     ret     z
 
+    ld      a,b ; get type
+    sub     a,TYPE_DOCK ; if result is 0, return 0. Don't replace sub by cp!
+    ret     z
+
     ; The rest of types need power, even parks (because of lights)
     ld      a,TYPE_HAS_POWER
     ret
