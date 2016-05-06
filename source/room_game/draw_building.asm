@@ -201,29 +201,30 @@ MapDrawBuildingForced:: ; Puts a building at the cursor. No checks.
     push    de ; save width and x
 .width_loop:
 
-    ; Draw
+        ; Draw
 
-    push    bc
-    push    de
-    push    hl
+        push    bc
+        push    de
+        push    hl
 
-    ;ld      e,e
-    ld      d,b
+            ;ld      e,e
+            ld      d,b
 
-    ld      c,l
-    ld      b,h
+            ld      c,l
+            ld      b,h
 
-    call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
+            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
 
-    pop     hl
-    pop     de
-    pop     bc
+        pop     hl
+        pop     de
+        pop     bc
 
-    inc     e ; inc x
-    inc     hl ; inc tile
+        inc     e ; inc x
+        inc     hl ; inc tile
 
-    dec     d ; dec width
-    jr      nz,.width_loop
+        dec     d ; dec width
+        jr      nz,.width_loop
+
     pop     de ; restore width and x
 
     ; Next row
@@ -401,7 +402,7 @@ ENDC
     or      a,[hl] ; a = (delta x) or (delta y)
 
     ld      b,a
-    call    rom_bank_pop ; should preserve bc and de
+    call    rom_bank_pop ; preserves bc and de
     ld      a,b
 
     and     a,a
@@ -447,7 +448,7 @@ ENDC
     add     a,d
     ld      d,a ; d = origin y
 
-    call    rom_bank_pop ; should preserve bc and de
+    call    rom_bank_pop ; preserves bc and de
 
     ; de = coordinates of the origin
 
@@ -650,22 +651,23 @@ ENDC
     push    de ; save width and x
 .width_loop:
 
-    ; Loop
+        ; Loop
 
-    push    bc
-    push    de
+        push    bc
+        push    de
 
-    ld      d,b ; d = y
-    call    MapDeleteBuildingGetTileDestroyed
-    call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
+            ld      d,b ; d = y
+            call    MapDeleteBuildingGetTileDestroyed
+            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
 
-    pop     de
-    pop     bc
+        pop     de
+        pop     bc
 
-    inc     e ; inc x
+        inc     e ; inc x
 
-    dec     d ; dec width
-    jr      nz,.width_loop
+        dec     d ; dec width
+        jr      nz,.width_loop
+
     pop     de ; restore width and x
 
     ; Next row

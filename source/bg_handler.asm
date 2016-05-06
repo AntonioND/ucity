@@ -79,9 +79,9 @@ bg_update_scroll_registers::
 
 __bg_load_tiles: ; hl = tile data struct    b = struct bank
 
-    push    hl
-    call    rom_bank_push_set
-    pop     hl
+    LD_DE_HL ; (*)
+    call    rom_bank_push_set ; preserves de
+    LD_HL_DE ; (*)
 
     ld      c,[hl]
     inc     hl
@@ -210,6 +210,7 @@ __bg_load_tiles: ; hl = tile data struct    b = struct bank
     ld      [rVBK],a
 
     call    rom_bank_pop
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -397,9 +398,9 @@ __bg_load_map: ; hl = pointer to data    b = struct bank
     ld      [bg_map_bank],a
 
     ; Change to the bank that contains BG info. B value is useless after this
-    push    hl
-    call    rom_bank_push_set
-    pop     hl
+    LD_DE_HL ; (*)
+    call    rom_bank_push_set ; preserves de
+    LD_HL_DE ; (*)
 
     ; save bg size to bg_w, bg_h and bg_size
 
@@ -674,12 +675,14 @@ _bg_load::
     ld      a,h
     ld      [bg_struct_ptr+1],a
 
+    ; DE can be destroyed now
+
     ld      a,b
     ld      [bg_struct_bank],a
 
-    push    hl
+    LD_DE_HL ; (*)
     call    rom_bank_push_set ; ***
-    pop     hl
+    LD_HL_DE ; (*)
 
     ; LOAD MAP
 

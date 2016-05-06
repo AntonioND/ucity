@@ -64,12 +64,12 @@ LoadText:: ; b = 1 -> load at bank 8800h, b = 0 -> load at bank at 8000h
     xor     a,a
     ld      [rVBK],a
 
-    push    bc
+    LD_DE_BC ; (*)
 
     ld      b,BANK(TextTilesData)
-    call    rom_bank_push_set
+    call    rom_bank_push_set ; preserves de
 
-    pop     bc
+    LD_BC_DE  ; (*)
 
     bit     0,b
     jr      nz,.bank_8800

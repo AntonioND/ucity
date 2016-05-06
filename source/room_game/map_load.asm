@@ -107,9 +107,9 @@ PredefinedMapLoad: ; b = bank, hl = tiles
 
     ; Load city from ROM into WRAM
 
-    push    hl
-    call    rom_bank_push_set
-    pop     hl
+    LD_DE_HL
+    call    rom_bank_push_set ; preserves de
+    LD_HL_DE
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a

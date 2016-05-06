@@ -680,9 +680,9 @@ MapDeletePort:: ; Deletes a building. Checks money.
     ld      b,d
     ld      c,e ; bc = tile number
 
-    IF TILESET_INFO_ELEMENT_SIZE != 4
-        FAIL "draw_port.asm: Fix this!"
-    ENDC
+IF TILESET_INFO_ELEMENT_SIZE != 4
+    FAIL "draw_port.asm: Fix this!"
+ENDC
 
     push    bc
     ld      b,BANK(TILESET_INFO)

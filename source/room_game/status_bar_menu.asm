@@ -447,7 +447,7 @@ StatusBarUpdate::
     call    .print_date
     call    .print_population
     call    .print_rci
-    jr      .end
+    ;jr      .end
 
 .end: ; Exit
 

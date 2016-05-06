@@ -238,7 +238,7 @@ APA_PixelStreamPlot2x2::
     ret
 
 ;-------------------------------------------------------------------------------
-IF 0
+IF 0 ; Unused for now
 APA_PixelStreamPlot::
 
     ld      a,[apa_colors+0]
@@ -325,7 +325,7 @@ APA_PixelStreamPlot::
     ret
 ENDC
 ;-------------------------------------------------------------------------------
-IF 0
+IF 0 ; Unused for now
 APA_Plot:: ; b = x, c = y (0-127!)
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK

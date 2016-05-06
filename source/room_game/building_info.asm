@@ -97,9 +97,7 @@ ENDC
     inc     hl
     ld      c,[hl]
 
-    push    bc
-    call    rom_bank_pop
-    pop     bc
+    call    rom_bank_pop ; preserves bc and de
 
     ret
 
@@ -146,11 +144,11 @@ ENDC
     ld      h,[hl]
     ld      l,a
 
-    push    bc
-    push    hl
-    call    rom_bank_pop
-    pop     hl
-    pop     bc
+    ; return hl and bc
+
+    LD_DE_HL
+    call    rom_bank_pop ; preserves bc and de
+    LD_HL_DE
 
     ret
 

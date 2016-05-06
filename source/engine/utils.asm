@@ -413,7 +413,7 @@ rom_handler_init::
 ;- rom_bank_pop()                                                              -
 ;-------------------------------------------------------------------------------
 
-rom_bank_pop:: ; should preserve bc and de
+rom_bank_pop:: ; preserves bc and de
 
     di
 
