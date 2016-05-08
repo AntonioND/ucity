@@ -31,34 +31,6 @@
 
 ;###############################################################################
 
-CURTILE     SET 0
-POPULATION  SET 0
-ENERGY_COST SET 0
-
-; Tile Add - Base tile of the building to add information of
-;            Will only fill the building when the next one is added!
-T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost
-
-    IF (\1) < CURTILE ; check if going backwards and stop if so
-        FAIL "ERROR : building_density.asm : Tile already in use!"
-    ENDC
-
-    ; Fill previous building
-    IF (\1) > CURTILE ; The first call both are 0 and this has to be skipped
-        REPT (\1) - CURTILE
-            DB POPULATION, ENERGY_COST
-        ENDR
-    ENDC
-
-    ; Set parameters for this building
-CURTILE     SET (\1)
-POPULATION  SET (\2)
-ENERGY_COST SET (\3)
-
-ENDM
-
-;###############################################################################
-
     SECTION "Building Density Functions Bank 0",ROM0
 
 ;-------------------------------------------------------------------------------
@@ -86,6 +58,34 @@ ENDC
     pop     de
 
     ret
+
+;###############################################################################
+
+CURTILE     SET 0
+POPULATION  SET 0
+ENERGY_COST SET 0
+
+; Tile Add - Base tile of the building to add information of
+;            Will only fill the building when the next one is added!
+T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost
+
+    IF (\1) < CURTILE ; check if going backwards and stop if so
+        FAIL "ERROR : building_density.asm : Tile already in use!"
+    ENDC
+
+    ; Fill previous building
+    IF (\1) > CURTILE ; The first call both are 0 and this has to be skipped
+        REPT (\1) - CURTILE
+            DB POPULATION, ENERGY_COST
+        ENDR
+    ENDC
+
+    ; Set parameters for this building
+CURTILE     SET (\1)
+POPULATION  SET (\2)
+ENERGY_COST SET (\3)
+
+ENDM
 
 ;###############################################################################
 
