@@ -166,14 +166,33 @@ MapTileUpdatePowerLines:: ; e = x, d = y
         ld      a,BANK_CITY_MAP_TILES
         ld      [rSVBK],a
         ld      a,[hl]
+
         cp      a,T_ROAD_TB
-        jr      nz,.not_tb
+        jr      z,.is_tb
+        cp      a,T_ROAD_TB_1
+        jr      z,.is_tb
+        cp      a,T_ROAD_TB_2
+        jr      z,.is_tb
+        cp      a,T_ROAD_TB_3
+        jr      z,.is_tb
+
+        jr      .not_tb
+.is_tb:
             ld      bc,T_ROAD_TB_POWER_LINES
             call    CityMapDrawTerrainTile
             ret
 .not_tb:
         cp      a,T_ROAD_LR
-        jr      nz,.not_lr
+        jr      z,.is_lr
+        cp      a,T_ROAD_LR_1
+        jr      z,.is_lr
+        cp      a,T_ROAD_LR_2
+        jr      z,.is_lr
+        cp      a,T_ROAD_LR_3
+        jr      z,.is_lr
+
+        jr      .not_lr
+.is_lr:
             ld      bc,T_ROAD_LR_POWER_LINES
             call    CityMapDrawTerrainTile
             ret
@@ -395,10 +414,27 @@ MapDrawPowerLines:: ; Adds a train tile in the cursor. Updates neighbours.
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      a,[hl] ; get tile from map
+
     cp      a,T_ROAD_TB ; valid road tile
     jr      z,.end_road_check
+    cp      a,T_ROAD_TB_1 ; valid road tile
+    jr      z,.end_road_check
+    cp      a,T_ROAD_TB_2 ; valid road tile
+    jr      z,.end_road_check
+    cp      a,T_ROAD_TB_3 ; valid road tile
+    jr      z,.end_road_check
+
     cp      a,T_ROAD_LR ; valid road tile
-    ret     nz
+    jr      z,.end_road_check
+    cp      a,T_ROAD_LR_1 ; valid road tile
+    jr      z,.end_road_check
+    cp      a,T_ROAD_LR_2 ; valid road tile
+    jr      z,.end_road_check
+    cp      a,T_ROAD_LR_3 ; valid road tile
+    jr      z,.end_road_check
+
+    ret
+
 .end_road_check:
 
     ld      a,b

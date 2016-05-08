@@ -261,7 +261,7 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
 
 ; Note: This doesn't check bounds or anything!
 ; Returns: - Tile -> Register DE
-CityMapGetTileAtAddress:: ; Arguments: hl = address. Preserves BC
+CityMapGetTileAtAddress:: ; Arguments: hl = address. Preserves BC and HL
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
