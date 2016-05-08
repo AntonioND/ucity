@@ -68,9 +68,6 @@ ENDC
 ; Up to 256 elements (We assume that roads and train tracks are always placed
 ; in the lowest 256 tiles)
 
-ROAD_BASE_COST  EQU 2
-TRAIN_BASE_COST EQU 1
-
 ; Equates that tell the directions that a train/car can go from this tile
 ; Road To / Train To
 RT_U EQU $01
@@ -92,6 +89,10 @@ TF_U EQU $40
 TF_R EQU $80
 TF_D EQU $10
 TF_L EQU $20
+
+; To check if it is a valid movement -> (FROM & TO & MASK) != 0 -> VALID
+TILE_TRANSPORT_VERTICAL_MASK   EQU RT_U|RT_D|TT_U|TT_D
+TILE_TRANSPORT_HORIZONTAL_MASK EQU RT_L|RT_R|TT_L|TT_R
 
 TILE_TRANSPORT_INFO:
   TILE_SET_COUNT 0 ; Add padding
