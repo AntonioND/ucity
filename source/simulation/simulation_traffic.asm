@@ -146,6 +146,55 @@ TILE_TRANSPORT_INFO:
 
 ;###############################################################################
 
+; returns a != 0 => movement allowed, c = cost of step
+TrafficTryMoveUp: ; d=y, e=x => current position
+
+    ld      a,d ; check if top row
+    and     a,a
+    jr      nz,.pos_ok
+        xor     a,a
+        ld      c,a ; not ok, return 0
+        ret
+.pos_ok:
+
+    ; Arguments: e = x , d = y
+    call    CityMapGetTileNoBoundCheck ; returns tile = de, address = hl
+    LD_BC_DE
+    push    bc
+    ld      bc,-32 ; previous row
+    add     hl,bc
+    ; hl = address, returns de = tile
+    call    CityMapGetTileAtAddress ; preserves hl
+    pop     bc
+    ; bc = old tile
+    ; de = new tile
+    ld      hl,TILE_TRANSPORT_INFO+1
+    add     hl,bc
+    add     hl,bc
+    add     hl,bc
+    ld      a,[hl-] ; a = To
+    ld      c,[hl] ; c = Cost
+
+    ld      hl,TILE_TRANSPORT_INFO+1
+    add     hl,de
+    add     hl,de
+    add     hl,de ; hl points to From
+
+    and     a,[hl]
+
+    and     a,TILE_TRANSPORT_VERTICAL_MASK
+
+    ret     z ; if not allowed, return now
+
+    ; Allowed, add to base cost the cost because of the traffic
+
+    ; TODO - Add cost to c acording to traffic
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+
 ;-------------------------------------------------------------------------------
 
 ; Output data to WRAMX bank BANK_CITY_MAP_TRAFFIC

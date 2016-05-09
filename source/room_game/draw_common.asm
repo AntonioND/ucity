@@ -224,6 +224,30 @@ CityMapGetTile:: ; Arguments: e = x , d = y
 
 ;-------------------------------------------------------------------------------
 
+; Returns: - Tile -> Register DE
+;          - Address -> Register HL
+CityMapGetTileNoBoundCheck:: ; Arguments: e = x , d = y
+
+    call    GetMapAddress
+
+    ld      a,BANK_CITY_MAP_TILES
+    ld      [rSVBK],a
+
+    ld      e,[hl]
+
+    ld      a,BANK_CITY_MAP_ATTR
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    rla
+    swap    a
+    and     a,1 ; get bank bit
+    ld      d,a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Returns: - Type of the tile + extra flags -> register A
 ;          - Tile -> Register DE
 ;          - Address -> Register HL
