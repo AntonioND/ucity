@@ -53,7 +53,7 @@ QueueInit:: ; Reset pointers
 
 ;-------------------------------------------------------------------------------
 
-QueueAdd:: ; Add register DE to the queue. Preserves DE
+QueueAdd:: ; Add register DE to the queue. Preserves DE and BC
 
     ld      a,BANK_SCRATCH_RAM_2
     ld      [rSVBK],a
@@ -78,7 +78,7 @@ QueueAdd:: ; Add register DE to the queue. Preserves DE
     ret
 
 ;-------------------------------------------------------------------------------
-
+IF 0
 QueueAddEx:: ; Add registers BC and DE to the queue. Preserves BC and DE
 
     ld      a,BANK_SCRATCH_RAM_2
@@ -107,7 +107,7 @@ QueueAddEx:: ; Add registers BC and DE to the queue. Preserves BC and DE
     ldh     [queue_in_ptr+0],a
 
     ret
-
+ENDC
 ;-------------------------------------------------------------------------------
 
 QueueGet:: ; Get value from queue into DE.
@@ -135,7 +135,7 @@ QueueGet:: ; Get value from queue into DE.
     ret
 
 ;-------------------------------------------------------------------------------
-
+IF 0
 QueueGetEx:: ; Get values from queue into BC and DE.
 
     ld      a,BANK_SCRATCH_RAM_2
@@ -164,7 +164,7 @@ QueueGetEx:: ; Get values from queue into BC and DE.
     ldh     [queue_out_ptr+0],a
 
     ret
-
+ENDC
 ;-------------------------------------------------------------------------------
 
 QueueIsEmpty:: ; Returns a=1 if empty
