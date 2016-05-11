@@ -26,174 +26,31 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
-    INCLUDE "tileset_info.inc"
-    INCLUDE "building_density.inc"
 
 ;###############################################################################
 
     SECTION "Simulation Traffic Functions",ROMX
 
-;###############################################################################
-
-TILE_TRANSPORT_INFO_ELEMENT_SIZE EQU 3
-
-CURTILE SET 0
-
-; Tile Set Count
-TILE_SET_COUNT : MACRO ; 1 = Tile number
-    IF (\1) < CURTILE ; check if going backwards and stop if so
-        FAIL "ERROR : building_info.asm : Tile already in use!"
-    ENDC
-    IF (\1) > CURTILE ; If there's a hole to fill, fill it
-        REPT (\1) - CURTILE
-            DS TILE_TRANSPORT_INFO_ELEMENT_SIZE ; Empty
-        ENDR
-    ENDC
-CURTILE SET (\1)
-ENDM
-
-; Tile Add
-T_ADD : MACRO ; 1=Tile name, 2=Transit base cost, 3=To, 4=From
-    TILE_SET_COUNT (\1)
-    DB (\2), (\3), (\4)
-CURTILE SET CURTILE+1 ; Set cursor for next item
-ENDM
-
-IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 3
-    FAIL "Fix this!"
-ENDC
-
-;###############################################################################
-
-; Up to 256 elements (We assume that roads and train tracks are always placed
-; in the lowest 256 tiles)
-
-; Equates that tell the directions that a train/car can go from this tile
-; Road To / Train To
-RT_U EQU $01
-RT_R EQU $02
-RT_D EQU $04
-RT_L EQU $08
-TT_U EQU $10
-TT_R EQU $20
-TT_D EQU $40
-TT_L EQU $80
-
-; Equates that tell the directions that a train/car can come to this tile
-; Road From / Train From
-RF_U EQU $04 ; To match the other equates
-RF_R EQU $08
-RF_D EQU $01
-RF_L EQU $02
-TF_U EQU $40
-TF_R EQU $80
-TF_D EQU $10
-TF_L EQU $20
-
-; To check if it is a valid movement -> (FROM & TO & MASK) != 0 -> VALID
-TILE_TRANSPORT_VERTICAL_MASK   EQU RT_U|RT_D|TT_U|TT_D
-TILE_TRANSPORT_HORIZONTAL_MASK EQU RT_L|RT_R|TT_L|TT_R
-
-TILE_TRANSPORT_INFO:
-  TILE_SET_COUNT 0 ; Add padding
-
-  T_ADD T_ROAD_TB,   2, RT_U|RT_D, RF_U|RF_D
-  T_ADD T_ROAD_TB_1, 2, RT_U|RT_D, RF_U|RF_D
-  T_ADD T_ROAD_TB_2, 2, RT_U|RT_D, RF_U|RF_D
-  T_ADD T_ROAD_TB_3, 2, RT_U|RT_D, RF_U|RF_D
-
-  T_ADD T_ROAD_LR,   2, RT_R|RT_L, RF_R|RF_L
-  T_ADD T_ROAD_LR_1, 2, RT_R|RT_L, RF_R|RF_L
-  T_ADD T_ROAD_LR_2, 2, RT_R|RT_L, RF_R|RF_L
-  T_ADD T_ROAD_LR_3, 2, RT_R|RT_L, RF_R|RF_L
-
-  T_ADD T_ROAD_RB,   2, RT_R|RT_D, RF_R|RF_D
-  T_ADD T_ROAD_LB,   2, RT_L|RT_D, RF_L|RF_D
-  T_ADD T_ROAD_TR,   2, RT_R|RT_U, RF_R|RF_U
-  T_ADD T_ROAD_TL,   2, RT_U|RT_L, RF_U|RF_L
-
-  T_ADD T_ROAD_TRB,  2, RT_U|RT_R|RT_D, RF_U|RF_R|RF_D
-  T_ADD T_ROAD_LRB,  2, RT_L|RT_R|RT_D, RF_L|RF_R|RF_D
-  T_ADD T_ROAD_TLB,  2, RT_U|RT_L|RT_D, RF_U|RF_L|RF_D
-  T_ADD T_ROAD_TLR,  2, RT_U|RT_R|RT_L, RF_U|RF_R|RF_L
-  T_ADD T_ROAD_TLRB, 2, RT_U|RT_R|RT_D|RT_L, RF_U|RF_R|RF_D|RF_L
-
-  T_ADD T_ROAD_TB_POWER_LINES, 2, RT_U|RT_D, RF_U|RF_D
-  T_ADD T_ROAD_LR_POWER_LINES, 2, RT_R|RT_L, RF_R|RF_L
-  T_ADD T_ROAD_TB_BRIDGE, 2, RT_U|RT_D, RF_U|RF_D
-  T_ADD T_ROAD_LR_BRIDGE, 2, RT_R|RT_L, RF_R|RF_L
-
-  T_ADD T_TRAIN_TB,   1, TT_U|TT_D, TF_U|TF_D
-  T_ADD T_TRAIN_LR,   1, TT_R|TT_L, TF_R|TF_L
-  T_ADD T_TRAIN_RB,   1, TT_R|TT_D, TF_R|TF_D
-  T_ADD T_TRAIN_LB,   1, TT_L|TT_D, TF_L|TF_D
-  T_ADD T_TRAIN_TR,   1, TT_R|TT_U, TF_R|TF_U
-  T_ADD T_TRAIN_TL,   1, TT_U|TT_L, TF_U|TF_L
-
-  T_ADD T_TRAIN_TRB,  1, TT_U|TT_R|TT_D, TF_U|TF_R|TF_D
-  T_ADD T_TRAIN_LRB,  1, TT_L|TT_R|TT_D, TF_L|TF_R|TF_D
-  T_ADD T_TRAIN_TLB,  1, TT_U|TT_L|TT_D, TF_U|TF_L|TF_D
-  T_ADD T_TRAIN_TLR,  1, TT_U|TT_R|TT_L, TF_U|TF_R|TF_L
-  T_ADD T_TRAIN_TLRB, 1, TT_U|TT_R|TT_D|TT_L, TF_U|TF_R|TF_D|TF_L
-
-  T_ADD T_TRAIN_LR_ROAD, 3, TT_R|TT_L|RT_U|RT_D, TF_R|TF_L|RF_U|RF_D ; Both!
-  T_ADD T_TRAIN_TB_ROAD, 3, TT_U|TT_D|RT_R|RT_L, TF_U|TF_D|RF_R|RF_L ; Both!
-
-  T_ADD T_TRAIN_TB_POWER_LINES, 1, TT_U|TT_D, TF_U|TF_D
-  T_ADD T_TRAIN_LR_POWER_LINES, 1, TT_R|TT_L, TF_R|TF_L
-  T_ADD T_TRAIN_TB_BRIDGE, 1, TT_U|TT_D, TF_U|TF_D
-  T_ADD T_TRAIN_LR_BRIDGE, 1, TT_R|TT_L, TF_R|TF_L
-
-;###############################################################################
-
-; returns a != 0 => movement allowed, c = cost of step
-TrafficTryMoveUp: ; d=y, e=x => current position
-
-    ld      a,d ; check if top row
-    and     a,a
-    jr      nz,.pos_ok
-        xor     a,a
-        ld      c,a ; not ok, return 0
-        ret
-.pos_ok:
-
-    ; Arguments: e = x , d = y
-    call    CityMapGetTileNoBoundCheck ; returns tile = de, address = hl
-    LD_BC_DE
-    push    bc
-    ld      bc,-32 ; previous row
-    add     hl,bc
-    ; hl = address, returns de = tile
-    call    CityMapGetTileAtAddress ; preserves hl
-    pop     bc
-    ; bc = old tile
-    ; de = new tile
-    ld      hl,TILE_TRANSPORT_INFO+1
-    add     hl,bc
-    add     hl,bc
-    add     hl,bc
-    ld      a,[hl-] ; a = To
-    ld      c,[hl] ; c = Cost
-
-    ld      hl,TILE_TRANSPORT_INFO+1
-    add     hl,de
-    add     hl,de
-    add     hl,de ; hl points to From
-
-    and     a,[hl]
-
-    and     a,TILE_TRANSPORT_VERTICAL_MASK
-
-    ret     z ; if not allowed, return now
-
-    ; Allowed, add to base cost the cost because of the traffic
-
-    ; TODO - Add cost to c acording to traffic
-
-    ret
-
 ;-------------------------------------------------------------------------------
 
+; Checks bounds, returns a=0 if outside the map else a=value
+Simulation_TrafficGetMapValue: ; d=y, e=x
+
+    ld      a,e
+    or      a,d
+    and     a,128+64 ; ~63
+    jr      z,.ok
+    xor     a,a
+    ret
+
+.ok:
+    ld      a,BANK_CITY_MAP_TRAFFIC
+    ld      [rSVBK],a
+
+    call    GetMapAddress
+    ld      a,[hl]
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -211,8 +68,63 @@ Simulation_Traffic::
     ld      hl,CITY_MAP_TRAFFIC
     call    memset
 
-    ; For each tile check if it is a road
-    ; -----------------------------------
+    ; For each building tile load its density
+    ; ---------------------------------------
+
+    ; Density is positive for residential areas, negative for the rest.
+    ; Note: Density can only be 0-127, so it fits in 8 bits.
+
+    ld      hl,CITY_MAP_TRAFFIC ; Map base
+
+    ld      d,0 ; y
+.loopy_reset:
+        ld      e,0 ; x
+.loopx_reset:
+        push    de
+        push    hl
+
+            push    hl
+
+            call    CityMapGetTileAtAddress ; hl = address, returns de = tile
+
+            LONG_CALL_ARGS  CityTileDensity ; de = tile, returns d=population
+            ; d = population density
+
+            pop     hl
+
+            ld      a,BANK_CITY_MAP_TYPE
+            ld      [rSVBK],a
+            ld      a,[hl] ; Get type
+
+            cp      a,TYPE_RESIDENTIAL
+            ld      a,d ; a = density
+            jr      z,.residential
+            xor     a,a
+            sub     a,d ; a = -density
+.residential:
+
+            ld      d,a
+            ld      a,BANK_CITY_MAP_TRAFFIC
+            ld      [rSVBK],a
+            ld      [hl],d ; save density
+
+        pop     hl
+        pop     de
+
+        inc     hl
+
+        inc     e
+        ld      a,CITY_MAP_WIDTH
+        cp      a,e
+        jr      nz,.loopx_reset
+
+    inc     d
+    ld      a,CITY_MAP_HEIGHT
+    cp      a,d
+    jr      nz,.loopy_reset
+
+    ; For each tile check if it is a residential building
+    ; ---------------------------------------------------
 
     ld      hl,CITY_MAP_TRAFFIC ; Map base
 
@@ -227,12 +139,18 @@ Simulation_Traffic::
             ld      [rSVBK],a
             ld      a,[hl] ; Get type
 
-            bit     TYPE_HAS_ROAD_BIT,a
-            jr      z,.not_road
+            cp      a,TYPE_RESIDENTIAL
+            jr      nz,.not_residential
 
-                ; Road. Handle traffic
+                ; Residential building = Source of traffic
 
-.not_road:
+                ; Check if handled
+                ; TODO
+
+                ; de = coordinates of top left corner of building
+                LONG_CALL_ARGS  Simulation_TrafficHandleSource
+
+.not_residential:
 
         pop     hl
         pop     de
