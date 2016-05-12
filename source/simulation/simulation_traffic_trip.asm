@@ -156,6 +156,10 @@ TrafficTryExpand: ; d=y, e=x => current position
     cp      a,255
     ret     z ; this tile is full of traffic, ignore
 
+IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 3
+    FAIL "Fix this!"
+ENDC
+
     ld      hl,TILE_TRANSPORT_INFO
     add     hl,bc ; bc = tile
     add     hl,bc
@@ -234,8 +238,9 @@ TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
     LD_BC_DE
     pop     de ; de = original coords, bc = tile, hl = address
 
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 3
+    FAIL "Fix this!"
+ENDC
 
     ld      a,[hl]
     ld      hl,TILE_TRANSPORT_INFO+2
@@ -288,6 +293,30 @@ TrafficRoadAddRight:
 
 TrafficTrainAddRight:
     TRAFFIC_ADD_TILE_COMMON T_L_BIT
+
+;-------------------------------------------------------------------------------
+
+; de = coordinates of destination, hl = address of destination
+; preserves bc and de
+TrafficRoadTrainAddStart:
+
+    push    bc
+    call    CityMapGetTypeNoBoundCheck ; returns type in A. Preserves de
+    pop     bc ; de = original coords
+
+    ld      h,a
+    and     a,TYPE_MASK
+    cp      a,TYPE_WATER
+    ret     z ; if this is water (or a bridge) return
+    ld      a,h
+
+    and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+    ret     z ; return if there is no road or train
+
+    ; add coordinates of destination tile to the queue
+    call    QueueAdd ; preserves BC and DE
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -734,10 +763,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            push    hl
-                call    TrafficRoadAddUp ; preserves bc and de
-            pop     hl
-            call    TrafficTrainAddUp ; preserves bc and de
+            call    TrafficRoadTrainAddStart ; preserves bc and de
         pop     bc
 
         inc     e ; inc x
@@ -764,10 +790,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            push    hl
-                call    TrafficRoadAddDown ; preserves bc and de
-            pop     hl
-            call    TrafficTrainAddDown ; preserves bc and de
+            call    TrafficRoadTrainAddStart ; preserves bc and de
         pop     bc
 
         inc     e ; inc x
@@ -792,10 +815,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            push    hl
-                call    TrafficRoadAddLeft ; preserves bc and de
-            pop     hl
-            call    TrafficTrainAddLeft ; preserves bc and de
+            call    TrafficRoadTrainAddStart ; preserves bc and de
         pop     bc
 
         inc     d ; inc y
@@ -822,10 +842,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            push    hl
-                call    TrafficRoadAddRight ; preserves bc and de
-            pop     hl
-            call    TrafficTrainAddRight ; preserves bc and de
+            call    TrafficRoadTrainAddStart ; preserves bc and de
         pop     bc
 
         inc     d ; inc y
@@ -846,30 +863,55 @@ Traffic_AddBuildingNeighboursToQueue:
 ; d = y, e = x, coordinates of top left corner of building
 Simulation_TrafficHandleSource::
 
+    ret
+
     ; Get dimensions of this building
+    ; -------------------------------
 
-    ; TODO
+    ; Get base tile
+    push    de
+    call    CityMapGetTile ; returns tile in de
+    LD_BC_DE
+    ; bc = base tile
 
-    ; Set as handled
+    ; bc = base tile. returns size: d=height, e=width
+    LONG_CALL_ARGS  BuildingGetSizeFromBaseTile
+    LD_BC_DE
+    pop     de ; de = coordinates
+    ; bc = size
+
+    ; Flag as handled
+    ; ---------------
 
     ; TODO
 
     ; Get density of this building
+    ; ----------------------------
+
+    ; Save it to a variable that will be decreased in the queue loop below
 
     ; TODO
 
     ; Add neighbours of this building source of traffic to the queue
+    ; --------------------------------------------------------------
 
-    ; TODO
+    ; e = x, d = y
+    ; b = width, c = height
+    ;call    Traffic_AddBuildingNeighboursToQueue
+    ; coordinates and size are not needed from now on
 
-    ; While queue is not empty, read element. If not destination, try expanding
-    ; from it.
+    ; While queue is not empty, expand
+    ; --------------------------------
 
-    ; TODO
-
+    ; Read tile type
+    ;    If valid destination, check density and subtract it from source density
+    ;    If not valid destination, try expanding.
     ; If remaining source density is 0, exit
 
     ; TODO
+
+    ; End of this building
+    ; --------------------
 
     ret
 

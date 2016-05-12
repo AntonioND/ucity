@@ -30,7 +30,7 @@ CURTILE SET 0
 ; Tile Set Count
 TILE_SET_COUNT : MACRO ; 1 = Tile number
     IF (\1) < CURTILE ; check if going backwards and stop if so
-        FAIL "ERROR : building_info.asm : Tile already in use!"
+        FAIL "ERROR : tileset_info.asm : Tile already in use!"
     ENDC
     IF (\1) > CURTILE ; If there's a hole to fill, fill it
         REPT (\1) - CURTILE

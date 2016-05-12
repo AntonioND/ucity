@@ -468,16 +468,13 @@ BuildingGetCoordinateOriginAndSize::
     push    de
     call    CityMapGetTile ; returns tile in de
     LD_BC_DE
-    pop     de
     ; bc = base tile
-    ; de = coordinates
 
-    push    de
     ; bc = base tile. returns size: d=height, e=width
     LONG_CALL_ARGS  BuildingGetSizeFromBaseTile
     LD_BC_DE
     pop     de ; de = coordinates
-    ; bc = size
+    ; bc = size (b=height, c=width)
 
     ret
 
