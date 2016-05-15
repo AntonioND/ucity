@@ -863,7 +863,25 @@ Traffic_AddBuildingNeighboursToQueue:
 ; d = y, e = x, coordinates of top left corner of building
 Simulation_TrafficHandleSource::
 
-    ret
+    ; Get density of this building
+    ; ----------------------------
+
+    push    de
+    call    GetMapAddress
+    pop     de
+
+    ld      a,BANK_CITY_MAP_TRAFFIC
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    and     a,a
+    ret     z
+
+    ; If density is 0, exit
+
+    ; Save it to a variable that will be decreased in the queue loop below
+
+    ; TODO
 
     ; Get dimensions of this building
     ; -------------------------------
@@ -880,17 +898,69 @@ Simulation_TrafficHandleSource::
     pop     de ; de = coordinates
     ; bc = size
 
-    ; Flag as handled
-    ; ---------------
+    ; Flag as handled (density 0)
+    ; ---------------------------
 
-    ; TODO
+    push    bc
+    push    de ; (***)
 
-    ; Get density of this building
-    ; ----------------------------
+    ; e = x, d = y
+    ; b = height, c = width
 
-    ; Save it to a variable that will be decreased in the queue loop below
+    ld      a,b ; height
+    ld      b,d ; b = y
+    ld      d,a ; d = height
 
-    ; TODO
+    ; e = x, d = height
+    ; b = y, c = width
+
+    ld      a,d ; height
+    ld      d,c ; d = width
+    ld      c,a ; c = height
+
+    ; e = x, d = width
+    ; b = y, c = height
+.height_loop_set_handled:
+
+    push    de ; save width and x
+
+    push    bc
+    push    de
+    ; e = x, d = width
+    ; b = y, c = height
+    ld      d,b
+    ; Returns address in HL. Preserves de
+    call    GetMapAddress ; e = x , d = y
+    pop     de
+    pop     bc
+    ; hl = pointer to start of building row
+
+    ld      a,BANK_CITY_MAP_TRAFFIC
+    ld      [rSVBK],a
+
+    xor     a,a
+
+.width_loop_set_handled:
+
+        ; Loop
+
+        ld      [hl+],a
+
+        inc     e ; inc x
+
+        dec     d ; dec width
+        jr      nz,.width_loop_set_handled
+
+    pop     de ; restore width and x
+
+    ; Next row
+    inc     b ; inc y
+
+    dec     c ; dec height
+    jr      nz,.height_loop_set_handled
+
+    pop     de  ;(***)
+    pop     bc
 
     ; Add neighbours of this building source of traffic to the queue
     ; --------------------------------------------------------------

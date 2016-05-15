@@ -126,6 +126,11 @@ Simulation_Traffic::
     ; For each tile check if it is a residential building
     ; ---------------------------------------------------
 
+    ; When a building is handled the rest of the tiles of it are flagged as
+    ; handled, so we will only check the top left tile of each building.
+    ; To flag a building as handled its density is set to 0. That way even R
+    ; tiles are flagged as handled indirectly.
+
     ld      hl,CITY_MAP_TRAFFIC ; Map base
 
     ld      d,0 ; y
@@ -144,8 +149,14 @@ Simulation_Traffic::
 
                 ; Residential building = Source of traffic
 
-                ; Check if handled
-                ; TODO
+                ; Check if handled (density = 0). If so, skip
+
+                ld      a,BANK_CITY_MAP_TRAFFIC
+                ld      [rSVBK],a
+
+                ld      a,[hl]
+                and     a,a
+                jr      z,.not_residential
 
                 ; de = coordinates of top left corner of building
                 LONG_CALL_ARGS  Simulation_TrafficHandleSource
