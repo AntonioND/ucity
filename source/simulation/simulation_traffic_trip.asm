@@ -231,6 +231,37 @@ ENDC
 ; preserves bc and de
 TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
 
+    ; Check if it is a building. If so, add to queue immediately.
+    ; Only buildings can have density != 0, so check if it is different than
+    ; residential and if density != 0, it can't be field or water. If both
+    ; conditions are met, ignore direction check and add to queue
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+    ld      a,[hl]
+    and     a,TYPE_MASK
+
+    cp      a,TYPE_RESIDENTIAL
+    ret     z ; Ignore residential zones
+
+    cp      a,TYPE_DOCK
+    ret     z ; Ignore docks
+
+    cp      a,TYPE_FIELD
+    jr      z,.not_a_building
+    cp      a,TYPE_FOREST
+    jr      z,.not_a_building
+    cp      a,TYPE_WATER
+    jr      z,.not_a_building
+
+    ; Building, add to queue
+
+    call    QueueAdd ; preserves BC and DE
+    ret
+
+.not_a_building:
+    ; Not a building, check directions
+
     push    bc
     push    de
     ; hl = address, returns de = tile
