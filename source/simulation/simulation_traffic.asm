@@ -68,61 +68,6 @@ Simulation_Traffic::
     ld      hl,CITY_MAP_TRAFFIC
     call    memset
 
-    ; For each building tile load its density
-    ; ---------------------------------------
-
-    ; Density is positive for residential areas, negative for the rest.
-    ; Note: Density can only be 0-127, so it fits in 8 bits.
-
-    ld      hl,CITY_MAP_TRAFFIC ; Map base
-
-    ld      d,0 ; y
-.loopy_reset:
-        ld      e,0 ; x
-.loopx_reset:
-        push    de
-        push    hl
-
-            push    hl
-
-            call    CityMapGetTileAtAddress ; hl = address, returns de = tile
-
-            LONG_CALL_ARGS  CityTileDensity ; de = tile, returns d=population
-            ; d = population density
-
-            pop     hl
-
-            ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
-            ld      a,[hl] ; Get type
-
-            cp      a,TYPE_RESIDENTIAL
-            ld      a,d ; a = density
-            jr      z,.residential
-            xor     a,a
-            sub     a,d ; a = -density
-.residential:
-
-            ld      d,a
-            ld      a,BANK_CITY_MAP_TRAFFIC
-            ld      [rSVBK],a
-            ld      [hl],d ; save density
-
-        pop     hl
-        pop     de
-
-        inc     hl
-
-        inc     e
-        ld      a,CITY_MAP_WIDTH
-        cp      a,e
-        jr      nz,.loopx_reset
-
-    inc     d
-    ld      a,CITY_MAP_HEIGHT
-    cp      a,d
-    jr      nz,.loopy_reset
-
     ; For each tile check if it is a residential building
     ; ---------------------------------------------------
 
@@ -130,6 +75,11 @@ Simulation_Traffic::
     ; handled, so we will only check the top left tile of each building.
     ; To flag a building as handled its density is set to 0. That way even R
     ; tiles are flagged as handled indirectly.
+
+    ; The "amount of cars" that leave a residential building is the same as the
+    ; TOP LEFT corner tile density. The same thing goes for the "amount of cars"
+    ; that can get into another building. However, all tiles of a building
+    ; should have the same density so that the density map makes sense.
 
     ld      hl,CITY_MAP_TRAFFIC ; Map base
 

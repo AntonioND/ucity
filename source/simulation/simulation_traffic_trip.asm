@@ -891,15 +891,37 @@ Traffic_AddBuildingNeighboursToQueue:
 
 ;-------------------------------------------------------------------------------
 
+; de = coordinates of any tile
+; returns hl = origin of coordinates address
+;         a = building assigned population density
+Simulation_TrafficGetBuildingDensityAndPointer:
+
+    ; de = coordinates of one tile, returns de = coordinates of the origin
+    call    BuildingGetCoordinateOrigin
+
+    ; get origin coordinates into hl
+    call    GetMapAddress ; Preserves DE
+
+    push    hl
+
+    call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
+
+    call    CityTileDensity ; de = tile, returns d=population, e=energy
+    ld      a,d
+
+    pop     hl
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; d = y, e = x, coordinates of top left corner of building
 Simulation_TrafficHandleSource::
 
     ; Get density of this building
     ; ----------------------------
 
-    push    de
-    call    GetMapAddress
-    pop     de
+    call    GetMapAddress ; Preserves DE
 
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a
@@ -998,18 +1020,56 @@ Simulation_TrafficHandleSource::
 
     ; e = x, d = y
     ; b = width, c = height
-    ;call    Traffic_AddBuildingNeighboursToQueue
+    call    Traffic_AddBuildingNeighboursToQueue
     ; coordinates and size are not needed from now on
 
     ; While queue is not empty, expand
     ; --------------------------------
 
+    ret ; TODO remove
+
+.loop_expand:
+    call    QueueIsEmpty
+    and     a,a
+    jr      nz,.loop_expand_exit
+
+    call    QueueGet ; get coordinates in de
+
+    ; In short:
+    ; Check that there is population that need to continue traveling
     ; Read tile type
-    ;    If valid destination, check density and subtract it from source density
-    ;    If not valid destination, try expanding.
+    ; - If valid destination
+    ;   - Check building remaining density
+    ;   - Reduce the source density by that amount or reduce the destination
+    ;     amount (depending on which one is higher)
+    ; - If not valid destination, try expanding.
+
+
     ; If remaining source density is 0, exit
 
     ; TODO
+
+    ; Returns type of the tile + extra flags -> register A
+    ;          - Address -> Register HL
+    call    CityMapGetTypeNoBoundCheck ; Arguments: e = x , d = y
+    ; Check if this is a building, and not a residential one! If not, next tile
+
+    ; TODO
+
+    ; If this is a building, check if it has enough remaining density to accept
+    ; more population. If there is some population left it means that it can
+    ; accept more population. Reduce it as much as possible and continue in
+    ; next tile.
+
+    ; de = coordinates of any tile
+    ; returns hl = origin of coordinates address
+    ;         a = building assigned population density
+    call    Simulation_TrafficGetBuildingDensityAndPointer
+
+    ; TODO
+
+    jr      .loop_expand
+.loop_expand_exit:
 
     ; End of this building
     ; --------------------
