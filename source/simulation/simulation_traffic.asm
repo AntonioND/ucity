@@ -57,7 +57,7 @@ Simulation_TrafficGetMapValue: ; d=y, e=x
 ; Output data to WRAMX bank BANK_CITY_MAP_TRAFFIC
 Simulation_Traffic::
 
-    ; Clear
+    ; Clear. Set map to 0 to flag all residential buildings as not handled
     ; -----
 
     ld      a,BANK_CITY_MAP_TRAFFIC
@@ -68,13 +68,82 @@ Simulation_Traffic::
     ld      hl,CITY_MAP_TRAFFIC
     call    memset
 
+    ret     ; TODO Remove
+
+    ; Initialize each non-residential building
+    ; ----------------------------------------
+
+    ; Get density of each non-residential building and save it in the top left
+    ; tile of the building. It will be reduced as needed with each call to
+    ; Simulation_TrafficHandleSource.
+
+    ld      hl,CITY_MAP_TRAFFIC ; Map base
+
+    ld      d,0 ; y
+.loopy_init:
+        ld      e,0 ; x
+.loopx_init:
+        push    de
+        push    hl
+
+            ld      a,BANK_CITY_MAP_TYPE
+            ld      [rSVBK],a
+            ld      a,[hl] ; Get type
+
+            cp      a,TYPE_RESIDENTIAL
+            jr      z,.skip_init
+            cp      a,TYPE_DOCK
+            jr      z,.skip_init
+            cp      a,TYPE_FIELD
+            jr      z,.skip_init
+            cp      a,TYPE_FOREST
+            jr      z,.skip_init
+            cp      a,TYPE_WATER
+            jr      z,.skip_init
+
+            ; de = coordinates of one tile
+            ; returns a = 1 if it is the origin, 0 if not
+            push    hl
+            call    BuildingIsCoordinateOrigin
+            pop     hl
+            and     a,a
+            jr      z,.skip_init
+
+                push    hl
+                call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
+                call    CityTileDensity ; de = tile, returns d=population
+                pop     hl
+
+                ld      a,BANK_CITY_MAP_TRAFFIC
+                ld      [rSVBK],a
+                ld      [hl],d
+.skip_init:
+
+        pop     hl
+        pop     de
+
+        inc     hl
+
+        inc     e
+        ld      a,CITY_MAP_WIDTH
+        cp      a,e
+        jr      nz,.loopx_init
+
+    inc     d
+    ld      a,CITY_MAP_HEIGHT
+    cp      a,d
+    jr      nz,.loopy_init
+
     ; For each tile check if it is a residential building
     ; ---------------------------------------------------
 
     ; When a building is handled the rest of the tiles of it are flagged as
     ; handled, so we will only check the top left tile of each building.
-    ; To flag a building as handled its density is set to 0. That way even R
-    ; tiles are flagged as handled indirectly.
+    ; To flag a building as handled it is set to 1 in the TRAFFIC map
+
+    ; After handling a residential building the density of population that
+    ; couldn't get to a valid destination will be stored in the top left tile,
+    ; and the rest should be flagged as 1 (handled)
 
     ; The "amount of cars" that leave a residential building is the same as the
     ; TOP LEFT corner tile density. The same thing goes for the "amount of cars"
@@ -95,23 +164,23 @@ Simulation_Traffic::
             ld      a,[hl] ; Get type
 
             cp      a,TYPE_RESIDENTIAL
-            jr      nz,.not_residential
+            jr      nz,.skip ; Not residential, skip
 
                 ; Residential building = Source of traffic
 
-                ; Check if handled (density = 0). If so, skip
+                ; Check if handled (1). If so, skip
 
                 ld      a,BANK_CITY_MAP_TRAFFIC
                 ld      [rSVBK],a
 
                 ld      a,[hl]
                 and     a,a
-                jr      z,.not_residential
+                jr      nz,.skip ; Handled, skip
 
-                ; de = coordinates of top left corner of building
-                LONG_CALL_ARGS  Simulation_TrafficHandleSource
+                    ; de = coordinates of top left corner of building
+                    LONG_CALL_ARGS  Simulation_TrafficHandleSource
 
-.not_residential:
+.skip:
 
         pop     hl
         pop     de

@@ -31,6 +31,15 @@
 
 ;###############################################################################
 
+    SECTION "Simulation Traffic Trip Variables",HRAM
+
+;-------------------------------------------------------------------------------
+
+; Remaining density in the residential building being handled at the moment.
+source_building_remaining_density: DS 1
+
+;###############################################################################
+
     SECTION "Simulation Traffic Trip Functions",ROMX
 
 ;-------------------------------------------------------------------------------
@@ -142,7 +151,8 @@ TILE_TRANSPORT_INFO: ; Cost, Destinations allowed, Origins allowed
 
 ; From the specified positions, get the current accumulated cost, calculate the
 ; cost of this tile and add it. If the top cost is not reached, try to expand
-; in all directions.
+; in all directions. Top cost is 255. If it goes to 256 and overflows, it is
+; considered to be too far for the car/train to get there.
 TrafficTryExpand: ; d=y, e=x => current position
 
     ; Arguments: e = x , d = y
@@ -191,6 +201,10 @@ ENDC
     add     a,c ; new accumulated cost
     ret     c ; if overflow, we can't advance from this tile, return!
     ld      c,a
+
+    ; Add to B as valid destinations any surroinding tile that is a building!
+
+    ; TODO
 
     ; b = allowed destinations
     ; c = current accumulated cost
@@ -258,7 +272,6 @@ TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
 
     cp      a,TYPE_RESIDENTIAL
     ret     z ; Ignore residential zones
-
     cp      a,TYPE_DOCK
     ret     z ; Ignore docks
 
@@ -356,12 +369,6 @@ TrafficRoadTrainAddStart:
     push    bc
     call    CityMapGetTypeNoBoundCheck ; returns type in A. Preserves de
     pop     bc ; de = original coords
-
-    ld      h,a
-    and     a,TYPE_MASK
-    cp      a,TYPE_WATER
-    ret     z ; if this is water (or a bridge) return
-    ld      a,h
 
     and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
     ret     z ; return if there is no road or train
@@ -945,26 +952,35 @@ Simulation_TrafficGetBuildingDensityAndPointer:
 
 ;-------------------------------------------------------------------------------
 
+; When calling this function for the first time in the simulation step the
+; caller must ensure that every destination building has its max population
+; density in its top left tile. This function will reduce them as needed
+; so that the next time it is called the previous call would be taken into
+; account.
+
 ; d = y, e = x, coordinates of top left corner of building
 Simulation_TrafficHandleSource::
 
     ; Get density of this building
     ; ----------------------------
 
+    ; Get the density of this building (source) and save it to a variable
+    ; that will be decreased in the queue loop below. This doesn't need to
+    ; be saved to the map.
+
     call    GetMapAddress ; Preserves DE
 
-    ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
+    call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
+
+    call    CityTileDensity ; de = tile, returns d=population, e=energy
+    ld      a,d
 
     ld      a,[hl]
-    and     a,a
-    ret     z
+    ret     z ; If density is 0, exit
 
-    ; If density is 0, exit
+    ; If not, save it to a variable and start!
 
-    ; Save it to a variable that will be decreased in the queue loop below
-
-    ; TODO
+    ld      [source_building_remaining_density],a
 
     ; Get dimensions of this building
     ; -------------------------------
@@ -981,7 +997,7 @@ Simulation_TrafficHandleSource::
     pop     de ; de = coordinates
     ; bc = size
 
-    ; Flag as handled (density 0)
+    ; Flag as handled (density 1)
     ; ---------------------------
 
     push    bc
@@ -1021,7 +1037,7 @@ Simulation_TrafficHandleSource::
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a
 
-    xor     a,a
+    ld      a,1
 
 .width_loop_set_handled:
 
@@ -1050,8 +1066,10 @@ Simulation_TrafficHandleSource::
 
     ; e = x, d = y
     ; b = width, c = height
+    push    de ; (**) preserve coordinates
+
     call    Traffic_AddBuildingNeighboursToQueue
-    ; coordinates and size are not needed from now on
+    ; size is not needed from now on, coordinates are needed at the end
 
     ; While queue is not empty, expand
     ; --------------------------------
@@ -1074,10 +1092,11 @@ Simulation_TrafficHandleSource::
     ;     amount (depending on which one is higher)
     ; - If not valid destination, try expanding.
 
+    ; Check if remaining source density is 0. If so, exit
 
-    ; If remaining source density is 0, exit
-
-    ; TODO
+    ld      a,[source_building_remaining_density]
+    and     a,a
+    jr      z,.loop_expand_exit
 
     ; Returns type of the tile + extra flags -> register A
     ;          - Address -> Register HL
@@ -1100,6 +1119,24 @@ Simulation_TrafficHandleSource::
 
     jr      .loop_expand
 .loop_expand_exit:
+
+    ; If there is remaining density, restore it to the source building
+    ; ----------------------------------------------------------------
+
+    pop     de ; (**) restore coordinates
+
+    ; This means that the people from this building will be unhappy!
+
+    ; The same happens for other buildings, if its final density is not 0 it
+    ; means that this building doesn't get all the people it needs for working!
+
+    call    GetMapAddress
+
+    ld      a,BANK_CITY_MAP_TRAFFIC
+    ld      [rSVBK],a
+
+    ld      a,[source_building_remaining_density]
+    ld      [hl],a
 
     ; End of this building
     ; --------------------
