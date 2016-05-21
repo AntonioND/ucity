@@ -140,6 +140,9 @@ TILE_TRANSPORT_INFO: ; Cost, Destinations allowed, Origins allowed
 
 ;-------------------------------------------------------------------------------
 
+; From the specified positions, get the current accumulated cost, calculate the
+; cost of this tile and add it. If the top cost is not reached, try to expand
+; in all directions.
 TrafficTryExpand: ; d=y, e=x => current position
 
     ; Arguments: e = x , d = y
@@ -199,6 +202,8 @@ ENDC
 
     ; e = x, d = y (original coordinates)
 
+    ; The functions will check inside if the tile has already been handled.
+
     bit     R_U_BIT,b
     call    nz,TrafficRoadTryMoveUp ; preserves bc,de,hl
 
@@ -227,14 +232,24 @@ ENDC
 
 ;-------------------------------------------------------------------------------
 
+; c = accumulated cost
 ; de = coordinates of destination, hl = address of destination
 ; preserves bc and de
 TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
 
     ; Check if it is a building. If so, add to queue immediately.
+
     ; Only buildings can have density != 0, so check if it is different than
     ; residential and if density != 0, it can't be field or water. If both
-    ; conditions are met, ignore direction check and add to queue
+    ; conditions are met, ignore direction check and add to queue.
+
+    ; If density == 0 it means it is a road or train (if not, the tile wouldn't
+    ; have been added to the queue). Just check directions and add to queue if
+    ; the movement is allowed.
+
+    ; In any case, if it is added to the queue, write the accumulated cost up to
+    ; this point to the tile as well if it's not a building. If it's a building
+    ; it means that we have reached a destination.
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -254,7 +269,7 @@ TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
     cp      a,TYPE_WATER
     jr      z,.not_a_building
 
-    ; Building, add to queue
+    ; Building, add to queue. Don't save accumulated cost.
 
     call    QueueAdd ; preserves BC and DE
     ret
@@ -262,7 +277,8 @@ TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
 .not_a_building:
     ; Not a building, check directions
 
-    push    bc
+    push    bc ; (*12)
+
     push    de
     ; hl = address, returns de = tile
     call    CityMapGetTileAtAddress ; preserves hl
@@ -281,15 +297,21 @@ ENDC
     ld      b,[hl] ; b = allowed origins
 
     bit     (\1),b ; check if we can come from the orign
-    jr      z,.not_allowed
-        ; add coordinates of destination tile to the queue
-        call    QueueAdd ; preserves BC and DE
-.not_allowed:
+    jr      nz,.allowed
+    pop     bc ; (*1) no, just exit
+    ret
+.allowed:
 
-    pop     bc
+    ; add coordinates of destination tile to the queue and write the accumulated
+    ; cost to the tile
+    call    QueueAdd ; preserves BC and DE
+
+    call    GetMapAddress ; de = tile, hl = address. preserves de
+    pop     bc ; (*2) c = accumulated cost
+
+    ld      [hl],c ; set cost
 
     ret
-
 ENDM
 
 ;-------------------------------------------------------------------------------
@@ -388,6 +410,7 @@ TrafficRoadTryMoveUp: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
@@ -442,6 +465,7 @@ TrafficTrainTryMoveUp: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
@@ -496,6 +520,7 @@ TrafficRoadTryMoveDown: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
@@ -550,6 +575,7 @@ TrafficTrainTryMoveDown: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
@@ -602,6 +628,7 @@ TrafficRoadTryMoveLeft: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
@@ -654,6 +681,7 @@ TrafficTrainTryMoveLeft: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
@@ -706,6 +734,7 @@ TrafficRoadTryMoveRight: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
@@ -758,6 +787,7 @@ TrafficTrainTryMoveRight: ; preserves bc,de,hl
 
 .not_handled:
 
+        ; c = accumulated cost
         push    bc ; de = original coordinates
         push    de ; hl = pointer to origin
 
