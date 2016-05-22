@@ -68,7 +68,7 @@ Simulation_Traffic::
     ld      hl,CITY_MAP_TRAFFIC
     call    memset
 
-    ret     ; TODO Remove
+    ret ; TODO remove
 
     ; Initialize each non-residential building
     ; ----------------------------------------

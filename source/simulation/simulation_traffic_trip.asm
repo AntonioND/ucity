@@ -195,7 +195,8 @@ ENDC
 
 ;-------------------------------------------------------------------------------
 
-; Try to add a certain tile to the queue
+; Try to add a certain tile to the queue. Only non-residential buildings and
+; road/train tracks are allowed.
 
 ; c = accumulated cost
 ; de = coordinates of destination, hl = address of destination
@@ -256,7 +257,8 @@ TrafficAdd:
 
 ;-------------------------------------------------------------------------------
 
-; Add initial tiles that are next to a residential building
+; Add initial tiles that are next to a residential building. The only allowed
+; destinations are road and train tracks tiles.
 
 ; de = coordinates of destination, hl = address of destination
 ; preserves bc and de
@@ -762,60 +764,97 @@ Simulation_TrafficHandleSource::
     ; While queue is not empty, expand
     ; --------------------------------
 
-    ret ; TODO remove
-
 .loop_expand:
-    call    QueueIsEmpty
-    and     a,a
-    jr      nz,.loop_expand_exit
+        ; In short:
+        ; 1) Check that there is population that need to continue traveling.
+        ; 2) Check that there are tiles to handle.
+        ; 3) Get tile coordinates to handle
+        ; 4) Read tile type.
+        ;    - If road => expand
+        ;    - If building =>
+        ;      - Check building remaining density
+        ;      - Reduce the source density by that amount or reduce the
+        ;        destination amount (depending on which one is higher)
 
-    call    QueueGet ; get coordinates in de
+        ; Check if remaining source density is 0. If so, exit.
 
-    ; In short:
-    ; Check that there is population that need to continue traveling
-    ; Read tile type
-    ; - If valid destination
-    ;   - Check building remaining density
-    ;   - Reduce the source density by that amount or reduce the destination
-    ;     amount (depending on which one is higher)
-    ; - If not valid destination, try expanding.
+        ld      a,[source_building_remaining_density]
+        and     a,a
+        jr      z,.loop_expand_exit
 
-    ; Check if remaining source density is 0. If so, exit
+        ; Check if there are tiles left to handle. If not, exit.
 
-    ld      a,[source_building_remaining_density]
-    and     a,a
-    jr      z,.loop_expand_exit
+        call    QueueIsEmpty
+        and     a,a
+        jr      nz,.loop_expand_exit
 
-    ; Returns type of the tile + extra flags -> register A
-    ;          - Address -> Register HL
-    call    CityMapGetTypeNoBoundCheck ; Arguments: e = x , d = y. Preserves DE
+        ; Get tile coordinates and type.
 
-    and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
-    jr      z,.loop_expand_not_road_train
+        call    QueueGet ; get coordinates in de
 
-    ; If this is a road or train tracks expand and continue to the next tile.
+        ; Returns type of the tile + extra flags -> register A
+        call    CityMapGetTypeNoBoundCheck ; Args: e = x , d = y. Preserves DE
 
-    call    TrafficTryExpand ; d=y, e=x => current position
+        and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+        jr      z,.loop_expand_not_road_train
 
-    jr      .loop_expand
+            ; This is a road or train tracks. Expand and continue to next tile.
+
+            call    TrafficTryExpand ; d=y, e=x => current position
+
+            jr      .loop_expand
 
 .loop_expand_not_road_train:
-    ; If this is not a road or train tracks, it must be a building, and not a
-    ; residential one because the expand functions won't allow that.
+            ; If this is not a road or train tracks, it must be a building, and
+            ; not a residential one because the expand functions wouldn't allow
+            ; that.
 
-    ; If this is a building, check if it has enough remaining density to accept
-    ; more population. If there is some population left it means that it can
-    ; accept more population. Reduce it as much as possible and continue in
-    ; next tile.
+            ; Check if it has enough remaining density to accept more
+            ; population. If there is some population left in the tile it means
+            ; that it can accept more population. Reduce it as much as possible
+            ; and continue in next tile with the remaining population.
 
-    ; de = coordinates of any tile
-    ; returns hl = origin of coordinates address
-    ;         a = building assigned population density
-    call    Simulation_TrafficGetBuildingDensityAndPointer
+            ; de = coordinates of any tile
+            ; returns hl = origin of coordinates address
+            ;         a = building assigned population density
+            call    Simulation_TrafficGetBuildingDensityAndPointer
 
-    ; TODO
+            ld      b,a
+            ld      a,[source_building_remaining_density]
+            ; b = destination building desired population
+            ; a = source building remaining population
 
-    jr      .loop_expand
+            ; c = min(a,b). That's the amount to reduce in src and dest
+
+            cp      a,b ; cy = 1 if b > a
+            jr      c,.b_gt_a
+            ld      c,b ; a > b
+            jr      .end_min
+.b_gt_a:
+            ld      c,a ; b > a
+.end_min:
+
+            ; Subtract min from both places
+
+            sub     a,c
+            ld      d,a ; save a
+
+            ld      a,b
+            sub     a,c
+            ld      b,a
+
+            ld      a,d ; restore a
+
+            ; b = destination building desired population
+            ; a = source building remaining population
+
+            ld      [source_building_remaining_density],a
+
+            ; HL should hold the top left tile of the destination building
+            ld      [hl],b
+
+            jr      .loop_expand
+
 .loop_expand_exit:
 
     ; If there is remaining density, restore it to the source building
