@@ -104,12 +104,13 @@ MinimapDrawTrafficMap::
                 ld      [rSVBK],a
                 ld      a,[hl] ; get traffic density
 
-                rra
-                rra
-                rra
-                rra
-                rra
-                and     a,7 ; 8 bits to 3 bits
+                swap    a
+                and     a,15 ; 8 bits to 4 bits
+                bit     3,a
+                jr      z,.val_0_to_7
+                ld      a,7 ; saturate to 7
+.val_0_to_7:
+
                 ld      de,MINIMAP_TRAFFIC_TILE_COLORS
                 ld      l,a
                 ld      h,0

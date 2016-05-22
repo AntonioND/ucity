@@ -173,9 +173,10 @@ ENDC
     ; de = coords
     ; hl = address
 
+    ; add traffic in this tile to movement cost to penalize movement through
+    ; crowded streets
     swap    a
-    rra
-    and     a,7
+    and     a,15 ; 8 to 4 bit
     add     a,c
     ld      c,a ; c = real cost of moving from this tile
 
@@ -238,6 +239,8 @@ TrafficAdd:
     cp      a,TYPE_DOCK
     ret     z ; Ignore docks
 
+    ; Check if this is a building or not
+
     cp      a,TYPE_FIELD
     jr      z,.not_a_building
     cp      a,TYPE_FOREST
@@ -251,7 +254,12 @@ TrafficAdd:
     ret
 
 .not_a_building:
-    ; Not a building, add to queue and save accumulated cost
+    ; Not a building, add to queue and save accumulated cost if it is a road
+    ; or train track
+
+    ld      a,[hl]
+    and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+    ret     z ; if there are no roads or train, don't add to queue
 
     push    bc ; (*)
 
@@ -671,7 +679,7 @@ TrafficGetAccumulatedCost: ; d=y, e=x. preserves de
 ; de = current coordinates
 TrafficRetraceStep:
 
-    ; Increase traffic
+    ; Increase traffic in the TRAFFIC map
 
     push    bc
     call    GetMapAddress ; preserves DE
@@ -1010,12 +1018,11 @@ Simulation_TrafficHandleSource::
             ; to get to this building (using the population that has actually
             ; arrived to the destination building).
 
+            push    de ; (*) save coords for retrace
+
             ; de = coordinates of any tile
             ; returns hl = origin of coordinates address
             ;         a = building assigned population density
-
-            push    de ; (*) save coords for retrace
-
             call    TrafficGetBuildingDensityAndPointer
 
             ld      b,a
