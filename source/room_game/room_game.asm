@@ -80,6 +80,25 @@ SCRATCH_RAM_2:: DS $1000
 
 ;-------------------------------------------------------------------------------
 
+ClearWRAMX:: ; Sets D000 - DFFF to 0 ($1000 bytes)
+
+    xor     a,a ; a = 0
+
+    ld      d,a ; d = $100
+
+    ld      hl,$D000
+
+.loop:
+    REPT    $10
+    ld      [hl+],a
+    ENDR
+    dec     d
+    jr      nz,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Returns address in HL. Preserves de
 GetMapAddress:: ; e = x , d = y
 

@@ -57,16 +57,16 @@ Simulation_TrafficGetMapValue: ; d=y, e=x
 ; Output data to WRAMX bank BANK_CITY_MAP_TRAFFIC
 Simulation_Traffic::
 
+    ; Final traffic density and building handled flags go to TRAFFIC map,
+    ; temporary expansion map goes to SCRATCH RAM, queue goes to SCRATCH RAM 2
+
     ; Clear. Set map to 0 to flag all residential buildings as not handled
     ; --------------------------------------------------------------------
 
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a
 
-    ld      bc,$1000
-    ld      d,0
-    ld      hl,CITY_MAP_TRAFFIC
-    call    memset
+    call    ClearWRAMX
 
     ; Initialize each non-residential building
     ; ----------------------------------------
