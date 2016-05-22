@@ -58,7 +58,7 @@ Simulation_TrafficGetMapValue: ; d=y, e=x
 Simulation_Traffic::
 
     ; Clear. Set map to 0 to flag all residential buildings as not handled
-    ; -----
+    ; --------------------------------------------------------------------
 
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a
@@ -67,8 +67,6 @@ Simulation_Traffic::
     ld      d,0
     ld      hl,CITY_MAP_TRAFFIC
     call    memset
-
-    ret ; TODO remove
 
     ; Initialize each non-residential building
     ; ----------------------------------------
@@ -83,31 +81,35 @@ Simulation_Traffic::
 .loopy_init:
         ld      e,0 ; x
 .loopx_init:
-        push    de
-        push    hl
 
-            ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
-            ld      a,[hl] ; Get type
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+        ld      a,[hl] ; Get type
+        and     a,TYPE_MASK
 
-            cp      a,TYPE_RESIDENTIAL
-            jr      z,.skip_init
-            cp      a,TYPE_DOCK
-            jr      z,.skip_init
-            cp      a,TYPE_FIELD
-            jr      z,.skip_init
-            cp      a,TYPE_FOREST
-            jr      z,.skip_init
-            cp      a,TYPE_WATER
-            jr      z,.skip_init
+        ; Ignored tile types by decreasing frequency order
+        cp      a,TYPE_FIELD
+        jr      z,.skip_init
+        cp      a,TYPE_WATER
+        jr      z,.skip_init
+        cp      a,TYPE_RESIDENTIAL
+        jr      z,.skip_init
+        cp      a,TYPE_FOREST
+        jr      z,.skip_init
+        cp      a,TYPE_DOCK
+        jr      z,.skip_init
 
             ; de = coordinates of one tile
             ; returns a = 1 if it is the origin, 0 if not
+            push    de
             push    hl
             call    BuildingIsCoordinateOrigin
             pop     hl
+            pop     de
             and     a,a
             jr      z,.skip_init
+
+                push    de
 
                 push    hl
                 call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
@@ -117,22 +119,19 @@ Simulation_Traffic::
                 ld      a,BANK_CITY_MAP_TRAFFIC
                 ld      [rSVBK],a
                 ld      [hl],d
-.skip_init:
 
-        pop     hl
-        pop     de
+                pop     de
+.skip_init:
 
         inc     hl
 
         inc     e
-        ld      a,CITY_MAP_WIDTH
-        cp      a,e
-        jr      nz,.loopx_init
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jr      z,.loopx_init
 
     inc     d
-    ld      a,CITY_MAP_HEIGHT
-    cp      a,d
-    jr      nz,.loopy_init
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jr      z,.loopy_init
 
     ; For each tile check if it is a residential building
     ; ---------------------------------------------------
@@ -152,19 +151,18 @@ Simulation_Traffic::
 
     ld      hl,CITY_MAP_TRAFFIC ; Map base
 
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
     ld      d,0 ; y
 .loopy:
         ld      e,0 ; x
 .loopx:
-        push    de
-        push    hl
 
-            ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
             ld      a,[hl] ; Get type
 
             cp      a,TYPE_RESIDENTIAL
-            jr      nz,.skip ; Not residential, skip
+            jr      nz,.skip_tile ; Not residential, skip
 
                 ; Residential building = Source of traffic
 
@@ -175,27 +173,30 @@ Simulation_Traffic::
 
                 ld      a,[hl]
                 and     a,a
-                jr      nz,.skip ; Handled, skip
+                jr      nz,.skip_call ; Handled, skip
 
+                push    de
+                push    hl
                     ; de = coordinates of top left corner of building
                     LONG_CALL_ARGS  Simulation_TrafficHandleSource
+                pop     hl
+                pop     de
+.skip_call:
 
-.skip:
+                ld      a,BANK_CITY_MAP_TYPE
+                ld      [rSVBK],a
 
-        pop     hl
-        pop     de
+.skip_tile:
 
         inc     hl
 
         inc     e
-        ld      a,CITY_MAP_WIDTH
-        cp      a,e
-        jr      nz,.loopx
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jr      z,.loopx
 
     inc     d
-    ld      a,CITY_MAP_HEIGHT
-    cp      a,d
-    jr      nz,.loopy
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jr      z,.loopy
 
     ret
 
@@ -232,12 +233,12 @@ Simulation_TrafficSetTileOkFlag::
         inc     hl
 
         inc     e
-        bit     6,e
-        jp      z,.loopx
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jr      z,.loopx
 
     inc     d
-    bit     6,d
-    jp      z,.loopy
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jr      z,.loopy
 
     ret
 

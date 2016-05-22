@@ -257,35 +257,6 @@ TrafficAdd:
 
 ;-------------------------------------------------------------------------------
 
-; Add initial tiles that are next to a residential building. The only allowed
-; destinations are road and train tracks tiles.
-
-; de = coordinates of destination, hl = address of destination
-; preserves bc and de
-TrafficAddStart:
-
-    push    bc
-    call    CityMapGetTypeNoBoundCheck ; returns type in A. Preserves de
-    pop     bc ; de = original coords
-
-    and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
-    ret     z ; return if there is no road or train
-
-    ; add coordinates of destination tile to the queue
-    call    QueueAdd ; preserves BC and DE
-
-    ; set initial cost to 1!
-
-    ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
-
-    call    GetMapAddress
-    ld      [hl],1
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 ; c = current accumulated cost
 ; de = current coordinates (d = y, e = x)
 ; hl = address of current tile
@@ -502,6 +473,37 @@ TrafficTryMoveRight: ; preserves bc,de,hl
 
 ;-------------------------------------------------------------------------------
 
+; Add initial tiles that are next to a residential building. The only allowed
+; destinations are road and train tracks tiles.
+
+; de = coordinates of destination
+; preserves bc and de
+TrafficAddStart:
+
+    push    bc
+    call    CityMapGetTypeNoBoundCheck ; returns type in A. Preserves de
+    pop     bc ; de = original coords
+
+    and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+    ret     z ; return if there is no road or train
+
+    ; add coordinates of destination tile to the queue
+    call    QueueAdd ; preserves BC and DE
+
+    ; set initial cost to 1!
+
+    ld      a,BANK_CITY_MAP_TRAFFIC
+    ld      [rSVBK],a
+
+    push    bc
+    call    GetMapAddress
+    pop     bc
+    ld      [hl],1
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Arguments:
 ; e = x, d = y
 ; b = width, c = height
@@ -515,14 +517,10 @@ Traffic_AddBuildingNeighboursToQueue:
     push    bc
     push    de
 
-        dec     d ; dec y
+        dec     d ; y - 1
 .loop_top:
 
-        push    bc
-            call    GetMapAddress ; preserves de, returns address in hl
-            ; de = destination coordinates, hl = destination address
-            call    TrafficAddStart ; preserves bc and de
-        pop     bc
+        call    TrafficAddStart ; de = destination coords. preserves bc and de
 
         inc     e ; inc x
         dec     b ; dec width
@@ -537,19 +535,15 @@ Traffic_AddBuildingNeighboursToQueue:
 
     ld      a,d
     add     a,c ; a = y + height
-    cp      a,CITY_MAP_HEIGHT
+    cp      a,CITY_MAP_HEIGHT ; this shouldn't overflow!
     jr      nc,.skip_bottom_row ; skip row if this is the last row
     push    bc
     push    de
 
-        ld      d,a
+        ld      d,a ; y + height
 .loop_bottom:
 
-        push    bc
-            call    GetMapAddress ; preserves de, returns address in hl
-            ; de = destination coordinates, hl = destination address
-            call    TrafficAddStart ; preserves bc and de
-        pop     bc
+        call    TrafficAddStart ; de = destination coords. preserves bc and de
 
         inc     e ; inc x
         dec     b ; dec width
@@ -567,14 +561,10 @@ Traffic_AddBuildingNeighboursToQueue:
     push    bc
     push    de
 
-        dec     e ; dec x
+        dec     e ; x - 1
 .loop_left:
 
-        push    bc
-            call    GetMapAddress ; preserves de, returns address in hl
-            ; de = destination coordinates, hl = destination address
-            call    TrafficAddStart ; preserves bc and de
-        pop     bc
+        call    TrafficAddStart ; de = destination coords. preserves bc and de
 
         inc     d ; inc y
         dec     c ; dec height
@@ -588,20 +578,16 @@ Traffic_AddBuildingNeighboursToQueue:
     ; ------------
 
     ld      a,e
-    add     a,b ; a = c + width
-    cp      a,CITY_MAP_WIDTH
+    add     a,b ; a = x + width
+    cp      a,CITY_MAP_WIDTH ; this shouldn't overflow!
     jr      nc,.skip_right_col ; skip column  if this is the last column
     push    bc
     push    de
 
-        ld      e,a
+        ld      e,a ; x + width
 .loop_right:
 
-        push    bc
-            call    GetMapAddress ; preserves de, returns address in hl
-            ; de = destination coordinates, hl = destination address
-            call    TrafficAddStart ; preserves bc and de
-        pop     bc
+        call    TrafficAddStart ; de = destination coords. preserves bc and de
 
         inc     d ; inc y
         dec     c ; dec height
@@ -658,15 +644,19 @@ Simulation_TrafficHandleSource::
     ; that will be decreased in the queue loop below. This doesn't need to
     ; be saved to the map.
 
+    push    de
+
     call    GetMapAddress ; Preserves DE
 
     call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
 
-    call    CityTileDensity ; de = tile, returns d=population, e=energy
+    call    CityTileDensity ; de = tile, returns d=population, e=eneddrgy
     ld      a,d
 
-    ld      a,[hl]
-    ret     z ; If density is 0, exit
+    pop     de
+
+    and     a,a
+    ret     z ; If density is 0, exit (this is the case for R tiles)
 
     ; If not, save it to a variable and start!
 
@@ -690,79 +680,92 @@ Simulation_TrafficHandleSource::
     ; Flag as handled (density 1)
     ; ---------------------------
 
+    ; The top left tile will be overwritten at the end of this function with the
+    ; remaining population to travel (or 0 if everyone reached a valid
+    ; destination).
+
     push    bc
     push    de ; (***)
 
-    ; e = x, d = y
-    ; b = height, c = width
+        ; e = x, d = y
+        ; b = height, c = width
 
-    ld      a,b ; height
-    ld      b,d ; b = y
-    ld      d,a ; d = height
+        ld      a,b ; height
+        ld      b,d ; b = y
+        ld      d,a ; d = height
 
-    ; e = x, d = height
-    ; b = y, c = width
+        ; e = x, d = height
+        ; b = y, c = width
 
-    ld      a,d ; height
-    ld      d,c ; d = width
-    ld      c,a ; c = height
+        ld      a,d ; height
+        ld      d,c ; d = width
+        ld      c,a ; c = height
 
-    ; e = x, d = width
-    ; b = y, c = height
+        ld      a,BANK_CITY_MAP_TRAFFIC
+        ld      [rSVBK],a
+
+        ; e = x, d = width
+        ; b = y, c = height
 .height_loop_set_handled:
 
-    push    de ; save width and x
+        push    de ; (**) save width and x for next row
 
-    push    bc
-    push    de
-    ; e = x, d = width
-    ; b = y, c = height
-    ld      d,b
-    ; Returns address in HL. Preserves de
-    call    GetMapAddress ; e = x , d = y
-    pop     de
-    pop     bc
-    ; hl = pointer to start of building row
+        push    bc
+        push    de
+        ; e = x, d = width
+        ; b = y, c = height
+        ld      d,b
+        ; Returns address in HL. Preserves de
+        call    GetMapAddress ; e = x , d = y
+        pop     de
+        pop     bc
+        ; hl = pointer to start of building row
 
-    ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
-
-    ld      a,1
+        ld      a,1
 
 .width_loop_set_handled:
 
-        ; Loop
+            ; Loop
 
-        ld      [hl+],a
+            ld      [hl+],a
 
-        inc     e ; inc x
+            inc     e ; inc x
 
-        dec     d ; dec width
-        jr      nz,.width_loop_set_handled
+            dec     d ; dec width
+            jr      nz,.width_loop_set_handled
 
-    pop     de ; restore width and x
+        pop     de ; (**) restore width and x
 
-    ; Next row
-    inc     b ; inc y
+        ; Next row
+        inc     b ; inc y
 
-    dec     c ; dec height
-    jr      nz,.height_loop_set_handled
+        dec     c ; dec height
+        jr      nz,.height_loop_set_handled
 
     pop     de  ;(***)
     pop     bc
+
+    ; Init queue
+    ; ----------
+
+    call    QueueInit
 
     ; Add neighbours of this building source of traffic to the queue
     ; --------------------------------------------------------------
 
     ; e = x, d = y
     ; b = width, c = height
-    push    de ; (**) preserve coordinates
+    push    de ; (**) preserve top left coordinates
 
     call    Traffic_AddBuildingNeighboursToQueue
     ; size is not needed from now on, coordinates are needed at the end
 
     ; While queue is not empty, expand
     ; --------------------------------
+
+pop de
+ret
+ld b,b
 
 .loop_expand:
         ; In short:
@@ -860,7 +863,7 @@ Simulation_TrafficHandleSource::
     ; If there is remaining density, restore it to the source building
     ; ----------------------------------------------------------------
 
-    pop     de ; (**) restore coordinates
+    pop     de ; (**) restore top left coordinates
 
     ; This means that the people from this building will be unhappy!
 
