@@ -140,14 +140,19 @@ TrafficTryExpand: ; d=y, e=x => current position
     call    CityMapGetTileNoBoundCheck ; returns tile = de, address = hl
     LD_BC_DE ; bc = tile
     pop     de ; de = coords
-    ; hl = address
 
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a
 
-    ld      a,[hl] ; get current traffic
-    cp      a,255
-    ret     z ; this tile is full of traffic, ignore
+    ; Check if current density is small enough to fit in this road/train track.
+    ; If adding the density to this tile overflows 256, we can't go through
+    ; this tile, return.
+    ld      a,[source_building_remaining_density] ; density
+    add     a,[hl] ; get current traffic
+    ret     c ; if overflow, return
+
+    ld      a,[hl]; get current traffic level, will be used to calculate the
+    ; cost of going through this tile
 
 IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 1
     FAIL "Fix this!"
@@ -156,6 +161,12 @@ ENDC
     ld      hl,TILE_TRANSPORT_INFO
     add     hl,bc ; bc = tile
     ld      c,[hl] ; load cost
+
+    push    af
+    push    bc
+    call    GetMapAddress ; preserves de, returns hl = address
+    pop     bc
+    pop     af
 
     ; a = traffic
     ; c = base cost of moving from this tile
@@ -251,6 +262,9 @@ TrafficAdd:
     call    GetMapAddress ; de = tile, hl = address. preserves de
     pop     bc ; (*) c = accumulated cost
 
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
     ld      [hl],c ; set cost
 
     ret
@@ -281,7 +295,7 @@ TrafficTryMoveUp: ; preserves bc,de,hl
 
     ld      a,[hl]
     and     a,a
-    jr      nz,.not_handled
+    jr      z,.not_handled
 
     ; This has been handled before. If the cost is lower than the stored one
     ; continue. If not, return.
@@ -336,7 +350,7 @@ TrafficTryMoveDown: ; preserves bc,de,hl
 
     ld      a,[hl]
     and     a,a
-    jr      nz,.not_handled
+    jr      z,.not_handled
 
     ; This has been handled before. If the cost is lower than the stored one
     ; continue. If not, return.
@@ -389,7 +403,7 @@ TrafficTryMoveLeft: ; preserves bc,de,hl
 
     ld      a,[hl]
     and     a,a
-    jr      nz,.not_handled
+    jr      z,.not_handled
 
     ; This has been handled before. If the cost is lower than the stored one
     ; continue. If not, return.
@@ -442,7 +456,7 @@ TrafficTryMoveRight: ; preserves bc,de,hl
 
     ld      a,[hl]
     and     a,a
-    jr      nz,.not_handled
+    jr      z,.not_handled
 
     ; This has been handled before. If the cost is lower than the stored one
     ; continue. If not, return.
@@ -492,12 +506,13 @@ TrafficAddStart:
 
     ; set initial cost to 1!
 
-    ld      a,BANK_CITY_MAP_TRAFFIC
+    push    bc
+    call    GetMapAddress ; preserves de
+    pop     bc
+
+    ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
 
-    push    bc
-    call    GetMapAddress
-    pop     bc
     ld      [hl],1
 
     ret
@@ -607,7 +622,7 @@ Traffic_AddBuildingNeighboursToQueue:
 ; de = coordinates of any tile
 ; returns hl = origin of coordinates address
 ;         a = building assigned population density
-Simulation_TrafficGetBuildingDensityAndPointer:
+TrafficGetBuildingDensityAndPointer:
 
     ; de = coordinates of one tile, returns de = coordinates of the origin
     call    BuildingGetCoordinateOrigin
@@ -625,6 +640,173 @@ Simulation_TrafficGetBuildingDensityAndPointer:
     pop     hl
 
     ret
+
+;-------------------------------------------------------------------------------
+
+; Checks bounds, returns a=0 if outside the map else a=value
+TrafficGetAccumulatedCost: ; d=y, e=x. preserves de
+
+    ld      a,e
+    or      a,d
+    and     a,128+64 ; ~63
+    jr      z,.ok
+    ld      a,255 ; very high value so that there will always be a smaller one
+    ret ; in any other neighbour
+
+.ok:
+
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
+    call    GetMapAddress ; preserves de
+    ld      a,[hl]
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Recursively find origin of traffic and increase traffic in TRAFFIC map.
+
+; c = amount of traffic
+; de = current coordinates
+TrafficRetraceStep:
+
+    ; Increase traffic
+
+    push    bc
+    call    GetMapAddress ; preserves DE
+    pop     bc
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+    jr      z,.skip_write
+
+        ld      a,BANK_CITY_MAP_TRAFFIC
+        ld      [rSVBK],a
+
+        ld      a,[hl]
+        add     a,c
+        jr      nc,.not_overflow
+        ld      a,255
+.not_overflow
+        ld      [hl],a
+
+.skip_write:
+
+    ; If the cost of this tile is 1 it is the initial one, return!
+
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    cp      a,1
+    ret     z
+
+    ; This is not the start. Find neighbour with lowest cost in SCRATCH RAM.
+
+    push    bc
+
+        add     sp,-4
+
+        dec     d ; up
+        call    TrafficGetAccumulatedCost ; d=y, e=x. preserves de
+        ld      hl,sp+0
+        ld      [hl],a
+
+        inc     d
+        inc     d ;down
+        call    TrafficGetAccumulatedCost ; d=y, e=x. preserves de
+        ld      hl,sp+1
+        ld      [hl],a
+
+        dec     d ; center
+        dec     e ; left
+        call    TrafficGetAccumulatedCost ; d=y, e=x. preserves de
+        ld      hl,sp+2
+        ld      [hl],a
+
+        inc     e
+        inc     e ; right
+        call    TrafficGetAccumulatedCost ; d=y, e=x. preserves de
+        ld      hl,sp+3
+        ld      [hl],a
+
+        dec     e ; center again! (save for checks later!)
+
+        ; get min value higher than 0
+
+; returns the min of A and B in A. B must be non-zero, A can be zero
+LD_A_MIN_NON_ZERO_A_B : MACRO
+    and     a,a
+    jr      z,.a_is_zero\@
+    cp      a,b ; cy = 1 if b > a
+    jr      c,.b_gt_a\@
+.a_is_zero\@:
+    ld      a,b ; a > b
+;    jr      .end_min\@
+.b_gt_a\@:
+;   ld      a,a ; b > a
+.end_min\@:
+ENDM
+
+        ld      hl,sp+0
+        ld      b,255 ; max value
+        ld      a,[hl+]
+        LD_A_MIN_NON_ZERO_A_B
+        ld      b,a
+        ld      a,[hl+]
+        LD_A_MIN_NON_ZERO_A_B
+        ld      b,a
+        ld      a,[hl+]
+        LD_A_MIN_NON_ZERO_A_B
+        ld      b,a
+        ld      a,[hl]
+        LD_A_MIN_NON_ZERO_A_B
+
+        ; a = min, de = coordinates
+
+        ; get coordinates for min value
+
+        ld      hl,sp+0
+
+        cp      a,[hl]
+        jr      nz,.not_up
+        dec     d ; y--
+        jr      .done_get_dir
+.not_up:
+        inc     hl
+
+        cp      a,[hl]
+        jr      nz,.not_down
+        inc     d ; y++
+        jr      .done_get_dir
+.not_down:
+        inc     hl
+
+        cp      a,[hl]
+        jr      nz,.not_left
+        dec     e ; x--
+        jr      .done_get_dir
+.not_left:
+        inc     hl
+
+        ; It must be the remaining one, right!
+;        cp      a,[hl]
+;        jr      nz,.not_right
+        inc     e ; x++
+;        jr      .done_get_dir
+;.not_right:
+
+.done_get_dir:
+
+        add     sp,+4
+
+    pop     bc
+
+    jp      TrafficRetraceStep ; recursively call this function
 
 ;-------------------------------------------------------------------------------
 
@@ -745,10 +927,21 @@ Simulation_TrafficHandleSource::
     pop     de  ;(***)
     pop     bc
 
-    ; Init queue
-    ; ----------
+    ; Init queue and expansion map
+    ; ----------------------------
+
+    push    bc
+    push    de
 
     call    QueueInit
+
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
+    call    ClearWRAMX
+
+    pop     de
+    pop     bc
 
     ; Add neighbours of this building source of traffic to the queue
     ; --------------------------------------------------------------
@@ -762,10 +955,6 @@ Simulation_TrafficHandleSource::
 
     ; While queue is not empty, expand
     ; --------------------------------
-
-pop de
-ret
-ld b,b
 
 .loop_expand:
         ; In short:
@@ -817,10 +1006,17 @@ ld b,b
             ; that it can accept more population. Reduce it as much as possible
             ; and continue in next tile with the remaining population.
 
+            ; After that, retrace steps to increase traffic in all tiles used
+            ; to get to this building (using the population that has actually
+            ; arrived to the destination building).
+
             ; de = coordinates of any tile
             ; returns hl = origin of coordinates address
             ;         a = building assigned population density
-            call    Simulation_TrafficGetBuildingDensityAndPointer
+
+            push    de ; (*) save coords for retrace
+
+            call    TrafficGetBuildingDensityAndPointer
 
             ld      b,a
             ld      a,[source_building_remaining_density]
@@ -848,13 +1044,27 @@ ld b,b
 
             ld      a,d ; restore a
 
+            ; c = min
             ; b = destination building desired population
             ; a = source building remaining population
 
             ld      [source_building_remaining_density],a
 
             ; HL should hold the top left tile of the destination building
+            ld      a,BANK_CITY_MAP_TRAFFIC
+            ld      [rSVBK],a
+
             ld      [hl],b
+
+            ; Now, retrace steps to increase traffic of each tile used to get
+            ; to this building in the TRAFFIC map!
+
+            pop     de ; (*) restore coords for retrace
+
+            ; c = amount to increment traffic
+            ; de = coordinates to start retrace
+
+            call    TrafficRetraceStep
 
             jr      .loop_expand
 

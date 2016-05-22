@@ -35,7 +35,7 @@
 
 ;-------------------------------------------------------------------------------
 
-; TODO - Add another minimap to check which  buildings don't have propper
+; TODO - Add another minimap to check which buildings don't have propper
 ; communications?
 
 C_WHITE  EQU 0 ; Other tiles (not road nor train)
