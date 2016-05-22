@@ -44,7 +44,7 @@ source_building_remaining_density: DS 1
 
 ;-------------------------------------------------------------------------------
 
-TILE_TRANSPORT_INFO_ELEMENT_SIZE EQU 3
+TILE_TRANSPORT_INFO_ELEMENT_SIZE EQU 1
 
 CURTILE SET 0
 
@@ -62,13 +62,13 @@ CURTILE SET (\1)
 ENDM
 
 ; Tile Add
-T_ADD : MACRO ; 1=Tile name, 2=Transit base cost, 3=To, 4=From
+T_ADD : MACRO ; 1=Tile name, 2=Transit base cost
     TILE_SET_COUNT (\1)
-    DB (\2), (\3), (\4)
+    DB (\2)
 CURTILE SET CURTILE+1 ; Set cursor for next item
 ENDM
 
-IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 3
+IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 1
     FAIL "Fix this!"
 ENDC
 
@@ -77,75 +77,55 @@ ENDC
 ; Up to 256 elements (We assume that roads and train tracks are always placed
 ; in the lowest 256 tiles)
 
-; Equates that tell the directions that a train/car can go from this tile or
-; the directions that a train/car can come to this tile from
-R_U EQU $01
-R_R EQU $02
-R_D EQU $04
-R_L EQU $08
-T_U EQU $10
-T_R EQU $20
-T_D EQU $40
-T_L EQU $80
-
-R_U_BIT EQU 0
-R_R_BIT EQU 1
-R_D_BIT EQU 2
-R_L_BIT EQU 3
-T_U_BIT EQU 4
-T_R_BIT EQU 5
-T_D_BIT EQU 6
-T_L_BIT EQU 7
-
-TILE_TRANSPORT_INFO: ; Cost, Destinations allowed, Origins allowed
+TILE_TRANSPORT_INFO: ; Cost
   TILE_SET_COUNT 0 ; Add padding
 
-  T_ADD T_ROAD_TB,   2, R_U|R_D, R_U|R_D
-  T_ADD T_ROAD_TB_1, 2, R_U|R_D, R_U|R_D
-  T_ADD T_ROAD_TB_2, 2, R_U|R_D, R_U|R_D
-  T_ADD T_ROAD_TB_3, 2, R_U|R_D, R_U|R_D
+  T_ADD T_ROAD_TB,   2
+  T_ADD T_ROAD_TB_1, 2
+  T_ADD T_ROAD_TB_2, 2
+  T_ADD T_ROAD_TB_3, 2
 
-  T_ADD T_ROAD_LR,   2, R_R|R_L, R_R|R_L
-  T_ADD T_ROAD_LR_1, 2, R_R|R_L, R_R|R_L
-  T_ADD T_ROAD_LR_2, 2, R_R|R_L, R_R|R_L
-  T_ADD T_ROAD_LR_3, 2, R_R|R_L, R_R|R_L
+  T_ADD T_ROAD_LR,   2
+  T_ADD T_ROAD_LR_1, 2
+  T_ADD T_ROAD_LR_2, 2
+  T_ADD T_ROAD_LR_3, 2
 
-  T_ADD T_ROAD_RB,   2, R_R|R_D, R_R|R_D
-  T_ADD T_ROAD_LB,   2, R_L|R_D, R_L|R_D
-  T_ADD T_ROAD_TR,   2, R_R|R_U, R_R|R_U
-  T_ADD T_ROAD_TL,   2, R_U|R_L, R_U|R_L
+  T_ADD T_ROAD_RB,   2
+  T_ADD T_ROAD_LB,   2
+  T_ADD T_ROAD_TR,   2
+  T_ADD T_ROAD_TL,   2
 
-  T_ADD T_ROAD_TRB,  2, R_U|R_R|R_D, R_U|R_R|R_D
-  T_ADD T_ROAD_LRB,  2, R_L|R_R|R_D, R_L|R_R|R_D
-  T_ADD T_ROAD_TLB,  2, R_U|R_L|R_D, R_U|R_L|R_D
-  T_ADD T_ROAD_TLR,  2, R_U|R_R|R_L, R_U|R_R|R_L
-  T_ADD T_ROAD_TLRB, 2, R_U|R_R|R_D|R_L, R_U|R_R|R_D|R_L
+  T_ADD T_ROAD_TRB,  2
+  T_ADD T_ROAD_LRB,  2
+  T_ADD T_ROAD_TLB,  2
+  T_ADD T_ROAD_TLR,  2
+  T_ADD T_ROAD_TLRB, 2
 
-  T_ADD T_ROAD_TB_POWER_LINES, 2, R_U|R_D, R_U|R_D
-  T_ADD T_ROAD_LR_POWER_LINES, 2, R_R|R_L, R_R|R_L
-  T_ADD T_ROAD_TB_BRIDGE, 2, R_U|R_D, R_U|R_D
-  T_ADD T_ROAD_LR_BRIDGE, 2, R_R|R_L, R_R|R_L
+  T_ADD T_ROAD_TB_POWER_LINES, 2
+  T_ADD T_ROAD_LR_POWER_LINES, 2
+  T_ADD T_ROAD_TB_BRIDGE, 2
+  T_ADD T_ROAD_LR_BRIDGE, 2
 
-  T_ADD T_TRAIN_TB,   1, T_U|T_D, T_U|T_D
-  T_ADD T_TRAIN_LR,   1, T_R|T_L, T_R|T_L
-  T_ADD T_TRAIN_RB,   1, T_R|T_D, T_R|T_D
-  T_ADD T_TRAIN_LB,   1, T_L|T_D, T_L|T_D
-  T_ADD T_TRAIN_TR,   1, T_R|T_U, T_R|T_U
-  T_ADD T_TRAIN_TL,   1, T_U|T_L, T_U|T_L
+  T_ADD T_TRAIN_TB,   1
+  T_ADD T_TRAIN_LR,   1
+  T_ADD T_TRAIN_RB,   1
+  T_ADD T_TRAIN_LB,   1
+  T_ADD T_TRAIN_TR,   1
+  T_ADD T_TRAIN_TL,   1
 
-  T_ADD T_TRAIN_TRB,  1, T_U|T_R|T_D, T_U|T_R|T_D
-  T_ADD T_TRAIN_LRB,  1, T_L|T_R|T_D, T_L|T_R|T_D
-  T_ADD T_TRAIN_TLB,  1, T_U|T_L|T_D, T_U|T_L|T_D
-  T_ADD T_TRAIN_TLR,  1, T_U|T_R|T_L, T_U|T_R|T_L
-  T_ADD T_TRAIN_TLRB, 1, T_U|T_R|T_D|T_L, T_U|T_R|T_D|T_L
+  T_ADD T_TRAIN_TRB,  1
+  T_ADD T_TRAIN_LRB,  1
+  T_ADD T_TRAIN_TLB,  1
+  T_ADD T_TRAIN_TLR,  1
+  T_ADD T_TRAIN_TLRB, 1
 
-  T_ADD T_TRAIN_LR_ROAD, 3, T_R|T_L|R_U|R_D, T_R|T_L|R_U|R_D ; Both road and
-  T_ADD T_TRAIN_TB_ROAD, 3, T_U|T_D|R_R|R_L, T_U|T_D|R_R|R_L ; train!
+  T_ADD T_TRAIN_LR_ROAD, 3
+  T_ADD T_TRAIN_TB_ROAD, 3
 
-  T_ADD T_TRAIN_TB_POWER_LINES, 1, T_U|T_D, T_U|T_D
-  T_ADD T_TRAIN_LR_POWER_LINES, 1, T_R|T_L, T_R|T_L
-  T_ADD T_TRAIN_TB_BRIDGE, 1, T_U|T_D, T_U|T_D
-  T_ADD T_TRAIN_LR_BRIDGE, 1, T_R|T_L, T_R|T_L
+  T_ADD T_TRAIN_TB_POWER_LINES, 1
+  T_ADD T_TRAIN_LR_POWER_LINES, 1
+  T_ADD T_TRAIN_TB_BRIDGE, 1
+  T_ADD T_TRAIN_LR_BRIDGE, 1
 
 ;-------------------------------------------------------------------------------
 
@@ -169,20 +149,15 @@ TrafficTryExpand: ; d=y, e=x => current position
     cp      a,255
     ret     z ; this tile is full of traffic, ignore
 
-IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 3
+IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 1
     FAIL "Fix this!"
 ENDC
 
     ld      hl,TILE_TRANSPORT_INFO
     add     hl,bc ; bc = tile
-    add     hl,bc
-    add     hl,bc
-    ld      c,[hl]
-    inc     hl
-    ld      b,[hl]
+    ld      c,[hl] ; load cost
 
     ; a = traffic
-    ; b = allowed destinations
     ; c = base cost of moving from this tile
     ; de = coords
     ; hl = address
@@ -202,54 +177,30 @@ ENDC
     ret     c ; if overflow, we can't advance from this tile, return!
     ld      c,a
 
-    ; Add to B as valid destinations any surroinding tile that is a building!
-
-    ; TODO
-
-    ; b = allowed destinations
     ; c = current accumulated cost
     ; de = coords (d = y, e = x)
     ; hl = address
 
-    ; Check road and train individually. At most only one check will be done to
-    ; each direction because of the way the tiles are designed.
-
-    ; e = x, d = y (original coordinates)
-
     ; The functions will check inside if the tile has already been handled.
 
-    bit     R_U_BIT,b
-    call    nz,TrafficRoadTryMoveUp ; preserves bc,de,hl
+    call    TrafficTryMoveUp ; preserves bc,de,hl
 
-    bit     T_U_BIT,b
-    call    nz,TrafficTrainTryMoveUp ; preserves bc,de,hl
+    call    TrafficTryMoveRight ; preserves bc,de,hl
 
-    bit     R_R_BIT,b
-    call    nz,TrafficRoadTryMoveRight ; preserves bc,de,hl
+    call    TrafficTryMoveDown ; preserves bc,de,hl
 
-    bit     T_R_BIT,b
-    call    nz,TrafficTrainTryMoveRight ; preserves bc,de,hl
-
-    bit     R_D_BIT,b
-    call    nz,TrafficRoadTryMoveDown ; preserves bc,de,hl
-
-    bit     T_D_BIT,b
-    call    nz,TrafficTrainTryMoveDown ; preserves bc,de,hl
-
-    bit     R_L_BIT,b
-    call    nz,TrafficRoadTryMoveLeft ; preserves bc,de,hl
-
-    bit     T_L_BIT,b
-    call    nz,TrafficTrainTryMoveLeft ; preserves bc,de,hl
+    call    TrafficTryMoveLeft ; preserves bc,de,hl
 
     ret
 
 ;-------------------------------------------------------------------------------
 
+; Try to add a certain tile to the queue
+
 ; c = accumulated cost
 ; de = coordinates of destination, hl = address of destination
 ; preserves bc and de
-TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
+TrafficAdd:
 
     ; Check if it is a building. If so, add to queue immediately.
 
@@ -282,89 +233,34 @@ TRAFFIC_ADD_TILE_COMMON : MACRO ; \1 = bit to test in destination
     cp      a,TYPE_WATER
     jr      z,.not_a_building
 
-    ; Building, add to queue. Don't save accumulated cost.
+    ; Building, add to queue but don't save accumulated cost.
 
     call    QueueAdd ; preserves BC and DE
     ret
 
 .not_a_building:
-    ; Not a building, check directions
+    ; Not a building, add to queue and save accumulated cost
 
-    push    bc ; (*12)
-
-    push    de
-    ; hl = address, returns de = tile
-    call    CityMapGetTileAtAddress ; preserves hl
-    LD_BC_DE
-    pop     de ; de = original coords, bc = tile, hl = address
-
-IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 3
-    FAIL "Fix this!"
-ENDC
-
-    ld      a,[hl]
-    ld      hl,TILE_TRANSPORT_INFO+2
-    add     hl,bc ; bc = tile
-    add     hl,bc
-    add     hl,bc
-    ld      b,[hl] ; b = allowed origins
-
-    bit     (\1),b ; check if we can come from the orign
-    jr      nz,.allowed
-    pop     bc ; (*1) no, just exit
-    ret
-.allowed:
+    push    bc ; (*)
 
     ; add coordinates of destination tile to the queue and write the accumulated
     ; cost to the tile
     call    QueueAdd ; preserves BC and DE
 
     call    GetMapAddress ; de = tile, hl = address. preserves de
-    pop     bc ; (*2) c = accumulated cost
+    pop     bc ; (*) c = accumulated cost
 
     ld      [hl],c ; set cost
 
     ret
-ENDM
 
 ;-------------------------------------------------------------------------------
 
-; Try to add a certain tile checking the opposite direction. If it's ok, adds
-; that tile to the queue.
+; Add initial tiles that are next to a residential building
 
 ; de = coordinates of destination, hl = address of destination
 ; preserves bc and de
-
-; For each one of them, check the opposite direction
-TrafficRoadAddUp:
-    TRAFFIC_ADD_TILE_COMMON R_D_BIT
-
-TrafficTrainAddUp:
-    TRAFFIC_ADD_TILE_COMMON T_D_BIT
-
-TrafficRoadAddDown:
-    TRAFFIC_ADD_TILE_COMMON R_U_BIT
-
-TrafficTrainAddDown:
-    TRAFFIC_ADD_TILE_COMMON T_U_BIT
-
-TrafficRoadAddLeft:
-    TRAFFIC_ADD_TILE_COMMON R_R_BIT
-
-TrafficTrainAddLeft:
-    TRAFFIC_ADD_TILE_COMMON T_R_BIT
-
-TrafficRoadAddRight:
-    TRAFFIC_ADD_TILE_COMMON R_L_BIT
-
-TrafficTrainAddRight:
-    TRAFFIC_ADD_TILE_COMMON T_L_BIT
-
-;-------------------------------------------------------------------------------
-
-; de = coordinates of destination, hl = address of destination
-; preserves bc and de
-TrafficRoadTrainAddStart:
+TrafficAddStart:
 
     push    bc
     call    CityMapGetTypeNoBoundCheck ; returns type in A. Preserves de
@@ -376,6 +272,14 @@ TrafficRoadTrainAddStart:
     ; add coordinates of destination tile to the queue
     call    QueueAdd ; preserves BC and DE
 
+    ; set initial cost to 1!
+
+    ld      a,BANK_CITY_MAP_TRAFFIC
+    ld      [rSVBK],a
+
+    call    GetMapAddress
+    ld      [hl],1
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -383,7 +287,7 @@ TrafficRoadTrainAddStart:
 ; c = current accumulated cost
 ; de = current coordinates (d = y, e = x)
 ; hl = address of current tile
-TrafficRoadTryMoveUp: ; preserves bc,de,hl
+TrafficTryMoveUp: ; preserves bc,de,hl
 
     ld      a,d
     and     a,a
@@ -423,7 +327,7 @@ TrafficRoadTryMoveUp: ; preserves bc,de,hl
 
             dec     d ; y--
 
-            call    TrafficRoadAddUp ; preserves bc and de
+            call    TrafficAdd ; preserves bc and de
 
         pop     de
         pop     bc
@@ -438,62 +342,7 @@ TrafficRoadTryMoveUp: ; preserves bc,de,hl
 ; c = current accumulated cost
 ; de = current coordinates (d = y, e = x)
 ; hl = address of current tile
-TrafficTrainTryMoveUp: ; preserves bc,de,hl
-
-    ld      a,d
-    and     a,a
-    ret     z ; return if top row
-
-    push    hl ; (*)
-
-    push    de
-    ld      de,-CITY_MAP_WIDTH ; previous row
-    add     hl,de
-    pop     de ; hl = pointer to origin
-
-    ; Check if already handled. If so, check if the new cost is lower
-    ; than the previous one.
-
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
-
-    ld      a,[hl]
-    and     a,a
-    jr      nz,.not_handled
-
-    ; This has been handled before. If the cost is lower than the stored one
-    ; continue. If not, return.
-
-    cp      a,c
-    jr      z,.handled ; same cost, don't repeat
-
-    cp      a,c ; carry flag is set if c > a (current cost > old cost)
-    jr      c,.handled ; higher cost, ignore
-
-.not_handled:
-
-        ; c = accumulated cost
-        push    bc ; de = original coordinates
-        push    de ; hl = pointer to origin
-
-            dec     d ; y--
-
-            call    TrafficTrainAddUp ; preserves bc and de
-
-        pop     de
-        pop     bc
-
-.handled:
-    pop     hl ; (*)
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-; c = current accumulated cost
-; de = current coordinates (d = y, e = x)
-; hl = address of current tile
-TrafficRoadTryMoveDown: ; preserves bc,de,hl
+TrafficTryMoveDown: ; preserves bc,de,hl
 
     ld      a,CITY_MAP_HEIGHT-1
     cp      a,d
@@ -533,7 +382,7 @@ TrafficRoadTryMoveDown: ; preserves bc,de,hl
 
             inc     d ; y++
 
-            call    TrafficRoadAddDown ; preserves bc and de
+            call    TrafficAdd ; preserves bc and de
 
         pop     de
         pop     bc
@@ -548,62 +397,7 @@ TrafficRoadTryMoveDown: ; preserves bc,de,hl
 ; c = current accumulated cost
 ; de = current coordinates (d = y, e = x)
 ; hl = address of current tile
-TrafficTrainTryMoveDown: ; preserves bc,de,hl
-
-    ld      a,CITY_MAP_HEIGHT-1
-    cp      a,d
-    ret     z ; return if bottom row
-
-    push    hl ; (*)
-
-    push    de
-    ld      de,+CITY_MAP_WIDTH ; next row
-    add     hl,de
-    pop     de ; hl = pointer to origin
-
-    ; Check if already handled. If so, check if the new cost is lower
-    ; than the previous one.
-
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
-
-    ld      a,[hl]
-    and     a,a
-    jr      nz,.not_handled
-
-    ; This has been handled before. If the cost is lower than the stored one
-    ; continue. If not, return.
-
-    cp      a,c
-    jr      z,.handled ; same cost, don't repeat
-
-    cp      a,c ; carry flag is set if c > a (current cost > old cost)
-    jr      c,.handled ; higher cost, ignore
-
-.not_handled:
-
-        ; c = accumulated cost
-        push    bc ; de = original coordinates
-        push    de ; hl = pointer to origin
-
-            inc     d ; y++
-
-            call    TrafficTrainAddDown ; preserves bc and de
-
-        pop     de
-        pop     bc
-
-.handled:
-    pop     hl ; (*)
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-; c = current accumulated cost
-; de = current coordinates (d = y, e = x)
-; hl = address of current tile
-TrafficRoadTryMoveLeft: ; preserves bc,de,hl
+TrafficTryMoveLeft: ; preserves bc,de,hl
 
     ld      a,e
     and     a,a
@@ -641,7 +435,7 @@ TrafficRoadTryMoveLeft: ; preserves bc,de,hl
 
             dec     e ; x--
 
-            call    TrafficRoadAddLeft ; preserves bc and de
+            call    TrafficAdd ; preserves bc and de
 
         pop     de
         pop     bc
@@ -656,60 +450,7 @@ TrafficRoadTryMoveLeft: ; preserves bc,de,hl
 ; c = current accumulated cost
 ; de = current coordinates (d = y, e = x)
 ; hl = address of current tile
-TrafficTrainTryMoveLeft: ; preserves bc,de,hl
-
-    ld      a,e
-    and     a,a
-    ret     z ; return if left column
-
-    push    hl ; (*)
-
-    dec     hl ; previous row
-    ; hl = pointer to origin
-
-    ; Check if already handled. If so, check if the new cost is lower
-    ; than the previous one.
-
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
-
-    ld      a,[hl]
-    and     a,a
-    jr      nz,.not_handled
-
-    ; This has been handled before. If the cost is lower than the stored one
-    ; continue. If not, return.
-
-    cp      a,c
-    jr      z,.handled ; same cost, don't repeat
-
-    cp      a,c ; carry flag is set if c > a (current cost > old cost)
-    jr      c,.handled ; higher cost, ignore
-
-.not_handled:
-
-        ; c = accumulated cost
-        push    bc ; de = original coordinates
-        push    de ; hl = pointer to origin
-
-            dec     e ; x--
-
-            call    TrafficTrainAddLeft ; preserves bc and de
-
-        pop     de
-        pop     bc
-
-.handled:
-    pop     hl ; (*)
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-; c = current accumulated cost
-; de = current coordinates (d = y, e = x)
-; hl = address of current tile
-TrafficRoadTryMoveRight: ; preserves bc,de,hl
+TrafficTryMoveRight: ; preserves bc,de,hl
 
     ld      a,CITY_MAP_WIDTH-1
     cp      a,e
@@ -747,60 +488,7 @@ TrafficRoadTryMoveRight: ; preserves bc,de,hl
 
             inc     e ; x++
 
-            call    TrafficRoadAddRight ; preserves bc and de
-
-        pop     de
-        pop     bc
-
-.handled:
-    pop     hl ; (*)
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-; c = current accumulated cost
-; de = current coordinates (d = y, e = x)
-; hl = address of current tile
-TrafficTrainTryMoveRight: ; preserves bc,de,hl
-
-    ld      a,CITY_MAP_WIDTH-1
-    cp      a,e
-    ret     z ; return if right column
-
-    push    hl ; (*)
-
-    inc     hl ; next column
-    ; hl = pointer to origin
-
-    ; Check if already handled. If so, check if the new cost is lower
-    ; than the previous one.
-
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
-
-    ld      a,[hl]
-    and     a,a
-    jr      nz,.not_handled
-
-    ; This has been handled before. If the cost is lower than the stored one
-    ; continue. If not, return.
-
-    cp      a,c
-    jr      z,.handled ; same cost, don't repeat
-
-    cp      a,c ; carry flag is set if c > a (current cost > old cost)
-    jr      c,.handled ; higher cost, ignore
-
-.not_handled:
-
-        ; c = accumulated cost
-        push    bc ; de = original coordinates
-        push    de ; hl = pointer to origin
-
-            inc     e ; x++
-
-            call    TrafficTrainAddRight ; preserves bc and de
+            call    TrafficAdd ; preserves bc and de
 
         pop     de
         pop     bc
@@ -831,7 +519,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            call    TrafficRoadTrainAddStart ; preserves bc and de
+            call    TrafficAddStart ; preserves bc and de
         pop     bc
 
         inc     e ; inc x
@@ -858,7 +546,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            call    TrafficRoadTrainAddStart ; preserves bc and de
+            call    TrafficAddStart ; preserves bc and de
         pop     bc
 
         inc     e ; inc x
@@ -883,7 +571,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            call    TrafficRoadTrainAddStart ; preserves bc and de
+            call    TrafficAddStart ; preserves bc and de
         pop     bc
 
         inc     d ; inc y
@@ -910,7 +598,7 @@ Traffic_AddBuildingNeighboursToQueue:
         push    bc
             call    GetMapAddress ; preserves de, returns address in hl
             ; de = destination coordinates, hl = destination address
-            call    TrafficRoadTrainAddStart ; preserves bc and de
+            call    TrafficAddStart ; preserves bc and de
         pop     bc
 
         inc     d ; inc y
@@ -1100,10 +788,20 @@ Simulation_TrafficHandleSource::
 
     ; Returns type of the tile + extra flags -> register A
     ;          - Address -> Register HL
-    call    CityMapGetTypeNoBoundCheck ; Arguments: e = x , d = y
-    ; Check if this is a building, and not a residential one! If not, next tile
+    call    CityMapGetTypeNoBoundCheck ; Arguments: e = x , d = y. Preserves DE
 
-    ; TODO
+    and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+    jr      z,.loop_expand_not_road_train
+
+    ; If this is a road or train tracks expand and continue to the next tile.
+
+    call    TrafficTryExpand ; d=y, e=x => current position
+
+    jr      .loop_expand
+
+.loop_expand_not_road_train:
+    ; If this is not a road or train tracks, it must be a building, and not a
+    ; residential one because the expand functions won't allow that.
 
     ; If this is a building, check if it has enough remaining density to accept
     ; more population. If there is some population left it means that it can
