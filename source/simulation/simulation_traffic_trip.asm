@@ -651,6 +651,26 @@ TrafficGetBuildingDensityAndPointer:
 
 ;-------------------------------------------------------------------------------
 
+; de = coordinates of any tile
+; returns hl = origin of coordinates address
+;         a = building remaining population density
+TrafficGetBuildingiRemainingDensityAndPointer:
+
+    ; de = coordinates of one tile, returns de = coordinates of the origin
+    call    BuildingGetCoordinateOrigin
+
+    ; get origin coordinates into hl
+    call    GetMapAddress ; Preserves DE
+
+    ld      a,BANK_CITY_MAP_TRAFFIC
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Checks bounds, returns a=0 if outside the map else a=value
 TrafficGetAccumulatedCost: ; d=y, e=x. preserves de
 
@@ -1018,12 +1038,15 @@ Simulation_TrafficHandleSource::
             ; to get to this building (using the population that has actually
             ; arrived to the destination building).
 
-            push    de ; (*) save coords for retrace
+            push    de ; (*12) save coords for retrace
 
             ; de = coordinates of any tile
             ; returns hl = origin of coordinates address
-            ;         a = building assigned population density
-            call    TrafficGetBuildingDensityAndPointer
+            ;         a = building remaining population density
+            call    TrafficGetBuildingiRemainingDensityAndPointer
+
+            and     a,a
+            jr      z,.destination_is_full
 
             ld      b,a
             ld      a,[source_building_remaining_density]
@@ -1066,12 +1089,18 @@ Simulation_TrafficHandleSource::
             ; Now, retrace steps to increase traffic of each tile used to get
             ; to this building in the TRAFFIC map!
 
-            pop     de ; (*) restore coords for retrace
+            pop     de ; (*1) restore coords for retrace
 
             ; c = amount to increment traffic
             ; de = coordinates to start retrace
 
             call    TrafficRetraceStep
+
+            jr      .loop_expand
+
+.destination_is_full
+
+            pop     de ; (*2) restore coordinates
 
             jr      .loop_expand
 
