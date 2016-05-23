@@ -131,78 +131,78 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost
     T_ADD   T_POWER_LINES_TB_BRIDGE, 0,1
     T_ADD   T_POWER_LINES_LR_BRIDGE, 0,1
 
-    T_ADD   T_POLICE_DEPT,  7,1
-    T_ADD   T_FIRE_DEPT,    5,1
-    T_ADD   T_HOSPITAL,    10,1
+    T_ADD   T_POLICE_DEPT, 1*9,1
+    T_ADD   T_FIRE_DEPT,   1*9,1
+    T_ADD   T_HOSPITAL,    2*9,1
 
-    T_ADD   T_PARK_SMALL, 1, 1
-    T_ADD   T_PARK_BIG,   1, 1
-    T_ADD   T_STADIUM,   20,20
+    T_ADD   T_PARK_SMALL,  2*1, 1
+    T_ADD   T_PARK_BIG,    2*9, 1
+    T_ADD   T_STADIUM,    2*15,20
 
-    T_ADD   T_SCHOOL,       5,5
-    T_ADD   T_HIGH_SCHOOL, 10,6
-    T_ADD   T_UNIVERSITY,  20,7 ; TODO - Set central tile (5x5) to 0?
-    T_ADD   T_MUSEUM,       5,6
-    T_ADD   T_LIBRARY,     10,5
+    T_ADD   T_SCHOOL,       2*6,5
+    T_ADD   T_HIGH_SCHOOL,  2*9,6
+    T_ADD   T_UNIVERSITY,  2*25,7 ; TODO - Set central tile (5x5) to 0?
+    T_ADD   T_MUSEUM,      1*12,6
+    T_ADD   T_LIBRARY,      1*6,5
 
-    T_ADD   T_AIRPORT,     30,10
-    T_ADD   T_PORT,        10,8
-    T_ADD   T_PORT_WATER_L, 0,0
-    T_ADD   T_PORT_WATER_R, 0,0
-    T_ADD   T_PORT_WATER_D, 0,0
-    T_ADD   T_PORT_WATER_U, 0,0
+    T_ADD   T_AIRPORT,   2*15,10
+    T_ADD   T_PORT,        1*9,8
+    T_ADD   T_PORT_WATER_L,  0,0
+    T_ADD   T_PORT_WATER_R,  0,0
+    T_ADD   T_PORT_WATER_D,  0,0
+    T_ADD   T_PORT_WATER_U,  0,0
 
-    T_ADD   T_POWER_PLANT_COAL,    5,0 ; They don't have cost, power plants are
-    T_ADD   T_POWER_PLANT_OIL,     5,0 ; generators!
-    T_ADD   T_POWER_PLANT_WIND,    1,0
-    T_ADD   T_POWER_PLANT_SOLAR,   2,0
-    T_ADD   T_POWER_PLANT_NUCLEAR, 7,0
-    T_ADD   T_POWER_PLANT_FUSION, 10,0
+    T_ADD   T_POWER_PLANT_COAL,    1*16,0 ; They don't have cost, power plants
+    T_ADD   T_POWER_PLANT_OIL,     1*16,0 ; are generators!
+    T_ADD   T_POWER_PLANT_WIND,     1*4,0
+    T_ADD   T_POWER_PLANT_SOLAR,   1*16,0
+    T_ADD   T_POWER_PLANT_NUCLEAR, 2*16,0
+    T_ADD   T_POWER_PLANT_FUSION,  3*16,0
 
-    T_ADD   T_RESIDENTIAL_S1_A, 6,2
-    T_ADD   T_RESIDENTIAL_S1_B, 7,2
-    T_ADD   T_RESIDENTIAL_S1_C, 8,2
-    T_ADD   T_RESIDENTIAL_S1_D, 9,2
+    T_ADD   T_RESIDENTIAL_S1_A, 6*1,2
+    T_ADD   T_RESIDENTIAL_S1_B, 7*1,2
+    T_ADD   T_RESIDENTIAL_S1_C, 7*1,2
+    T_ADD   T_RESIDENTIAL_S1_D, 8*1,2
 
-    T_ADD   T_RESIDENTIAL_S2_A, 22,3
-    T_ADD   T_RESIDENTIAL_S2_B, 23,3
-    T_ADD   T_RESIDENTIAL_S2_C, 25,3
-    T_ADD   T_RESIDENTIAL_S2_D, 26,3
+    T_ADD   T_RESIDENTIAL_S2_A, 8*4,3
+    T_ADD   T_RESIDENTIAL_S2_B, 9*4,3
+    T_ADD   T_RESIDENTIAL_S2_C, 9*4,3
+    T_ADD   T_RESIDENTIAL_S2_D, 10*4,3
 
-    T_ADD   T_RESIDENTIAL_S3_A, 40,5
-    T_ADD   T_RESIDENTIAL_S3_B, 42,5
-    T_ADD   T_RESIDENTIAL_S3_C, 45,5
-    T_ADD   T_RESIDENTIAL_S3_D, 45,5
+    T_ADD   T_RESIDENTIAL_S3_A, 10*9,5
+    T_ADD   T_RESIDENTIAL_S3_B, 11*9,5
+    T_ADD   T_RESIDENTIAL_S3_C, 11*9,5
+    T_ADD   T_RESIDENTIAL_S3_D, 12*9,5
 
-    T_ADD   T_COMMERCIAL_S1_A, 1,2
-    T_ADD   T_COMMERCIAL_S1_B, 2,2
-    T_ADD   T_COMMERCIAL_S1_C, 2,2
-    T_ADD   T_COMMERCIAL_S1_D, 3,2
+    T_ADD   T_COMMERCIAL_S1_A, 2*1,2
+    T_ADD   T_COMMERCIAL_S1_B, 2*1,2
+    T_ADD   T_COMMERCIAL_S1_C, 2*1,2
+    T_ADD   T_COMMERCIAL_S1_D, 3*1,2
 
-    T_ADD   T_COMMERCIAL_S2_A, 4,3
-    T_ADD   T_COMMERCIAL_S2_B, 5,3
-    T_ADD   T_COMMERCIAL_S2_C, 6,3
-    T_ADD   T_COMMERCIAL_S2_D, 7,3
+    T_ADD   T_COMMERCIAL_S2_A, 3*4,3
+    T_ADD   T_COMMERCIAL_S2_B, 3*4,3
+    T_ADD   T_COMMERCIAL_S2_C, 4*4,3
+    T_ADD   T_COMMERCIAL_S2_D, 5*4,3
 
-    T_ADD   T_COMMERCIAL_S3_A, 10,5
-    T_ADD   T_COMMERCIAL_S3_B, 11,5
-    T_ADD   T_COMMERCIAL_S3_C, 12,5
-    T_ADD   T_COMMERCIAL_S3_D, 13,5
+    T_ADD   T_COMMERCIAL_S3_A, 5*9,5
+    T_ADD   T_COMMERCIAL_S3_B, 6*9,5
+    T_ADD   T_COMMERCIAL_S3_C, 7*9,5
+    T_ADD   T_COMMERCIAL_S3_D, 7*9,5
 
-    T_ADD   T_INDUSTRIAL_S1_A, 1,2 ; Industrial zones consume more power than
-    T_ADD   T_INDUSTRIAL_S1_B, 2,2 ; the population density
-    T_ADD   T_INDUSTRIAL_S1_C, 2,2
-    T_ADD   T_INDUSTRIAL_S1_D, 3,2
+    T_ADD   T_INDUSTRIAL_S1_A, 2*1,2 ; Industrial zones consume more power than
+    T_ADD   T_INDUSTRIAL_S1_B, 2*1,2 ; the population density
+    T_ADD   T_INDUSTRIAL_S1_C, 2*1,2
+    T_ADD   T_INDUSTRIAL_S1_D, 3*1,2
 
-    T_ADD   T_INDUSTRIAL_S2_A, 6,6
-    T_ADD   T_INDUSTRIAL_S2_B, 7,6
-    T_ADD   T_INDUSTRIAL_S2_C, 8,6
-    T_ADD   T_INDUSTRIAL_S2_D, 9,6
+    T_ADD   T_INDUSTRIAL_S2_A, 3*4,6
+    T_ADD   T_INDUSTRIAL_S2_B, 4*4,6
+    T_ADD   T_INDUSTRIAL_S2_C, 4*4,6
+    T_ADD   T_INDUSTRIAL_S2_D, 5*4,6
 
-    T_ADD   T_INDUSTRIAL_S3_A, 13,10
-    T_ADD   T_INDUSTRIAL_S3_B, 14,10
-    T_ADD   T_INDUSTRIAL_S3_C, 15,10
-    T_ADD   T_INDUSTRIAL_S3_D, 15,10
+    T_ADD   T_INDUSTRIAL_S3_A, 5*9,10
+    T_ADD   T_INDUSTRIAL_S3_B, 6*9,10
+    T_ADD   T_INDUSTRIAL_S3_C, 6*9,10
+    T_ADD   T_INDUSTRIAL_S3_D, 7*9,10
 
     T_ADD   512, 0,0 ; Fill array
 

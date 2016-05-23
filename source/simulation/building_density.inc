@@ -35,8 +35,8 @@ CITY_TILE_DENSITY_ELEMENT_SIZE EQU 2 ; Size of elements of CITY_TILE_DENSITY
 ;     FAIL "Fix this!"
 ; ENDC
 
-; 15-1 Because we round up to show tiles with value 1
-MAX_DISPLAYABLE_POPULATION_DENSITY EQU 14
+; 63-1 Because we round up to show tiles with value 1
+MAX_DISPLAYABLE_POPULATION_DENSITY EQU 62
 MAX_DISPLAYABLE_POWER_DENSITY      EQU 14
 
 ;###############################################################################
