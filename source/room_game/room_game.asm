@@ -51,6 +51,9 @@ vbl_handler_working: DS 1
 ; It can be set by any function to tell the simulation loop to do a step.
 simulation_running:  DS 1
 
+ANIMATION_COUNT_FRAMES EQU 60
+animation_countdown: DS 1 ; When this reaches ANIMATION_COUNT_FRAMES, step
+
 ;###############################################################################
 
     SECTION "City Map Tiles",WRAMX,BANK[BANK_CITY_MAP_TILES]
@@ -125,13 +128,18 @@ GetMapAddress:: ; e = x , d = y
 
 GameAnimateMap:
 
-    ret
-
-    call    bg_main_is_moving
-    and     a,a
+    ld      hl,animation_countdown
+    inc     [hl]
+    ld      a,ANIMATION_COUNT_FRAMES
+    cp      a,[hl]
     ret     nz
+    ld      [hl],0
 
+    ; This doesn't refresh tile map!
     LONG_CALL   Simulation_TrafficAnimate
+
+    ; Refresh tile map
+    call    bg_refresh_main
 
     ret
 
@@ -251,6 +259,9 @@ GameStateMachineStateSet:: ; a = new state
         ld      a,LCDCF_OBJ8
         ld      [game_sprites_8x16],a
 
+        xor     a,a
+        ld      [animation_countdown],a
+
         call    StatusBarShow
         call    StatusBarUpdate
 
@@ -280,6 +291,9 @@ GameStateMachineStateSet:: ; a = new state
 
         call    StatusBarHide
         call    CursorHide
+
+;        xor     a,a ; not needed, we can only enter this mode from watch mode,
+;        ld      [animation_countdown],a ; that should have done it already.
 
         ret
 
