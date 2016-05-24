@@ -244,7 +244,7 @@ MapDrawBuildingForced:: ; Puts a building at the cursor. No checks.
     ; Update map
     ; ----------
 
-    ;call    bg_reload_map_main
+    ;call    bg_refresh_main
 
     ret
 
@@ -692,7 +692,7 @@ ENDC
     ; Update map
     ; ----------
 
-    ;call    bg_reload_map_main
+    ;call    bg_refresh_main
 
     ld      b,0
     ret ; return 0 (success)
@@ -732,7 +732,7 @@ MapClearDemolishedTile:: ; Transform demolished into field. Checks money.
     ; Update map
     ; ----------
 
-    call    bg_reload_map_main
+    call    bg_refresh_main
 
     ret
 

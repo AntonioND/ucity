@@ -1064,7 +1064,7 @@ DrawCityDeleteBridgeForce: ; Reloads map too.
     ; Reload map
     ; ----------
 
-    call    bg_reload_map_main
+    call    bg_refresh_main
 
     ret
 

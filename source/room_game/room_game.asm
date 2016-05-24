@@ -708,7 +708,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         call    StatusBarMenuLoadGfx
         call    CursorLoad
 
-        call    bg_reload_main
+        call    bg_reload_main ; refresh bg and set correct scroll
 
 .continue:
 

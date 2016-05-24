@@ -180,7 +180,7 @@ BuildingBuildAtCursor:: ; B_Delete will remove instead
     ; ----------------
 
     LONG_CALL   MapDrawBuilding
-    call    bg_reload_map_main
+    call    bg_refresh_main
     ret
 
 .meta_building:
@@ -287,7 +287,7 @@ BuildingRemoveRoadTrainPowerLines: ; de = coordinates, a = type
     ; Reload map
     ; ----------
 
-    call    bg_reload_map_main
+    call    bg_refresh_main
 
     ret
 
@@ -386,7 +386,7 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
 .building:
     ; Building!
     call    MapDeleteBuilding ; de should be set from the begining
-    call    bg_reload_map_main
+    call    bg_refresh_main
     ret
 .not_building:
 

@@ -398,7 +398,7 @@ MapDrawRoad:: ; Adds a road tile where the cursor is. Updates neighbours.
     ; Update map
     ; ----------
 
-    call    bg_reload_map_main
+    call    bg_refresh_main
 
     ret
 

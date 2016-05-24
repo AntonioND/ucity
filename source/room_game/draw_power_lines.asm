@@ -512,7 +512,7 @@ MapDrawPowerLines:: ; Adds a train tile in the cursor. Updates neighbours.
     ; Update map
     ; ----------
 
-    call    bg_reload_map_main
+    call    bg_refresh_main
 
     ret
 

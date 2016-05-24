@@ -287,7 +287,7 @@ Simulation_Traffic::
     ; Update map
     ; ----------
 
-;    call    bg_reload_map_main
+;    call    bg_refresh_main
 
     ret
 
@@ -387,7 +387,7 @@ Simulation_TrafficAnimate::
     ; Update map
     ; ----------
 
-;    call    bg_reload_map_main
+;    call    bg_refresh_main
 
     ret
 

@@ -656,7 +656,7 @@ MapDrawPort::
     ; Update map
     ; ----------
 
-    call    bg_reload_map_main
+    call    bg_refresh_main
 
     ret
 
@@ -769,7 +769,7 @@ ENDC
     ; Update map
     ; ----------
 
-    call    bg_reload_map_main
+    call    bg_refresh_main
 
     ret
 

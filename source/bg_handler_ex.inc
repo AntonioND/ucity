@@ -185,6 +185,101 @@ __bg_load_map_main:
     ret
 
 ;-------------------------------------------------------------------------------
+;- bg_refresh_main()                                                           -
+;-------------------------------------------------------------------------------
+
+bg_refresh_main:: ; refresh tiles but don't scroll or anything
+
+    ;----------------------------------------------
+    ; Load the previous line and column if possible by modifying the saved
+    ; coordinates. They will be corrected at the end of the function.
+    ld      a,[bg_x]
+    and     a,a
+    jr      z,.dont_dec
+    dec     a
+.dont_dec:
+    ld      d,a
+
+    ld      a,[bg_y]
+    and     a,a
+    jr      z,.dont_dec2
+    dec     a
+.dont_dec2:
+    ld      e,a
+
+    ; d = start x, e = start y
+
+    ;----------------------------------------------
+
+    ; Load tile and attribute map
+    ; ---------------------------
+
+    ld      c,e ; y
+    ld      a,CITY_MAP_WIDTH ; width
+    call    mul_u8u8u16 ; de preserved
+    ld      c,d
+    ld      b,0
+    add     hl,bc ; hl = width*y + x
+
+    ld      bc,CITY_MAP_TILES ; hl = map base
+
+    add     hl,bc ; hl = map_ptr + width*y + x
+
+    ld      b,d ; x
+    ld      c,e ; y
+
+    ld      a,20 ; a = num rows
+
+    ; b = x, c = y
+
+.loop:
+
+    push    af
+    push    bc
+    push    hl
+
+        ld      a,BANK_CITY_MAP_TILES
+        ld      [rSVBK],a ; set correct WRAM bank
+        xor     a,a
+        ld      [rVBK],a
+
+        push    bc
+        push    hl
+        call    ____vram_copy_row_wrap
+        pop     hl
+        pop     bc
+
+        ld      a,BANK_CITY_MAP_ATTR
+        ld      [rSVBK],a ; set correct WRAM bank
+        ld      a,1
+        ld      [rVBK],a
+
+        call    ____vram_copy_row_wrap
+
+    pop     hl
+    pop     bc
+    pop     af
+
+    dec     a
+    ret     z ; exit!
+
+    push    af
+    push    bc
+
+    ld      a,CITY_MAP_WIDTH
+
+    ld      c,a
+    ld      b,0
+    add     hl,bc ; increase source by one bg line
+
+    pop     bc
+    pop     af
+
+    inc     c ; y++
+
+    jr      .loop
+
+;-------------------------------------------------------------------------------
 ;- bg_reload_main()                                                            -
 ;-------------------------------------------------------------------------------
 
@@ -310,7 +405,6 @@ TILE_SIZE EQU (8*8/4)
     call    rom_bank_pop
 
     ret
-
 
 ;-------------------------------------------------------------------------------
 ;- bg_main_scroll_right()    returns: a = if moved 1 else 0                    -

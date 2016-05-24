@@ -135,7 +135,7 @@ memcopy_inc:: ; hl and de should be incremented at the end of this
     SECTION "MathFunctions",ROM0
 
 ;-------------------------------------------------------------------------------
-;- mul_u8u8u16()    hl = returned value    a,c = initial values                -
+;- mul_u8u8u16()    hl = result    a,c = initial values    de preserved        -
 ;-------------------------------------------------------------------------------
 
 mul_u8u8u16:: ; super fast unrolled multiplication
