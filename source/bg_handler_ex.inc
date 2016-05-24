@@ -810,4 +810,14 @@ bg_main_drift_scroll_ver::
     ld      a,e
     ret
 
+;-------------------------------------------------------------------------------
+
+bg_main_is_moving:: ; returns a != 0 if in scrolling in the middle of a tile
+
+    ld      a,[bg_y_in_tile]
+    ld      b,a
+    ld      a,[bg_x_in_tile]
+    or      a,b
+    ret
+
 ;###############################################################################

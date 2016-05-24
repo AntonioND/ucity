@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -197,6 +198,196 @@ Simulation_Traffic::
     inc     d
     bit     6,d ; CITY_MAP_HEIGHT = 64
     jr      z,.loopy
+
+    ; Update tiles of the map to show the traffic level
+    ; -------------------------------------------------
+
+    ld      hl,CITY_MAP_TRAFFIC ; Map base
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+    ld      d,0 ; y
+.loopy_map:
+        ld      e,0 ; x
+.loopx_map:
+
+            ld      a,[hl] ; Get type
+
+            and     a,TYPE_HAS_ROAD
+            jr      z,.not_road ; Not road, skip
+
+                ld      a,BANK_CITY_MAP_TRAFFIC
+                ld      [rSVBK],a
+
+                ld      a,[hl]
+                bit     7,a
+                jr      z,.not_saturated ; if > 127, saturated
+                ld      a,255 ; saturated
+.not_saturated:
+                ; 8 bits to 2
+                rlca
+                rlca ; rotate no carry
+                and     a,3
+                ld      b,a ; b = traffic level
+
+                ld      a,BANK_CITY_MAP_TILES
+                ld      [rSVBK],a
+
+                ; All road tiles are < 256, that's why this works!
+                ld      a,[hl]
+
+                cp      a,T_ROAD_TB
+                jr      z,.rtb
+                cp      a,T_ROAD_TB_1
+                jr      z,.rtb
+                cp      a,T_ROAD_TB_2
+                jr      z,.rtb
+                cp      a,T_ROAD_TB_3
+                jr      z,.rtb
+
+                cp      a,T_ROAD_LR
+                jr      z,.rlr
+                cp      a,T_ROAD_LR_1
+                jr      z,.rlr
+                cp      a,T_ROAD_LR_2
+                jr      z,.rlr
+                cp      a,T_ROAD_LR_3
+                jr      z,.rlr
+
+                jr      .not_valid_road ; crossings, etc
+.rlr:
+                ; Left-Right
+                ld      a,T_ROAD_LR
+                add     a,b
+                jr      .end_tb_lr
+.rtb:
+                ; Top-Bottom
+                ld      a,T_ROAD_TB
+                add     a,b
+.end_tb_lr:
+                ld      [hl],a ; save tile!
+                ; The palette should be the same, no need to update!
+.not_valid_road:
+
+                ld      a,BANK_CITY_MAP_TYPE
+                ld      [rSVBK],a
+.not_road:
+
+        inc     hl
+
+        inc     e
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jr      z,.loopx_map
+
+    inc     d
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jr      z,.loopy_map
+
+    ; Update map
+    ; ----------
+
+;    call    bg_reload_map_main
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+Simulation_TrafficAnimate::
+
+    ; Animate tiles of the map with traffic animation
+    ; -----------------------------------------------
+
+    ld      hl,CITY_MAP_TRAFFIC ; Map base
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+    ld      d,0 ; y
+.loopy:
+        ld      e,0 ; x
+.loopx:
+
+            ld      a,[hl] ; Get type
+
+            and     a,TYPE_HAS_ROAD
+            jr      z,.not_road ; Not road, skip
+
+                ld      a,BANK_CITY_MAP_TRAFFIC
+                ld      [rSVBK],a
+
+                ld      a,[hl]
+                bit     7,a
+                jr      z,.not_saturated ; if > 127, saturated
+                ld      a,255 ; saturated
+.not_saturated:
+                ; 8 bits to 2
+                rlca
+                rlca ; rotate no carry
+                and     a,3
+                ld      b,a ; b = traffic level
+
+                ld      a,BANK_CITY_MAP_TILES
+                ld      [rSVBK],a
+
+                ; All road tiles are < 256, that's why this works!
+                ld      a,[hl]
+
+                ; Ignore tiles with traffic level 0
+
+                cp      a,T_ROAD_TB_1
+                jr      z,.rtb
+                cp      a,T_ROAD_TB_2
+                jr      z,.rtb
+                cp      a,T_ROAD_TB_3
+                jr      z,.rtb
+
+                cp      a,T_ROAD_LR_1
+                jr      z,.rlr
+                cp      a,T_ROAD_LR_2
+                jr      z,.rlr
+                cp      a,T_ROAD_LR_3
+                jr      z,.rlr
+
+                jr      .not_valid_road ; crossings, etc
+
+.rlr:
+                ; Left-Right
+                ld      a,BANK_CITY_MAP_ATTR
+                ld      [rSVBK],a
+                ld      a,1<<5 ; X flip
+                xor     a,[hl]
+                ld      [hl],a
+
+                jr      .end_tb_lr
+.rtb:
+                ; Top-Bottom
+                ld      a,BANK_CITY_MAP_ATTR
+                ld      [rSVBK],a
+                ld      a,1<<6 ; Y flip
+                xor     a,[hl]
+                ld      [hl],a
+.end_tb_lr:
+.not_valid_road:
+
+                ld      a,BANK_CITY_MAP_TYPE
+                ld      [rSVBK],a
+.not_road:
+
+        inc     hl
+
+        inc     e
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jr      z,.loopx
+
+    inc     d
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jr      z,.loopy
+
+    ; Update map
+    ; ----------
+
+;    call    bg_reload_map_main
 
     ret
 

@@ -123,6 +123,20 @@ GetMapAddress:: ; e = x , d = y
 
 ;-------------------------------------------------------------------------------
 
+GameAnimateMap:
+
+    ret
+
+    call    bg_main_is_moving
+    and     a,a
+    ret     nz
+
+    LONG_CALL   Simulation_TrafficAnimate
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 GameStateMachineHandle::
 
     ld      a,[game_state]
@@ -133,6 +147,8 @@ GameStateMachineHandle::
         call    InputHandleModeWatch
 
         call    StatusBarUpdate ; Update status bar text
+
+        call    GameAnimateMap
 
         ld      a,1
         ld      [simulation_running],a ; Always simulate in watch mode
@@ -156,6 +172,8 @@ GameStateMachineHandle::
     jr      nz,.not_watch_fast_move ; GAME_STATE_WATCH_FAST_MOVE
 
         call    InputHandleModeWatchFastMove
+
+        call    GameAnimateMap
 
         ld      a,1
         ld      [simulation_running],a ; Always simulate in fast move mode
