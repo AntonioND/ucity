@@ -219,10 +219,7 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
 
-    ld      bc,$1000
-    ld      d,0
-    ld      hl,SCRATCH_RAM
-    call    memset
+    call    ClearWRAMX
 
     ; For each tile check if it is the central tile of a police station
     ; -----------------------------------------------------------------
@@ -662,10 +659,7 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
 
-    ld      bc,$1000
-    ld      d,0
-    ld      hl,SCRATCH_RAM
-    call    memset
+    call    ClearWRAMX
 
     ; For each tile check if it is the central tile of a police station
     ; -----------------------------------------------------------------

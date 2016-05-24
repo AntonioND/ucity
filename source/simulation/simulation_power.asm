@@ -539,10 +539,7 @@ Simulation_PowerDistribution::
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
 
-    ld      bc,$1000
-    ld      d,0
-    ld      hl,SCRATCH_RAM
-    call    memset
+    call    ClearWRAMX
 
     ; For each tile check if it is type TYPE_POWER_PLANT (power plant)
     ; ----------------------------------------------------------------

@@ -243,10 +243,7 @@ CityMapLoad:: ; returns de = xy start coordinates
     ; Clear type map
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
-    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ld      d,0
-    ld      hl,CITY_MAP_TYPE
-    call    memset
+    call    ClearWRAMX
 
     ; Refresh type map from tiles and attributes
     call    CityMapRefreshTypeMap

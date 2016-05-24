@@ -505,10 +505,20 @@ APA_BufferClear::
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
     ld      [rSVBK],a
 
-    ld      bc,APA_TILE_NUMBER*(8*8/4) ; size to clear
-    ld      d,0
+IF APA_TILE_NUMBER != 256
+    FAIL "APA_TILE_NUMBER should be 256!"
+ENDC
+
+    xor     a,a
+    ld      b,APA_TILE_NUMBER & $FF ; 256 == 0
     ld      hl,MINIMAP_BACKBUFFER_BASE
-    call    memset
+
+.loop:
+    REPT (8*8/4) ; size of a tile
+    ld      [hl+],a
+    ENDR
+    dec     b
+    jr      nz,.loop
 
     ret
 
