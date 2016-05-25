@@ -129,11 +129,26 @@ GetMapAddress:: ; e = x , d = y
 GameAnimateMap:
 
     ld      hl,animation_countdown
-    inc     [hl]
-    ld      a,ANIMATION_COUNT_FRAMES
-    cp      a,[hl]
+    ld      a,[hl]
+    cp      a,ANIMATION_COUNT_FRAMES
+    jr      z,.animate
+    inc     [hl] ; increment and exit
+    ret
+.animate:
+
+    ; Check if we can actually animate or not. If not, just wait until we can.
+    ; Reasons for not animating: Some of the direction pad keys are pressed
+    ; or the map is still moving after releasing a key.
+
+    call    bg_main_is_moving
+    ld      b,a
+    ld      a,[joy_held]
+    and     a,PAD_LEFT|PAD_RIGHT|PAD_UP|PAD_DOWN ; check directions only
+    or      a,b
     ret     nz
-    ld      [hl],0
+
+    xor     a,a
+    ld      [animation_countdown],a
 
     ; This doesn't refresh tile map!
     LONG_CALL   Simulation_TrafficAnimate
