@@ -136,16 +136,8 @@ GameAnimateMap:
     ret
 .animate:
 
-    ; Check if we can actually animate or not. If not, just wait until we can.
     ; Reasons for not animating: Some of the direction pad keys are pressed
     ; or the map is still moving after releasing a key.
-
-    call    bg_main_is_moving
-    ld      b,a
-    ld      a,[joy_held]
-    and     a,PAD_LEFT|PAD_RIGHT|PAD_UP|PAD_DOWN ; check directions only
-    or      a,b
-    ret     nz
 
     xor     a,a
     ld      [animation_countdown],a
@@ -470,7 +462,12 @@ InputHandleModeWatch:
         ret
 .not_select:
 
-    call    CursorHandle
+    call    CursorHandle ; returns a = 1 if bg has scrolled
+    and     a,a
+    jr      z,.dont_delay_anim
+    xor     a,a ; if bg has scrolled, delay animation
+    ld      [animation_countdown],a
+.dont_delay_anim:
 
     call    CursorGetGlobalCoords ; e = x, d = y
 
@@ -537,7 +534,12 @@ InputHandleModeEdit:
         ret
 .not_select:
 
-    call    CursorHandle
+    call    CursorHandle ; returns a = 1 if bg has scrolled
+    and     a,a
+    jr      z,.dont_delay_anim
+    xor     a,a ; if bg has scrolled, delay animation
+    ld      [animation_countdown],a
+.dont_delay_anim:
 
     call    CursorGetGlobalCoords ; e = x, d = y
 
@@ -627,8 +629,11 @@ InputHandleModeWatchFastMove:
         ret
 .not_b:
 
-    call    CursorHiddenMove
-
+    call    CursorHiddenMove ; returns a = 1 if bg has scrolled
+    and     a,a
+    ret     z
+    xor     a,a ; if bg has scrolled, delay animation
+    ld      [animation_countdown],a
     ret
 
 ;-------------------------------------------------------------------------------

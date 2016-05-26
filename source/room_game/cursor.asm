@@ -408,6 +408,7 @@ CursorSetSize:: ; b = width, c = height
 
 ;-------------------------------------------------------------------------------
 
+; Returns a = 1 if bg has scrolled, 0 otherwise
 CursorCheckDragBg_hor:
 
     cpl     ; a = ~moved
@@ -422,6 +423,10 @@ CursorCheckDragBg_hor:
         call    bg_main_scroll_right
         ENDR
         pop     af
+
+        ld      a,1
+        ret
+
 .not_right:
 
         bit     PAD_BIT_LEFT,a
@@ -431,10 +436,16 @@ CursorCheckDragBg_hor:
         call    bg_main_scroll_left
         ENDR
         pop     af
+
+        ld      a,1
+        ret
+
 .not_left:
 
+    xor     a,a
     ret
 
+; Returns a = 1 if bg has scrolled, 0 otherwise
 CursorCheckDragBg_ver:
 
     cpl     ; a = ~moved
@@ -449,6 +460,10 @@ CursorCheckDragBg_ver:
         call    bg_main_scroll_up
         ENDR
         pop     af
+
+        ld      a,1
+        ret
+
 .not_up:
 
         bit     PAD_BIT_DOWN,a
@@ -458,40 +473,58 @@ CursorCheckDragBg_ver:
         call    bg_main_scroll_down
         ENDR
         pop     af
+
+        ld      a,1
+        ret
+
 .not_down:
 
+    xor     a,a
     ret
 
 ;-------------------------------------------------------------------------------
 
+; Returns a = 1 if bg has scrolled, 0 otherwise
 CursorHandle::
 
     call    bg_main_drift_scroll_hor ; If in the middle of a movement, wait
+    ld      b,0 ; has scrolled = 0
     and     a,a
     jr      nz,.skip_movement_hor
         call    CursorMovePAD_hor
         call    CursorCheckDragBg_hor
+        ld      b,a
 .skip_movement_hor:
 
+    push    bc
     call    bg_main_drift_scroll_ver
+    pop     bc
     and     a,a
     jr      nz,.skip_movement_ver
+        push    bc
         call    CursorMovePAD_ver
         call    CursorCheckDragBg_ver
+        pop     bc
+        or      a,b
+        ld      b,a
 .skip_movement_ver:
 
+    push    bc ; (*)
     call    CursorAnimate
     call    CursorRefresh
+    pop     af ; (*) load bc into af ( ld b,a )
 
     ret
 
 ;-------------------------------------------------------------------------------
 
+; Returns a = 1 bg it has scrolled, 0 otherwise
 CursorHiddenMove::
 
     ; Horizontal
 
     call    bg_main_drift_scroll_hor ; If in the middle of a movement, wait
+    ld      b,0 ; has scrolled = 0
     and     a,a
     jr      nz,.skip_movement_hor
 
@@ -504,6 +537,11 @@ CursorHiddenMove::
             call    bg_main_scroll_right
             ENDR
             pop     af
+            ld      b,1 ; has scrolled = 1
+            ; The only way this register is modified is if any of the
+            ; bg_main_scroll_xxxx functions is called, and in that case it is
+            ; going to be set to 1 after it anyway. There's no need to push/pop
+            jr      .skip_movement_hor
 .not_right:
 
         bit     PAD_BIT_LEFT,a
@@ -513,13 +551,17 @@ CursorHiddenMove::
             call    bg_main_scroll_left
             ENDR
             pop     af
+            ld      b,1 ; has scrolled = 1
+            ;jr      .skip_movement_hor
 .not_left:
 
 .skip_movement_hor:
 
     ; Vertical
 
+    push    bc ; here it is needed to save it
     call    bg_main_drift_scroll_ver ; If in the middle of a movement, wait
+    pop     bc
     and     a,a
     jr      nz,.skip_movement_ver
 
@@ -532,6 +574,8 @@ CursorHiddenMove::
             call    bg_main_scroll_up
             ENDR
             pop     af
+            ld      b,1 ; has scrolled = 1
+            jr      .skip_movement_ver
 .not_up:
 
         bit     PAD_BIT_DOWN,a
@@ -541,10 +585,13 @@ CursorHiddenMove::
             call    bg_main_scroll_down
             ENDR
             pop     af
+            ld      b,1 ; has scrolled = 1
+            ;jr      .skip_movement_ver
 .not_down:
 
 .skip_movement_ver:
 
+    ld      a,b
     ret
 
 ;-------------------------------------------------------------------------------
