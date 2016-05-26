@@ -178,6 +178,7 @@ ENDC
     swap    a
     and     a,15 ; 8 to 4 bit
     add     a,c
+    ret     c ; return if overflowed
     ld      c,a ; c = real cost of moving from this tile
 
     ld      a,BANK_SCRATCH_RAM
