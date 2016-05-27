@@ -221,8 +221,8 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
 
     call    ClearWRAMX
 
-    ; For each tile check if it is the central tile of a police station
-    ; -----------------------------------------------------------------
+    ; For each tile check if it is the tile passed as argument
+    ; --------------------------------------------------------
 
     ld      d,0 ; y
 .loopy:
@@ -661,8 +661,8 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
 
     call    ClearWRAMX
 
-    ; For each tile check if it is the central tile of a police station
-    ; -----------------------------------------------------------------
+    ; For each tile check if it is the tile passed as argument
+    ; --------------------------------------------------------
 
     ld      d,0 ; y
 .loopy:

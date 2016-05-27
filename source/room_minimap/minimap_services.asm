@@ -66,11 +66,9 @@ MinimapServicesCommonDrawMap:
             ld      [rSVBK],a
 
             ld      a,[hl]
-            rra
-            rra
-            rra
-            rra
-            rra
+            rlca
+            rlca
+            rlca ; Overflow from top bits
             and     a,7 ; Reduce from 8 to 3 bits
 
             ld      de,MINIMAP_TILE_COLORS
