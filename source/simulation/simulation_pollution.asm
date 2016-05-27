@@ -45,8 +45,10 @@ Simulation_Pollution::
 
     call    ClearWRAMX
 
-    ; Add to the map the mask for each tile
-    ; -------------------------------------
+    ; Add to the map the corresponding pollution for each tile
+    ; --------------------------------------------------------
+
+    ; Valid pollution values: -128 to 127
 
     ld      d,0 ; y
 .loopy:
@@ -54,6 +56,14 @@ Simulation_Pollution::
 .loopx:
         push    de
 
+        ; Get tile type.
+        ; - If road, check traffic.
+        ; - If building, check if the building has power and add pollution if
+        ;   so. If it is a power plant, add the corresponding pollution level.
+        ; - If park, forest or water set a negative level of pollution (they
+        ;   reduce it)
+
+        ; TODO
 
         pop     de
 
@@ -66,6 +76,24 @@ Simulation_Pollution::
     ld      a,CITY_MAP_HEIGHT
     cp      a,d
     jr      nz,.loopy
+
+    ; Smooth map
+    ; ----------
+
+    ; Valid pollution values: -128 to 127
+
+    ; TODO
+
+    ; Set all tiles with negative pollution value to 0
+    ; ------------------------------------------------
+
+    ; Valid pollution values: -128 to 127
+
+    ; Also, duplicate the values to go from 0-127 to 0-255
+
+    ; TODO
+
+    ; Valid pollution values: 0 to 255
 
     ret
 

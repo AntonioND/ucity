@@ -58,7 +58,7 @@ MinimapDrawPollutionMap::
     ; Simulate and get data!
     ; ----------------------
 
-    LONG_CALL	Simulation_Pollution
+    LONG_CALL	Simulation_Pollution ; Returns values 0-255 in SCRATCH RAM bank
 
     ; Draw map
     ; --------
