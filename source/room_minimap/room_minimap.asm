@@ -145,7 +145,11 @@ MinimapDrawSelectedMap::
         ret
 .not_traffic:
 
-    ; TODO Pollution
+    cp      a,MINIMAP_SELECTION_POLLUTION
+    jr      nz,.not_pollution
+        LONG_CALL   MinimapDrawPollutionMap
+        ret
+.not_pollution:
 
     ; TODO Happiness (tile ok flags)
 
