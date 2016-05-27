@@ -141,7 +141,7 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost
 
     T_ADD   T_SCHOOL,       2*6,5
     T_ADD   T_HIGH_SCHOOL,  2*9,6
-    T_ADD   T_UNIVERSITY,  2*25,7 ; TODO - Set central tile (5x5) to 0?
+    T_ADD   T_UNIVERSITY,  2*25,7
     T_ADD   T_MUSEUM,      1*12,6
     T_ADD   T_LIBRARY,      1*6,5
 
@@ -189,8 +189,8 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost
     T_ADD   T_COMMERCIAL_S3_C, 5*9,5
     T_ADD   T_COMMERCIAL_S3_D, 5*9,5
 
-    T_ADD   T_INDUSTRIAL_S1_A, 1*1,2 ; Industrial zones consume more power than
-    T_ADD   T_INDUSTRIAL_S1_B, 2*1,2 ; the population density
+    T_ADD   T_INDUSTRIAL_S1_A, 1*1,2
+    T_ADD   T_INDUSTRIAL_S1_B, 2*1,2
     T_ADD   T_INDUSTRIAL_S1_C, 2*1,2
     T_ADD   T_INDUSTRIAL_S1_D, 2*1,2
 
