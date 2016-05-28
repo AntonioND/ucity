@@ -25,13 +25,18 @@ BUILDING_DENSITY_INC SET 1
 
 ;###############################################################################
 
-    GLOBAL CITY_TILE_DENSITY ; 512 entries: Population density, energetic cost
+; 512 entries: Population density, energetic cost, pollution level
+; Population and energy cost 0 to 255, pollution -127 to 127
 
-CITY_TILE_DENSITY_ELEMENT_SIZE EQU 2 ; Size of elements of CITY_TILE_DENSITY
+; Population is the whole population of the building, the others are per-tile
+
+    GLOBAL CITY_TILE_DENSITY
+
+CITY_TILE_DENSITY_ELEMENT_SIZE EQU 3 ; Size of elements of CITY_TILE_DENSITY
 
 ; Add the following check when using this array:
 ;
-; IF CITY_TILE_DENSITY_ELEMENT_SIZE != 2
+; IF CITY_TILE_DENSITY_ELEMENT_SIZE != 3
 ;     FAIL "Fix this!"
 ; ENDC
 

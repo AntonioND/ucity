@@ -90,9 +90,6 @@ AddPowerToTile: ; de = coordinates, hl = address
     ; If not, give power
     push    hl ; save for later
 
-IF CITY_TILE_DENSITY_ELEMENT_SIZE != 2
-    FAIL "Fix this!"
-ENDC
         call    CityMapGetTileAtAddress ; de = tile
         call    CityTileDensity ; returns energy consumption in E
 
