@@ -45,100 +45,161 @@ VALUE SET VALUE + 1
 
 ;-------------------------------------------------------------------------------
 
+; Input pointer to central tile in HL
+; Returns the value in C
+DIFFUMINATE_CENTRAL_TILE : MACRO ; 1=Source bank, 2=Destination bank
+                                 ; 3=Top, 4=Left, 5=Right, 6=Bottom
+
+    ld      a,(\1) ; Source bank
+    ld      [rSVBK],a
+
+    push    hl
+
+        ld      bc,0
+
+        ld      de,-64 ; Top tile
+        add     hl,de
+IF (\3) != 0
+        ld      c,[hl]
+ENDC
+
+        ld      de,63 ; Left tile
+        add     hl,de
+IF (\4) != 0
+        ld      a,c
+        add     a,[hl]
+        ld      c,a
+        ld      a,0
+        adc     a,b
+        ld      b,a
+ENDC
+
+        inc     hl ; Central tile
+REPT ( 5 - ((\3)+(\4)+(\5)+(\6)) )
+        ld      a,c
+        add     a,[hl]
+        ld      c,a
+        ld      a,0
+        adc     a,b
+        ld      b,a
+ENDR
+
+        inc     hl ; Right tile
+IF (\5) != 0
+        ld      a,c
+        add     a,[hl]
+        ld      c,a
+        ld      a,0
+        adc     a,b
+        ld      b,a
+ENDC
+
+IF (\6) != 0
+        ld      de,63 ; Bottom tile
+        add     hl,de
+        ld      a,c
+        add     a,[hl]
+        ld      c,a
+        ld      a,0
+        adc     a,b
+        ld      b,a
+ENDC
+
+        ; check if bc < 255*3
+        ld      a,b
+        cp      a,(255*3)>>8 ; carry flag is set if n > a
+        jr      nc,.n_is_greater\@
+        jr      nz,.n_is_lower\@
+
+        ; Upper byte is equal
+        ld      a,c
+        cp      a,(255*3)&$FF ; carry flag is set if n > a
+        jr      nc,.n_is_greater\@
+
+.n_is_lower\@:
+        ld      hl,DIV_BY_3
+        add     hl,bc
+        ld      c,[hl]
+        jr      .end\@
+.n_is_greater\@:
+        ld      c,255 ; saturate
+.end\@:
+
+    pop     hl
+
+    ld      a,(\2) ; Destination bank
+    ld      [rSVBK],a
+
+    ld      [hl],c
+
+ENDM
+
+;-------------------------------------------------------------------------------
+
 ; Valid pollution values:  0-255
 DIFFUMINATE_LOOP : MACRO ; \1=Source Bank, \2=Destination bank
 
     ld      hl,SCRATCH_RAM ; Base address of the map!
 
-    ld      d,0 ; d = y
+    ; Top row
+
+    DIFFUMINATE_CENTRAL_TILE    (\1),(\2),0,0,1,1
+    inc     hl
+
+    ld      e,64-2
+.loopx_ytop\@:
+    push    de
+        DIFFUMINATE_CENTRAL_TILE    (\1),(\2),0,1,1,1
+        inc     hl
+    pop     de
+    dec     e
+    jr      nz,.loopx_ytop\@
+
+    DIFFUMINATE_CENTRAL_TILE    (\1),(\2),0,1,0,1
+    inc     hl
+
+    ; Regular row
+
+    ld      d,CITY_MAP_HEIGHT-2 ; d = y
 .loopy\@:
 
-        ld      e,0 ; e = x
-.loopx\@:
+        push    de
 
-        push    de ; (*)
-        push    hl
-
-            ld      a,(\1) ; Source bank
-            ld      [rSVBK],a
-
-            ld      de,-64 ; Top tile
-            add     hl,de
-            ld      b,0
-            ld      c,[hl]
-
-            ld      de,63 ; Left tile
-            add     hl,de
-            ld      a,c
-            add     a,[hl]
-            ld      c,a
-            ld      a,0
-            adc     a,b
-            ld      b,a
-
-            inc     hl ; Center tile
-            ld      a,c
-            add     a,[hl]
-            ld      c,a
-            ld      a,0
-            adc     a,b
-            ld      b,a
-
-            inc     hl ; Right tile
-            ld      a,c
-            add     a,[hl]
-            ld      c,a
-            ld      a,0
-            adc     a,b
-            ld      b,a
-
-            ld      de,63 ; Bottom tile
-            add     hl,de
-            ld      a,c
-            add     a,[hl]
-            ld      c,a
-            ld      a,0
-            adc     a,b
-            ld      b,a
-
-            ; check if bc < 255*3
-            ld      a,b
-            cp      a,(255*3)>>8 ; carry flag is set if n > a
-            jr      nc,.n_is_greater\@
-            jr      nz,.n_is_lower\@
-
-            ; Upper byte is equal
-            ld      a,c
-            cp      a,(255*3)&$FF ; carry flag is set if n > a
-            jr      nc,.n_is_greater\@
-
-.n_is_lower\@:
-            ld      hl,DIV_BY_3
-            add     hl,bc
-            ld      c,[hl]
-            jr      .end\@
-.n_is_greater\@:
-            ld      c,255 ; saturate
-.end\@:
-
-        pop     hl
-
-        ld      a,(\2) ; Destination bank
-        ld      [rSVBK],a
-
-        ld      [hl],c
-
-        pop     de ; (*)
-
+        DIFFUMINATE_CENTRAL_TILE    (\1),(\2),1,0,1,1
         inc     hl
 
-        inc     e
-        bit     6,e
-        jr      z,.loopx\@
+        ld      e,CITY_MAP_WIDTH-2
+.loopx\@:
+        push    de
+            DIFFUMINATE_CENTRAL_TILE    (\1),(\2),1,1,1,1
+            inc     hl
+        pop     de
+        dec     e
+        jr      nz,.loopx\@
 
-    inc     d
-    bit     6,d
-    jr      z,.loopy\@
+        DIFFUMINATE_CENTRAL_TILE    (\1),(\2),1,1,0,1
+        inc     hl
+
+        pop     de
+
+    dec     d
+    jp      nz,.loopy\@
+
+    ; Bottom row
+
+    DIFFUMINATE_CENTRAL_TILE    (\1),(\2),1,0,1,0
+    inc     hl
+
+    ld      e,64-2
+.loopx_ybottom\@:
+    push    de
+        DIFFUMINATE_CENTRAL_TILE    (\1),(\2),1,1,1,0
+        inc     hl
+    pop     de
+    dec     e
+    jr      nz,.loopx_ybottom\@
+
+    DIFFUMINATE_CENTRAL_TILE    (\1),(\2),1,1,0,0
 
 ENDM
 
@@ -233,6 +294,7 @@ Simulation_Pollution::
 
 ;-------------------------------------------------------------------------------
 
+; Reads data from SCRATCH RAM and saves the result to the FLAGS map
 Simulation_PollutionSetTileOkFlag::
 
     ; NOTE: Don't call when drawing minimaps, this can only be called from the
@@ -249,6 +311,7 @@ Simulation_PollutionSetTileOkFlag::
         push    de ; (*)
         push    hl
 
+            ; TODO
 
         pop     hl
         pop     de ; (*)

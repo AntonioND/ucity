@@ -845,7 +845,8 @@ RoomGame::
 
         ; Calculate total population and other statistics
 
-        ; TODO
+        LONG_CALL   Simulation_Pollution
+        LONG_CALL   Simulation_PollutionSetTileOkFlag
 
         ; After simulating everything, calculate happiness. For example, to know
         ; if education is good enough, small towns don't need high schools but
