@@ -94,8 +94,6 @@ POLLUTION   SET 0
 
 ; Tile Add - Base tile of the building to add information of
 ;            Will only fill the building when the next one is added!
-; Input pollution as a -128 to 127 value! Negative values are used for forests,
-; parks, etc. Positive values for areas that pollute.
 T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost, 4=Pollution
 
     IF (\1) < CURTILE ; check if going backwards and stop if so
@@ -103,9 +101,9 @@ T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost, 4=Pollution
     ENDC
 
     ; Fill previous building
-    IF (\1) > CURTILE ; The first call both are 0 and this has to be skipped
+    IF (\1) > CURTILE ; In the first call all are 0 and this has to be skipped
         REPT (\1) - CURTILE
-            DB POPULATION, ENERGY_COST, 128+POLLUTION
+            DB POPULATION, ENERGY_COST, POLLUTION
         ENDR
     ENDC
 
@@ -131,42 +129,37 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
 
 ; Population is the whole population of the building, the others are per-tile
 
-; Pollution base level is 128, lower values are clean areas and higher values
-; are polluted areas. The macro used here takes the input value and adds 128 to
-; it so that negative values can be used for clean areas and positive values
-; can be used for areas that pollute. Note that the actual values are 0 to 255.
+    T_ADD   T_GRASS__FOREST_TL, 0,0, 0
+    T_ADD   T_GRASS__FOREST_TC, 0,0, 0
+    T_ADD   T_GRASS__FOREST_TR, 0,0, 0
+    T_ADD   T_GRASS__FOREST_CL, 0,0, 0
+    T_ADD   T_GRASS,            0,0, 0
+    T_ADD   T_GRASS__FOREST_CR, 0,0, 0
+    T_ADD   T_GRASS__FOREST_BL, 0,0, 0
+    T_ADD   T_GRASS__FOREST_BC, 0,0, 0
+    T_ADD   T_GRASS__FOREST_BR, 0,0, 0
+    T_ADD   T_GRASS__FOREST_CORNER_TL, 0,0, 0
+    T_ADD   T_GRASS__FOREST_CORNER_TR, 0,0, 0
+    T_ADD   T_GRASS__FOREST_CORNER_BL, 0,0, 0
+    T_ADD   T_GRASS__FOREST_CORNER_BR, 0,0, 0
+    T_ADD   T_FOREST,       0,0, 0
+    T_ADD   T_GRASS_EXTRA,  0,0, 0
+    T_ADD   T_FOREST_EXTRA, 0,0, 0
 
-    T_ADD   T_GRASS__FOREST_TL, 0,0, -64
-    T_ADD   T_GRASS__FOREST_TC, 0,0, -64
-    T_ADD   T_GRASS__FOREST_TR, 0,0, -64
-    T_ADD   T_GRASS__FOREST_CL, 0,0, -64
-    T_ADD   T_GRASS,            0,0, -16
-    T_ADD   T_GRASS__FOREST_CR, 0,0, -64
-    T_ADD   T_GRASS__FOREST_BL, 0,0, -64
-    T_ADD   T_GRASS__FOREST_BC, 0,0, -64
-    T_ADD   T_GRASS__FOREST_BR, 0,0, -64
-    T_ADD   T_GRASS__FOREST_CORNER_TL, 0,0, -64
-    T_ADD   T_GRASS__FOREST_CORNER_TR, 0,0, -64
-    T_ADD   T_GRASS__FOREST_CORNER_BL, 0,0, -64
-    T_ADD   T_GRASS__FOREST_CORNER_BR, 0,0, -64
-    T_ADD   T_FOREST,       0,0, -127
-    T_ADD   T_GRASS_EXTRA,  0,0,  -16
-    T_ADD   T_FOREST_EXTRA, 0,0, -127
-
-    T_ADD   T_WATER__GRASS_TL, 0,0, -32
-    T_ADD   T_WATER__GRASS_TC, 0,0, -32
-    T_ADD   T_WATER__GRASS_TR, 0,0, -32
-    T_ADD   T_WATER__GRASS_CL, 0,0, -32
-    T_ADD   T_WATER,           0,0, -48
-    T_ADD   T_WATER__GRASS_CR, 0,0, -32
-    T_ADD   T_WATER__GRASS_BL, 0,0, -32
-    T_ADD   T_WATER__GRASS_BC, 0,0, -32
-    T_ADD   T_WATER__GRASS_BR, 0,0, -32
-    T_ADD   T_WATER__GRASS_CORNER_TL, 0,0, -32
-    T_ADD   T_WATER__GRASS_CORNER_TR, 0,0, -32
-    T_ADD   T_WATER__GRASS_CORNER_BL, 0,0, -32
-    T_ADD   T_WATER__GRASS_CORNER_BR, 0,0, -32
-    T_ADD   T_WATER_EXTRA, 0,0, -64
+    T_ADD   T_WATER__GRASS_TL, 0,0, 0
+    T_ADD   T_WATER__GRASS_TC, 0,0, 0
+    T_ADD   T_WATER__GRASS_TR, 0,0, 0
+    T_ADD   T_WATER__GRASS_CL, 0,0, 0
+    T_ADD   T_WATER,           0,0, 0
+    T_ADD   T_WATER__GRASS_CR, 0,0, 0
+    T_ADD   T_WATER__GRASS_BL, 0,0, 0
+    T_ADD   T_WATER__GRASS_BC, 0,0, 0
+    T_ADD   T_WATER__GRASS_BR, 0,0, 0
+    T_ADD   T_WATER__GRASS_CORNER_TL, 0,0, 0
+    T_ADD   T_WATER__GRASS_CORNER_TR, 0,0, 0
+    T_ADD   T_WATER__GRASS_CORNER_BL, 0,0, 0
+    T_ADD   T_WATER__GRASS_CORNER_BR, 0,0, 0
+    T_ADD   T_WATER_EXTRA, 0,0, 0
 
     T_ADD   T_RESIDENTIAL, 0,1, 0
     T_ADD   T_COMMERCIAL,  0,1, 0
@@ -227,78 +220,78 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
     T_ADD   T_POWER_LINES_TB_BRIDGE, 0,1, 0
     T_ADD   T_POWER_LINES_LR_BRIDGE, 0,1, 0
 
-    T_ADD   T_POLICE_DEPT, 1*9,1, 32
-    T_ADD   T_FIRE_DEPT,   1*9,1, 16
-    T_ADD   T_HOSPITAL,    2*9,1, 32
+    T_ADD   T_POLICE_DEPT, 1*9,1, 0
+    T_ADD   T_FIRE_DEPT,   1*9,1, 0
+    T_ADD   T_HOSPITAL,    2*9,1, 0
 
-    T_ADD   T_PARK_SMALL,  2*1, 1, -127
-    T_ADD   T_PARK_BIG,    2*9, 1, -127
-    T_ADD   T_STADIUM,    3*15,20, 32
+    T_ADD   T_PARK_SMALL,  2*1, 1, 0
+    T_ADD   T_PARK_BIG,    2*9, 1, 0
+    T_ADD   T_STADIUM,    3*15,20, 0
 
-    T_ADD   T_SCHOOL,       2*6,5, 16
-    T_ADD   T_HIGH_SCHOOL,  2*9,6, 16
-    T_ADD   T_UNIVERSITY,  2*25,7, 16
-    T_ADD   T_MUSEUM,      1*12,6, 16
-    T_ADD   T_LIBRARY,      1*6,5, 16
+    T_ADD   T_SCHOOL,       2*6,5, 0
+    T_ADD   T_HIGH_SCHOOL,  2*9,6, 0
+    T_ADD   T_UNIVERSITY,  2*25,7, 0
+    T_ADD   T_MUSEUM,      1*12,6, 0
+    T_ADD   T_LIBRARY,      1*6,5, 0
 
-    T_ADD   T_AIRPORT,   2*15,10, 64
-    T_ADD   T_PORT,        1*9,8, 64
-    T_ADD   T_PORT_WATER_L,  0,0, 16
-    T_ADD   T_PORT_WATER_R,  0,0, 16
-    T_ADD   T_PORT_WATER_D,  0,0, 16
-    T_ADD   T_PORT_WATER_U,  0,0, 16
+    T_ADD   T_AIRPORT,   2*15,10, 128
+    T_ADD   T_PORT,        1*9,8, 128
+    T_ADD   T_PORT_WATER_L,  0,0, 32
+    T_ADD   T_PORT_WATER_R,  0,0, 32
+    T_ADD   T_PORT_WATER_D,  0,0, 32
+    T_ADD   T_PORT_WATER_U,  0,0, 32
 
-    T_ADD   T_POWER_PLANT_COAL,    1*16,0, 127 ; They don't have energetic cost,
-    T_ADD   T_POWER_PLANT_OIL,     1*16,0, 112 ; power plants are generators!
+    T_ADD   T_POWER_PLANT_COAL,    1*16,0, 255 ; They don't have energetic cost,
+    T_ADD   T_POWER_PLANT_OIL,     1*16,0, 232 ; power plants are generators!
     T_ADD   T_POWER_PLANT_WIND,     1*4,0, 0
     T_ADD   T_POWER_PLANT_SOLAR,   1*16,0, 0
     T_ADD   T_POWER_PLANT_NUCLEAR, 2*16,0, 0
     T_ADD   T_POWER_PLANT_FUSION,  3*16,0, 0
 
-    T_ADD   T_RESIDENTIAL_S1_A, 6*1,2, 16
-    T_ADD   T_RESIDENTIAL_S1_B, 7*1,2, 16
-    T_ADD   T_RESIDENTIAL_S1_C, 7*1,2, 16
-    T_ADD   T_RESIDENTIAL_S1_D, 8*1,2, 16
+    T_ADD   T_RESIDENTIAL_S1_A, 6*1,2, 0
+    T_ADD   T_RESIDENTIAL_S1_B, 7*1,2, 0
+    T_ADD   T_RESIDENTIAL_S1_C, 7*1,2, 0
+    T_ADD   T_RESIDENTIAL_S1_D, 8*1,2, 0
 
-    T_ADD   T_RESIDENTIAL_S2_A, 8*4,3, 24
-    T_ADD   T_RESIDENTIAL_S2_B, 9*4,3, 24
-    T_ADD   T_RESIDENTIAL_S2_C, 9*4,3, 24
-    T_ADD   T_RESIDENTIAL_S2_D, 10*4,3, 24
+    T_ADD   T_RESIDENTIAL_S2_A,  9*4,3, 0
+    T_ADD   T_RESIDENTIAL_S2_B, 10*4,3, 0
+    T_ADD   T_RESIDENTIAL_S2_C, 10*4,3, 0
+    T_ADD   T_RESIDENTIAL_S2_D, 10*4,3, 0
 
-    T_ADD   T_RESIDENTIAL_S3_A, 10*9,5, 32
-    T_ADD   T_RESIDENTIAL_S3_B, 11*9,5, 32
-    T_ADD   T_RESIDENTIAL_S3_C, 11*9,5, 32
-    T_ADD   T_RESIDENTIAL_S3_D, 12*9,5, 32
+    T_ADD   T_RESIDENTIAL_S3_A, 11*9,5, 0
+    T_ADD   T_RESIDENTIAL_S3_B, 11*9,5, 0
+    T_ADD   T_RESIDENTIAL_S3_C, 11*9,5, 0
+    T_ADD   T_RESIDENTIAL_S3_D, 12*9,5, 0
 
-    T_ADD   T_COMMERCIAL_S1_A, 1*1,2, 32
-    T_ADD   T_COMMERCIAL_S1_B, 1*1,2, 32
-    T_ADD   T_COMMERCIAL_S1_C, 2*1,2, 32
-    T_ADD   T_COMMERCIAL_S1_D, 2*1,2, 32
+    T_ADD   T_COMMERCIAL_S1_A, 1*1,2, 0
+    T_ADD   T_COMMERCIAL_S1_B, 1*1,2, 0
+    T_ADD   T_COMMERCIAL_S1_C, 2*1,2, 0
+    T_ADD   T_COMMERCIAL_S1_D, 2*1,2, 0
 
-    T_ADD   T_COMMERCIAL_S2_A, 2*4,3, 48
-    T_ADD   T_COMMERCIAL_S2_B, 2*4,3, 48
-    T_ADD   T_COMMERCIAL_S2_C, 3*4,3, 48
-    T_ADD   T_COMMERCIAL_S2_D, 3*4,3, 48
+    T_ADD   T_COMMERCIAL_S2_A, 2*4,3, 0
+    T_ADD   T_COMMERCIAL_S2_B, 2*4,3, 0
+    T_ADD   T_COMMERCIAL_S2_C, 3*4,3, 0
+    T_ADD   T_COMMERCIAL_S2_D, 3*4,3, 0
 
-    T_ADD   T_COMMERCIAL_S3_A, 4*9,5, 64
-    T_ADD   T_COMMERCIAL_S3_B, 4*9,5, 64
-    T_ADD   T_COMMERCIAL_S3_C, 5*9,5, 64
-    T_ADD   T_COMMERCIAL_S3_D, 5*9,5, 64
+    T_ADD   T_COMMERCIAL_S3_A, 4*9,5, 0
+    T_ADD   T_COMMERCIAL_S3_B, 4*9,5, 0
+    T_ADD   T_COMMERCIAL_S3_C, 5*9,5, 0
+    T_ADD   T_COMMERCIAL_S3_D, 5*9,5, 0
 
-    T_ADD   T_INDUSTRIAL_S1_A, 1*1,2, 64
-    T_ADD   T_INDUSTRIAL_S1_B, 2*1,2, 64
-    T_ADD   T_INDUSTRIAL_S1_C, 2*1,2, 64
-    T_ADD   T_INDUSTRIAL_S1_D, 2*1,2, 64
+    T_ADD   T_INDUSTRIAL_S1_A, 1*1,2, 128
+    T_ADD   T_INDUSTRIAL_S1_B, 2*1,2, 128
+    T_ADD   T_INDUSTRIAL_S1_C, 2*1,2, 128
+    T_ADD   T_INDUSTRIAL_S1_D, 2*1,2, 128
 
-    T_ADD   T_INDUSTRIAL_S2_A, 3*4,6, 92
-    T_ADD   T_INDUSTRIAL_S2_B, 3*4,6, 92
-    T_ADD   T_INDUSTRIAL_S2_C, 4*4,6, 92
-    T_ADD   T_INDUSTRIAL_S2_D, 4*4,6, 92
+    T_ADD   T_INDUSTRIAL_S2_A, 3*4,6, 192
+    T_ADD   T_INDUSTRIAL_S2_B, 3*4,6, 192
+    T_ADD   T_INDUSTRIAL_S2_C, 4*4,6, 192
+    T_ADD   T_INDUSTRIAL_S2_D, 4*4,6, 192
 
-    T_ADD   T_INDUSTRIAL_S3_A, 5*9,10, 127
-    T_ADD   T_INDUSTRIAL_S3_B, 5*9,10, 127
-    T_ADD   T_INDUSTRIAL_S3_C, 5*9,10, 127
-    T_ADD   T_INDUSTRIAL_S3_D, 6*9,10, 127
+    T_ADD   T_INDUSTRIAL_S3_A, 5*9,10, 255
+    T_ADD   T_INDUSTRIAL_S3_B, 5*9,10, 255
+    T_ADD   T_INDUSTRIAL_S3_C, 5*9,10, 255
+    T_ADD   T_INDUSTRIAL_S3_D, 6*9,10, 255
 
     T_ADD   512, 0,0,0 ; Fill array
 

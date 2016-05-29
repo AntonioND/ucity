@@ -33,11 +33,121 @@
 
 ;-------------------------------------------------------------------------------
 
+; Division Look Up Table
+
+DIV_BY_3: ; uint8_t = uint16_t / 3 (but only up to 255*3)
+
+VALUE SET 0
+    REPT 256 * 3
+        DB VALUE / 3
+VALUE SET VALUE + 1
+    ENDR
+
+;-------------------------------------------------------------------------------
+
+; Valid pollution values:  0-255
+DIFFUMINATE_LOOP : MACRO ; \1=Source Bank, \2=Destination bank
+
+    ld      hl,SCRATCH_RAM ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy\@:
+
+        ld      e,0 ; e = x
+.loopx\@:
+
+        push    de ; (*)
+        push    hl
+
+            ld      a,(\1) ; Source bank
+            ld      [rSVBK],a
+
+            ld      de,-64 ; Top tile
+            add     hl,de
+            ld      b,0
+            ld      c,[hl]
+
+            ld      de,63 ; Left tile
+            add     hl,de
+            ld      a,c
+            add     a,[hl]
+            ld      c,a
+            ld      a,0
+            adc     a,b
+            ld      b,a
+
+            inc     hl ; Center tile
+            ld      a,c
+            add     a,[hl]
+            ld      c,a
+            ld      a,0
+            adc     a,b
+            ld      b,a
+
+            inc     hl ; Right tile
+            ld      a,c
+            add     a,[hl]
+            ld      c,a
+            ld      a,0
+            adc     a,b
+            ld      b,a
+
+            ld      de,63 ; Bottom tile
+            add     hl,de
+            ld      a,c
+            add     a,[hl]
+            ld      c,a
+            ld      a,0
+            adc     a,b
+            ld      b,a
+
+            ; check if bc < 255*3
+            ld      a,b
+            cp      a,(255*3)>>8 ; carry flag is set if n > a
+            jr      nc,.n_is_greater\@
+            jr      nz,.n_is_lower\@
+
+            ; Upper byte is equal
+            ld      a,c
+            cp      a,(255*3)&$FF ; carry flag is set if n > a
+            jr      nc,.n_is_greater\@
+
+.n_is_lower\@:
+            ld      hl,DIV_BY_3
+            add     hl,bc
+            ld      c,[hl]
+            jr      .end\@
+.n_is_greater\@:
+            ld      c,255 ; saturate
+.end\@:
+
+        pop     hl
+
+        ld      a,(\2) ; Destination bank
+        ld      [rSVBK],a
+
+        ld      [hl],c
+
+        pop     de ; (*)
+
+        inc     hl
+
+        inc     e
+        bit     6,e
+        jr      z,.loopx\@
+
+    inc     d
+    bit     6,d
+    jr      z,.loopy\@
+
+ENDM
+
 Simulation_PollutionDiffuminate:
 
-    ; Valid pollution values: -128 to 127
-
-    ; TODO
+    DIFFUMINATE_LOOP    BANK_SCRATCH_RAM,BANK_SCRATCH_RAM_2
+    DIFFUMINATE_LOOP    BANK_SCRATCH_RAM_2,BANK_SCRATCH_RAM
+    DIFFUMINATE_LOOP    BANK_SCRATCH_RAM,BANK_SCRATCH_RAM_2
+    DIFFUMINATE_LOOP    BANK_SCRATCH_RAM_2,BANK_SCRATCH_RAM
 
     ret
 
@@ -45,9 +155,6 @@ Simulation_PollutionDiffuminate:
 
 ; Output data to WRAMX bank BANK_SCRATCH_RAM
 Simulation_Pollution::
-
-    ; Valid input pollution values: 0 to 255
-    ; Values are clamped to 128-255 at the end and expanded to 0-255
 
     ; Clean
     ; -----
@@ -121,28 +228,6 @@ Simulation_Pollution::
     ; ----------
 
     call    Simulation_PollutionDiffuminate
-
-    ; Values are clamped to 128-255 and expanded to 0-255
-    ; ---------------------------------------------------
-
-    ld      hl,CITY_MAP_TILES
-
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
-
-.loop_fix:
-        ld      a,[hl]
-        bit     7,a
-        jr      nz,.greater_than_127
-        ld      a,128 ; clamp to 128
-.greater_than_127:
-        sub     a,128 ; 128-255 to 0-127
-        sla     a ; 0-127 to 0-255
-
-        ld      [hl+],a
-
-    bit     5,h ; Up to E000
-    jr      z,.loop_fix
 
     ret
 

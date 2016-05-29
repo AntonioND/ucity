@@ -45,8 +45,8 @@ MINIMAP_TILE_COLORS:
     DB 3,3,3,3
 
 MINIMAP_POLLUTION_MAP_PALETTE:
-    DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(0<<0)
-    DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
+    DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(31<<0)
+    DW (0<<10)|(15<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
 MINIMAP_POLLUTION_MAP_TITLE:
     DB "Pollution",0
@@ -58,7 +58,7 @@ MinimapDrawPollutionMap::
     ; Simulate and get data!
     ; ----------------------
 
-    LONG_CALL	Simulation_Pollution ; Returns values 0-255 in SCRATCH RAM bank
+    LONG_CALL   Simulation_Pollution ; Returns values 0-255 in SCRATCH RAM bank
 
     ; Draw map
     ; --------
