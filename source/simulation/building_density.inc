@@ -26,7 +26,6 @@ BUILDING_DENSITY_INC SET 1
 ;###############################################################################
 
 ; 512 entries: Population density, energetic cost, pollution level
-; Population and energy cost 0 to 255, pollution -127 to 127
 
 ; Population is the whole population of the building, the others are per-tile
 

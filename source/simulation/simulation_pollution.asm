@@ -46,6 +46,9 @@ Simulation_PollutionDiffuminate:
 ; Output data to WRAMX bank BANK_SCRATCH_RAM
 Simulation_Pollution::
 
+    ; Valid input pollution values: 0 to 255
+    ; Values are clamped to 128-255 at the end and expanded to 0-255
+
     ; Clean
     ; -----
 
@@ -56,8 +59,6 @@ Simulation_Pollution::
 
     ; Add to the map the corresponding pollution for each tile
     ; --------------------------------------------------------
-
-    ; Valid pollution values: -128 to 127
 
     ld      hl,CITY_MAP_TILES
 
@@ -85,7 +86,6 @@ Simulation_Pollution::
 
             ld      b,[hl]
 
-            sra     b ; 0-255 to 0-127
             ; Pollution is the amount of cars going through here
 
             jr      .save_value
@@ -120,17 +120,10 @@ Simulation_Pollution::
     ; Smooth map
     ; ----------
 
-    ; Valid pollution values: -128 to 127
-
-    call    Simulation_PollutionDiffuminate
     call    Simulation_PollutionDiffuminate
 
-    ; Set all tiles with negative pollution value to 0
-    ; ------------------------------------------------
-
-    ; Valid pollution values: -128 to 127
-
-    ; Also, duplicate the values to go from 0-127 to 0-255
+    ; Values are clamped to 128-255 and expanded to 0-255
+    ; ---------------------------------------------------
 
     ld      hl,CITY_MAP_TILES
 
@@ -140,17 +133,50 @@ Simulation_Pollution::
 .loop_fix:
         ld      a,[hl]
         bit     7,a
-        jr      z,.positive
-        xor     a,a ; if negative, 0
-.positive:
-        sla     a ; 0 to 127 -> 0 to 255
+        jr      nz,.greater_than_127
+        ld      a,128 ; clamp to 128
+.greater_than_127:
+        sub     a,128 ; 128-255 to 0-127
+        sla     a ; 0-127 to 0-255
 
         ld      [hl+],a
 
     bit     5,h ; Up to E000
     jr      z,.loop_fix
 
-    ; Valid pollution values: 0 to 255
+    ret
+
+;-------------------------------------------------------------------------------
+
+Simulation_PollutionSetTileOkFlag::
+
+    ; NOTE: Don't call when drawing minimaps, this can only be called from the
+    ; simulation loop!
+
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy:
+
+        ld      e,0 ; e = x
+.loopx:
+
+        push    de ; (*)
+        push    hl
+
+
+        pop     hl
+        pop     de ; (*)
+
+        inc     hl
+
+        inc     e
+        bit     6,e
+        jr      z,.loopx
+
+    inc     d
+    bit     6,d
+    jr      z,.loopy
 
     ret
 

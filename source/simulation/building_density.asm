@@ -94,7 +94,8 @@ POLLUTION   SET 0
 
 ; Tile Add - Base tile of the building to add information of
 ;            Will only fill the building when the next one is added!
-; Population and energy cost 0 to 255, pollution -127 to 127
+; Input pollution as a -128 to 127 value! Negative values are used for forests,
+; parks, etc. Positive values for areas that pollute.
 T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost, 4=Pollution
 
     IF (\1) < CURTILE ; check if going backwards and stop if so
@@ -104,7 +105,7 @@ T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost, 4=Pollution
     ; Fill previous building
     IF (\1) > CURTILE ; The first call both are 0 and this has to be skipped
         REPT (\1) - CURTILE
-            DB POPULATION, ENERGY_COST, POLLUTION
+            DB POPULATION, ENERGY_COST, 128+POLLUTION
         ENDR
     ENDC
 
@@ -127,7 +128,13 @@ IF CITY_TILE_DENSITY_ELEMENT_SIZE != 3
 ENDC
 
 CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
+
 ; Population is the whole population of the building, the others are per-tile
+
+; Pollution base level is 128, lower values are clean areas and higher values
+; are polluted areas. The macro used here takes the input value and adds 128 to
+; it so that negative values can be used for clean areas and positive values
+; can be used for areas that pollute. Note that the actual values are 0 to 255.
 
     T_ADD   T_GRASS__FOREST_TL, 0,0, -64
     T_ADD   T_GRASS__FOREST_TC, 0,0, -64
@@ -241,8 +248,8 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
     T_ADD   T_PORT_WATER_D,  0,0, 16
     T_ADD   T_PORT_WATER_U,  0,0, 16
 
-    T_ADD   T_POWER_PLANT_COAL,    1*16,0, 255 ; They don't have energetic cost,
-    T_ADD   T_POWER_PLANT_OIL,     1*16,0, 192 ; power plants are generators!
+    T_ADD   T_POWER_PLANT_COAL,    1*16,0, 127 ; They don't have energetic cost,
+    T_ADD   T_POWER_PLANT_OIL,     1*16,0, 112 ; power plants are generators!
     T_ADD   T_POWER_PLANT_WIND,     1*4,0, 0
     T_ADD   T_POWER_PLANT_SOLAR,   1*16,0, 0
     T_ADD   T_POWER_PLANT_NUCLEAR, 2*16,0, 0
