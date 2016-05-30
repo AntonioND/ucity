@@ -50,7 +50,7 @@ vbl_handler_working: DS 1
 
 ; Set to 0 by the simulation loop when the simulation has finished.
 ; It can be set by any function to tell the simulation loop to do a step.
-simulation_running:  DS 1
+simulation_running::  DS 1
 
 ANIMATION_COUNT_FRAMES EQU 60
 animation_countdown: DS 1 ; When this reaches ANIMATION_COUNT_FRAMES, step
@@ -236,15 +236,6 @@ GameStateMachineHandle::
 
 ;-------------------------------------------------------------------------------
 
-GameShowCPUBusyIconIfNeeded:
-    ld      a,[simulation_running]
-    and     a,a
-    call    nz,CPUBusyIconShow
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 GameStateMachineStateGet:: ; return a = state
 
     ld      a,[game_state]
@@ -289,7 +280,7 @@ GameStateMachineStateSet:: ; a = new state
 
         call    CursorShow
 
-        call    GameShowCPUBusyIconIfNeeded
+        call    CPUBusyIconShow
 
         ret
 
@@ -327,7 +318,7 @@ GameStateMachineStateSet:: ; a = new state
         call    StatusBarHide
         call    StatusBarMenuShow
 
-        call    GameShowCPUBusyIconIfNeeded
+        call    CPUBusyIconShow
 
         ret
 

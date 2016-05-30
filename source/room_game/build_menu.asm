@@ -1120,6 +1120,10 @@ CPUBusyIconHandle::
     and     a,a
     ret     z
 
+    ld      a,[simulation_running]
+    and     a,a
+    jp      z,CPUBusyIconHide ; call and return from that function
+
     ld      a,[status_menu_active]
     and     a,a
     jr      nz,.sprite_down
