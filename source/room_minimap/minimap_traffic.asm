@@ -35,9 +35,6 @@
 
 ;-------------------------------------------------------------------------------
 
-; TODO - Add another minimap to check which buildings don't have propper
-; communications?
-
 C_WHITE  EQU 0 ; Other tiles (not road nor train)
 C_GREEN  EQU 1 ; Levels of traffic
 C_YELLOW EQU 2
@@ -90,12 +87,64 @@ MinimapDrawTrafficMap::
             ld      a,b
             jr      nz,.has_road_or_train
 
-                ; Doesn't have road or train
-                ld      a,C_WHITE
-                ld      b,a
-                ld      c,a
-                ld      d,a
-                jr      .end_color
+                ; Tile doesn't have road or train
+
+                ; Check if this is a building. If so, draw as a green pattern if
+                ; all cars could leave/arrive, otherwise draw it red.
+
+                ld      a,b
+                and     a,TYPE_MASK
+
+                cp      a,TYPE_FIELD
+                jr      z,.tile_empty
+                cp      a,TYPE_FOREST
+                jr      z,.tile_empty
+                cp      a,TYPE_WATER
+                jr      z,.tile_empty
+                cp      a,TYPE_DOCK
+                jr      z,.tile_empty
+
+                    push    de
+                    push    hl
+                    ; de = coordinates of one tile, returns de = coordinates of
+                    ; the origin
+                    call    BuildingGetCoordinateOrigin
+
+                    ; get origin coordinates into hl
+                    call    GetMapAddress ; Preserves DE
+
+                    ld      a,BANK_CITY_MAP_TRAFFIC
+                    ld      [rSVBK],a
+
+                    ld      a,[hl]
+
+                    pop     hl
+                    pop     de
+
+                    and     a,a ; If remaining density is 0, building is ok
+                    jr      z,.building_ok
+
+                        ; Building not ok
+                        ld      a,C_WHITE
+                        ld      b,C_RED
+                        ld      c,C_RED
+                        ld      d,C_WHITE
+                        jr      .end_color
+
+.building_ok:
+                        ; Building ok
+                        ld      a,C_WHITE
+                        ld      b,C_GREEN
+                        ld      c,C_GREEN
+                        ld      d,C_WHITE
+                        jr      .end_color
+
+.tile_empty:
+                    ld      a,C_WHITE
+                    ld      b,a
+                    ld      c,a
+                    ld      d,a
+                    jr      .end_color
 
 .has_road_or_train:
 
