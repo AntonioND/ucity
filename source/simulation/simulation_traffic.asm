@@ -373,6 +373,10 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 
     ret
 
+;###############################################################################
+
+TRAFFIC_MAX_LEVEL EQU ((256*2)/4) ; Max level of adequate traffic
+
 ;-------------------------------------------------------------------------------
 
 Simulation_TrafficSetTileOkFlag::
@@ -380,10 +384,11 @@ Simulation_TrafficSetTileOkFlag::
     ; NOTE: Don't call when drawing minimaps, this can only be called from the
     ; simulation loop!
 
-    ; - For roads, make sure that the traffic is below a certain threshold.
+    ; - For roads and train, make sure that the traffic is below a certain
+    ;   threshold.
     ; - For buildings, make sure that all people could get out of residential
-    ; zones, and that commercial zones and industrial zones could be reached
-    ; by all people.
+    ;   zones, and that commercial zones and industrial zones could be reached
+    ;   by all people.
 
     ld      hl,CITY_MAP_FLAGS ; Base address of the map!
 
@@ -399,6 +404,8 @@ Simulation_TrafficSetTileOkFlag::
             ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
             res     TILE_OK_TRAFFIC_BIT,[hl]
+
+            ; TODO
 
         pop     hl
         pop     de ; (*)

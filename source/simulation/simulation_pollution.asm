@@ -311,7 +311,9 @@ Simulation_PollutionSetTileOkFlag::
         push    de ; (*)
         push    hl
 
-            ; TODO
+            ; TODO - Set flags.
+
+            ; TODO - Get average pollution and complain if it is too high
 
         pop     hl
         pop     de ; (*)

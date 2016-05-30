@@ -18,8 +18,8 @@ you are interested please contact me at my email (antonio_nd@outlook.com).
 
 General to do list:
 - Minimap screen (with different maps) - Almost finished
-- Simulation - In progress
-  - Graphical response
+- Simulation - Most parts are ready
+  - Graphical output (trains, planes, boats...)
 - Save menus
 - Budget screen
 - Sample cities

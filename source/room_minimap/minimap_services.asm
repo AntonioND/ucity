@@ -60,8 +60,6 @@ MinimapServicesCommonDrawMap:
         push    de ; (*)
         push    hl
 
-            ; TODO Check if water and show in map?
-
             ld      a,BANK_SCRATCH_RAM
             ld      [rSVBK],a
 

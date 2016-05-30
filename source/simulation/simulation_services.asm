@@ -716,7 +716,7 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
 
 ;###############################################################################
 
-SERVICE_MIN_LEVEL EQU (255/4) ; Min level of adequate service coverage
+SERVICE_MIN_LEVEL EQU (256/4) ; Min level of adequate service coverage
 
 ;-------------------------------------------------------------------------------
 
