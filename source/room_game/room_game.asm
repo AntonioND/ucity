@@ -29,6 +29,7 @@
     INCLUDE "building_info.inc"
     INCLUDE "text.inc"
     INCLUDE "money.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -809,7 +810,7 @@ RoomGame::
 
     ld      a,[simulation_running]
     and     a,a ; Check if simulation has been requested
-    jr      z,.skip_simulation
+    jp      z,.skip_simulation
 
         ; NOTE: All VRAM-modifying code inside this loop must be thread-safe as
         ; it can be interrupted by the VBL handler and it can take a long time
@@ -837,16 +838,34 @@ RoomGame::
         ; Simulate services, like police and firemen. They depend on the power
         ; simulation, as they can't work without electricity.
 
-        ; TODO - Simulate police and set tile ok flags .Same for firemen, etc
+        ld      bc,T_POLICE_DEPT_CENTER
+        LONG_CALL_ARGS  Simulation_Services
+        LONG_CALL   Simulation_ServicesSetTileOkFlag
+
+        ld      bc,T_FIRE_DEPT_CENTER
+        LONG_CALL_ARGS  Simulation_Services
+        LONG_CALL   Simulation_ServicesAddTileOkFlag
+
+        ld      bc,T_HOSPITAL_CENTER
+        LONG_CALL_ARGS  Simulation_Services
+        LONG_CALL   Simulation_ServicesAddTileOkFlag
+
+        ld      bc,T_SCHOOL_CENTER
+        LONG_CALL_ARGS  Simulation_Services
+        LONG_CALL   Simulation_EducationSetTileOkFlag
+
+        ld      bc,T_HIGH_SCHOOL_CENTER
+        LONG_CALL_ARGS  Simulation_ServicesBig
+        LONG_CALL   Simulation_EducationAddTileOkFlag
 
         ; After simulating traffic, power, etc, simulate pollution
 
-        ; TODO
+        LONG_CALL   Simulation_Pollution
+        LONG_CALL   Simulation_PollutionSetTileOkFlag
 
         ; Calculate total population and other statistics
 
-        LONG_CALL   Simulation_Pollution
-        LONG_CALL   Simulation_PollutionSetTileOkFlag
+        ; TODO
 
         ; After simulating everything, calculate happiness. For example, to know
         ; if education is good enough, small towns don't need high schools but
@@ -880,7 +899,7 @@ RoomGame::
 
 .end_simulation:
 
-    jr      .main_loop
+    jp      .main_loop
 
     call    SetDefaultVBLHandler
 

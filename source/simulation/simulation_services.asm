@@ -715,3 +715,249 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
     ret
 
 ;###############################################################################
+
+SERVICE_MIN_LEVEL EQU (255/4) ; Min level of adequate service coverage
+
+;-------------------------------------------------------------------------------
+
+Simulation_ServicesSetTileOkFlag::
+
+    ; NOTE: Don't call when drawing minimaps, this can only be called from the
+    ; simulation loop!
+
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
+
+.loop:
+
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+
+        ld      a,[hl]
+        and     a,TYPE_MASK
+
+        ; Ignore non-building tiles - Set the tile!
+        cp      a,TYPE_FIELD
+        jr      z,.tile_set_flag
+        cp      a,TYPE_FOREST
+        jr      z,.tile_set_flag
+        cp      a,TYPE_WATER
+        jr      z,.tile_set_flag
+        cp      a,TYPE_DOCK
+        jr      z,.tile_set_flag
+
+.check_service:
+
+            ; Building, check!
+
+            ld      a,BANK_SCRATCH_RAM
+            ld      [rSVBK],a
+
+            ld      a,[hl] ; Get coverage value
+
+            cp      a,SERVICE_MIN_LEVEL ; carry flag is set if n > a
+            jr      c,.tile_res_flag
+            ;jr      .tile_set_flag
+
+.tile_set_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        set     TILE_OK_SERVICES_BIT,[hl]
+        jr      .tile_end
+
+.tile_res_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        res     TILE_OK_SERVICES_BIT,[hl]
+        ;jr      .tile_end
+
+.tile_end:
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Like Simulation_ServicesSetTileOkFlag, but can only set to 1 if it was 1
+; before.
+
+Simulation_ServicesAddTileOkFlag::
+
+    ; NOTE: Don't call when drawing minimaps, this can only be called from the
+    ; simulation loop!
+
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
+
+.loop:
+
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+
+        ld      a,[hl]
+        and     a,TYPE_MASK
+
+        ; Ignore non-building tiles - Set the flag!
+        cp      a,TYPE_FIELD
+        jr      z,.tile_set_flag
+        cp      a,TYPE_FOREST
+        jr      z,.tile_set_flag
+        cp      a,TYPE_WATER
+        jr      z,.tile_set_flag
+        cp      a,TYPE_DOCK
+        jr      z,.tile_set_flag
+
+.check_service:
+
+            ; Building, check!
+
+            ld      a,BANK_SCRATCH_RAM
+            ld      [rSVBK],a
+
+            ld      a,[hl] ; Get coverage value
+
+            cp      a,SERVICE_MIN_LEVEL ; carry flag is set if n > a
+            jr      c,.tile_res_flag
+            ;jr      .tile_set_flag
+
+.tile_set_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        bit     TILE_OK_SERVICES_BIT,[hl]
+        jr      z,.tile_end ; if it was 0, don't set to 1!
+        set     TILE_OK_SERVICES_BIT,[hl]
+        jr      .tile_end
+
+.tile_res_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        res     TILE_OK_SERVICES_BIT,[hl]
+        ;jr      .tile_end
+
+.tile_end:
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+Simulation_EducationSetTileOkFlag::
+
+    ; NOTE: Don't call when drawing minimaps, this can only be called from the
+    ; simulation loop!
+
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
+
+.loop:
+
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+
+        ld      a,[hl]
+        and     a,TYPE_MASK
+
+        ; Ignore non-residential tiles - Set the tile!
+        cp      a,TYPE_RESIDENTIAL
+        jr      nz,.tile_set_flag
+
+.check_service:
+
+            ; Residential, check!
+
+            ld      a,BANK_SCRATCH_RAM
+            ld      [rSVBK],a
+
+            ld      a,[hl] ; Get coverage value
+
+            cp      a,SERVICE_MIN_LEVEL ; carry flag is set if n > a
+            jr      c,.tile_res_flag
+            ;jr      .tile_set_flag
+
+.tile_set_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        set     TILE_OK_EDUCATION_BIT,[hl]
+        jr      .tile_end
+
+.tile_res_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        res     TILE_OK_EDUCATION_BIT,[hl]
+        ;jr      .tile_end
+
+.tile_end:
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Like Simulation_EducationSetTileOkFlag, but can only set to 1 if it was 1
+; before.
+
+Simulation_EducationAddTileOkFlag::
+
+    ; NOTE: Don't call when drawing minimaps, this can only be called from the
+    ; simulation loop!
+
+    ld      hl,CITY_MAP_FLAGS ; Base address of the map!
+
+.loop:
+
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+
+        ld      a,[hl]
+        and     a,TYPE_MASK
+
+        ; Ignore non-residential tiles - Set the tile!
+        cp      a,TYPE_RESIDENTIAL
+        jr      nz,.tile_set_flag
+
+.check_service:
+
+            ; Residential, check!
+
+            ld      a,BANK_SCRATCH_RAM
+            ld      [rSVBK],a
+
+            ld      a,[hl] ; Get coverage value
+
+            cp      a,SERVICE_MIN_LEVEL ; carry flag is set if n > a
+            jr      c,.tile_res_flag
+            ;jr      .tile_set_flag
+
+.tile_set_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        bit     TILE_OK_EDUCATION_BIT,[hl]
+        jr      z,.tile_end ; if it was 0, don't set to 1!
+        set     TILE_OK_EDUCATION_BIT,[hl]
+        jr      .tile_end
+
+.tile_res_flag:
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
+        res     TILE_OK_EDUCATION_BIT,[hl]
+        ;jr      .tile_end
+
+.tile_end:
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ret
+
+;###############################################################################

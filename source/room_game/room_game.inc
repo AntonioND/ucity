@@ -102,8 +102,6 @@ TYPE_PORT               EQU 17
 TYPE_DOCK               EQU 18
 TYPE_POWER_PLANT        EQU 19
 
-TYPE_OTHER              EQU 20 ; Decoration (Unused type)
-
 TYPE_NUMBER             EQU 32 ; Max. number. Upper 3 bits used as flags
 
 ;###############################################################################

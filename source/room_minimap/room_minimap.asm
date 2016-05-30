@@ -151,7 +151,11 @@ MinimapDrawSelectedMap::
         ret
 .not_pollution:
 
-    ; TODO Happiness (tile ok flags)
+    cp      a,MINIMAP_SELECTION_HAPPINESS
+    jr      nz,.not_happiness
+        LONG_CALL   MinimapDrawHappinessMap
+        ret
+.not_happiness:
 
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
