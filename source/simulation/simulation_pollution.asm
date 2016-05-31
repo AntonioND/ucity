@@ -292,6 +292,11 @@ Simulation_Pollution::
 
     ret
 
+;###############################################################################
+
+; Max valid pollution for zones that need non-polluted air
+POLLUTION_MAX_VALID_LEVEL EQU (256/2)
+
 ;-------------------------------------------------------------------------------
 
 ; Reads data from SCRATCH RAM and saves the result to the FLAGS map
@@ -302,31 +307,39 @@ Simulation_PollutionSetTileOkFlag::
 
     ld      hl,CITY_MAP_FLAGS ; Base address of the map!
 
-    ld      d,0 ; d = y
-.loopy:
+.loop:
 
-        ld      e,0 ; e = x
-.loopx:
+    push    hl
 
-        push    de ; (*)
-        push    hl
+        ; TODO - Perform check only if the zone actually requires it
 
-            ; TODO - Set flags.
+        ld      a,BANK_SCRATCH_RAM
+        ld      [rSVBK],a
 
-            ; TODO - Get average pollution and complain if it is too high
+        ld      a,[hl] ; get pollution
+        cp      a,POLLUTION_MAX_VALID_LEVEL ; carry flag is set if n > a
 
-        pop     hl
-        pop     de ; (*)
+        ld      a,BANK_CITY_MAP_FLAGS
+        ld      [rSVBK],a
 
-        inc     hl
+        jr      c,.non_polluted
+            ; Polluted - Clear "valid pollution level" bit
+            res     TILE_OK_POLLUTION_BIT,[hl]
+            jr      .end_pollution_check
+.non_polluted:
+            ; Non-polluted - Set "valid pollution level" bit
+            set     TILE_OK_POLLUTION_BIT,[hl]
+            ;jr      .end_pollution_check
+.end_pollution_check:
 
-        inc     e
-        bit     6,e
-        jr      z,.loopx
+        ; TODO - Get average pollution and complain if it is too high
 
-    inc     d
-    bit     6,d
-    jr      z,.loopy
+    pop     hl
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
 
     ret
 

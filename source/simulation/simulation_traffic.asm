@@ -30,6 +30,15 @@
 
 ;###############################################################################
 
+    SECTION "Simulation Traffic Variables",WRAM0
+
+;-------------------------------------------------------------------------------
+
+; Amount of tiles with traffic jams. It will stop counting when it reaches 255.
+simulation_traffic_jam_num_tiles:: DS 1
+
+;###############################################################################
+
     SECTION "Simulation Traffic Functions",ROMX
 
 ;-------------------------------------------------------------------------------
@@ -375,7 +384,7 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 
 ;###############################################################################
 
-TRAFFIC_MAX_LEVEL EQU ((256*2)/4) ; Max level of adequate traffic
+TRAFFIC_MAX_LEVEL EQU (256/3) ; Max level of adequate traffic
 
 ;-------------------------------------------------------------------------------
 
@@ -390,6 +399,9 @@ Simulation_TrafficSetTileOkFlag::
     ;   zones, and that commercial zones and industrial zones could be reached
     ;   by all people.
 
+    xor     a,a
+    ld      [simulation_traffic_jam_num_tiles],a
+
     ld      hl,CITY_MAP_FLAGS ; Base address of the map!
 
     ld      d,0 ; d = y
@@ -401,12 +413,81 @@ Simulation_TrafficSetTileOkFlag::
         push    de ; (*)
         push    hl
 
+            ld      a,BANK_CITY_MAP_TYPE
+            ld      [rSVBK],a
+
+            ld      a,[hl]
+            ld      b,a
+            and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
+            jr      z,.not_road_or_train
+
+                ; Road or train
+
+                ld      a,BANK_CITY_MAP_TRAFFIC
+                ld      [rSVBK],a
+
+                ld      a,[hl] ; get traffic level
+                cp      a,TRAFFIC_MAX_LEVEL ; carry flag is set if n > a
+                jr      nc,.tile_res_flag
+
+                ; Count the number of road/train tiles that have too much
+                ; traffic to show warning messages to the player.
+
+                ld      de,simulation_traffic_jam_num_tiles
+                ld      a,[de]
+                inc     a
+                jr      nz,.not_overflowed ; check if overflow from 255
+                dec     a ; if overflowed from 255, return to 255
+.not_overflowed:
+                ld      [de],a
+                jr      .tile_set_flag
+
+.not_road_or_train:
+
+            ld      a,b
+            and     a,TYPE_MASK
+
+            ; Check if this is a building or not. If not, set tile as ok
+            cp      a,TYPE_FIELD
+            jr      z,.tile_set_flag
+            cp      a,TYPE_FOREST
+            jr      z,.tile_set_flag
+            cp      a,TYPE_WATER
+            jr      z,.tile_set_flag
+            cp      a,TYPE_DOCK
+            jr      z,.tile_set_flag ; Ignore docks
+
+            ; This is a building, check it
+
+            push    hl ; save current tile address
+
+            ; de = coordinates of one tile, returns de = origin coordinates
+            call    BuildingGetCoordinateOrigin
+
+            ; get origin coordinates into hl
+            call    GetMapAddress ; Preserves DE
+
+            ld      a,BANK_CITY_MAP_TRAFFIC
+            ld      [rSVBK],a
+            ld      a,[hl] ; get remaining population of this building
+
+            pop     hl ; restore current tile address
+
+            and     a,a ; If 0, all people could leave / arrive
+            jr      z,.tile_set_flag
+            ;jr      .tile_res_flag
+
+.tile_res_flag:
             ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
             res     TILE_OK_TRAFFIC_BIT,[hl]
-
-            ; TODO
-
+            jr      .tile_end
+.tile_set_flag:
+            ld      a,BANK_CITY_MAP_FLAGS
+            ld      [rSVBK],a
+            set     TILE_OK_TRAFFIC_BIT,[hl]
+            ;jr      .tile_end
+.tile_end:
         pop     hl
         pop     de ; (*)
 
@@ -419,6 +500,9 @@ Simulation_TrafficSetTileOkFlag::
     inc     d
     bit     6,d ; CITY_MAP_HEIGHT = 64
     jr      z,.loopy
+
+    ; TODO - Do something with the value of [simulation_traffic_jam_num_tiles]
+    ; Set a flag to show a warning message or something.
 
     ret
 

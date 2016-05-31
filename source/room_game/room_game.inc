@@ -45,7 +45,7 @@ BANK_SCRATCH_RAM_2    EQU 7 ; For temporary calculations (APA, simulation)
 TILE_OK_POWER_BIT           EQU 0
 TILE_OK_SERVICES_BIT        EQU 1 ; Hospitals, police and firemen
 TILE_OK_EDUCATION_BIT       EQU 2
-TILE_OK_POLLUTION_BIT       EQU 3
+TILE_OK_POLLUTION_BIT       EQU 3 ; Set to 1 if valid pollution level
 TILE_OK_TRAFFIC_BIT         EQU 4 ; - Roads: Traffic lower than threshold.
                                   ; - Buildings: People from this tile could
                                   ;   reach a valid destination.
