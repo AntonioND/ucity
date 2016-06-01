@@ -311,23 +311,47 @@ Simulation_PollutionSetTileOkFlag::
 
     push    hl
 
-        ; TODO - Perform check only if the zone actually requires it
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+
+        ld      a,[hl] ; get type
+        and     a,TYPE_MASK ; remove flags
+
+        ; List of terrains that ignore the pollution level. In general, any
+        ; terrain that generates pollution ignores it. This is only used for
+        ; buildings, so no need to check fields, forests or water zones.
+
+        ; TODO - Replace this by a LUT
+        ld      de,.ignore_tile_array
+        ; 1 = ignore this tile, 0 = handle pollution
+        add     a,e
+        ld      e,a
+        ld      a,0
+        adc     a,d
+        ld      d,a ; de = &(array[type])
+
+        ld      a,[de]
+        and     a,a
+        jr      nz,.ignore_pollution
+
+        ; If the building actually requires a pollution level check...
 
         ld      a,BANK_SCRATCH_RAM
         ld      [rSVBK],a
 
         ld      a,[hl] ; get pollution
         cp      a,POLLUTION_MAX_VALID_LEVEL ; carry flag is set if n > a
-
-        ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
-
         jr      c,.non_polluted
             ; Polluted - Clear "valid pollution level" bit
+            ld      a,BANK_CITY_MAP_FLAGS
+            ld      [rSVBK],a
             res     TILE_OK_POLLUTION_BIT,[hl]
             jr      .end_pollution_check
 .non_polluted:
+.ignore_pollution:
             ; Non-polluted - Set "valid pollution level" bit
+            ld      a,BANK_CITY_MAP_FLAGS
+            ld      [rSVBK],a
             set     TILE_OK_POLLUTION_BIT,[hl]
             ;jr      .end_pollution_check
 .end_pollution_check:
@@ -342,5 +366,30 @@ Simulation_PollutionSetTileOkFlag::
     jr      z,.loop
 
     ret
+
+; This array says whether a particular tile type has to be checked for pollution
+; or not. Type flags should be removed before accesing it.
+.ignore_tile_array: ; 1 = ignore this tile, 0 = handle pollution
+    DB  1 ; TYPE_FIELD - There's nothing here...
+    DB  1 ; TYPE_FOREST
+    DB  1 ; TYPE_WATER
+    DB  0 ; TYPE_RESIDENTIAL - R and C must be clean. I generates pollution.
+    DB  1 ; TYPE_INDUSTRIAL
+    DB  0 ; TYPE_COMMERCIAL
+    DB  1 ; TYPE_POLICE_DEPT - Services are supposed to work even in very
+    DB  1 ; TYPE_FIRE_DEPT     polluted areas.
+    DB  1 ; TYPE_HOSPITAL
+    DB  0 ; TYPE_PARK - Recreation and education, they must be clean.
+    DB  0 ; TYPE_STADIUM
+    DB  0 ; TYPE_SCHOOL
+    DB  0 ; TYPE_HIGH_SCHOOL
+    DB  0 ; TYPE_UNIVERSITY
+    DB  0 ; TYPE_MUSEUM
+    DB  0 ; TYPE_LIBRARY
+    DB  1 ; TYPE_AIRPORT - The following tiles generate pollution, so it's
+    DB  1 ; TYPE_PORT      illogical to ask for no pollution there.
+    DB  1 ; TYPE_DOCK
+    DB  1 ; TYPE_POWER_PLANT
+    ; End of valid types...
 
 ;###############################################################################
