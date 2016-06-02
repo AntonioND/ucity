@@ -321,7 +321,6 @@ Simulation_PollutionSetTileOkFlag::
         ; terrain that generates pollution ignores it. This is only used for
         ; buildings, so no need to check fields, forests or water zones.
 
-        ; TODO - Replace this by a LUT
         ld      de,.ignore_tile_array
         ; 1 = ignore this tile, 0 = handle pollution
         add     a,e
@@ -370,7 +369,7 @@ Simulation_PollutionSetTileOkFlag::
 ; This array says whether a particular tile type has to be checked for pollution
 ; or not. Type flags should be removed before accesing it.
 .ignore_tile_array: ; 1 = ignore this tile, 0 = handle pollution
-    DB  1 ; TYPE_FIELD - There's nothing here...
+    DB  1 ; TYPE_FIELD - There's nothing here, don't check...
     DB  1 ; TYPE_FOREST
     DB  1 ; TYPE_WATER
     DB  0 ; TYPE_RESIDENTIAL - R and C must be clean. I generates pollution.
