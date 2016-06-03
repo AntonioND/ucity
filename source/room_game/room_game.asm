@@ -857,7 +857,7 @@ RoomGame::
 
         ; After simulating, flag buildings to be created or demolished.
 
-        ; TODO
+        LONG_CALL   Simulation_FlagCreateBuildings
 
         ; Calculate total population and other statistics
 

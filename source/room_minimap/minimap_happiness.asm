@@ -220,6 +220,7 @@ FPOL EQU TILE_OK_POLLUTION
 FTRA EQU TILE_OK_TRAFFIC
 
 .needed_flags_info: ; Desired flags | Needed flags
+; The needed flags must be a subset of the desired ones
     DB  0, 0 ; TYPE_FIELD - Not buildings, don't care...
     DB  0, 0 ; TYPE_FOREST
     DB  0, 0 ; TYPE_WATER
