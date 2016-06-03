@@ -845,6 +845,7 @@ RoomGame::
         LONG_CALL_ARGS  Simulation_Services
         LONG_CALL   Simulation_EducationSetTileOkFlag
 
+        ; TODO - Ignore this if the city is too small.
         ld      bc,T_HIGH_SCHOOL_CENTER
         LONG_CALL_ARGS  Simulation_ServicesBig
         LONG_CALL   Simulation_EducationAddTileOkFlag
@@ -854,13 +855,11 @@ RoomGame::
         LONG_CALL   Simulation_Pollution
         LONG_CALL   Simulation_PollutionSetTileOkFlag
 
-        ; Calculate total population and other statistics
+        ; After simulating, flag buildings to be created or demolished.
 
         ; TODO
 
-        ; After simulating everything, calculate happiness. For example, to know
-        ; if education is good enough, small towns don't need high schools but
-        ; cities from a certain size onwards do.
+        ; Calculate total population and other statistics
 
         ; TODO
 

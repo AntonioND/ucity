@@ -51,7 +51,7 @@ TILE_OK_TRAFFIC_BIT         EQU 4 ; - Roads: Traffic lower than threshold.
                                   ;   reach a valid destination.
 TILE_BUILD_REQUESTED_BIT    EQU 5
 TILE_DEMOLISH_REQUESTED_BIT EQU 6
-TILE_unused2_BIT            EQU 7
+TILE_unused_BIT             EQU 7
 
 TILE_OK_POWER       EQU (1<<TILE_OK_POWER_BIT)
 TILE_OK_SERVICES    EQU (1<<TILE_OK_SERVICES_BIT)

@@ -195,7 +195,6 @@ MinimapDrawHappinessMap::
     bit     5,h ; Up to E000
     jr      z,.loop
 
-
     ; Set White
     call    MinimapSetDefaultPalette
 
@@ -224,7 +223,7 @@ FTRA EQU TILE_OK_TRAFFIC
     DB  0, 0 ; TYPE_FIELD - Not buildings, don't care...
     DB  0, 0 ; TYPE_FOREST
     DB  0, 0 ; TYPE_WATER
-    DB  FPOW|FSER|FEDU|FPOL|FTRA, FPOW|FEDU|FPOL|FTRA ; TYPE_RESIDENTIAL
+    DB  FPOW|FSER|FEDU|FPOL|FTRA, FPOW|FPOL|FTRA ; TYPE_RESIDENTIAL
     DB  FPOW|FSER|FTRA, FPOW|FTRA ; TYPE_INDUSTRIAL
     DB  FPOW|FSER|FPOL|FTRA, FPOW|FPOL|FTRA ; TYPE_COMMERCIAL
     DB  FPOW|FSER|FPOL|FTRA, FPOW ; TYPE_POLICE_DEPT
