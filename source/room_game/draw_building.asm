@@ -385,6 +385,9 @@ BuildingIsCoordinateOrigin::
 
     ; Get the first tile of the group
 
+; de = tile number, returns a = 1 if it is the origin of a building, 0 if not
+BuildingIsTileCoordinateOrigin::
+
 IF TILESET_INFO_ELEMENT_SIZE != 4
     FAIL "draw_city_map_building.asm: Fix this!"
 ENDC

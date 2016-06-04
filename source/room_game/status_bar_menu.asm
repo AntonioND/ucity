@@ -548,12 +548,9 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
 ;-----------------------------------
 
-.population_test:
-    DB $89,$67,$45,$23,$01
-
-.print_population: ; TODO
+.print_population:
     ; Convert to tile from BCD
-    ld      de,.population_test ; BCD, LSB first, LSB in lower nibbles
+    ld      de,city_population ; BCD, LSB first, LSB in lower nibbles
     ld      hl,sp+2
     call    BCD_DE_2TILE_HL_LEADING_SPACES
 

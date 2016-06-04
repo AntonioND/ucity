@@ -861,7 +861,7 @@ RoomGame::
 
         ; Calculate total population and other statistics
 
-        ; TODO
+        LONG_CALL   Simulation_CalculateStatistics
 
         ; Calculate RCI graph
 
