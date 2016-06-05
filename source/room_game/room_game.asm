@@ -707,6 +707,18 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     and     a,a
     jr      z,.only_gfx
 
+        ; Clear WRAMX
+
+        xor     a,a
+.clear_wramx_loop:
+        ld      [rSVBK],a
+        push    af
+        call    ClearWRAMX
+        pop     af
+        inc     a
+        cp      a,8
+        jr      nz,.clear_wramx_loop
+
         ; Load map and city data. Load GFX
 
         call    CityMapLoad ; Returns starting coordinates in d = x and e = y
