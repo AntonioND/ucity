@@ -33,8 +33,13 @@
 
 ;-------------------------------------------------------------------------------
 
-city_population:: DS 5 ; LSB first!
-city_population_temp: DS 5 ; LSB first!
+city_population:: DS 5 ; BCD, LSB first!
+city_population_temp: DS 5 ; BCD, LSB first!
+
+; Internal variables used to calculate the demmand of RCI zones (and RCI graph)
+population_residential:: DS 4 ; binary, LSB first
+population_commercial::  DS 4 ; binary, LSB first
+population_industrial::  DS 4 ; binary, LSB first
 
 ;###############################################################################
 
@@ -79,13 +84,58 @@ BINARY_TO_BCD: ; 2 bytes per entry. LSB first
 
 ;-------------------------------------------------------------------------------
 
+; Going to the school is like going to  work for young people, that's why it
+; adds to industrial population
+
+; Must be alligned to $100
+tile_rci_population_pointer: ; Pointer to variable to add population. LSB first
+    DW  population_residential ; TYPE_FIELD - No population, but don't set the
+    DW  population_residential ; TYPE_FOREST  to NULL.
+    DW  population_residential ; TYPE_WATER
+    DW  population_residential ; TYPE_RESIDENTIAL
+    DW  population_industrial ; TYPE_INDUSTRIAL
+    DW  population_commercial ; TYPE_COMMERCIAL
+    DW  population_industrial ; TYPE_POLICE_DEPT
+    DW  population_industrial ; TYPE_FIRE_DEPT
+    DW  population_industrial ; TYPE_HOSPITAL
+    DW  population_commercial ; TYPE_PARK
+    DW  population_commercial ; TYPE_STADIUM
+    DW  population_industrial ; TYPE_SCHOOL
+    DW  population_industrial ; TYPE_HIGH_SCHOOL
+    DW  population_industrial ; TYPE_UNIVERSITY
+    DW  population_commercial ; TYPE_MUSEUM
+    DW  population_commercial ; TYPE_LIBRARY
+    DW  population_commercial ; TYPE_AIRPORT
+    DW  population_industrial ; TYPE_PORT
+    DW  population_industrial ; TYPE_DOCK
+    DW  population_industrial ; TYPE_POWER_PLANT
+    ; End of valid types...
+
+;-------------------------------------------------------------------------------
+
 Simulation_CalculateStatistics::
 
     ; Clear variables
 
     xor     a,a
+
     ld      hl,city_population_temp
     REPT    5
+    ld      [hl+],a
+    ENDR
+
+    ld      hl,population_residential
+    REPT    4
+    ld      [hl+],a
+    ENDR
+
+    ld      hl,population_commercial
+    REPT    4
+    ld      [hl+],a
+    ENDR
+
+    ld      hl,population_industrial
+    REPT    4
     ld      [hl+],a
     ENDR
 
@@ -111,6 +161,9 @@ Simulation_CalculateStatistics::
         cp      a,TYPE_DOCK
         jr      z,.skip
 
+        ld      b,a
+        push    bc ; (*) b = type
+
         ; Returns: Tile -> Register DE
         ; Arguments: hl = address. Preserves BC and HL
         call    CityMapGetTileAtAddress
@@ -120,12 +173,45 @@ Simulation_CalculateStatistics::
         call    BuildingIsTileCoordinateOrigin
         pop     de
 
+        pop     bc ; (*) b = type
+
         and     a,a
         jr      z,.skip ; not the origin of the building, already handled
 
+        push    bc ; preserve type
         call    CityTileDensity ; de = tile, returns d=population
+        pop     bc
 
-        ld      l,d
+        ; Preserve population (d)
+
+        ; Add population to the corresponding type variable
+
+        ld      a,b ; b = type. no need to save it after this
+        add     a,a ; a * 2
+        ld      l,a
+        ld      h,tile_rci_population_pointer>>8 ; LSB first
+
+        ld      a,[hl+]
+        ld      h,[hl]
+        ld      l,a ; hl = pointer to variable to add the population to
+
+        ld      e,0 ; helper zero register
+
+        ld      a,[hl]
+        add     a,d
+        ld      [hl+],a
+
+        REPT    3
+        ld      a,[hl]
+        adc     a,e
+        ld      [hl+],a
+        ENDR
+
+        ; Restore population (d)
+
+        ; Add population to the global population variable
+
+        ld      l,d ; BINARY_TO_BCD is aligned to $100
         ld      h,BINARY_TO_BCD>>8 ; 2 bytes per entry. LSB first
 
         ld      a,[hl+]
