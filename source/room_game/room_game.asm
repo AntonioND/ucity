@@ -709,7 +709,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
         ; Clear WRAMX
 
-        xor     a,a
+        ld      a,1
 .clear_wramx_loop:
         ld      [rSVBK],a
         push    af
