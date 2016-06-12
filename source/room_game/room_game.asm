@@ -821,10 +821,12 @@ RoomGame::
 
         ; First, get data from last frame and build new buildings or destroy
         ; them (if there haven't been changes since the previous step!)
-        ; depending on the tile ok flags map.
-        ; Note: Only if this is not the first iteration step!
+        ; depending on the tile ok flags map. In the first iteration step the
+        ; flags should be 0, so this can be called as well.
 
-        ; TODO
+        ; NOTE: This function doesn't update the VRAM map after removing or
+        ; creating buildings because the animation handler will take care of it.
+        LONG_CALL   Simulation_CreateBuildings
 
         ; Now, simulate this new map. First, power distribution, as it will be
         ; needed for other simulations

@@ -115,6 +115,9 @@ tile_rci_population_pointer: ; Pointer to variable to add population. LSB first
 
 Simulation_CalculateStatistics::
 
+    ; First, add up population (total population and separated by types)
+    ; ------------------------------------------------------------------
+
     ; Clear variables
 
     xor     a,a
@@ -255,6 +258,11 @@ Simulation_CalculateStatistics::
     ld      [de],a
     inc     de
     ENDR
+
+    ; Calculate RCI demand
+    ; --------------------
+
+    ; TODO
 
     ret
 
