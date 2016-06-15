@@ -106,8 +106,10 @@ ENDC
 ; A = building to check data of. Don't call with B_Delete.
 BuildingGetSizeAndBaseTile:: ; Returns b=width, c=height, hl = base tile
 
+    ld      d,a ; (*) preserve A
     ld      b,BANK(BUILDING_INFO_POINTERS_ARRAY)
-    call    rom_bank_push_set
+    call    rom_bank_push_set  ; preserves de
+    ld      a,d ; (*) restore A
 
     jr      building_get_size_base_tile_common
 
