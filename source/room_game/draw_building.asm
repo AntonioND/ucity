@@ -169,7 +169,17 @@ MapUpdateBuildingSuroundingPowerLines:
 ;-------------------------------------------------------------------------------
 
 ; Doesn't update VRAM map
+; de = coordinates, b = B_xxx define
+MapDrawBuildingForcedCoords:: ; Puts a building
 
+    push    de
+    ld      a,b ; get building index
+    ; A = building to check data of. Don't call with B_Delete.
+    call    BuildingGetSizeAndBaseTile ; Ret b=width, c=height, hl = base tile
+    pop     de
+    jr      _MapDrawBuildingForcedInner
+
+; Doesn't update VRAM map
 MapDrawBuildingForced:: ; Puts a building at the cursor. No checks.
 
     ; Get cursor position and building size
@@ -179,6 +189,8 @@ MapDrawBuildingForced:: ; Puts a building at the cursor. No checks.
     push    de
     call    BuildingCurrentGetSizeAndBaseTile ; b = width, c = height, hl = tile
     pop     de
+
+_MapDrawBuildingForcedInner:
 
     ld      a,d
     ld      d,b
@@ -240,11 +252,6 @@ MapDrawBuildingForced:: ; Puts a building at the cursor. No checks.
     pop     bc ; restore info (***)
 
     call    MapUpdateBuildingSuroundingPowerLines
-
-    ; Update map
-    ; ----------
-
-    ;call    bg_refresh_main
 
     ret
 
