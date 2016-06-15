@@ -116,6 +116,7 @@ random_ptr: DS 1
 
 ;-------------------------------------------------------------------------------
 
+; bc and de preserved
 GetRandom::
 
     ld      hl,random_ptr

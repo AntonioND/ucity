@@ -231,7 +231,7 @@ ENDC
                     ; Try to build
 
                     ; coords = bc
-                    ; tile = de | only the low byte is needed
+                    ; tile = de | only the low byte is needed, d is 0
                     ; hl = address
                     call    Simulation_CreateBuildingsTryBuild
 .not_build:
@@ -305,18 +305,15 @@ ENDC
                     ; coords = bc
                     ; hl = address
 
-                    ; 1. Get building size and save it
-
-                    ; TODO
-
-                    ; 2. Demolish
-
                     LD_DE_BC
                     call    MapDeleteBuildingForced
 
-                    ; 3. Clear demolish flags
+                    ; After demolishing the building all the tiles will be RCI,
+                    ; so it is not needed to clear the demolish request flag.
+                    ; Only non-RCI tiles with demolish request flag are
+                    ; demolished, when demolishing a RCI building the tiles will
+                    ; go back to RCI tiles, so they won't be demolished again.
 
-                    ; TODO
 .dont_demolish:
 
         pop     hl
