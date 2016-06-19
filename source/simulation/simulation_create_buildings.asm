@@ -659,7 +659,7 @@ Simulation_CreateBuildings::
                     call    GetRandom
                     pop     hl
                     pop     de
-                    and     a,3
+                    and     a,$0F
                     call    z,Simulation_CreateBuildingsTryBuild
 
 .not_build:
@@ -739,7 +739,7 @@ ENDC
                     push    de
                     call    GetRandom
                     pop     de
-                    and     a,3
+                    and     a,$0F
                     call    z,MapDeleteBuildingForced
 
                     ; After demolishing the building all the tiles will be RCI,
