@@ -56,7 +56,7 @@ C_DESIRED EQU FPOW|FPOL|FTRA
 I_NEEDED  EQU FPOW|FSER|FTRA
 I_DESIRED EQU FPOW|FTRA
 
-; Flags are only calculated for RCI zones!
+; Flags are only calculated for RCI type zones!
 Simulation_FlagCreateBuildings::
 
     ld      hl,CITY_MAP_TILES
@@ -142,11 +142,105 @@ Simulation_FlagCreateBuildings::
 
 ;-------------------------------------------------------------------------------
 
+F_TL EQU 1 ; Top left
+F_TC EQU 2 ; Top center
+F_TR EQU 4 ; Top right
+F_CL EQU 8 ; Center left
+F_CR EQU 16 ; Center right
+F_BL EQU 32 ; Bottom left
+F_BC EQU 64 ; Bottom center
+F_BR EQU 128 ; Bottom right
+
+F_CC EQU F_TL|F_TC|F_TR|F_CL|F_CR|F_BL|F_BC|F_BR ; Center center
+
+BUILDING1X1FLAGS : MACRO
+    DB F_CC ; Center center / All
+ENDM
+
+BUILDING2X2FLAGS : MACRO
+    DB F_TL|F_TC|F_CL ; Top left
+    DB F_TC|F_TR|F_CR ; Top right
+    DB F_CL|F_BL|F_BC ; Bottom left
+    DB F_CR|F_BC|F_BR ; Bottom right
+ENDM
+
+BUILDING3X3FLAGS : MACRO
+    DB F_TL ; Top left
+    DB F_TC ; Top center
+    DB F_TR ; Top right
+    DB F_CL ; Center left
+    DB F_CC ; Center center
+    DB F_CR ; Center right
+    DB F_BL ; Bottom left
+    DB F_BC ; Bottom center
+    DB F_BR ; Bottom right
+ENDM
+
+IF T_RESIDENTIAL > T_RESIDENTIAL_S1_A
+    FAIL "Fix this!"
+ENDC
+IF T_RESIDENTIAL_S1_A > T_COMMERCIAL_S1_A
+    FAIL "Fix this!"
+ENDC
+IF T_RESIDENTIAL_S1_A > T_INDUSTRIAL_S1_A
+    FAIL "Fix this!"
+ENDC
+
+; Gets the flag assigned to a tile
+CREATE_BUILDING_FLAGS: ; Input = tile number
+
+    ; RCI Tiles
+    DS  T_RESIDENTIAL
+    BUILDING1X1FLAGS
+    BUILDING1X1FLAGS
+    BUILDING1X1FLAGS
+
+    ; Buildings
+    DS  T_RESIDENTIAL_S1_A - T_RESIDENTIAL - 3
+    REPT 3 ; R C I
+        REPT 4
+            BUILDING1X1FLAGS
+        ENDR
+        REPT 4
+            BUILDING2X2FLAGS
+        ENDR
+        REPT 4
+            BUILDING3X3FLAGS
+        ENDR
+    ENDR
+
+; Gets the building level. Used to prevent building small buildings on top of
+; bigger ones.
+CREATE_BUILDING_LEVEL: ; Input = tile number
+
+    ; Level = size
+
+    ; RCI Tiles
+    DS  T_RESIDENTIAL
+    DB 0
+    DB 0
+    DB 0
+
+    ; Buildings
+    DS  T_RESIDENTIAL_S1_A - T_RESIDENTIAL - 3
+    REPT 3 ; R C I
+        REPT 4
+            DB 1
+        ENDR
+        REPT 4
+            DB 2,2, 2,2
+        ENDR
+        REPT 4
+            DB 3,3,3, 3,3,3, 3,3,3
+        ENDR
+    ENDR
+
+;-------------------------------------------------------------------------------
+
 ; Try to build a building as big as possible.
 
-; coords = bc
-; tile = de | only the low byte is needed because d should be 0 from the caller
-; address = hl
+; c = type
+; de = coords
 Simulation_CreateBuildingsTryBuild::
 
     ; The tiles to test are arranged like this (0 is the origin):
@@ -155,35 +249,30 @@ Simulation_CreateBuildingsTryBuild::
     ; 3 4 5
     ; 6 7 8
 
-    ; Check if all tiles are the same tile as register DE and if they are
-    ; flagged to build. D is 0, so we only need to make sure that each other
-    ; tile is < 256 and if E is the same as the lower byte. Any tile outside
-    ; the map makes the function to fail.
+    ; Check if all tiles are the same type as register C and if they are
+    ; flagged to build. Any tile outside the map makes the function to fail.
 
     ; 1. Set size to 3x3.
     ; 2a. Check coordinates to see if 3x3 fits.
     ; 2b. Check 8, 7, 5, 6, 2. If any of them fails, fall back to 2x2.
     ; 3a. Check coordinates to see if 2x2 fits.
     ; 3b. Check 4, 3, 1. If they fail, fall back to 1x1.
-    ; 4. Build building.
+    ; 4. Check 0.
+    ; 5. Build building.
 
     add     sp,-1
     ld      hl,sp+0
-    ld      [hl],e ; (*) save tile into stack
+    ld      [hl],c ; (*12) save tile into stack
 
-    LD_DE_BC
-
-    ; [sp+0] = low byte of tile (high byte should be 0)
+    ; [sp+0] = type
     ; d = y, e = x
-    ; hl = address
 
     ; 2a. Check coordinates to see if 3x3 fits
 
     ld      a,61
     cp      a,d ; carry flag is set if d > a (62 or 63)
     jp      c,.check2x2
-    ld      a,61
-    cp      a,e ; carry flag is set if d > a (62 or 63)
+    cp      a,e ; carry flag is set if e > a (62 or 63)
     jp      c,.check2x2
 
     ; 2b. Check 8, 7, 5, 6, 2. If any of them fails, fall back to 2x2.
@@ -192,19 +281,49 @@ START_POS_TEST : MACRO
     push    de
 ENDM
 
-END_POS_TEST : MACRO ; 1 = jump here if failed
-        call    CityMapGetTileNoBoundCheck ; coords=de, returns tile=de
-        LD_BC_DE ; bc = tile
+; 1 = check position flags, 2 = this building level, 3 = jump here if failed
+END_POS_TEST : MACRO
+    call    CityMapGetTypeNoBoundCheck ; coords = de
+    ; returns a = type, hl = address
+
     pop     de
 
-    xor     a,a
-    cp      a,b ; high byte should be 0!
-    jp      nz,\1
+    LD_BC_HL ; save address
 
-    ld      hl,sp+2
+    ld      hl,sp+0 ; point to type
+    cp      a,[hl] ; type should be the same!
+    jp      nz,\3
+
+    LD_HL_BC ; restore address
+
+    ; Check if building has been requested or demolished has been requested
+    ld      a,BANK_CITY_MAP_FLAGS
+    ld      [rSVBK],a
+
+    ld      a,[hl] ; get flags
+
+    bit     TILE_BUILD_REQUESTED_BIT,a ; if not requested, exit
+    jp      z,\3
+
+    bit     TILE_DEMOLISH_REQUESTED_BIT,a ; if requested, exit
+    jp      nz,\3
+
+    ; Make sure that the position flags allow us to build here
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+
     ld      a,[hl]
-    cp      a,c ; low byte should be the same!
-    jp      nz,\1
+    and     a,\1
+    jp      z,\3
+
+    ; Make sure that the building already present here has a lower level than
+    ; the one we are trying to build
+    ld      a,BANK_SCRATCH_RAM_2
+    ld      [rSVBK],a
+
+    ld      a,[hl]
+    cp      a,\2 ; carry flag is set if \2 > a (new level > old level)
+    jp      nc,\3 ; it is lower or equal, don't build
 ENDM
 
     ; d = y, e = x
@@ -214,44 +333,47 @@ ENDM
         inc     e
         inc     d
         inc     d
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_BR,3,.check2x2
 
     START_POS_TEST ; Check 7
         inc     e
         inc     d
         inc     d
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_BC,3,.check2x2
 
     START_POS_TEST ; Check 5
         inc     e
         inc     e
         inc     d
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_CR,3,.check2x2
 
     START_POS_TEST ; Check 6
         inc     d
         inc     d
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_BL,3,.check2x2
 
     START_POS_TEST ; Check 2
         inc     e
         inc     e
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_TR,3,.check2x2
 
     START_POS_TEST ; Check 4
         inc     e
         inc     d
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_CC,3,.check2x2
 
     START_POS_TEST ; Check 3
         inc     d
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_CL,3,.check2x2
 
     START_POS_TEST ; Check 1
         inc     e
-    END_POS_TEST    .check2x2
+    END_POS_TEST    F_TC,3,.check2x2
 
-    jr      .build3x3
+    START_POS_TEST ; Check 0
+    END_POS_TEST    F_TL,3,.check2x2
+
+    jp      .build3x3
 
 .check2x2:
 
@@ -259,54 +381,70 @@ ENDM
 
     ld      a,62
     cp      a,d ; carry flag is set if d > a (63)
-    jp      c,.build1x1
-    ld      a,62
-    cp      a,e ; carry flag is set if d > a (63)
-    jp      c,.build1x1
+    jp      c,.check1x1
+    cp      a,e ; carry flag is set if e > a (63)
+    jp      c,.check1x1
 
     ; 3b. Check 4, 3, 1. If they fail, fall back to 1x1.
 
     START_POS_TEST ; Check 4
         inc     e
         inc     d
-    END_POS_TEST    .build1x1
+    END_POS_TEST    F_CR|F_BC|F_BR,2,.check1x1
 
     START_POS_TEST ; Check 3
         inc     d
-    END_POS_TEST    .build1x1
+    END_POS_TEST    F_CL|F_BL|F_BC,2,.check1x1
 
     START_POS_TEST ; Check 1
         inc     e
-    END_POS_TEST    .build1x1
+    END_POS_TEST    F_TC|F_TR|F_CR,2,.check1x1
 
-    ;jr      .build2x2
+    START_POS_TEST ; Check 0
+    END_POS_TEST    F_TL|F_TC|F_CL,2,.check1x1
 
-    ; Get offset
+    jr      .build2x2
+
+.check1x1:
+
+    ; 4. Check 0
+
+    START_POS_TEST ; Check 0
+    END_POS_TEST    F_CC,1,.exit_no_build
+
+    ;jr      .build_1x1
+
+    ; Check if there is already a building of this size in this same spot.
+    ; If not, build (get offset and continue calculating building number)
+
+    ; TODO
+.build1x1:
+    ld      b,B_ResidentialS1A - B_ResidentialS1A
+    jr      .build_end
 .build2x2:
     ld      b,B_ResidentialS2A - B_ResidentialS1A
     jr      .build_end
 .build3x3:
     ld      b,B_ResidentialS3A - B_ResidentialS1A
-    jr      .build_end
-.build1x1:
-    ld      b,B_ResidentialS1A - B_ResidentialS1A
     ;jr      .build_end
 .build_end:
 
     ld      hl,sp+0
     ld      a,[hl]
 
-    add     sp,+1 ; (*) restore stack
+    add     sp,+1 ; (*2) restore stack
 
-    ; a = RCI tile low byte
+    ; a = RCI type
     ; b = building size offset
     ; de = origin coordinates
 
-    cp      a,T_RESIDENTIAL & $FF
+    ; TODO - Get address and clear all build flags in the building area.
+
+    cp      a,TYPE_RESIDENTIAL ; Residential first, it's the most common one.
     jr      z,.res
-    cp      a,T_COMMERCIAL & $FF
+    cp      a,TYPE_COMMERCIAL
     jr      z,.com
-    cp      a,T_INDUSTRIAL & $FF
+    cp      a,TYPE_INDUSTRIAL
     jr      z,.ind
 
     ld      b,b ; Panic!
@@ -334,7 +472,7 @@ ENDM
     add     a,b ; randomize building type
 
     ; TODO - Instead of randomizing, check demand? Maybe not a good idea
-    ; because it would reduce the variety.
+    ; because it would reduce the variety of graphics...
 
     ld      b,a
     ; de = origin coordinates
@@ -342,6 +480,13 @@ ENDM
     LONG_CALL_ARGS  MapDrawBuildingForcedCoords
 
     ret
+
+.exit_no_build:
+
+    add     sp,+1 ; (*1) restore stack
+
+    ret
+
 
 ;-------------------------------------------------------------------------------
 
@@ -354,12 +499,77 @@ Simulation_CreateBuildings::
     ; TODO - Actually use the city statistics (RCI demand) to affect the
     ; creation or destruction of buildings
 
-    ; First, create buildings. Then, demolish.
+    ; Create buildings
+    ; ----------------
 
-    ; We know that only RCI zones can have a build or demolish flag set. No need
-    ; to check the type, only the tile number!
+    ; First set a temporary map with information to expand buildings and
+    ; another one with information about the building size in order not to
+    ; build small buildings on top of a big one.
 
-    ; First, build. Make sure that it is a RCI tile!
+    ld      a,BANK_SCRATCH_RAM
+    ld      [rSVBK],a
+    call    ClearWRAMX
+
+    ; Not needed to clear SCRATCH_RAM_2 because it will only be used if a
+    ; building is being built in a tile, and to get to that point a few extra
+    ; checks are needed.
+
+    ;ld      a,BANK_SCRATCH_RAM_2
+    ;ld      [rSVBK],a
+    ;call    ClearWRAMX
+
+    ld      hl,CITY_MAP_TILES ; Base address of the map!
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+.loop_set_flags:
+
+        ld      a,[hl]
+
+        cp      a,TYPE_RESIDENTIAL
+        jr      z,.set_flags
+        cp      a,TYPE_COMMERCIAL
+        jr      z,.set_flags
+        cp      a,TYPE_INDUSTRIAL
+        jr      nz,.skip_set_flags
+.set_flags:
+
+         ; Arguments: hl = address. Preserves BC and HL
+        call    CityMapGetTileAtAddress ; returns tile = de
+        push    hl
+
+            ld      hl,CREATE_BUILDING_FLAGS
+            add     hl,de
+            ld      c,[hl] ; c = flags
+
+            ld      hl,CREATE_BUILDING_LEVEL
+            add     hl,de
+            ld      b,[hl] ; b = level
+
+        pop     hl
+
+        ld      a,BANK_SCRATCH_RAM
+        ld      [rSVBK],a
+        ld      [hl],c ; save flags
+
+        ld      a,BANK_SCRATCH_RAM_2
+        ld      [rSVBK],a
+        ld      [hl],b ; save level
+
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+
+.skip_set_flags:
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop_set_flags
+
+    ; We know that only RCI type tiles can have a build or demolish flag set.
+    ; If the flag is set to 1, check if we can build. If built, clear the build
+    ; flag from the modified tiles!
 
     ld      hl,CITY_MAP_TILES ; Base address of the map!
 
@@ -372,39 +582,30 @@ Simulation_CreateBuildings::
         push    de ; (*)
         push    hl
 
-IF (T_RESIDENTIAL >= 256) || (T_COMMERCIAL >= 256) || (T_INDUSTRIAL >= 256)
-    FAIL "RCI tiles should be in positions lower than 256."
-ENDC
+            ld      a,BANK_CITY_MAP_TYPE
+            ld      [rSVBK],a
 
-            LD_BC_DE ; save coords in bc
+            ld      a,[hl] ; a = type
 
-            ; Arguments: hl = address. Preserves BC and HL
-            ; Returns: de = tile
-            call    CityMapGetTileAtAddress
-
-            ; coords = bc
-            ; tile = de
+            ; type = a
+            ; coords = de
             ; address = hl
 
-            ld      a,d
-            and     a,a ; High byte should be 0
-            jr      nz,.not_type_rci
-
-            ; Low byte should be one of the RCI tiles
-            ld      a,e
-            cp      a,T_RESIDENTIAL
+            cp      a,TYPE_RESIDENTIAL
             jr      z,.type_rci
-            cp      a,T_COMMERCIAL
+            cp      a,TYPE_COMMERCIAL
             jr      z,.type_rci
-            cp      a,T_INDUSTRIAL
+            cp      a,TYPE_INDUSTRIAL
             jr      nz,.not_type_rci
 
 .type_rci:
-                ; coords = bc
-                ; tile = de
+                ld      c,a
+
+                ; type = c
+                ; coords = de
                 ; address = hl
 
-                ; This is a RCI flag, check that we got a request to build or
+                ; This is a RCI tile, check that we got a request to build or
                 ; demolish.
                 ; - To build, all tiles must be at least ok (none of them can be
                 ;   flagged to demolish.
@@ -420,13 +621,17 @@ ENDC
 
                     ; Try to build
 
-                    ; coords = bc
-                    ; tile = de | only the low byte is needed, d is 0
+                    ; c = type
+                    ; de = coords
                     ; hl = address
-                    call    Simulation_CreateBuildingsTryBuild
+                    push    de
+                    push    hl
+                    call    GetRandom
+                    pop     hl
+                    pop     de
+                    and     a,3
+                    call    z,Simulation_CreateBuildingsTryBuild
 
-                    ; TODO - Try to build even if there are small buildings
-                    ; on the way!
 .not_build:
 
 .not_type_rci:
@@ -445,6 +650,7 @@ ENDC
     jp      z,.loopy
 
     ; Demolish buildings. Make sure that we are not demolishing a RCI tile!
+    ; ---------------------------------------------------------------------
 
     ld      hl,CITY_MAP_TILES ; Base address of the map!
 
@@ -499,7 +705,12 @@ ENDC
                     ; hl = address
 
                     LD_DE_BC
-                    call    MapDeleteBuildingForced
+
+                    push    de
+                    call    GetRandom
+                    pop     de
+                    and     a,3
+                    call    z,MapDeleteBuildingForced
 
                     ; After demolishing the building all the tiles will be RCI,
                     ; so it is not needed to clear the demolish request flag.
