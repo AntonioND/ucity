@@ -41,6 +41,8 @@ selected_map: DS 1
 
     SECTION "Predefined Map 0",ROMX
 
+;-------------------------------------------------------------------------------
+
 PREDEFINED_MAP_0:
     INCBIN  "data/predefined_map_0.bin"
 

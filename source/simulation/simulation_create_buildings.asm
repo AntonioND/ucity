@@ -142,6 +142,32 @@ Simulation_FlagCreateBuildings::
 
 ;-------------------------------------------------------------------------------
 
+; The following is used to verify if a building can actually grow in this place
+; taking in consideration if there are more buildings on the way.
+
+; Vertical and horizontal flags separated for easier understanding. The result
+; is the addition of both sides:
+
+; T T T   L C R
+; C C C   L C R
+; B B B   L C R
+
+; TC TC   LC RC
+; BC BC   LC RC
+
+; TCB     LCR
+
+; In short, SCRATCH_RAM is filled with the flags corresponding to the buildings
+; that are already there. If a new building wants to grow on a certaing place,
+; all the new tiles have to be checked. If the flags corresponding to each one
+; of the new tiles ANDed with the ones that are already on SCRATCH_RAM is not 0
+; that means that it's not going to cut another building that was there before.
+
+; Also, it is needed to check if the new building is bigger than the old one,
+; as this check only works when the new building is bigger. For this check,
+; SCRATCH_RAM_2 is filled with the size of the building (being 0 for RCI tiles,
+; 1 for the 1x1 buildings, 2 for 2x2 and 3 for 3x3).
+
 F_TL EQU 1 ; Top left
 F_TC EQU 2 ; Top center
 F_TR EQU 4 ; Top right
@@ -493,7 +519,11 @@ ENDM
 ; After calling Simulation_FlagCreateBuildings and calculating the RCI demand in
 ; Simulation_CalculateStatistics, create and destroy buildings!
 
-; Don't update VRAM map, let the animation loop do that for us
+; The functions used to build and delete buildings will clear the FLAGS in the
+; tiles affected by the change, so the loop won't try to handle all tiles after
+; one of these changes.
+
+; Don't update VRAM map, let the animation loop do that for us.
 Simulation_CreateBuildings::
 
     ; TODO - Actually use the city statistics (RCI demand) to affect the
@@ -535,7 +565,7 @@ Simulation_CreateBuildings::
         jr      nz,.skip_set_flags
 .set_flags:
 
-         ; Arguments: hl = address. Preserves BC and HL
+        ; Arguments: hl = address. Preserves BC and HL
         call    CityMapGetTileAtAddress ; returns tile = de
         push    hl
 

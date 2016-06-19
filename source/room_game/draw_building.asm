@@ -168,7 +168,7 @@ MapUpdateBuildingSuroundingPowerLines:
 
 ;-------------------------------------------------------------------------------
 
-; Doesn't update VRAM map
+; Doesn't update VRAM map. Clears FLAGS of this tile.
 ; de = coordinates, b = B_xxx define
 MapDrawBuildingForcedCoords:: ; Puts a building
 
@@ -179,7 +179,7 @@ MapDrawBuildingForcedCoords:: ; Puts a building
     pop     de
     jr      _MapDrawBuildingForcedInner
 
-; Doesn't update VRAM map
+; Doesn't update VRAM map. Clears FLAGS of this tile.
 MapDrawBuildingForced:: ; Puts a building at the cursor. No checks.
 
     ; Get cursor position and building size
@@ -492,7 +492,7 @@ BuildingGetCoordinateOriginAndSize::
 
 ; TODO - Combine MapDeleteBuildingForced and MapDeleteBuilding
 
-; Doesn't update VRAM
+; Doesn't update VRAM map. Clears FLAGS of this tile.
 
 ; d = y, e = x -> Coordinates of one of the tiles.
 ; Returns b=0 if could remove building, b=1 if error.
