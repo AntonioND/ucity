@@ -214,8 +214,11 @@ Simulation_CalculateStatistics::
 
         ; Add population to the global population variable
 
-        ld      l,d ; BINARY_TO_BCD is aligned to $100
-        ld      h,BINARY_TO_BCD>>8 ; 2 bytes per entry. LSB first
+        ld      e,d ; BINARY_TO_BCD
+        ld      d,0
+        ld      hl,BINARY_TO_BCD ; 2 bytes per entry. LSB first
+        add     hl,de
+        add     hl,de
 
         ld      a,[hl+]
         ld      b,[hl]
