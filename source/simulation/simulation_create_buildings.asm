@@ -231,7 +231,11 @@ CREATE_BUILDING_FLAGS: ; Input = tile number
             BUILDING2X2FLAGS
         ENDR
         REPT 4
-            BUILDING3X3FLAGS
+        ; Not needed to set flags because this is only used to make buildings
+        ; grow on top of this. A 3x3 building can't be replaced by anything,
+        ; so save some CPU by setting this to 0 and preventing calculations.
+            DB 0,0,0, 0,0,0, 0,0,0
+        ;    BUILDING3X3FLAGS
         ENDR
     ENDR
 
@@ -343,7 +347,8 @@ END_POS_TEST : MACRO
     jp      z,\3
 
     ; Make sure that the building already present here has a lower level than
-    ; the one we are trying to build
+    ; the one we are trying to build. This will also prevent a building to be
+    ; built on top of another one of the same size.
     ld      a,BANK_SCRATCH_RAM_2
     ld      [rSVBK],a
 
@@ -440,10 +445,6 @@ ENDM
 
     ;jr      .build_1x1
 
-    ; Check if there is already a building of this size in this same spot.
-    ; If not, build (get offset and continue calculating building number)
-
-    ; TODO
 .build1x1:
     ld      b,B_ResidentialS1A - B_ResidentialS1A
     jr      .build_end
@@ -463,8 +464,6 @@ ENDM
     ; a = RCI type
     ; b = building size offset
     ; de = origin coordinates
-
-    ; TODO - Get address and clear all build flags in the building area.
 
     cp      a,TYPE_RESIDENTIAL ; Residential first, it's the most common one.
     jr      z,.res
