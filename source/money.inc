@@ -29,10 +29,10 @@ MONEY_INC SET 1
 ; Up to 10 digits!
 DATA_MONEY_AMOUNT : MACRO ; \1 = Label, \2 = Amount
     IF \2 > 9999999999
-        FAIL "Invalid money amount."
+        FAIL "Invalid amount of money."
     ENDC
     IF \2 < 0
-        FAIL "Invalid money amount."
+        FAIL "Invalid amount of money."
     ENDC
 \1:
     DB   (\2              % 10)  |  (((\2 / 10)         % 10) << 4)
