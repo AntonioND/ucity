@@ -496,7 +496,7 @@ BuildingGetCoordinateOriginAndSize::
 
 ; d = y, e = x -> Coordinates of one of the tiles.
 ; Returns b=0 if could remove building, b=1 if error.
-MapDeleteBuildingForced:: ; Puts a building at the cursor. No checks.
+MapDeleteBuildingForced:: ; Removes a building. No checks. No SFX.
 
     ; Get building type and set corresponding "destroyed tile"
     ; --------------------------------------------------------
@@ -671,7 +671,7 @@ ENDC
 
 ; d = y, e = x -> Coordinates of one of the tiles.
 ; Returns b=0 if could remove building, b=1 if error.
-MapDeleteBuilding:: ; Deletes a building. Checks money.
+MapDeleteBuilding:: ; Deletes a building. Checks money. Plays SFX.
 
     ; Get building type and set corresponding "destroyed tile"
     ; --------------------------------------------------------
