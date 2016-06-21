@@ -51,27 +51,43 @@ TILE_HANDLED_POWER_PLANT     EQU %01000000
 TILE_POWER_LEVEL_MASK        EQU %00111111 ; How much power there is now
 
 POWER_PLANT_POWER: ; Base tile, energetic power - LSB first, x delta, y delta
-    DW T_POWER_PLANT_COAL,     3000
+
+; All power plants have fluctuations in power during the year:
+; 1 - Solar plants output more power in summer, wind plants in winter.
+; 2 - The others depend on thermodynamic cycles, which are more efficient in
+;     winter, when the external temperature is lower.
+
+    DW T_POWER_PLANT_COAL
     DB 1,1 ; Origin of power of the power plant
+    DW 3000, 2950, 2900, 2850, 2800, 2750 ; Jan - Jun
+    DW 2750, 2800, 2850, 2900, 2950, 3000 ; Jul - Dec
 
-    DW T_POWER_PLANT_OIL,      2000
+    DW T_POWER_PLANT_OIL
     DB 1,1
+    DW 2000, 1950, 1900, 1850, 1800, 1750 ; Jan - Jun
+    DW 1750, 1800, 1850, 1900, 1950, 2000 ; Jul - Dec
 
-    DW T_POWER_PLANT_WIND,      100
+    DW T_POWER_PLANT_WIND
     DB 0,0
+    DW 200, 180, 160, 140, 120, 100 ; Jan - Jun
+    DW 100, 120, 140, 160, 180, 200 ; Jul - Dec
 
-    DW T_POWER_PLANT_SOLAR,    1000
+    DW T_POWER_PLANT_SOLAR
     DB 1,1
+    DW 1000, 1200, 1400, 1600, 1800, 2000 ; Jan - Jun
+    DW 2000, 1800, 1600, 1400, 1200, 1000 ; Jul - Dec
 
-    DW T_POWER_PLANT_NUCLEAR,  5000
+    DW T_POWER_PLANT_NUCLEAR
     DB 1,1
+    DW 5000, 4950, 4900, 4850, 4800, 4750 ; Jan - Jun
+    DW 4750, 4800, 4850, 4900, 4950, 5000 ; Jul - Dec
 
-    DW T_POWER_PLANT_FUSION,  10000
+    DW T_POWER_PLANT_FUSION
     DB 1,1
+    DW 10000,  9500,  9000,  8500,  8000,  7500 ; Jan - Jun
+    DW  7500,  8000,  8500,  9000,  9500, 10000 ; Jul - Dec
 
     DW 0 ; End
-
-; TODO Change power of solar and wind plants depending on the season.
 
 ;--------------------------------------
 
@@ -267,7 +283,8 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
 .loop_search:
         ld      a,[hl+]
         ld      e,a
-        ld      d,[hl]
+        ld      a,[hl+]
+        ld      d,a
 
         ld      a,b
         cp      a,d
@@ -275,12 +292,6 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
         ld      a,c
         cp      a,e
         jr      nz,.next
-
-            inc     hl
-            ld      a,[hl+]
-            ld      c,a
-            ld      a,[hl+]
-            ld      b,a ; bc = energetic power
 
             pop     de ; (***1)
 
@@ -290,9 +301,29 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
             add     a,e ; X += center of power plant
             ld      e,a
 
-            ld      a,[hl]
+            ld      a,[hl+]
             add     a,d ; Y += center of power plant
             ld      d,a
+
+            ; Get power for the current month
+
+            push    hl
+                ld      a,[date_month]
+                ld      c,a
+                ld      b,0
+                add     hl,bc ; 2 bytes per month
+                add     hl,bc
+
+                ld      a,[hl+]
+                ld      c,a
+                ld      a,[hl]
+                ld      b,a ; bc = energetic power
+            pop     hl
+
+            push    de
+                ld      de,12*2 ; 12 months power values
+                add     hl,de
+            pop     de
 
             jr      .exit_search
 .next:
@@ -306,7 +337,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
         ret
 
 .continue:
-        ld      de,5
+        ld      de,2+(12*2) ; 2 deltas + 12 power values
         add     hl,de
         jr      .loop_search
 
