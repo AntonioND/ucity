@@ -97,6 +97,8 @@ PredefinedMapSetupGameVariables:
     ld      de,MONEY_AMOUNT_START
     call    MoneySet ; de = ptr to the amount of money to set
 
+    call    DateReset
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -168,6 +170,8 @@ SRAMMapLoad: ; a = index to load from. Doesn't check bank limits
 
     ld      de,MONEY_AMOUNT_START
     call    MoneySet ; de = ptr to the amount of money to set
+
+    call    DateReset
 
     ; TODO - Other information
 

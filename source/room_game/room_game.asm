@@ -884,6 +884,8 @@ RoomGame::
         ; Update date, apply budget, etc.
         ; Note: Only if this is not the first iteration step!
 
+        call    DateStep ; TODO : Only after first step?
+
         ; TODO
 
         ; End of this simulation step

@@ -525,15 +525,27 @@ PRICE_LABEL_LEN EQU .end_price_label - .price_label
     DB O_A_LOWERCASE - "a" + "e"
     DB O_COLON
     DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
 .end_date_label:
 
 DATE_LABEL_LEN EQU .end_date_label - .date_label
 
-.print_date: ; TODO
-    ld      b,10
-    ld      de,.test_array
-    ld      hl,$9800+32*1+6
+.print_date:
+
+    add     sp,-8
+
+    ld      hl,sp+0
+    LD_DE_HL
+    call    DatePrint
+
+    ld      b,8
+    ld      hl,sp+0
+    LD_DE_HL
+    ld      hl,$9800+32*1+8
     call    vram_nitro_copy
+
+    add     sp,+8
 
     ld      b,DATE_LABEL_LEN
     ld      de,.date_label
@@ -541,10 +553,6 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
     call    vram_nitro_copy
 
     ret
-.test_array:
-    DB O_ZERO+2,O_ZERO+9,O_BAR
-    DB O_ZERO+0,O_ZERO+5,O_BAR
-    DB O_ZERO+1,O_ZERO+9,O_ZERO+9,O_ZERO+1
 
 ;-----------------------------------
 
