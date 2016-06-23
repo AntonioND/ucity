@@ -69,7 +69,7 @@ MapTileUpdateRoad: ; e = x, d = y
 
     ; Check if this is actually a road
     ; --------------------------------
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -309,7 +309,7 @@ MapDrawRoad:: ; Adds a road tile where the cursor is. Updates neighbours.
     ld      a,b
     and     a,TYPE_HAS_TRAIN
     jr      z,.end_train_check
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      a,[hl] ; get tile from map
@@ -322,7 +322,7 @@ MapDrawRoad:: ; Adds a road tile where the cursor is. Updates neighbours.
     ld      a,b
     and     a,TYPE_HAS_POWER
     jr      z,.end_electricity_check
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      a,[hl] ; get tile from map
@@ -359,7 +359,7 @@ MapDrawRoad:: ; Adds a road tile where the cursor is. Updates neighbours.
     ; ------------------------
 
     call    CursorGetGlobalCoords
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a

@@ -136,7 +136,7 @@ _CityMapFixBorderCoordinates: ; Arguments: e = x , d = y
 
 .end_y:
 
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -169,7 +169,7 @@ CityMapGetType:: ; Arguments: e = x , d = y
     ; if x or y less than 0 or higher than 63 expand map to sea or field
     jp      nz,_CityMapFixBorderCoordinates ; returns from there
 
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -183,7 +183,7 @@ CityMapGetType:: ; Arguments: e = x , d = y
 ;          - Address -> Register HL
 CityMapGetTypeNoBoundCheck:: ; Arguments: e = x , d = y. Preserves de
 
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -204,7 +204,7 @@ CityMapGetTile:: ; Arguments: e = x , d = y
     ; if x or y less than 0 or higher than 63 expand map to sea or field
     jp      nz,_CityMapFixBorderCoordinates ; returns from there
 
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
@@ -228,7 +228,7 @@ CityMapGetTile:: ; Arguments: e = x , d = y
 ;          - Address -> Register HL
 CityMapGetTileNoBoundCheck:: ; Arguments: e = x , d = y
 
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
@@ -259,7 +259,7 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
     ; if x or y less than 0 or higher than 63 expand map to sea or field
     jp      nz,_CityMapFixBorderCoordinates ; returns from there
 
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
@@ -311,7 +311,7 @@ CityMapGetTileAtAddress:: ; Arguments: hl = address. Preserves BC and HL
 
 CityMapDrawTerrainTile:: ; bc = tile, e = x, d = y
 
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
 CityMapDrawTerrainTileAddress:: ; bc = tile, hl = address
 
@@ -663,7 +663,7 @@ CityMapBuildBridge::
     push    bc
     push    de
     push    hl
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
 
         pop     bc ; pop'ing into a different register, watch out!
 

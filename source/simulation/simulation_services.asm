@@ -143,7 +143,7 @@ Simulation_ServicesApplyMask: ; e=x d=y (center)
         push    bc
         push    de
 
-            call    GetMapAddress ; e = x , d = y. preserves de and bc
+            GET_MAP_ADDRESS ; e = x , d = y. preserves de and bc
 
             LD_DE_HL ; de = destination
 
@@ -245,7 +245,7 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
 
             pop     de
             push    de
-            call    GetMapAddress ; preserves de and bc
+            GET_MAP_ADDRESS ; preserves de and bc
 
             ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a
@@ -580,7 +580,7 @@ Simulation_ServicesApplyMaskBig: ; e=x d=y (center)
         push    bc
         push    de
 
-            call    GetMapAddress ; e = x , d = y. preseves de and bc
+            GET_MAP_ADDRESS ; e = x , d = y. preseves de and bc
 
             LD_DE_HL ; de = destination
 
@@ -683,7 +683,7 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
 
             pop     de
             push    de
-            call    GetMapAddress ; preserves de and bc
+            GET_MAP_ADDRESS ; preserves de and bc
 
             ld      a,BANK_CITY_MAP_FLAGS
             ld      [rSVBK],a

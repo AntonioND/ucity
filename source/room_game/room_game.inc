@@ -30,6 +30,27 @@ CITY_MAP_HEIGHT EQU 64
 
 ;-------------------------------------------------------------------------------
 
+; Returns address in HL. Preserves de and bc
+GET_MAP_ADDRESS : MACRO ; e = x , d = y (0 to 63)
+
+     xor     a,a
+     ld      h,d ; ha = y << 8
+     srl     h
+     rra
+     srl     h
+     rra         ; ha = ((y << 8) >> 2) = y << 6 = y * 64
+
+     add     a,e
+     ld      l,a ; hl = y * 64 + x
+
+     ld      a,h
+     add     a,CITY_MAP_TILES >> 8
+     ld      h,a ; hl = base + y * 64 + x
+
+ENDM
+
+;-------------------------------------------------------------------------------
+
 ; This shouldn't be needed, but if removed the assembler will complain when
 ; getting the BANK() of a label that hasn't been used before in that file.
 BANK_CITY_MAP_TILES   EQU 1

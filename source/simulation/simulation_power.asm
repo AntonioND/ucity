@@ -186,7 +186,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ld      a,BANK_SCRATCH_RAM ; Get current state
     ld      [rSVBK],a
 
-    call    GetMapAddress ; e=x , d=y ret: address=hl, preserves DE and BC
+    GET_MAP_ADDRESS ; e=x , d=y ret: address=hl, preserves DE and BC
     ld      a,[hl]
     and     a,TILE_HANDLED_POWER_PLANT
     ; If not 0, this power plant has already been handled (the top left tile
@@ -252,7 +252,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
 
             push    de
             ld      e,b ; e=x, d=y
-            call    GetMapAddress ; e=x , d=y ret: address=hl. prserves de, bc
+            GET_MAP_ADDRESS ; e=x , d=y ret: address=hl. prserves de, bc
             pop     de
 
             set     TILE_HANDLED_POWER_PLANT_BIT,[hl] ; flag as used
@@ -377,7 +377,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
 
     ; 2) If not already handled by this plant, try to fill current coordinates
 
-    call    GetMapAddress ; Preserves DE and BC
+    GET_MAP_ADDRESS ; Preserves DE and BC
 
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
@@ -480,7 +480,7 @@ AddToQueueVerticalDisplacement: ; d=y e=x
 
     ld      a,BANK_SCRATCH_RAM ; Check if already handled
     ld      [rSVBK],a
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
     ld      a,[hl]
     bit     TILE_HANDLED_BIT,a
     ret     nz
@@ -521,7 +521,7 @@ AddToQueueHorizontalDisplacement: ; d=y e=x
 
     ld      a,BANK_SCRATCH_RAM ; Check if already handled
     ld      [rSVBK],a
-    call    GetMapAddress ; preserves de and bc
+    GET_MAP_ADDRESS ; preserves de and bc
     ld      a,[hl]
     bit     TILE_HANDLED_BIT,a
     ret     nz
@@ -676,7 +676,7 @@ Simulation_PowerCheckBuildingTileOkFlag:
         ld      d,b
         ; Returns address in HL. Preserves de and bc
         push    af
-        call    GetMapAddress ; e = x , d = y
+        GET_MAP_ADDRESS ; e = x , d = y
         pop     af
 
         bit     TILE_OK_POWER_BIT,[hl]
@@ -730,7 +730,7 @@ Simulation_PowerCheckBuildingTileOkFlag:
         ; b = y, c = height
         ld      d,b
         ; Returns address in HL. Preserves de and bc
-        call    GetMapAddress ; e = x , d = y
+        GET_MAP_ADDRESS ; e = x , d = y
         res     TILE_OK_POWER_BIT,[hl]
 
         pop     de

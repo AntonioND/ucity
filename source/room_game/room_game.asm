@@ -103,29 +103,6 @@ ClearWRAMX:: ; Sets D000 - DFFF to 0 ($1000 bytes)
 
 ;-------------------------------------------------------------------------------
 
-; Returns address in HL. Preserves de and bc
-GetMapAddress:: ; e = x , d = y (0 to 63)
-
-    ; TODO - Turn this into a macro
-
-    xor     a,a
-    ld      h,d ; ha = y << 8
-    srl     h
-    rra
-    srl     h
-    rra         ; ha = ((y << 8) >> 2) = y << 6 = y * 64
-
-    add     a,e
-    ld      l,a ; hl = y * 64 + x
-
-    ld      a,h
-    add     a,CITY_MAP_TILES >> 8
-    ld      h,a ; hl = base + y * 64 + x
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 GameAnimateMap:
 
     ld      hl,animation_countdown

@@ -111,7 +111,7 @@ MinimapDrawTrafficMap::
                     call    BuildingGetCoordinateOrigin
 
                     ; get origin coordinates into hl
-                    call    GetMapAddress ; Preserves DE
+                    GET_MAP_ADDRESS ; Preserves DE
 
                     ld      a,BANK_CITY_MAP_TRAFFIC
                     ld      [rSVBK],a
