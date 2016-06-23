@@ -186,7 +186,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ld      a,BANK_SCRATCH_RAM ; Get current state
     ld      [rSVBK],a
 
-    call    GetMapAddress ; e=x , d=y ret: address=hl, preserves DE
+    call    GetMapAddress ; e=x , d=y ret: address=hl, preserves DE and BC
     ld      a,[hl]
     and     a,TILE_HANDLED_POWER_PLANT
     ; If not 0, this power plant has already been handled (the top left tile
@@ -250,12 +250,10 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
         push    bc ; save x and w
 .width_loop:
 
-            push    bc
             push    de
             ld      e,b ; e=x, d=y
-            call    GetMapAddress ; e=x , d=y ret: address=hl
+            call    GetMapAddress ; e=x , d=y ret: address=hl. prserves de, bc
             pop     de
-            pop     bc
 
             set     TILE_HANDLED_POWER_PLANT_BIT,[hl] ; flag as used
 
@@ -379,7 +377,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
 
     ; 2) If not already handled by this plant, try to fill current coordinates
 
-    call    GetMapAddress ; Preserves DE
+    call    GetMapAddress ; Preserves DE and BC
 
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
@@ -482,7 +480,7 @@ AddToQueueVerticalDisplacement: ; d=y e=x
 
     ld      a,BANK_SCRATCH_RAM ; Check if already handled
     ld      [rSVBK],a
-    call    GetMapAddress
+    call    GetMapAddress ; preserves de and bc
     ld      a,[hl]
     bit     TILE_HANDLED_BIT,a
     ret     nz
@@ -523,7 +521,7 @@ AddToQueueHorizontalDisplacement: ; d=y e=x
 
     ld      a,BANK_SCRATCH_RAM ; Check if already handled
     ld      [rSVBK],a
-    call    GetMapAddress
+    call    GetMapAddress ; preserves de and bc
     ld      a,[hl]
     bit     TILE_HANDLED_BIT,a
     ret     nz
@@ -666,18 +664,17 @@ Simulation_PowerCheckBuildingTileOkFlag:
 
 .height_loop_check:
 
-    push    de ; save width and x
+    push    de ; save width and x (****1)
 .width_loop_check:
 
         ; Loop
 
-        push    bc
-        push    de
+        push    de ; (****2)
 
         ; e = x, d = width
         ; b = y, c = height
         ld      d,b
-        ; Returns address in HL. Preserves de
+        ; Returns address in HL. Preserves de and bc
         push    af
         call    GetMapAddress ; e = x , d = y
         pop     af
@@ -686,13 +683,12 @@ Simulation_PowerCheckBuildingTileOkFlag:
         jr      nz,.has_power
 
             xor     a,a ; (*) pass A=0 (not powered) to the end of the loop
-            add     sp,+6
+            add     sp,+4 ; pop de / pop de (****12)
             jr      .end_check_loop
 
 .has_power: ; continue normally
 
         pop     de
-        pop     bc
 
         inc     e ; inc x
 
@@ -728,18 +724,16 @@ Simulation_PowerCheckBuildingTileOkFlag:
 
         ; Loop
 
-        push    bc
         push    de
 
         ; e = x, d = width
         ; b = y, c = height
         ld      d,b
-        ; Returns address in HL. Preserves de
+        ; Returns address in HL. Preserves de and bc
         call    GetMapAddress ; e = x , d = y
         res     TILE_OK_POWER_BIT,[hl]
 
         pop     de
-        pop     bc
 
         inc     e ; inc x
 

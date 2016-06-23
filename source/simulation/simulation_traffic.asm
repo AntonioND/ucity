@@ -57,7 +57,7 @@ Simulation_TrafficGetMapValue: ; d=y, e=x
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a
 
-    call    GetMapAddress
+    call    GetMapAddress ; preserves de and bc
     ld      a,[hl]
 
     ret
@@ -465,7 +465,7 @@ Simulation_TrafficSetTileOkFlag::
             call    BuildingGetCoordinateOrigin
 
             ; get origin coordinates into hl
-            call    GetMapAddress ; Preserves DE
+            call    GetMapAddress ; preserves de and bc
 
             ld      a,BANK_CITY_MAP_TRAFFIC
             ld      [rSVBK],a

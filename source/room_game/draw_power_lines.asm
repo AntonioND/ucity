@@ -139,9 +139,7 @@ MapTileUpdatePowerLines:: ; e = x, d = y
 
     ; Check if this is actually a power line
     ; --------------------------------------
-    push    de
-    call    GetMapAddress
-    pop     de
+    call    GetMapAddress ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -408,9 +406,7 @@ MapDrawPowerLines:: ; Adds a train tile in the cursor. Updates neighbours.
     ld      a,b
     and     a,TYPE_HAS_ROAD
     jr      z,.end_road_check
-    push    bc ; save b
-    call    GetMapAddress
-    pop     bc
+    call    GetMapAddress ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      a,[hl] ; get tile from map
@@ -440,9 +436,7 @@ MapDrawPowerLines:: ; Adds a train tile in the cursor. Updates neighbours.
     ld      a,b
     and     a,TYPE_HAS_TRAIN
     jr      z,.end_train_check
-    push    bc ; save B
-    call    GetMapAddress
-    pop     bc
+    call    GetMapAddress ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      a,[hl] ; get tile from map
@@ -479,7 +473,7 @@ MapDrawPowerLines:: ; Adds a train tile in the cursor. Updates neighbours.
     ; ------------------------
 
     call    CursorGetGlobalCoords
-    call    GetMapAddress
+    call    GetMapAddress ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a

@@ -163,9 +163,7 @@ ENDC
     ld      c,[hl] ; load cost
 
     push    af
-    push    bc
-    call    GetMapAddress ; preserves de, returns hl = address
-    pop     bc
+    call    GetMapAddress ; preserves de and bc, returns hl = address
     pop     af
 
     ; a = traffic
@@ -262,14 +260,15 @@ TrafficAdd:
     and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
     ret     z ; if there are no roads or train, don't add to queue
 
-    push    bc ; (*)
+    ; c = accumulated cost
 
     ; add coordinates of destination tile to the queue and write the accumulated
     ; cost to the tile
     call    QueueAdd ; preserves BC and DE
 
-    call    GetMapAddress ; de = tile, hl = address. preserves de
-    pop     bc ; (*) c = accumulated cost
+    call    GetMapAddress ; de = tile, hl = address. preserves de and bc
+
+    ; c = accumulated cost
 
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
@@ -515,9 +514,7 @@ TrafficAddStart:
 
     ; set initial cost to 1!
 
-    push    bc
-    call    GetMapAddress ; preserves de
-    pop     bc
+    call    GetMapAddress ; preserves de and bc
 
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
@@ -637,7 +634,7 @@ TrafficGetBuildingDensityAndPointer:
     call    BuildingGetCoordinateOrigin
 
     ; get origin coordinates into hl
-    call    GetMapAddress ; Preserves DE
+    call    GetMapAddress ; Preserves DE and BC
 
     push    hl
 
@@ -661,7 +658,7 @@ TrafficGetBuildingiRemainingDensityAndPointer:
     call    BuildingGetCoordinateOrigin
 
     ; get origin coordinates into hl
-    call    GetMapAddress ; Preserves DE
+    call    GetMapAddress ; Preserves DE and BC
 
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a
@@ -702,9 +699,7 @@ TrafficRetraceStep:
 
     ; Increase traffic in the TRAFFIC map
 
-    push    bc
-    call    GetMapAddress ; preserves DE
-    pop     bc
+    call    GetMapAddress ; preserves DE and BC
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -857,7 +852,7 @@ Simulation_TrafficHandleSource::
 
     push    de
 
-    call    GetMapAddress ; Preserves DE
+    call    GetMapAddress ; Preserves DE and BC
 
     call    CityMapGetTileAtAddress ; hl=addr, returns tile=de
 
@@ -921,15 +916,13 @@ Simulation_TrafficHandleSource::
 
         push    de ; (**) save width and x for next row
 
-        push    bc
         push    de
         ; e = x, d = width
         ; b = y, c = height
         ld      d,b
-        ; Returns address in HL. Preserves de
+        ; Returns address in HL. Preserves de and bc
         call    GetMapAddress ; e = x , d = y
         pop     de
-        pop     bc
         ; hl = pointer to start of building row
 
         ld      a,1
@@ -1117,7 +1110,7 @@ Simulation_TrafficHandleSource::
     ; The same happens for other buildings, if its final density is not 0 it
     ; means that this building doesn't get all the people it needs for working!
 
-    call    GetMapAddress
+    call    GetMapAddress ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TRAFFIC
     ld      [rSVBK],a

@@ -69,9 +69,7 @@ MapTileUpdateTrain: ; e = x, d = y
 
     ; Check if this is actually a train line
     ; --------------------------------------
-    push    de
-    call    GetMapAddress
-    pop     de
+    call    GetMapAddress ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -329,9 +327,7 @@ MapDrawTrain:: ; Adds a train tile where the cursor is. Updates neighbours.
     ld      a,b
     and     a,TYPE_HAS_ROAD
     jr      z,.end_road_check
-    push    bc ; save b
-    call    GetMapAddress
-    pop     bc
+    call    GetMapAddress ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      a,[hl] ; get tile from map
@@ -361,9 +357,7 @@ MapDrawTrain:: ; Adds a train tile where the cursor is. Updates neighbours.
     ld      a,b
     and     a,TYPE_HAS_POWER
     jr      z,.end_electricity_check
-    push    bc ; save B
-    call    GetMapAddress
-    pop     bc
+    call    GetMapAddress ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      a,[hl] ; get tile from map
@@ -400,7 +394,7 @@ MapDrawTrain:: ; Adds a train tile where the cursor is. Updates neighbours.
     ; ------------------------
 
     call    CursorGetGlobalCoords
-    call    GetMapAddress
+    call    GetMapAddress ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
