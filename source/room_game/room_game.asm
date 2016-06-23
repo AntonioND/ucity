@@ -103,25 +103,24 @@ ClearWRAMX:: ; Sets D000 - DFFF to 0 ($1000 bytes)
 
 ;-------------------------------------------------------------------------------
 
-; Returns address in HL. Preserves de
-GetMapAddress:: ; e = x , d = y
+; Returns address in HL. Preserves de and bc
+GetMapAddress:: ; e = x , d = y (0 to 63)
 
-    ld      bc,CITY_MAP_TILES ; = CITY_MAP_ATTR = CITY_MAP_TYPE ...
+    ; TODO - Turn this into a macro
 
-    ld      l,d
-    ld      h,0
-    add     hl,hl
-    add     hl,hl
-    add     hl,hl
-    add     hl,hl
-    add     hl,hl
-    add     hl,hl ; hl = y * 64
+    xor     a,a
+    ld      h,d ; ha = y << 8
+    srl     h
+    rra
+    srl     h
+    rra         ; ha = ((y << 8) >> 2) = y << 6 = y * 64
 
-    ld      a,e
-    or      a,l
+    add     a,e
     ld      l,a ; hl = y * 64 + x
 
-    add     hl,bc ; hl = base + y * 64 + x
+    ld      a,h
+    add     a,CITY_MAP_TILES >> 8
+    ld      h,a ; hl = base + y * 64 + x
 
     ret
 
