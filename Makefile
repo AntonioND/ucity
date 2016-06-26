@@ -31,7 +31,7 @@ EXT  = gbc
 RGBASM  = ../rgbasm
 RGBLINK = ../rgblink
 RGBFIX  = ../rgbfix
-EMULATOR = ./tools/bgb.exe
+EMULATOR = wine ./tools/bgb.exe
 
 ##                                                                            ##
 ################################################################################
