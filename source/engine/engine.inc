@@ -198,11 +198,13 @@ Cosine  EQU $3F00 ; reading from them. :)
 ;- mul_u8u8u16()    hl = result    a,c = initial values    de preserved        -
 ;- div_u8u8u8()    c = a / b     a = a % b                                     -
 ;- div_s8s8s8()    a / b -> c     a % b -> a     destroys e                    -
+;- div_u16u7u16()     hl / c -> hl     hl % c -> a                             -
 ;-------------------------------------------------------------------------------
 
     GLOBAL  mul_u8u8u16
     GLOBAL  div_u8u8u8
     GLOBAL  div_s8s8s8
+    GLOBAL  div_u16u7u16
 
 ;-------------------------------------------------------------------------------
 ;- memset()    d = value    hl = start address    bc = size                    -

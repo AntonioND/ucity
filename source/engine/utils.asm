@@ -301,6 +301,30 @@ div_s8s8s8::
 
     ret
 
+;-------------------------------------------------------------------------------
+;- div_u16u7u16()     hl / c -> hl     hl % c -> a                             -
+;-------------------------------------------------------------------------------
+
+; Restoring 16-bit / 8-bit Unsigned
+; http://map.grauw.nl/sources/external/z80bits.html
+; Actually it only supports 7 bit values in c.
+
+div_u16u7u16:
+
+    xor     a,a
+
+    REPT    16
+        add     hl,hl
+        rla
+        cp      a,c
+        jr      c,.skip\@
+        sub     a,c
+        inc     l
+.skip\@:
+    ENDR
+
+    ret
+
 ;###############################################################################
 ;#                                                                             #
 ;#                                JOYPAD HANDLER                               #
