@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -40,6 +41,18 @@ city_population_temp: DS 5 ; BCD, LSB first!
 population_residential:: DS 4 ; binary, LSB first
 population_commercial::  DS 4 ; binary, LSB first
 population_industrial::  DS 4 ; binary, LSB first
+population_other::       DS 4 ; binary, LSB first
+
+residential_area_empty: DS 2 ; LSB first. Area in tiles
+residential_area_used:  DS 2
+commercial_area_empty:  DS 2
+commercial_area_used:   DS 2
+industrial_area_empty:  DS 2
+industrial_area_used:   DS 2
+
+graph_value_r:: DS 1 ; 0-7 (0 = high demand, 3,4 = neutral, 7 = low demand)
+graph_value_c:: DS 1 ; They are stored with an offset of -3 to make 0 the
+graph_value_i:: DS 1 ; central value
 
 ;###############################################################################
 
@@ -89,27 +102,255 @@ BINARY_TO_BCD: ; 2 bytes per entry. LSB first
 
 ; Must be alligned to $100
 tile_rci_population_pointer: ; Pointer to variable to add population. LSB first
-    DW  population_residential ; TYPE_FIELD - No population, but don't set the
-    DW  population_residential ; TYPE_FOREST  to NULL.
-    DW  population_residential ; TYPE_WATER
+    DW  population_other ; TYPE_FIELD - No population, but don't set the
+    DW  population_other ; TYPE_FOREST  to NULL.
+    DW  population_other ; TYPE_WATER
     DW  population_residential ; TYPE_RESIDENTIAL
     DW  population_industrial ; TYPE_INDUSTRIAL
     DW  population_commercial ; TYPE_COMMERCIAL
-    DW  population_industrial ; TYPE_POLICE_DEPT
-    DW  population_industrial ; TYPE_FIRE_DEPT
-    DW  population_industrial ; TYPE_HOSPITAL
-    DW  population_commercial ; TYPE_PARK
-    DW  population_commercial ; TYPE_STADIUM
-    DW  population_industrial ; TYPE_SCHOOL
-    DW  population_industrial ; TYPE_HIGH_SCHOOL
-    DW  population_industrial ; TYPE_UNIVERSITY
-    DW  population_commercial ; TYPE_MUSEUM
-    DW  population_commercial ; TYPE_LIBRARY
-    DW  population_commercial ; TYPE_AIRPORT
-    DW  population_industrial ; TYPE_PORT
-    DW  population_industrial ; TYPE_DOCK
-    DW  population_industrial ; TYPE_POWER_PLANT
+    DW  population_other ; TYPE_POLICE_DEPT
+    DW  population_other ; TYPE_FIRE_DEPT
+    DW  population_other ; TYPE_HOSPITAL
+    DW  population_other ; TYPE_PARK
+    DW  population_other ; TYPE_STADIUM
+    DW  population_other ; TYPE_SCHOOL
+    DW  population_other ; TYPE_HIGH_SCHOOL
+    DW  population_other ; TYPE_UNIVERSITY
+    DW  population_other ; TYPE_MUSEUM
+    DW  population_other ; TYPE_LIBRARY
+    DW  population_other ; TYPE_AIRPORT
+    DW  population_other ; TYPE_PORT
+    DW  population_other ; TYPE_DOCK
+    DW  population_other ; TYPE_POWER_PLANT
     ; End of valid types...
+
+;-------------------------------------------------------------------------------
+
+Simulation_CalculateRCIDemand:
+
+    ; Clear variables
+
+    xor     a,a
+
+    ld      hl,residential_area_empty
+    ld      [hl+],a
+    ld      [hl],a
+    ld      hl,residential_area_used
+    ld      [hl+],a
+    ld      [hl],a
+
+    ld      hl,commercial_area_empty
+    ld      [hl+],a
+    ld      [hl],a
+    ld      hl,commercial_area_used
+    ld      [hl+],a
+    ld      [hl],a
+
+    ld      hl,industrial_area_empty
+    ld      [hl+],a
+    ld      [hl],a
+    ld      hl,industrial_area_used
+    ld      [hl+],a
+    ld      [hl],a
+
+    ; Calculate area used and free
+
+    ld      hl,CITY_MAP_TILES
+
+.loop:
+    push    hl
+
+        ld      a,BANK_CITY_MAP_TYPE
+        ld      [rSVBK],a
+
+        ld      a,[hl] ; get type
+        and     a,TYPE_MASK ; without flags!
+        cp      a,TYPE_RESIDENTIAL
+        jr      z,.type_r
+        cp      a,TYPE_COMMERCIAL
+        jr      z,.type_c
+        cp      a,TYPE_INDUSTRIAL
+        jr      z,.type_i
+        jr      .end
+
+IF T_RESIDENTIAL >= 256 || T_COMMERCIAL >= 256 || T_INDUSTRIAL >= 256
+    FAIL "Fix this!"
+ENDC
+
+.type_r:
+        ; Returns: Tile -> Register DE
+        call    CityMapGetTileAtAddress ; hl = address. Preserves BC and HL
+        ld      a,d
+        and     a,a
+        jr      nz,.not_empty_r
+        ld      a,e
+        cp      a,T_RESIDENTIAL
+        jr      nz,.not_empty_r
+            ; Empty
+            ld      hl,residential_area_empty
+            inc     [hl]
+            jr      nc,.end
+            inc     hl
+            inc     [hl]
+            jr      .end
+.not_empty_r:
+            ; Used
+            ld      hl,residential_area_used
+            inc     [hl]
+            jr      nc,.end
+            inc     hl
+            inc     [hl]
+            jr      .end
+
+.type_c:
+        ; Returns: Tile -> Register DE
+        call    CityMapGetTileAtAddress ; hl = address. Preserves BC and HL
+        ld      a,d
+        and     a,a
+        jr      nz,.not_empty_c
+        ld      a,e
+        cp      a,T_COMMERCIAL
+        jr      nz,.not_empty_c
+            ; Empty
+            ld      hl,commercial_area_empty
+            inc     [hl]
+            jr      nc,.end
+            inc     hl
+            inc     [hl]
+            jr      .end
+.not_empty_c:
+            ; Used
+            ld      hl,commercial_area_used
+            inc     [hl]
+            jr      nc,.end
+            inc     hl
+            inc     [hl]
+            jr      .end
+
+.type_i:
+        ; Returns: Tile -> Register DE
+        call    CityMapGetTileAtAddress ; hl = address. Preserves BC and HL
+        ld      a,d
+        and     a,a
+        jr      nz,.not_empty_i
+        ld      a,e
+        cp      a,T_INDUSTRIAL
+        jr      nz,.not_empty_i
+            ; Empty
+            ld      hl,industrial_area_empty
+            inc     [hl]
+            jr      nc,.end
+            inc     hl
+            inc     [hl]
+            jr      .end
+.not_empty_i:
+            ; Used
+            ld      hl,industrial_area_used
+            inc     [hl]
+            jr      nc,.end
+            inc     hl
+            inc     [hl]
+            jr      .end
+
+.end:
+    pop     hl
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ; Calculate proportion of land used
+
+; The more percentage of area is used, the higher the demand!
+CALCULATE_GRAPH : MACRO ; \1 = empty ptr, \2 = used ptr, \3 = destination
+
+    ld      a,[\1+0] ; LSB first
+    ld      l,a
+    ld      a,[\1+1]
+    ld      h,a
+    ; hl = empty area
+
+    ld      a,[\2+0] ; LSB first
+    ld      e,a
+    ld      a,[\2+1]
+    ld      d,a
+    ; de = used area
+
+    add     hl,de
+    ; hl = total area
+
+    ld      a,l
+    or      a,h
+    jr      nz,.more_than_zero_area\@
+        ld      a,$FF ; zero area = set demand to max because there is nothing!
+        jr      .end\@
+.more_than_zero_area\@:
+
+    ; de = used area
+    ; hl = total area
+
+    ld      c,16 ; get the top 7 bits of the area to simplify divisions
+.loop\@:
+        ld      a,h
+        or      a,d
+        bit     6,a ; get 7 bits only
+        jp      nz,.end_simplify_loop\@
+        add     hl,hl ; hl <<= 1
+        sla     e     ; de <<= 1
+        rl      d
+    dec     c
+    jr      nz,.loop\@
+.end_simplify_loop\@:
+
+    ; d = aprox used area
+    ; h = aprox total area
+
+    ; empty / total => hl / c
+
+    ld      c,h ; total
+
+    ld      h,d ; empty
+    ld      l,0 ; 8.8 fixed point!
+
+    call    div_u16u7u16 ; hl / c -> hl
+
+    ; hl = empty / total 8.8 fixed point
+
+    ld      a,h
+    and     a,a ; if hl >= 1.0
+    jr      z,.not_saturated\@
+
+        ld      a,$FF
+        jr      .end\@
+.not_saturated\@:
+
+    ld      a,l ; get fractionary part
+.end\@:
+
+    ; Save to graph the value in register A (0 - $FF)
+
+    swap    a
+    rra
+    and     a,7
+
+    ld      b,a
+    ld      a,7
+    sub     a,b
+
+    ; 0-7 (0 = high demand, 3,4 = neutral, 7 = low demand)
+
+    sub     a,3 ; offset
+
+    ld      [\3],a
+
+ENDM
+
+    CALCULATE_GRAPH residential_area_empty,residential_area_used,graph_value_r
+    CALCULATE_GRAPH commercial_area_empty, commercial_area_used, graph_value_c
+    CALCULATE_GRAPH industrial_area_empty, industrial_area_used, graph_value_i
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -138,6 +379,11 @@ Simulation_CalculateStatistics::
     ENDR
 
     ld      hl,population_industrial
+    REPT    4
+    ld      [hl+],a
+    ENDR
+
+    ld      hl,population_other
     REPT    4
     ld      [hl+],a
     ENDR
@@ -265,7 +511,7 @@ Simulation_CalculateStatistics::
     ; Calculate RCI demand
     ; --------------------
 
-    ; TODO
+    call    Simulation_CalculateRCIDemand
 
     ret
 

@@ -578,14 +578,19 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
 ;-----------------------------------
 
-.print_rci: ; TODO
+.print_rci:
+
+    ld      e,O_RCI_BASE_BAR+3 ; base tile + offset
 
     ld      hl,sp+2
-    ld      a,43
+    ld      a,[graph_value_r]
+    add     a,e
     ld      [hl+],a
-    ld      a,47
+    ld      a,[graph_value_c]
+    add     a,e
     ld      [hl+],a
-    ld      a,44
+    ld      a,[graph_value_i]
+    add     a,e
     ld      [hl+],a
     ld      b,3
     ld      hl,sp+2

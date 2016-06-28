@@ -27,6 +27,7 @@ TEXT_INC SET 1
 
 ; Offsets
 O_CURSOR        EQU 41
+O_RCI_BASE_BAR  EQU 42
 O_SPACE         EQU 53
 O_BAR           EQU 54
 O_COPYRIGHT     EQU 55 ; Mapped to "%"
