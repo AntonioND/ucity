@@ -126,7 +126,7 @@ tile_rci_population_pointer: ; Pointer to variable to add population. LSB first
 
 ;-------------------------------------------------------------------------------
 
-Simulation_CalculateRCIDemand:
+Simulation_CalculateRCIDemand::
 
     ; Clear variables
 
@@ -507,11 +507,6 @@ Simulation_CalculateStatistics::
     ld      [de],a
     inc     de
     ENDR
-
-    ; Calculate RCI demand
-    ; --------------------
-
-    call    Simulation_CalculateRCIDemand
 
     ret
 

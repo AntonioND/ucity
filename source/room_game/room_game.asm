@@ -802,6 +802,7 @@ RoomGame::
 
         ; NOTE: This function doesn't update the VRAM map after removing or
         ; creating buildings because the animation handler will take care of it.
+
         LONG_CALL   Simulation_CreateBuildings
 
         ; Now, simulate this new map. First, power distribution, as it will be
@@ -855,7 +856,7 @@ RoomGame::
 
         ; Calculate RCI graph
 
-        ; TODO
+        LONG_CALL   Simulation_CalculateRCIDemand
 
         ; Update date, apply budget, etc.
         ; Note: Only if this is not the first iteration step!
