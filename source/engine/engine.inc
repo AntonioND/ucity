@@ -112,9 +112,6 @@ ENDM
 ;#                                                                             #
 ;###############################################################################
 
-Sine    EQU $3E00 ; Aligned to $100 to improve speed when
-Cosine  EQU $3F00 ; reading from them. :)
-
 ;-------------------------------------------------------------------------------
 ;- GetRandom()    a = returned value    hl is destroyed    bc, de preserved    -
 ;- SetRandomSeed()    a = new seed                                             -
