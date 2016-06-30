@@ -863,7 +863,7 @@ RoomGame::
 
         call    DateStep ; TODO : Only after first step?
 
-        ; TODO
+        LONG_CALL   Simulation_ApplyBudgetAndTaxes
 
         ; End of this simulation step
 

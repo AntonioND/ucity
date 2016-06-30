@@ -60,9 +60,6 @@ graph_value_i:: DS 1 ; central value
 
 ;-------------------------------------------------------------------------------
 
-; Going to the school is like going to  work for young people, that's why it
-; adds to industrial population
-
 ; Must be alligned to $100
 tile_rci_population_pointer: ; Pointer to variable to add population. LSB first
     DW  population_other ; TYPE_FIELD - No population, but don't set the
