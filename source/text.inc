@@ -26,6 +26,7 @@ TEXT_INC SET 1
 ;###############################################################################
 
 ; Offsets
+O_DASH          EQU 40
 O_CURSOR        EQU 41
 O_RCI_BASE_BAR  EQU 42
 O_SPACE         EQU 53
@@ -40,7 +41,7 @@ O_ARROW         EQU 61 ; Mapped to "#"
 O_APOSTROPHE    EQU 62
 O_QUESTION      EQU 63
 O_EXCLAMATION   EQU 64
-O_NTILDE        EQU 65 ; La eñe, leches XD - Mapped to "~"
+O_NTILDE        EQU 65 ; Mapped to "~"
 O_ZERO          EQU 66
 O_A_UPPERCASE   EQU 76
 O_A_LOWERCASE   EQU 102
