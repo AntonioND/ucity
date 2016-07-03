@@ -315,7 +315,7 @@ WaitSimulationEnds:
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,9999999999
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,0999999999
 
 PAUSE_MENU_RESUME    EQU 0
 PAUSE_MENU_MINIMAP   EQU 1
@@ -371,7 +371,7 @@ PauseMenuHandleOption:
         ; Cheat
 
         ld      de,MONEY_AMOUNT_CHEAT
-        call    MoneyAdd ; de = ptr to the amount of money to set
+        call    MoneySet ; de = ptr to the amount of money to set
 
         ret
 

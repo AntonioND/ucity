@@ -33,13 +33,17 @@
 
 ;-------------------------------------------------------------------------------
 
+BCD_NUMBER_LENGHT EQU 5 ; BCD bytes
+
+;-------------------------------------------------------------------------------
+
 BCD_DE_2TILE_HL:: ; [hl] = BCD2TILE [de] | leading zeros = zeros
 
     ; Convert to tile from BCD
     ; de - LSB first, LSB in lower nibbles
-    ld      bc,9
+    ld      bc,BCD_NUMBER_LENGHT*2-1
     add     hl,bc
-    ld      b,5
+    ld      b,BCD_NUMBER_LENGHT
 .loop_decode:
     ld      a,[de]
     inc     de
@@ -64,7 +68,7 @@ BCD_DE_2TILE_HL_LEADING_SPACES:: ; [hl] = BCD2TILE [de] | leading zeros = spaces
 
     call    BCD_DE_2TILE_HL
 
-    ld      b,9
+    ld      b,BCD_NUMBER_LENGHT*2-1
     inc     hl
 .loop_zero:
     ld      a,[hl]
@@ -79,7 +83,74 @@ BCD_DE_2TILE_HL_LEADING_SPACES:: ; [hl] = BCD2TILE [de] | leading zeros = spaces
 
 ;-------------------------------------------------------------------------------
 
-; returns carry = 1 if overflowed, 0 if not. On overflow, 999999999 is set
+; leading zeros are printed as spaces
+BCD_SIGNED_DE_2TILE_HL_LEADING_SPACES:: ; [hl] = BCD2TILE [de]
+
+    push    hl
+    call    BCD_DE_LW_ZERO ; Returns a = 1 if [de] < 0, preserves de
+    pop     hl
+    and     a,a
+    jr      nz,.negative
+
+        push    hl
+        call    BCD_DE_2TILE_HL_LEADING_SPACES
+        pop     hl
+        ld      [hl],O_SPACE ; space instead of minus sign
+        ret
+
+.negative:
+
+    ; Negative number
+
+    ; Change sign  number and save it to stack. DE won't be needed after this
+
+    add     sp,-BCD_NUMBER_LENGHT ; (*)
+
+    push    hl
+
+    ld      hl,sp+2 ; because of the push hl
+
+    ld      a,h
+    ld      h,d
+    ld      d,a
+    ld      a,l
+    ld      l,e
+    ld      e,a ; swap de and hl
+
+    push    de
+    call    BCD_DE_NEG_HL ; [de] = 0 - [hl]
+    pop     de
+    pop     hl
+
+    ; de = negated number
+    ; hl = destination
+
+    push    hl
+    call    BCD_DE_2TILE_HL_LEADING_SPACES
+    pop     hl
+
+    ; Check where the first digit is printed
+    ld      b,9 ; Limit loop to 10-1 digits (don't overwrite the last digit!)
+.search_dash_loop:
+    inc     hl
+    ld      a,[hl]
+    cp      a,O_SPACE
+    jr      z,.space
+        dec     hl
+        jr      .end_loop
+.space:
+    dec     b
+    jr      nz,.search_dash_loop
+
+.end_loop:
+    ld      [hl],O_DASH ; replace first digit by minus sign
+
+    add     sp,+BCD_NUMBER_LENGHT ; (*)
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 BCD_HL_ADD_DE:: ; [hl] = [hl] + [de]
 
     ; Start adding from LSB
@@ -87,7 +158,7 @@ BCD_HL_ADD_DE:: ; [hl] = [hl] + [de]
     scf
     ccf ; Set+Invert = Clear carry
 
-    REPT 4
+    REPT    BCD_NUMBER_LENGHT+-1 ; The +- is a fix for rgbasm
     ld      a,[de]
     adc     a,[hl]
     daa ; yeah, really
@@ -98,15 +169,6 @@ BCD_HL_ADD_DE:: ; [hl] = [hl] + [de]
     adc     a,[hl]
     daa
     ld      [hl],a
-
-    ret     nc ; if not carry, it didn't overflow
-
-    ld      a,$99 ; saturate to 9999999999
-    REPT    5
-    ld      [hl-],a
-    ENDR
-
-    scf ; set carry
 
     ret
 
@@ -119,9 +181,32 @@ BCD_HL_SUB_DE:: ; [de] = [de] - [hl]
     scf
     ccf ; Set+Invert = Clear carry
 
-    ld      b,5
+    ld      b,BCD_NUMBER_LENGHT
 .loop:
         ld      a,[de]
+        sbc     a,[hl]
+        daa ; yeah, really
+        ld      [de],a
+        inc     de
+        inc     hl
+    dec     b
+    jr      nz,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+BCD_DE_NEG_HL:: ; [de] = 0 - [hl]
+
+    ; Start subtracting from LSB
+
+    scf
+    ccf ; Set+Invert = Clear carry
+
+    ld      c,0
+    ld      b,BCD_NUMBER_LENGHT
+.loop:
+        ld      a,c ; zero
         sbc     a,[hl]
         daa ; yeah, really
         ld      [de],a
@@ -142,7 +227,7 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
 
         ; b is 0, return 0
         xor     a,a
-        REPT    5
+        REPT    BCD_NUMBER_LENGHT
         ld      [de],a
         inc     de
         ENDR
@@ -151,11 +236,11 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
 .not_zero:
 
     ; Get space for temporary variable
-    add     sp,-5
+    add     sp,-BCD_NUMBER_LENGHT
     ld      hl,sp+0
 
     xor     a,a ; Clear temp
-    REPT    5
+    REPT    BCD_NUMBER_LENGHT
     ld      [hl+],a
     ENDR
 
@@ -167,7 +252,7 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
         push    de
         ld      hl,sp+2
 
-        ld      c,5
+        ld      c,BCD_NUMBER_LENGHT
 .loop:
             ; Start adding from LSB
             ld      a,[de]
@@ -185,29 +270,46 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
 
     ; Save result in [de]
     ld      hl,sp+0
-    REPT    5
+    REPT    BCD_NUMBER_LENGHT
     ld      a,[hl+]
     ld      [de],a
     inc     de
     ENDR
 
     ; Reclaim space
-    add     sp,+5
+    add     sp,+BCD_NUMBER_LENGHT
 
+    ret
+
+;-------------------------------------------------------------------------------
+
+BCD_DE_LW_ZERO:: ; Returns a = 1 if [de] < 0, preserves de
+
+    ld      hl,BCD_NUMBER_LENGHT-1 ; last byte
+    add     hl,de
+    ld      a,[hl] ; get MSB
+    cp      a,$50 ; carry flag is set if $50 > a (a has a positive number)
+    jr      nc,.negative
+
+    xor     a,a
+    ret
+
+.negative:
+    ld      a,1
     ret
 
 ;-------------------------------------------------------------------------------
 
 BCD_HL_GE_DE:: ; Returns 1 if [hl] >= [de]
 
-    REPT    4
+    REPT    BCD_NUMBER_LENGHT+-1 ; The +- is a fix for rgbasm
     inc     de
     inc     hl
     ENDR
 
     ; Start comparing from MSB
 
-    REPT    5
+    REPT    BCD_NUMBER_LENGHT
     ld      a,[de]
     cp      a,[hl]
     jr      z,.dont_exit\@

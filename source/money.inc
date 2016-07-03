@@ -25,6 +25,10 @@ MONEY_INC SET 1
 
 ;###############################################################################
 
+MONEY_AMOUNT_SIZE EQU 5 ; 5 bytes
+
+;-------------------------------------------------------------------------------
+
 ; Create an array of bytes consisting on the money amount passed as argument
 ; Up to 10 digits!
 DATA_MONEY_AMOUNT : MACRO ; \1 = Label, \2 = Amount

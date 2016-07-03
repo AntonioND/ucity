@@ -461,7 +461,7 @@ StatusBarUpdate::
     ; Convert to tile from BCD
     ld      de,MoneyWRAM ; BCD, LSB first, LSB in lower nibbles
     ld      hl,sp+2
-    call    BCD_DE_2TILE_HL_LEADING_SPACES
+    call    BCD_SIGNED_DE_2TILE_HL_LEADING_SPACES
 
     ; Copy to VRAM
     xor     a,a
