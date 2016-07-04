@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "money.inc"
     INCLUDE "tileset_info.inc"
 
 ;###############################################################################
@@ -34,7 +35,7 @@
 
 ;-------------------------------------------------------------------------------
 
-; Only 3 bytes needed of BCD data:
+; Only 3 bytes needed of BCD data. LSB first
 ; Max amount of money per tile * tiles in map = 99*64*64 = 175890 = 3 BCD bytes
 
 taxes_rci:          DS 3 ; Residential, commercial, industrial
@@ -283,9 +284,10 @@ tile_money_destination: ; Pointer to variable to add money. LSB first
 
 ;-------------------------------------------------------------------------------
 
-Simulation_ApplyBudgetAndTaxes::
+Simulation_CalculateBudgetAndTaxes::
 
     ; Clear variables
+    ; ---------------
 
     xor     a,a
 
@@ -325,6 +327,7 @@ Simulation_ApplyBudgetAndTaxes::
     ld      [hl+],a
 
     ; Calculate taxes and budget
+    ; --------------------------
 
     ld      hl,CITY_MAP_TILES
 
@@ -389,6 +392,93 @@ ENDC
 
     bit     5,h ; Up to E000
     jr      z,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+Simulation_ApplyBudgetAndTaxes::
+
+    add     sp,-MONEY_AMOUNT_SIZE*2 ; (*) save space for 2 money amounts
+
+MONEY_DEST EQU 0 ; add to sp to get the pointer to this variable
+MONEY_TEMP EQU 5
+
+EXPAND_MONEY : MACRO ; de = ptr to 3 byte amount, hl = ptr to 5 byte dest
+    REPT    3
+        ld      a,[de]
+        ld      [hl+],a
+        inc     de
+    ENDR
+    xor     a,a
+    ld      [hl+],a
+    ld      [hl+],a
+ENDM
+
+    ; Save to temp variable
+
+    ld      de,MoneyWRAM
+    ld      hl,sp+MONEY_DEST
+    REPT    MONEY_AMOUNT_SIZE
+        ld      a,[de]
+        ld      [hl+],a
+        inc     de
+    ENDR
+
+ADD_TAXES : MACRO ; \1 = pointer to 3-byte money amount
+    ld      de,\1
+    ld      hl,sp+MONEY_TEMP
+    EXPAND_MONEY
+
+    ld      hl,sp+MONEY_TEMP
+    LD_DE_HL
+    ld      hl,sp+MONEY_DEST
+    call    BCD_HL_ADD_DE ; [hl] = [hl] + [de]
+ENDM
+
+    ; Add RCI taxes
+    ADD_TAXES   taxes_rci
+
+    ; Add other taxes
+    ADD_TAXES   taxes_other
+
+PAY_COST : MACRO ; \1 = pointer to 3-byte money amount
+    ld      de,\1
+    ld      hl,sp+MONEY_TEMP
+    EXPAND_MONEY
+
+    ld      hl,sp+MONEY_DEST
+    LD_DE_HL
+    ld      hl,sp+MONEY_TEMP
+    call    BCD_HL_SUB_DE ; [de] = [de] - [hl]
+ENDM
+
+    ; Pay police
+    PAY_COST    budget_police
+
+    ; Pay firemen
+    PAY_COST    budget_firemen
+
+    ; Pay healthcare
+    PAY_COST    budget_healthcare
+
+    ; Pay education
+    PAY_COST    budget_education
+
+    ; Pay transport
+    PAY_COST    budget_transport
+
+    ; Save result back
+
+    ld      de,MoneyWRAM
+    ld      hl,sp+MONEY_DEST
+    REPT    MONEY_AMOUNT_SIZE
+        ld      a,[hl+]
+        ld      [de],a
+        inc     de
+    ENDR
+
+    add     sp,+MONEY_AMOUNT_SIZE*2 ; (*) reclaim space
 
     ret
 

@@ -863,6 +863,8 @@ RoomGame::
 
         call    DateStep ; TODO : Only after first step?
 
+        ; TODO : Do this in January
+        LONG_CALL   Simulation_CalculateBudgetAndTaxes
         LONG_CALL   Simulation_ApplyBudgetAndTaxes
 
         ; End of this simulation step
