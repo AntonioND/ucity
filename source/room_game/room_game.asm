@@ -361,7 +361,17 @@ PauseMenuHandleOption:
     jr      nz,.not_budget
 
         ; Budget
+        ld      a,[simulation_running]
+        and     a,a ; If budget menu room is entered while a simulation is
+        jr      z,.continue_budget  ; running, bad things may happen when.
+        call    SFX_ErrorUI ; calculating taxes, etc.
+        ret
 
+.continue_budget:
+        call    RoomBudgetMenu
+
+        ld      a,0 ; load gfx only
+        call    RoomGameLoad
         ret
 
 .not_budget:
