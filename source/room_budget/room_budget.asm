@@ -23,6 +23,10 @@
     INCLUDE "hardware.inc"
     INCLUDE "engine.inc"
 
+;-------------------------------------------------------------------------------
+
+    INCLUDE "text.inc"
+
 ;###############################################################################
 
     SECTION "Room Budget Variables",WRAM0
@@ -71,20 +75,73 @@ BudgetMenuMandleInput: ; If it returns 1, exit room. If 0, continue
         jr      z,.end_left
             dec     a
             ld      [tax_percentage],a
+            call    BudgetMenuPrintTaxPercent
 .end_left:
 
     ld      a,[joy_pressed]
     and     a,PAD_RIGHT
     jr      z,.end_right
         ld      a,[tax_percentage]
-        cp      a,TAX_PERCENTAGE_MAX+1
+        cp      a,TAX_PERCENTAGE_MAX
         jr      z,.end_right
             inc     a
             ld      [tax_percentage],a
+            call    BudgetMenuPrintTaxPercent
 .end_right:
 
     xor     a,a
     ret ; return 0
+
+;-------------------------------------------------------------------------------
+
+BudgetMenuPrintTaxPercent:
+
+    xor     a,a
+    ld      [rVBK],a
+
+    ld      a,[tax_percentage]
+    sla     a
+    ld      l,a
+    ld      h,(BINARY_TO_BCD>>8) & $FF ; 2 bytes per entry. LSB first
+    ld      a,[hl] ; Tax percentage goes from 0 to 20, no need to get MSB!
+
+    ; Coordinates of tax percent on the screen: 15, 5
+    ld      de,$9800 + 32*5 + 15
+
+    ld      b,a ; (*) save
+
+        ld      a,b
+        swap    a
+        and     a,$0F
+        jr      nz,.not_zero
+
+.is_zero:
+            ld      h,O_SPACE
+            jr      .write_tile
+.not_zero:
+            BCD2Tile
+            ld      h,a ; save
+.write_tile
+
+        di
+        WAIT_SCREEN_BLANK ; Clobbers registers A and C
+        ld      a,h ; restore
+        ld      [de],a
+        ei
+
+    inc     de
+
+        ld      a,b
+        and     a,$0F
+        BCD2Tile
+        ld      h,a ; save
+        di
+        WAIT_SCREEN_BLANK ; Clobbers registers A and C
+        ld      a,h ; restore
+        ld      [de],a
+        ei
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -193,6 +250,9 @@ RoomBudgetMenu::
     call    LoadText
 
     call    RoomBudgetMenuLoadBG
+
+    ; Update numbers
+    call    BudgetMenuPrintTaxPercent
 
     call    LoadTextPalette
 
