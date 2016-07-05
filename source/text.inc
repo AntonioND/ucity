@@ -26,6 +26,7 @@ TEXT_INC SET 1
 ;###############################################################################
 
 ; Offsets
+O_PERCENT       EQU 39
 O_DASH          EQU 40
 O_CURSOR        EQU 41
 O_RCI_BASE_BAR  EQU 42
