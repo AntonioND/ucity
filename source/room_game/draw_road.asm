@@ -142,6 +142,7 @@ MapTileUpdateRoad: ; e = x, d = y
 
     ld      b,0
 
+IF 0
     push    bc
     push    de
     dec     e
@@ -153,6 +154,7 @@ MapTileUpdateRoad: ; e = x, d = y
     jr      z,.skip0
     set     0,b
 .skip0:
+ENDC
 
     push    de
     push    bc
@@ -168,6 +170,7 @@ MapTileUpdateRoad: ; e = x, d = y
 .skip1:
     pop     de
 
+IF 0
     push    bc
     push    de
     inc     e
@@ -179,6 +182,7 @@ MapTileUpdateRoad: ; e = x, d = y
     jr      z,.skip2
     set     2,b
 .skip2:
+ENDC
 
     push    de
     push    bc
@@ -208,6 +212,7 @@ MapTileUpdateRoad: ; e = x, d = y
 .skip4:
     pop     de
 
+IF 0
     push    bc
     push    de
     dec     e
@@ -219,6 +224,7 @@ MapTileUpdateRoad: ; e = x, d = y
     jr      z,.skip5
     set     5,b
 .skip5:
+ENDC
 
     push    de
     push    bc
@@ -234,6 +240,7 @@ MapTileUpdateRoad: ; e = x, d = y
 .skip6:
     pop     de
 
+IF 0
     push    bc
     push    de
     inc     e
@@ -245,6 +252,7 @@ MapTileUpdateRoad: ; e = x, d = y
     jr      z,.skip7
     set     7,b
 .skip7:
+ENDC
 
     ; Compare with table
 
