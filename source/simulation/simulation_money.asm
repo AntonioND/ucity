@@ -38,13 +38,13 @@
 ; Only 3 bytes needed of BCD data. LSB first
 ; Max amount of money per tile * tiles in map = 99*64*64 = 175890 = 3 BCD bytes
 
-taxes_rci:          DS 3 ; Residential, commercial, industrial
-taxes_other:        DS 3 ; Stadium, airport, seaport
-budget_police:      DS 3
-budget_firemen:     DS 3
-budget_healthcare:  DS 3 ; Hospital, park
-budget_education:   DS 3 ; School, high school, university, museum, library
-budget_transport:   DS 3 ; Road, train tracks
+taxes_rci::         DS 3 ; Residential, commercial, industrial
+taxes_other::       DS 3 ; Stadium, airport, seaport
+budget_police::     DS 3
+budget_firemen::    DS 3
+budget_healthcare:: DS 3 ; Hospital, park
+budget_education::  DS 3 ; School, high school, university, museum, library
+budget_transport::  DS 3 ; Road, train tracks
 
 ;###############################################################################
 

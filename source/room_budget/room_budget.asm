@@ -94,6 +94,86 @@ BudgetMenuMandleInput: ; If it returns 1, exit room. If 0, continue
 
 ;-------------------------------------------------------------------------------
 
+PrintMoneyAmount:: ; [hl] = Print [de] | leading zeros = spaces
+
+    ; Convert to tile from BCD
+    ; de - LSB first, LSB in lower nibbles
+    ld      bc,3*2-1
+    add     hl,bc
+    ld      b,3
+.loop_decode:
+    ld      a,[de]
+    inc     de
+    ld      c,a
+
+    and     a,$0F
+    add     a,O_ZERO
+    ld      [hl-],a
+
+    ld      a,c
+    swap    a
+    and     a,$0F
+    add     a,O_ZERO
+    ld      [hl-],a
+
+    dec     b
+    jr      nz,.loop_decode
+
+    ld      b,3*2-1
+    inc     hl
+.loop_zero:
+    ld      a,[hl]
+    cp      a,O_ZERO
+    jr      nz,.end
+    ld      a,O_SPACE
+    ld      [hl+],a
+    dec     b
+    jr      nz,.loop_zero
+.end:
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+BudgetMenuPrintMoneyAmounts:
+
+    add     sp,-6
+
+PRINT_MONEY : MACRO ; \1 = pointer to amount of money, \2 = Y coordinate
+    ld      de,\1
+    ld      hl,sp+0
+    call    PrintMoneyAmount ; [hl] = Print [de]
+
+    ld      de,$9800 + 32*(\2) + 13
+    ld      hl,sp+0
+
+    ld      b,6
+.loop\@:
+    di
+    WAIT_SCREEN_BLANK ; Clobbers registers A and C
+    ld      a,[hl+]
+    ld      [de],a
+    inc     de
+    ei
+    dec     b
+    jr      nz,.loop\@
+ENDM
+
+    PRINT_MONEY taxes_rci,   6
+    PRINT_MONEY taxes_other, 7
+
+    PRINT_MONEY budget_police,     10
+    PRINT_MONEY budget_firemen,    11
+    PRINT_MONEY budget_healthcare, 12
+    PRINT_MONEY budget_education,  13
+    PRINT_MONEY budget_transport,  14
+
+    add     sp,+6
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 BudgetMenuPrintTaxPercent:
 
     xor     a,a
@@ -253,6 +333,7 @@ RoomBudgetMenu::
 
     ; Update numbers
     call    BudgetMenuPrintTaxPercent
+    call    BudgetMenuPrintMoneyAmounts
 
     call    LoadTextPalette
 
