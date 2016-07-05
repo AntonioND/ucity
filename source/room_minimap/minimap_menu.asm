@@ -169,7 +169,7 @@ MinimapMenuRefresh::
 
 ;-------------------------------------------------------------------------------
 
-MinimapMenuMandleInput:: ; If it returns 1, exit room. If 0, continue
+MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
 
     ld      a,[minimap_menu_active]
     and     a,a

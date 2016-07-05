@@ -193,7 +193,7 @@ MinimapSelectMap:: ; a = map to select
 
 InputHandleMinimap:
 
-    call    MinimapMenuMandleInput ; If it returns 1, exit room
+    call    MinimapMenuHandleInput ; If it returns 1, exit room
     and     a,a
     ret     z ; don't exit
 
