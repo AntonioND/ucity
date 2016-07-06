@@ -134,7 +134,7 @@ PrintMoneyAmount:: ; [hl] = Print [de] | leading zeros = spaces
 
 BudgetMenuPrintMoneyAmounts:
 
-    add     sp,-6
+    add     sp,-10 ; (*) reserve max space
 
 PRINT_MONEY : MACRO ; \1 = pointer to amount of money, \2 = Y coordinate
     ld      de,\1
@@ -165,7 +165,29 @@ ENDM
     PRINT_MONEY budget_education,  13
     PRINT_MONEY budget_transport,  14
 
-    add     sp,+6
+    ; Budget result
+
+    ld      hl,sp+0
+    ld      de,budget_result
+    call    BCD_SIGNED_DE_2TILE_HL_LEADING_SPACES ; [hl] = BCD2TILE [de]
+
+    ld      de,$9800 + 32*16 + 9
+    ld      hl,sp+0
+
+    ld      b,10
+.loop_result:
+    di
+    WAIT_SCREEN_BLANK ; Clobbers registers A and C
+    ld      a,[hl+]
+    ld      [de],a
+    inc     de
+    ei
+    dec     b
+    jr      nz,.loop_result
+
+    ; End
+
+    add     sp,+10 ; (*) claim back space
 
     ret
 

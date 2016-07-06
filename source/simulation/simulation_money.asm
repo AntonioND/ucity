@@ -46,6 +46,8 @@ budget_healthcare:: DS 3 ; Hospital, park
 budget_education::  DS 3 ; School, high school, university, museum, library
 budget_transport::  DS 3 ; Road, train tracks
 
+budget_result::     DS 5
+
 tax_percentage::    DS 1
 
 ;###############################################################################
@@ -516,15 +518,14 @@ EXPAND_MONEY : MACRO ; de = ptr to 3 byte amount, hl = ptr to 5 byte dest
     ld      [hl+],a
 ENDM
 
-    ; Save to temp variable
+    ; Clear destination variable
 
-    ld      de,MoneyWRAM
+    xor     a,a
     ld      hl,sp+MONEY_DEST
     REPT    MONEY_AMOUNT_SIZE
-        ld      a,[de]
         ld      [hl+],a
-        inc     de
     ENDR
+
 
 ADD_TAXES : MACRO ; \1 = pointer to 3-byte money amount
     ld      de,\1
@@ -568,6 +569,30 @@ ENDM
 
     ; Pay transport
     PAY_COST    budget_transport
+
+    ; Save result
+    ld      de,budget_result
+    ld      hl,sp+MONEY_DEST
+    REPT    MONEY_AMOUNT_SIZE
+        ld      a,[hl+]
+        ld      [de],a
+        inc     de
+    ENDR
+
+    ; Add original amount of money to temp variable
+
+    scf
+    ccf ; clear carry
+
+    ld      de,MoneyWRAM
+    ld      hl,sp+MONEY_DEST
+    REPT    MONEY_AMOUNT_SIZE
+        ld      a,[de]
+        adc     a,[hl]
+        daa
+        ld      [hl+],a
+        inc     de
+    ENDR
 
     ; Save result back
 
