@@ -46,6 +46,8 @@ budget_healthcare:: DS 3 ; Hospital, park
 budget_education::  DS 3 ; School, high school, university, museum, library
 budget_transport::  DS 3 ; Road, train tracks
 
+tax_percentage::    DS 1
+
 ;###############################################################################
 
     SECTION "Simulation Calculate Money Functions",ROMX
