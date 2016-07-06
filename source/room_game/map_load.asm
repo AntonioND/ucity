@@ -99,6 +99,9 @@ PredefinedMapSetupGameVariables:
 
     call    DateReset
 
+    ld      a,10
+    ld      [tax_percentage],a
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -174,6 +177,9 @@ SRAMMapLoad: ; a = index to load from. Doesn't check bank limits
     call    DateReset
 
     ; TODO - Other information
+
+    ld      a,10 ; TODO - Load from SRAM
+    ld      [tax_percentage],a
 
     ; Return start coordinates
     ld      d,(CITY_MAP_WIDTH-20)/2 ; X
