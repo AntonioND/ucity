@@ -395,6 +395,105 @@ ENDC
     bit     5,h ; Up to E000
     jr      z,.loop
 
+    ; Adjust taxes according to the tax percentage
+    ; --------------------------------------------
+
+    ; 10% = base cost => Final cost = base cost * tax / 10
+
+    add     sp,-4 ; (**) reserve space for temporary calculations + 1 byte
+
+MULTIPLY_TAX : MACRO ; \1 = pointer to the amount to multiply
+    xor     a,a
+    ld      hl,sp+0
+    REPT    4
+    ld      [hl+],a
+    ENDR
+
+    ld      a,[tax_percentage] ; multiply base cost
+    and     a,a
+    jr      z,.end_addition\@
+    ld      c,a
+.loop_addition\@:
+
+        ld      de,\1
+        ld      hl,sp+0
+
+        scf
+        ccf ; clear carry flag
+
+        REPT    3 ; add
+            ld      a,[de]
+            adc     a,[hl]
+            daa
+            ld      [hl+],a
+            inc     de
+        ENDR
+
+        ld      a,0
+        adc     a,[hl]
+        daa
+        ld      [hl+],a
+
+    dec     c
+    jr      nz,.loop_addition\@
+.end_addition\@:
+
+    ; Divide by 10
+
+    ld      de,\1
+    ld      hl,sp+0
+
+    ld      a,[hl+]
+    swap    a
+    and     a,$0F
+    ld      b,a
+
+    ld      a,[hl+]
+    ld      c,a
+
+    and     a,$0F
+    swap    a
+    or      a,b
+
+    ld      [de],a
+    inc     de
+
+
+    ld      a,c
+    swap    a
+    and     a,$0F
+    ld      b,a
+
+    ld      a,[hl+]
+    ld      c,a
+
+    and     a,$0F
+    swap    a
+    or      a,b
+
+    ld      [de],a
+    inc     de
+
+
+    ld      a,c
+    swap    a
+    and     a,$0F
+    ld      b,a
+
+    ld      a,[hl]
+
+    and     a,$0F
+    swap    a
+    or      a,b
+
+    ld      [de],a
+ENDM
+
+    MULTIPLY_TAX    taxes_rci
+    MULTIPLY_TAX    taxes_other
+
+    add     sp,+4 ; (**) reclaim space
+
     ret
 
 ;-------------------------------------------------------------------------------
