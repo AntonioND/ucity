@@ -584,14 +584,12 @@ Simulation_ServicesApplyMaskBig: ; e=x d=y (center)
 
             LD_DE_HL ; de = destination
 
-            ld      l,b
-            ld      h,0
-            add     hl,hl ; TODO - Optimize this
-            add     hl,hl
-            add     hl,hl
-            add     hl,hl
-            add     hl,hl
-            add     hl,hl ; b<<6 = b*64 (SERVICES_MASK_BIG_WIDTH)
+            ld      l,0
+            ld      h,b ; b << 6 == (b << 8) >> 2
+            srl     h
+            rr      l
+            srl     h
+            rr      l ; b<<6 = b*64 (SERVICES_MASK_BIG_WIDTH)
 IF SERVICES_MASK_BIG_WIDTH != 64
     FAIL "Fix this."
 ENDC
