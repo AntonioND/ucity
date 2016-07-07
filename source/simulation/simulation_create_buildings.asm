@@ -515,6 +515,20 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
+; Higher number = Higher probability (0-255)
+
+CreateBuildingProbability: ; 0 to 20% taxes - 21 values
+    DB  $FF ; no taxes = everyone wants to come!
+    DB  $F8,$F0,$E8,$E0,$D8,$D0,$C8,$C0,$B8,$B0
+    DB  $A0,$90,$80,$70,$60,$50,$40,$30,$20,$10
+
+DemolishBuildingProbability: ; 0 to 20% taxes - 21 values
+    DB  $08 ; no taxes = nobody wants to leave!
+    DB  $0C,$10,$14,$18,$1C,$20,$24,$28,$2C,$30
+    DB  $38,$40,$48,$50,$58,$60,$68,$70,$78,$80
+
+;-------------------------------------------------------------------------------
+
 ; After calling Simulation_FlagCreateBuildings and calculating the RCI demand in
 ; Simulation_CalculateStatistics, create and destroy buildings!
 
@@ -525,13 +539,30 @@ ENDM
 ; Don't update VRAM map, let the animation loop do that for us.
 Simulation_CreateBuildings::
 
-    ; TODO - Actually use the city statistics (RCI demand) to affect the
-    ; creation or destruction of buildings
+    ; The probability of creating and destroying buildings depend on the amount
+    ; of taxes.
+
+    add     sp,-2 ; (***)
+
+    ld      a,[tax_percentage]
+    ld      e,a
+    ld      d,0
+    ld      hl,CreateBuildingProbability ; 0 to 20% taxes - 21 amounts
+    add     hl,de
+    ld      b,[hl] ; create probability
+    ld      hl,DemolishBuildingProbability ; 0 to 20% taxes - 21 amounts
+    add     hl,de
+    ld      c,[hl] ;demolish probability
+
+    ld      hl,sp+0
+    ld      [hl],b ; [sp+0] = create probability
+    inc     hl
+    ld      [hl],c ; [sp+1] = demolish probability
 
     ; Create buildings
     ; ----------------
 
-    ; First set a temporary map with information to expand buildings and
+    ; First, set a temporary map with information to expand buildings and
     ; another one with information about the building size in order not to
     ; build small buildings on top of a big one.
 
@@ -656,10 +687,11 @@ Simulation_CreateBuildings::
                     push    de
                     push    hl
                     call    GetRandom
+                    ld      hl,sp+8 ; [sp+0] = create probability (4 push)
+                    cp      a,[hl] ; carry flag is set if [hl] > a (build)
                     pop     hl
                     pop     de
-                    and     a,$0F
-                    call    z,Simulation_CreateBuildingsTryBuild
+                    call    c,Simulation_CreateBuildingsTryBuild
 
 .not_build:
 
@@ -737,9 +769,10 @@ ENDC
 
                     push    de
                     call    GetRandom
+                    ld      hl,sp+7 ; [sp+1] = demolish probability (3 push)
+                    cp      a,[hl] ; carry flag is set if [hl] > a (demolish)
                     pop     de
-                    and     a,$0F
-                    call    z,MapDeleteBuildingForced
+                    call    c,MapDeleteBuildingForced
 
                     ; After demolishing the building all the tiles will be RCI,
                     ; so it is not needed to clear the demolish request flag.
@@ -761,6 +794,10 @@ ENDC
     inc     d
     bit     6,d
     jp      z,.loopy2
+
+    ; End
+
+    add     sp,+2 ; (***)
 
     ret
 
