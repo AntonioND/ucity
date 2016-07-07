@@ -6,9 +6,8 @@ The open-source city building game for Game Boy Color.
 Introduction
 ------------
 
-This is a very early version of BitCity. As such, most of the functionality is
-missing. The only finished part is the editor mode. This is not playable. This
-is just the skeleton of the game it may become in a not so far away future.
+This is a very early version of BitCity. As such, a lot of the functionality is
+missing. This is not playable yet, but it's getting there.
 
 It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
 every once in a while.
@@ -20,7 +19,6 @@ General to do list:
 - Simulation - Most parts are ready
   - Graphical output (trains, planes, boats...)
 - Save menus
-- Budget screen
 - Sample cities
 - Random map generator
 - Compression
@@ -66,7 +64,7 @@ License
 -------
 
 This game is licensed under the GPL v3 license. You may have received the source
-code of this game along with the ROM file. If not, the source code is freely 
+code of this game along with the ROM file. If not, the source code is freely
 available at the following address:
 
     https://github.com/AntonioND/bitcity
