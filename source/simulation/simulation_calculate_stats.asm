@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "money.inc"
     INCLUDE "tileset_info.inc"
 
 ;###############################################################################
@@ -33,6 +34,8 @@
     SECTION "Simulation Calculate Statistics Variables",WRAM0
 
 ;-------------------------------------------------------------------------------
+
+city_type:: DS 1 ; TYPE_CITY, etc
 
 city_population:: DS 5 ; BCD, LSB first!
 city_population_temp: DS 5 ; BCD, LSB first!
@@ -467,6 +470,58 @@ Simulation_CalculateStatistics::
     ld      [de],a
     inc     de
     ENDR
+
+    ; Save city type to variable
+
+    jr      Simulation_CalculateCityType ; call and return from here
+
+;-------------------------------------------------------------------------------
+
+    DATA_MONEY_AMOUNT   POPULATION_TOWN,        1000
+    DATA_MONEY_AMOUNT   POPULATION_CITY,        5000
+    DATA_MONEY_AMOUNT   POPULATION_METROPOLIS, 10000
+    DATA_MONEY_AMOUNT   POPULATION_CAPITAL,    50000
+
+Simulation_CalculateCityType::
+
+    ld      a,TYPE_VILLAGE
+    ld      [city_type],a
+
+    ld      de,POPULATION_TOWN
+    ld      hl,city_population
+    call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
+    and     a,a
+    ret     z ; continue actual population > reference population
+
+    ld      a,TYPE_TOWN
+    ld      [city_type],a
+
+    ld      de,POPULATION_CITY
+    ld      hl,city_population
+    call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
+    and     a,a
+    ret     z ; continue actual population > reference population
+
+    ld      a,TYPE_CITY
+    ld      [city_type],a
+
+    ld      de,POPULATION_METROPOLIS
+    ld      hl,city_population
+    call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
+    and     a,a
+    ret     z ; continue actual population > reference population
+
+    ld      a,TYPE_METROPOLIS
+    ld      [city_type],a
+
+    ld      de,POPULATION_CAPITAL
+    ld      hl,city_population
+    call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
+    and     a,a
+    ret     z ; continue actual population > reference population
+
+    ld      a,TYPE_CAPITAL
+    ld      [city_type],a
 
     ret
 
