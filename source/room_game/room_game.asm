@@ -846,10 +846,13 @@ RoomGame::
         LONG_CALL_ARGS  Simulation_Services
         LONG_CALL   Simulation_EducationSetTileOkFlag
 
-        ; TODO - Ignore this if the city is too small.
+        ld      a,[city_type]
+        cp      a,TYPE_VILLAGE
+        jr      z,.city_is_too_small ; Ignore this if the city is too small
         ld      bc,T_HIGH_SCHOOL_CENTER
         LONG_CALL_ARGS  Simulation_ServicesBig
         LONG_CALL   Simulation_EducationAddTileOkFlag
+.city_is_too_small:
 
         ; After simulating traffic, power, etc, simulate pollution
 
