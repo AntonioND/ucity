@@ -496,9 +496,6 @@ ENDM
     and     a,3
     add     a,b ; randomize building type
 
-    ; TODO - Instead of randomizing, check demand? Maybe not a good idea
-    ; because it would reduce the variety of graphics...
-
     ld      b,a
     ; de = origin coordinates
     ; b = building index
