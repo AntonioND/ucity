@@ -149,10 +149,20 @@ DateStep::
         ld      [date_month],a
         ret
 .inc_year:
-    xor     a,a
+    xor     a,a ; January
     ld      [date_month],a
 
     ; Year
+
+    ; If year 9999 is reached, stay there!
+    ; Months will continue to increment
+    ld      a,[date_year+0]
+    cp      a,$99
+    jr      nz,.year_not_maxed
+    ld      a,[date_year+1]
+    cp      a,$99
+    ret     z
+.year_not_maxed:
 
     ld      a,[date_year+0]
     add     a,1 ; inc doesn't set carry flag
@@ -163,8 +173,6 @@ DateStep::
     adc     a,0 ; carry from previous inc
     daa
     ld      [date_year+1],a
-
-    ; TODO - check if Dec 9999 and stop game? Or just let it wraparound?
 
     ret
 
