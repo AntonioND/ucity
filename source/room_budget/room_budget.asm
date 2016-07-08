@@ -338,6 +338,9 @@ RoomBudgetMenu::
     ld      bc,BudgetMenuVBLHandler
     call    irq_set_VBL
 
+    ; Get prediction of the budget of this year
+    LONG_CALL   Simulation_CalculateBudgetAndTaxes
+
     xor     a,a
     ld      [rSCX],a
     ld      [rSCY],a

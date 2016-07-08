@@ -496,11 +496,8 @@ ENDM
 
     add     sp,+4 ; (**) reclaim space
 
-    ret
-
-;-------------------------------------------------------------------------------
-
-Simulation_ApplyBudgetAndTaxes::
+    ; Calculate total budget
+    ; ----------------------
 
     add     sp,-MONEY_AMOUNT_SIZE*2 ; (*) save space for 2 money amounts
 
@@ -525,7 +522,6 @@ ENDM
     REPT    MONEY_AMOUNT_SIZE
         ld      [hl+],a
     ENDR
-
 
 ADD_TAXES : MACRO ; \1 = pointer to 3-byte money amount
     ld      de,\1
@@ -579,32 +575,46 @@ ENDM
         inc     de
     ENDR
 
+    add     sp,+MONEY_AMOUNT_SIZE*2 ; (*) reclaim space
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+Simulation_ApplyBudgetAndTaxes::
+
+    add     sp,-MONEY_AMOUNT_SIZE ; (*) save space for temporary money amount
+
     ; Add original amount of money to temp variable
 
     scf
     ccf ; clear carry
 
+    ld      hl,sp+0
+    LD_BC_HL
     ld      de,MoneyWRAM
-    ld      hl,sp+MONEY_DEST
+    ld      hl,budget_result
     REPT    MONEY_AMOUNT_SIZE
         ld      a,[de]
         adc     a,[hl]
         daa
-        ld      [hl+],a
+        ld      [bc],a
+        inc     bc
         inc     de
+        inc     hl
     ENDR
 
     ; Save result back
 
     ld      de,MoneyWRAM
-    ld      hl,sp+MONEY_DEST
+    ld      hl,sp+0
     REPT    MONEY_AMOUNT_SIZE
         ld      a,[hl+]
         ld      [de],a
         inc     de
     ENDR
 
-    add     sp,+MONEY_AMOUNT_SIZE*2 ; (*) reclaim space
+    add     sp,+MONEY_AMOUNT_SIZE ; (*) reclaim space
 
     ret
 
