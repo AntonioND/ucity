@@ -846,8 +846,8 @@ RoomGame::
         LONG_CALL_ARGS  Simulation_Services
         LONG_CALL   Simulation_EducationSetTileOkFlag
 
-        ld      a,[city_type]
-        cp      a,TYPE_VILLAGE
+        ld      a,[city_class]
+        cp      a,CLASS_VILLAGE
         jr      z,.city_is_too_small ; Ignore this if the city is too small
         ld      bc,T_HIGH_SCHOOL_CENTER
         LONG_CALL_ARGS  Simulation_ServicesBig

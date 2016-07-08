@@ -92,11 +92,11 @@ GAME_STATE_PAUSE_MENU       EQU 4
 
 ;-------------------------------------------------------------------------------
 
-TYPE_VILLAGE    EQU 0
-TYPE_TOWN       EQU 1
-TYPE_CITY       EQU 2
-TYPE_METROPOLIS EQU 3
-TYPE_CAPITAL    EQU 4
+CLASS_VILLAGE    EQU 0
+CLASS_TOWN       EQU 1
+CLASS_CITY       EQU 2
+CLASS_METROPOLIS EQU 3
+CLASS_CAPITAL    EQU 4
 
 ;-------------------------------------------------------------------------------
 

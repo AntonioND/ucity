@@ -35,7 +35,7 @@
 
 ;-------------------------------------------------------------------------------
 
-city_type:: DS 1 ; TYPE_CITY, etc
+city_class:: DS 1 ; CLASS_CITY, etc
 
 city_population:: DS 5 ; BCD, LSB first!
 city_population_temp: DS 5 ; BCD, LSB first!
@@ -484,8 +484,8 @@ Simulation_CalculateStatistics::
 
 Simulation_CalculateCityType::
 
-    ld      a,TYPE_VILLAGE
-    ld      [city_type],a
+    ld      a,CLASS_VILLAGE
+    ld      [city_class],a
 
     ld      de,POPULATION_TOWN
     ld      hl,city_population
@@ -493,8 +493,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
-    ld      a,TYPE_TOWN
-    ld      [city_type],a
+    ld      a,CLASS_TOWN
+    ld      [city_class],a
 
     ld      de,POPULATION_CITY
     ld      hl,city_population
@@ -502,8 +502,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
-    ld      a,TYPE_CITY
-    ld      [city_type],a
+    ld      a,CLASS_CITY
+    ld      [city_class],a
 
     ld      de,POPULATION_METROPOLIS
     ld      hl,city_population
@@ -511,8 +511,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
-    ld      a,TYPE_METROPOLIS
-    ld      [city_type],a
+    ld      a,CLASS_METROPOLIS
+    ld      [city_class],a
 
     ld      de,POPULATION_CAPITAL
     ld      hl,city_population
@@ -520,8 +520,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
-    ld      a,TYPE_CAPITAL
-    ld      [city_type],a
+    ld      a,CLASS_CAPITAL
+    ld      [city_class],a
 
     ret
 
