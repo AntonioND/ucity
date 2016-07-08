@@ -505,6 +505,9 @@ Simulation_CalculateCityType::
     ld      a,CLASS_CITY
     ld      [city_class],a
 
+    ; TODO - Check if there is at least one university, museums, airport, port,
+    ; etc. If not, the city cannot get to the next level.
+
     ld      de,POPULATION_METROPOLIS
     ld      hl,city_population
     call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]

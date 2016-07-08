@@ -41,6 +41,8 @@ game_sprites_8x16:: DS 1
 
 game_state: DS 1
 
+first_simulation_iteration: DS 1 ; 1 for the first simulation iteration
+
 last_frame_x: DS 1
 last_frame_y: DS 1 ; in tiles. for autobuild when moving cursor
 
@@ -770,8 +772,11 @@ RoomGame::
     xor     a,a
     ld      [vbl_handler_working],a
 
-    ld      a,1 ; load everything
+    ld      a,1 ; load everything, not only graphics
     call    RoomGameLoad
+
+    ld      a,1
+    ld      [first_simulation_iteration],a
 
     ; This loop only handles simulation, user input goes in the VBL handler.
 
@@ -883,11 +888,26 @@ RoomGame::
         ; Update date, apply budget, etc.
         ; Note: Only if this is not the first iteration step!
 
-        call    DateStep ; TODO : Only after first step?
+        ld      a,[first_simulation_iteration]
+        and     a,a
+        jr      z,.not_first_iteration
 
-        ; TODO : Do this in January
-        LONG_CALL   Simulation_CalculateBudgetAndTaxes
-        LONG_CALL   Simulation_ApplyBudgetAndTaxes
+            xor     a,a ; flag as not first iteration for the next one
+            ld      [first_simulation_iteration],a
+            jr      .skip_budget
+
+.not_first_iteration:
+        call    DateStep
+
+        ld      a,[date_month]
+        cp      a,0 ; Check if january
+        jr      nz,.skip_budget
+
+            ; Calculate and apply budget when a year starts (Dec -> Jan)
+            LONG_CALL   Simulation_CalculateBudgetAndTaxes
+            LONG_CALL   Simulation_ApplyBudgetAndTaxes
+
+.skip_budget:
 
         ; End of this simulation step
 
