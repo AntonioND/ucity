@@ -155,7 +155,7 @@ DateStep::
     ; Year
 
     ld      a,[date_year+0]
-    inc     a
+    add     a,1 ; inc doesn't set carry flag
     daa
     ld      [date_year+0],a
 
