@@ -490,188 +490,10 @@ BuildingGetCoordinateOriginAndSize::
 
 ;-------------------------------------------------------------------------------
 
-; TODO - Combine MapDeleteBuildingForced and MapDeleteBuilding
-
 ; Doesn't update VRAM map. Clears FLAGS of this tile.
-
 ; d = y, e = x -> Coordinates of one of the tiles.
 ; Returns b=0 if could remove building, b=1 if error.
-MapDeleteBuildingForced:: ; Removes a building. No checks. No SFX.
-
-    ; Get building type and set corresponding "destroyed tile"
-    ; --------------------------------------------------------
-
-    ; If RCI building destroy to RCI tile, else demolished tile
-
-    push    de ; (*)
-
-    call    CityMapGetTypeAndTile
-    ; Type of the tile + extra flags -> register A
-    ; Tile -> Register DE
-
-IF (T_INDUSTRIAL <= T_COMMERCIAL) || (T_INDUSTRIAL <= T_RESIDENTIAL)
-    FAIL "RCI tiles are in an incorrect order."
-ENDC
-
-    ; Check if RCI tile. If so, jump to "set to demolished". If not, the only
-    ; way a tile could be type RCI is if it's a building, which has to be set
-    ; to tile RCI after destroying it.
-
-    ld      b,a ; save type
-
-    xor     a,a
-    cp      a,d
-    jr      nz,.not_rci_tile
-    ld      a,T_RESIDENTIAL&$FF
-    cp      a,e
-    jr      z,.set_demolished_tile
-    ld      a,T_COMMERCIAL&$FF
-    cp      a,e
-    jr      z,.set_demolished_tile
-    ld      a,T_INDUSTRIAL&$FF
-    cp      a,e
-    jr      z,.set_demolished_tile
-
-.not_rci_tile:
-
-    ld      a,b ; restore type
-
-    ; Check if RCI type. If so, this is a RCI building. Destroy to RCI tile
-
-    cp      a,TYPE_RESIDENTIAL
-    jr      nz,.not_residential
-    ld      bc,T_RESIDENTIAL ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
-    jr      .end_destroyed_tile_set
-.not_residential:
-    cp      a,TYPE_INDUSTRIAL
-    jr      nz,.not_industrial
-    ld      bc,T_INDUSTRIAL ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
-    jr      .end_destroyed_tile_set
-.not_industrial:
-    cp      a,TYPE_COMMERCIAL
-    jr      nz,.not_commercial
-    ld      bc,T_COMMERCIAL ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
-    jr      .end_destroyed_tile_set
-.not_commercial:
-
-.set_demolished_tile:
-
-    ; Set default demolished tile
-
-    ld      bc,T_DEMOLISHED ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
-
-.end_destroyed_tile_set:
-
-    pop     de ; (*)
-
-    ; Check origin of coordinates of the building
-    ; -------------------------------------------
-
-    ; de = coordinates of one tile, returns de = coordinates of the origin
-    call    BuildingGetCoordinateOrigin
-
-    ; All there's left to calculate is the building type! Save coordinates for
-    ; later, we'll need them together with the building type.
-
-    ; Get base tile
-    push    de
-    call    CityMapGetTypeAndTile ; returns tile in de
-    ld      b,d
-    ld      c,e
-    pop     de
-    ; bc = base tile
-    ; de = coordinates
-
-    push    de
-    LONG_CALL_ARGS  BuildingGetSizeFromBaseTile
-    pop     bc ; bc = coordinates
-    ; de = size
-
-    ; Now the demolition can begin!
-    ; Size is needed to calculate the money to be spent. Preserve coordinates
-    ; and size through the money check!
-
-    ; Delete building and place demolished tiles
-    ; ------------------------------------------
-
-    ; The coordinates and size come from the calculations above!
-
-    ; bc = coordinates (b = y, c = x)
-    ; de = size (d = height, e = width)
-
-    ; Swap some registers (b remains unchanged)
-
-    ld      a,c ; x
-    ld      c,d ; c = height
-    ld      d,a ; d = x
-
-    ; bc is ready
-
-    ld      a,e ; width
-    ld      e,d ; e = x
-    ld      d,a ; d = width
-
-    ; e = x, d = width
-    ; b = y, c = height
-
-    push    bc
-    push    de ; save for later (***)
-
-    ; Loop rows
-
-.height_loop:
-
-    push    de ; save width and x
-.width_loop:
-
-        ; Loop
-
-        push    bc
-        push    de
-
-            ld      d,b ; d = y
-            call    MapDeleteBuildingGetTileDestroyed
-            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
-
-        pop     de
-        pop     bc
-
-        inc     e ; inc x
-
-        dec     d ; dec width
-        jr      nz,.width_loop
-
-    pop     de ; restore width and x
-
-    ; Next row
-    inc     b ; inc y
-
-    dec     c ; dec height
-    jr      nz,.height_loop
-
-    pop     de
-    pop     bc ; restore for next step (***)
-
-    ; Update power lines around!
-    ; --------------------------
-
-    ; No need to preserve de or bc for the next steps
-    LONG_CALL_ARGS  MapUpdateBuildingSuroundingPowerLines
-
-    ld      b,0
-    ret ; return 0 (success)
-
-;-------------------------------------------------------------------------------
-
-; Doesn't update VRAM
-
-; d = y, e = x -> Coordinates of one of the tiles.
-; Returns b=0 if could remove building, b=1 if error.
-MapDeleteBuilding:: ; Deletes a building. Checks money. Plays SFX.
+MAP_DELETE_BUILDING : MACRO ; \1 = check money and play SFX if != 0
 
     ; Get building type and set corresponding "destroyed tile"
     ; --------------------------------------------------------
@@ -773,6 +595,8 @@ ENDC
     ; Check if enough money
     ; ---------------------
 
+IF \1 != 0
+
     ; Exit and play sound of "not enough money" if not
     ; Preserve coordinates and size
     ; Return b=1 if error
@@ -801,6 +625,8 @@ ENDC
         xor     a,a ; return 0 lenght (error)
         ret
 .enough_money:
+
+ENDC
 
     ; Delete building and place demolished tiles
     ; ------------------------------------------
@@ -872,12 +698,22 @@ ENDC
     ; Decrease money
     ; --------------
 
+IF \1 != 0
     call    BuildingPriceTempGet ; returns pointer in de
     call    MoneyReduce
     call    SFX_Demolish
+ENDC
 
     ld      b,0
     ret ; return 0 (success)
+
+ENDM
+
+MapDeleteBuildingForced:: ; Removes a building. No checks. No SFX.
+    MAP_DELETE_BUILDING 0
+
+MapDeleteBuilding:: ; Deletes a building. Checks money. Plays SFX.
+    MAP_DELETE_BUILDING 1
 
 ;-------------------------------------------------------------------------------
 
