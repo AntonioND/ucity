@@ -828,19 +828,26 @@ RoomGame::
         LONG_CALL   Simulation_TrafficSetTileOkFlag
 
         ; Simulate services, like police and firemen. They depend on the power
-        ; simulation, as they can't work without electricity.
+        ; simulation, as they can't work without electricity, so handle this
+        ; after simulating the power grid.
 
         ld      bc,T_POLICE_DEPT_CENTER
         LONG_CALL_ARGS  Simulation_Services
         LONG_CALL   Simulation_ServicesSetTileOkFlag
 
-        ld      bc,T_FIRE_DEPT_CENTER
-        LONG_CALL_ARGS  Simulation_Services
-        LONG_CALL   Simulation_ServicesAddTileOkFlag
+        ld      a,[city_class]
+        cp      a,CLASS_VILLAGE
+        jr      z,.too_small_for_fire_hospital ; Ignore if the city is too small
 
-        ld      bc,T_HOSPITAL_CENTER
-        LONG_CALL_ARGS  Simulation_Services
-        LONG_CALL   Simulation_ServicesAddTileOkFlag
+            ld      bc,T_FIRE_DEPT_CENTER
+            LONG_CALL_ARGS  Simulation_Services
+            LONG_CALL   Simulation_ServicesAddTileOkFlag
+
+            ld      bc,T_HOSPITAL_CENTER
+            LONG_CALL_ARGS  Simulation_Services
+            LONG_CALL   Simulation_ServicesAddTileOkFlag
+
+.too_small_for_fire_hospital:
 
         ld      bc,T_SCHOOL_CENTER
         LONG_CALL_ARGS  Simulation_Services
@@ -848,11 +855,13 @@ RoomGame::
 
         ld      a,[city_class]
         cp      a,CLASS_VILLAGE
-        jr      z,.city_is_too_small ; Ignore this if the city is too small
-        ld      bc,T_HIGH_SCHOOL_CENTER
-        LONG_CALL_ARGS  Simulation_ServicesBig
-        LONG_CALL   Simulation_EducationAddTileOkFlag
-.city_is_too_small:
+        jr      z,.too_small_for_high_school ; Ignore if the city is too small
+
+            ld      bc,T_HIGH_SCHOOL_CENTER
+            LONG_CALL_ARGS  Simulation_ServicesBig
+            LONG_CALL   Simulation_EducationAddTileOkFlag
+
+.too_small_for_high_school:
 
         ; After simulating traffic, power, etc, simulate pollution
 
