@@ -557,6 +557,10 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 ;-----------------------------------
 
 .print_population:
+
+    ; Print population
+    ; ----------------
+
     ; Convert to tile from BCD
     ld      de,city_population ; BCD, LSB first, LSB in lower nibbles
     ld      hl,sp+2
@@ -572,9 +576,85 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
     ld      hl,$9800+32*2+6
     call    vram_nitro_copy
 
-    ret
+    ; City class
+    ; ----------
+
+    ld      a,[city_class]
+    ld      e,a
+    ld      d,0
+    ld      hl,.class_strings
+    add     hl,de
+    add     hl,de
+    ld      a,[hl+]
+    ld      d,[hl]
+    ld      e,a ; get pointer to class string
+
+    ld      b,10
+    ld      hl,$9800+32*3+6
+    call    vram_nitro_copy
 
     ret
+
+.class_strings:
+    DW  .class_village, .class_town, .class_city
+    DW  .class_metropolis, .class_capital
+
+; The strings have to be 10 chars long
+.class_village:
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_A_UPPERCASE - "A" + "V"
+    DB O_A_LOWERCASE - "a" + "i"
+    DB O_A_LOWERCASE - "a" + "l"
+    DB O_A_LOWERCASE - "a" + "l"
+    DB O_A_LOWERCASE - "a" + "a"
+    DB O_A_LOWERCASE - "a" + "g"
+    DB O_A_LOWERCASE - "a" + "e"
+.class_town:
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_A_UPPERCASE - "A" + "T"
+    DB O_A_LOWERCASE - "a" + "o"
+    DB O_A_LOWERCASE - "a" + "w"
+    DB O_A_LOWERCASE - "a" + "n"
+.class_city:
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_A_UPPERCASE - "A" + "C"
+    DB O_A_LOWERCASE - "a" + "i"
+    DB O_A_LOWERCASE - "a" + "t"
+    DB O_A_LOWERCASE - "a" + "y"
+.class_metropolis:
+    DB O_A_UPPERCASE - "A" + "M"
+    DB O_A_LOWERCASE - "a" + "e"
+    DB O_A_LOWERCASE - "a" + "t"
+    DB O_A_LOWERCASE - "a" + "r"
+    DB O_A_LOWERCASE - "a" + "o"
+    DB O_A_LOWERCASE - "a" + "p"
+    DB O_A_LOWERCASE - "a" + "o"
+    DB O_A_LOWERCASE - "a" + "l"
+    DB O_A_LOWERCASE - "a" + "i"
+    DB O_A_LOWERCASE - "a" + "s"
+.class_capital:
+    DB O_SPACE
+    DB O_SPACE
+    DB O_SPACE
+    DB O_A_UPPERCASE - "A" + "C"
+    DB O_A_LOWERCASE - "a" + "a"
+    DB O_A_LOWERCASE - "a" + "p"
+    DB O_A_LOWERCASE - "a" + "i"
+    DB O_A_LOWERCASE - "a" + "t"
+    DB O_A_LOWERCASE - "a" + "a"
+    DB O_A_LOWERCASE - "a" + "l"
 
 ;-----------------------------------
 
