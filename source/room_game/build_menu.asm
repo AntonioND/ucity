@@ -121,8 +121,7 @@ ICON_SET_GROUP_NUMBER : MACRO ; 1 = Equate
 \1 EQU CURINDEX
 ENDM
 
-; TODO size checks where this is used
-
+; If this changes, fix all references to ICON_TO_BUILDING_PAL.
 Icon_Number_Icons_Per_Groups EQU 3
 
 ICON_TO_BUILDING_PAL: ; Get palette and building from icon
