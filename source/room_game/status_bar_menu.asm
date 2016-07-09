@@ -339,7 +339,6 @@ StatusBarMenuShow::
 
     call    StatusBarMenuDrawCursor
 
-
     ret
 
 ;-------------------------------------------------------------------------------
@@ -415,11 +414,13 @@ StatusBarUpdate::
     cp      a,GAME_STATE_EDIT
     jr      z,.edit
     cp      a,GAME_STATE_WATCH_FAST_MOVE
-    jr      z,.end ; nothing
+    jr      z,.end ; Status bar is not shown in this mode
     cp      a,GAME_STATE_SELECT_BUILDING
     jr      z,.building
     cp      a,GAME_STATE_PAUSE_MENU
     jr      z,.pause
+    cp      a,GAME_STATE_SHOW_MESSAGE
+    jr      z,.end ; Status bar is not shown when a message box is shown
 
     ld      b,b ; Catch invalid state
     jr      .end

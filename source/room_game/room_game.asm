@@ -207,6 +207,14 @@ GameStateMachineHandle::
         ret
 
 .not_pause_menu:
+    cp      a,GAME_STATE_SHOW_MESSAGE
+    jr      nz,.not_show_message ; GAME_STATE_SHOW_MESSAGE
+
+        call    InputHandleModeShowMessage
+
+        ret
+
+.not_show_message:
 
     ; Panic!
     ld      b,b ; Breakpoint
@@ -301,6 +309,17 @@ GameStateMachineStateSet:: ; a = new state
         ret
 
 .not_pause_menu:
+    cp      a,GAME_STATE_SHOW_MESSAGE
+    jr      nz,.not_show_message ; GAME_STATE_SHOW_MESSAGE
+
+        call    StatusBarHide
+        call    CursorHide
+
+        call    MessageBoxShow
+
+        ret
+
+.not_show_message:
 
     ; Panic!
     ld      b,b ; Breakpoint
@@ -416,6 +435,17 @@ PauseMenuHandleOption:
 ;-------------------------------------------------------------------------------
 
 InputHandleModeWatch:
+
+    ; First, check if there are messages left to show
+
+    ; TODO
+
+    ld      a,[joy_held]
+    and     a,PAD_A
+    ld      a,GAME_STATE_SHOW_MESSAGE
+    call    nz,GameStateMachineStateSet
+
+    ; If not, handle user input
 
     ld      a,[joy_pressed]
     and     a,PAD_B
@@ -624,6 +654,23 @@ InputHandleModePauseMenu:
     and     a,PAD_B|PAD_START
     jr      z,.not_b_start
         call    StatusBarMenuHide
+        ld      a,GAME_STATE_WATCH
+        call    GameStateMachineStateSet
+        ret
+.not_b_start:
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+InputHandleModeShowMessage:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_B|PAD_START
+    jr      z,.not_b_start
+
+        call    MessageBoxHide
+
         ld      a,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret

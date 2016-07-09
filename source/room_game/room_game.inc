@@ -89,6 +89,7 @@ GAME_STATE_EDIT             EQU 1
 GAME_STATE_WATCH_FAST_MOVE  EQU 2
 GAME_STATE_SELECT_BUILDING  EQU 3
 GAME_STATE_PAUSE_MENU       EQU 4
+GAME_STATE_SHOW_MESSAGE     EQU 5
 
 ;-------------------------------------------------------------------------------
 
