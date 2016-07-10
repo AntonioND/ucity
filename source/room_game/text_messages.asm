@@ -61,7 +61,7 @@ MSG_EMPTY:
     DB $00
 
 MSG_POLLUTION_HIGH:
-    DB "Pollution is too high!",$00
+    DB "Pollution is too",$0A,"high!",$00
 
 ;-------------------------------------------------------------------------------
 
