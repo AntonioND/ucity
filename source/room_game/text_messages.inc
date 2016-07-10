@@ -32,9 +32,10 @@ ROM_BANK_TEXT_MSG EQU 3
 ; Labels should be named MSG_xxxx and IDs should be named ID_MSG_xxxx
 
 ID_MSG_EMPTY           EQU 0
-ID_MSG_POLLUTION_HIGH  EQU 1
+ID_MSG_CUSTOM          EQU 1 ; Can only be in the queue once! Be careful with it
+ID_MSG_POLLUTION_HIGH  EQU 2
 
-ID_MSG_MAX_NUMBER      EQU 1
+ID_MSG_MAX_NUMBER      EQU 2
 
 ;###############################################################################
 

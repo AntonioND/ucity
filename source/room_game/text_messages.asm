@@ -58,6 +58,7 @@ ENDM
 ; Labels should be named MSG_xxxx and IDs should be named ID_MSG_xxxx
 
 MSG_EMPTY:
+MSG_CUSTOM: ; Placeholder, not actually used
     DB $00
 
 MSG_POLLUTION_HIGH:
@@ -67,6 +68,7 @@ MSG_POLLUTION_HIGH:
 
 MSG_POINTERS: ; Array of pointer to messages. LSB first
     MSG_ADD  MSG_EMPTY
+    MSG_ADD  MSG_CUSTOM
     MSG_ADD  MSG_POLLUTION_HIGH
 
 ;###############################################################################
@@ -81,12 +83,16 @@ msg_stack:   DS MSG_QUEUE_DEPTH ; emtpy elements must be set to 0
 msg_in_ptr:  DS 1
 msg_out_ptr: DS 1
 
+MSG_CUSTOM_LENGTH EQU ((20-2)*3) ; text box size
+msg_custom_text: DS MSG_CUSTOM_LENGTH+1 ; storage for custom msg + terminator
+
 ;###############################################################################
 
     SECTION "Text Messages Functions Bank 0",ROM0
 
 ;-------------------------------------------------------------------------------
 
+; NOTE: Don't use with ID_MSG_CUSTOM! Use MessageRequestAddCustom instead.
 MessageRequestAdd:: ; a = message ID to show
 
     ld      c,a ; (*) save ID
@@ -138,6 +144,32 @@ MessageRequestAdd:: ; a = message ID to show
 
 ;-------------------------------------------------------------------------------
 
+MessageRequestAddCustom:: ; bc = pointer to message
+
+    push    bc
+    ld      a,ID_MSG_CUSTOM
+    call    MessageRequestAdd
+    pop     bc
+
+    ld      hl,msg_custom_text
+    ld      d,MSG_CUSTOM_LENGTH ; storage for custom messages
+.loop:
+    ld      a,[bc]
+    ld      [hl+],a
+
+    and     a,a
+    ret     z ; if this is a terminator, exit now
+
+    inc     bc
+    dec     d
+    jr      nz,.loop
+
+    ld      [hl],0 ; terminator, just in case
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 MessageRequestGet:: ; returns a = message ID to show
 
     ; Check if there are messages left, and return the first one if so
@@ -172,6 +204,12 @@ MessageRequestGet:: ; returns a = message ID to show
 ;-------------------------------------------------------------------------------
 
 MessageRequestGetPointer:: ; a = message ID, returns hl = pointer to message
+
+    cp      a,ID_MSG_CUSTOM
+    jr      nz,.not_custom
+        ld      hl,msg_custom_text ; storage for custom messages
+        ret
+.not_custom:
 
     ld      e,a
     ld      d,0
