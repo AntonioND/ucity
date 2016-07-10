@@ -93,7 +93,7 @@ msg_custom_text: DS MSG_CUSTOM_LENGTH+1 ; storage for custom msg + terminator
 ;-------------------------------------------------------------------------------
 
 ; NOTE: Don't use with ID_MSG_CUSTOM! Use MessageRequestAddCustom instead.
-MessageRequestAdd:: ; a = message ID to show
+MessageRequestAdd:: ; a = message ID to show. returns a = 1 if ok, 0 if not
 
     ld      c,a ; (*) save ID
 
@@ -104,8 +104,10 @@ MessageRequestAdd:: ; a = message ID to show
 .loop:
     ld      a,[hl+]
     cp      a,c
-    ret     z
-
+    jr      nz,.dont_ret
+        xor     a,a
+        ret ; return 0 = not ok
+.dont_ret
     dec     b
     jr      nz,.loop
 
@@ -122,7 +124,8 @@ MessageRequestAdd:: ; a = message ID to show
     jr      z,.free_space
 
         ld      b,b ; Panic!
-        ret
+        xor     a,a
+        ret ; return 0 = not ok
 
 .free_space:
 
@@ -140,16 +143,19 @@ MessageRequestAdd:: ; a = message ID to show
     and     a,MSG_QUEUE_DEPTH-1 ; wrap around
     ld      [msg_in_ptr],a
 
-    ret
+    ld      a,1
+    ret ; return 1 = ok
 
 ;-------------------------------------------------------------------------------
 
-MessageRequestAddCustom:: ; bc = pointer to message
+MessageRequestAddCustom:: ; bc = pointer to message. ret a = 1 if ok, 0 if not
 
     push    bc
     ld      a,ID_MSG_CUSTOM
     call    MessageRequestAdd
     pop     bc
+    and     a,a
+    ret     z ; return 0 if adding the message failed
 
     ld      hl,msg_custom_text
     ld      d,MSG_CUSTOM_LENGTH ; storage for custom messages
@@ -157,16 +163,19 @@ MessageRequestAddCustom:: ; bc = pointer to message
     ld      a,[bc]
     ld      [hl+],a
 
-    and     a,a
-    ret     z ; if this is a terminator, exit now
-
+    and     a,a ; if this is a terminator, exit now
+    jr      .dont_ret
+        ld      a,1
+        ret ; return 1 = ok
+.dont_ret:
     inc     bc
     dec     d
     jr      nz,.loop
 
     ld      [hl],0 ; terminator, just in case
 
-    ret
+    ld      a,1
+    ret ; return 1 = ok
 
 ;-------------------------------------------------------------------------------
 
