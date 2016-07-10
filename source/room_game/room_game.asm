@@ -438,12 +438,17 @@ InputHandleModeWatch:
 
     ; First, check if there are messages left to show
 
-    ; TODO
+    call    MessageRequestGet ; returns a = message ID to show
+    and     a,a
+    jr      z,.no_messages_left
 
-    ld      a,[joy_held]
-    and     a,PAD_A
-    ld      a,GAME_STATE_SHOW_MESSAGE
-    call    nz,GameStateMachineStateSet
+        call    MessageBoxPrintMessageID ; a = message ID
+        ld      a,GAME_STATE_SHOW_MESSAGE
+        call    GameStateMachineStateSet
+
+        ret ; Ignore user input for the rest of the frame
+
+.no_messages_left
 
     ; If not, handle user input
 
@@ -630,6 +635,22 @@ InputHandleModeSelectBuilding:
 ;-------------------------------------------------------------------------------
 
 InputHandleModeWatchFastMove:
+
+    ; First, check if there are messages left to show
+
+    call    MessageRequestGet ; returns a = message ID to show
+    and     a,a
+    jr      z,.no_messages_left
+
+        call    MessageBoxPrintMessageID ; a = message ID
+        ld      a,GAME_STATE_SHOW_MESSAGE
+        call    GameStateMachineStateSet
+
+        ret ; Ignore user input for the rest of the frame
+
+.no_messages_left
+
+    ; If not, handle user input
 
     ld      a,[joy_held]
     and     a,PAD_B
