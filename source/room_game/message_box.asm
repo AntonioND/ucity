@@ -153,11 +153,7 @@ MessageBoxShow::
 
 ;-------------------------------------------------------------------------------
 
-MessageBoxPrint:: ; bc = pointer to string
-
-    ; Clear message box
-
-    push    bc ; (*) save pointer
+MessageBoxClear::
 
     ld      hl,$9800 + 32*19 + 1
 
@@ -175,6 +171,18 @@ MessageBoxPrint:: ; bc = pointer to string
         ld      de,32-18
         add     hl,de
     ENDR
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MessageBoxPrint:: ; bc = pointer to string
+
+    ; Clear message box
+
+    push    bc ; (*) save pointer
+
+    call    MessageBoxClear
 
     pop     bc ; (*) restore pointer
 
