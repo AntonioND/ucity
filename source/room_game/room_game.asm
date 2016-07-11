@@ -486,6 +486,8 @@ InputHandleModeWatch:
 
     call    CursorGetGlobalCoords ; e = x, d = y
 
+    ; Update old coordinates
+
     ld      hl,last_frame_x
     ld      c,[hl] ; get old x
     ld      [hl],e ; save new x
@@ -494,26 +496,29 @@ InputHandleModeWatch:
     ld      b,[hl] ; get old y
     ld      [hl],d ; save new y
 
-IF 0
-    ld      a,c
-    sub     a,e
-    ld      c,a ; c = old x - new x
-    ld      a,b
-    sub     a,d ; a = old y - new y
 
-    or      a,c ; if there is any difference, a != 0
-    jr      z,.check_a_new_press
-    ld      a,[joy_held]
-    and     a,PAD_A
-    jr      z,.check_a_new_press
-    call    CityMapDraw ; TODO : NOT BUILD, SHOW INFORMATION
-    jr      .end_draw_check
-.check_a_new_press:
+    ; Check if we have been asked to show the tile information
+
     ld      a,[joy_pressed]
     and     a,PAD_A
-    call    nz,CityMapDraw ; TODO : NOT BUILD, SHOW INFORMATION
-.end_draw_check:
-ENDC
+    ret     z ; Not pressed, return
+
+    add     sp,-20 ; Space for name of the tile
+
+    ; Returs Tile -> Register DE
+    call    CityMapGetTypeAndTile ; Arguments: e = x , d = y
+
+    ld      hl,sp+0
+    LD_BC_HL
+    LONG_CALL_ARGS  PrintTileNameAt ; de = tile number, bc = destination
+
+    call    MessageBoxClear
+    ld      hl,sp+0
+    LD_BC_HL
+
+    call    MessageRequestAddCustom ; bc = pointer to message. ret a = 1 if ok
+
+    add     sp,+20
 
     ret
 
