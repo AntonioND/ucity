@@ -505,7 +505,7 @@ InputHandleModeWatch:
 
     add     sp,-20 ; Space for name of the tile
 
-    ; Returs Tile -> Register DE
+    ; Returns tile in DE
     call    CityMapGetTypeAndTile ; Arguments: e = x , d = y
 
     ld      hl,sp+0

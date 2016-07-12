@@ -351,7 +351,7 @@ MapDrawRoad:: ; Adds a road tile where the cursor is. Updates neighbours.
     jr      nz,.end_type_check_water ; If water, bridge! If not, end reached!
         ld      c,TYPE_HAS_ROAD
         push    de ; de should still hold the cursor coordinates
-        call    CityMapCheckBuildBridge ; returns lenght and build direction
+        call    CityMapCheckBuildBridge ; returns length and build direction
         pop     de
         and     a,a
         ld      a,TYPE_HAS_ROAD

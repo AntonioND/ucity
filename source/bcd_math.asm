@@ -33,7 +33,7 @@
 
 ;-------------------------------------------------------------------------------
 
-BCD_NUMBER_LENGHT EQU 5 ; BCD bytes
+BCD_NUMBER_LENGTH EQU 5 ; BCD bytes
 
 ;-------------------------------------------------------------------------------
 
@@ -41,9 +41,9 @@ BCD_DE_2TILE_HL:: ; [hl] = BCD2TILE [de] | leading zeros = zeros
 
     ; Convert to tile from BCD
     ; de - LSB first, LSB in lower nibbles
-    ld      bc,BCD_NUMBER_LENGHT*2-1
+    ld      bc,BCD_NUMBER_LENGTH*2-1
     add     hl,bc
-    ld      b,BCD_NUMBER_LENGHT
+    ld      b,BCD_NUMBER_LENGTH
 .loop_decode:
     ld      a,[de]
     inc     de
@@ -68,7 +68,7 @@ BCD_DE_2TILE_HL_LEADING_SPACES:: ; [hl] = BCD2TILE [de] | leading zeros = spaces
 
     call    BCD_DE_2TILE_HL
 
-    ld      b,BCD_NUMBER_LENGHT*2-1
+    ld      b,BCD_NUMBER_LENGTH*2-1
     inc     hl
 .loop_zero:
     ld      a,[hl]
@@ -104,7 +104,7 @@ BCD_SIGNED_DE_2TILE_HL_LEADING_SPACES:: ; [hl] = BCD2TILE [de]
 
     ; Change sign  number and save it to stack. DE won't be needed after this
 
-    add     sp,-BCD_NUMBER_LENGHT ; (*)
+    add     sp,-BCD_NUMBER_LENGTH ; (*)
 
     push    hl
 
@@ -145,7 +145,7 @@ BCD_SIGNED_DE_2TILE_HL_LEADING_SPACES:: ; [hl] = BCD2TILE [de]
 .end_loop:
     ld      [hl],O_DASH ; replace first digit by minus sign
 
-    add     sp,+BCD_NUMBER_LENGHT ; (*)
+    add     sp,+BCD_NUMBER_LENGTH ; (*)
 
     ret
 
@@ -158,7 +158,7 @@ BCD_HL_ADD_DE:: ; [hl] = [hl] + [de]
     scf
     ccf ; Set+Invert = Clear carry
 
-    REPT    BCD_NUMBER_LENGHT+-1 ; The +- is a fix for rgbasm
+    REPT    BCD_NUMBER_LENGTH+-1 ; The +- is a fix for rgbasm
     ld      a,[de]
     adc     a,[hl]
     daa ; yeah, really
@@ -181,7 +181,7 @@ BCD_HL_SUB_DE:: ; [de] = [de] - [hl]
     scf
     ccf ; Set+Invert = Clear carry
 
-    ld      b,BCD_NUMBER_LENGHT
+    ld      b,BCD_NUMBER_LENGTH
 .loop:
         ld      a,[de]
         sbc     a,[hl]
@@ -204,7 +204,7 @@ BCD_DE_NEG_HL:: ; [de] = 0 - [hl]
     ccf ; Set+Invert = Clear carry
 
     ld      c,0
-    ld      b,BCD_NUMBER_LENGHT
+    ld      b,BCD_NUMBER_LENGTH
 .loop:
         ld      a,c ; zero
         sbc     a,[hl]
@@ -227,7 +227,7 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
 
         ; b is 0, return 0
         xor     a,a
-        REPT    BCD_NUMBER_LENGHT
+        REPT    BCD_NUMBER_LENGTH
         ld      [de],a
         inc     de
         ENDR
@@ -236,11 +236,11 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
 .not_zero:
 
     ; Get space for temporary variable
-    add     sp,-BCD_NUMBER_LENGHT
+    add     sp,-BCD_NUMBER_LENGTH
     ld      hl,sp+0
 
     xor     a,a ; Clear temp
-    REPT    BCD_NUMBER_LENGHT
+    REPT    BCD_NUMBER_LENGTH
     ld      [hl+],a
     ENDR
 
@@ -252,7 +252,7 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
         push    de
         ld      hl,sp+2
 
-        ld      c,BCD_NUMBER_LENGHT
+        ld      c,BCD_NUMBER_LENGTH
 .loop:
             ; Start adding from LSB
             ld      a,[de]
@@ -270,14 +270,14 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
 
     ; Save result in [de]
     ld      hl,sp+0
-    REPT    BCD_NUMBER_LENGHT
+    REPT    BCD_NUMBER_LENGTH
     ld      a,[hl+]
     ld      [de],a
     inc     de
     ENDR
 
     ; Reclaim space
-    add     sp,+BCD_NUMBER_LENGHT
+    add     sp,+BCD_NUMBER_LENGTH
 
     ret
 
@@ -285,7 +285,7 @@ BCD_DE_UMUL_B:: ; [de] = [de] * b
 
 BCD_DE_LW_ZERO:: ; Returns a = 1 if [de] < 0, preserves de
 
-    ld      hl,BCD_NUMBER_LENGHT-1 ; last byte
+    ld      hl,BCD_NUMBER_LENGTH-1 ; last byte
     add     hl,de
     ld      a,[hl] ; get MSB
     cp      a,$50 ; carry flag is set if $50 > a (a has a positive number)
@@ -302,14 +302,14 @@ BCD_DE_LW_ZERO:: ; Returns a = 1 if [de] < 0, preserves de
 
 BCD_HL_GE_DE:: ; Returns 1 if [hl] >= [de]
 
-    REPT    BCD_NUMBER_LENGHT+-1 ; The +- is a fix for rgbasm
+    REPT    BCD_NUMBER_LENGTH+-1 ; The +- is a fix for rgbasm
     inc     de
     inc     hl
     ENDR
 
     ; Start comparing from MSB
 
-    REPT    BCD_NUMBER_LENGHT
+    REPT    BCD_NUMBER_LENGTH
     ld      a,[de]
     cp      a,[hl]
     jr      z,.dont_exit\@

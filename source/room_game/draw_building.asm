@@ -622,7 +622,7 @@ IF \1 != 0
     and     a,a
     jr      nz,.enough_money
         call    SFX_BuildError
-        xor     a,a ; return 0 lenght (error)
+        xor     a,a ; return 0 length (error)
         ret
 .enough_money:
 

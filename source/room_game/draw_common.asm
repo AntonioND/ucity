@@ -508,7 +508,7 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
     add     a,b
     ld      e,a ; x += x increment
 
-    inc     h ; increment lenght
+    inc     h ; increment length
 
     jr      .check_loop
 
@@ -516,7 +516,7 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
 
     ; bc = coordinate increments -> will be returned!
     ; de = final coordinates
-    ; h = bridge lenght
+    ; h = bridge length
 
     and     a,TYPE_MASK
 
@@ -546,7 +546,7 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
 .not_outside:
 
     ; bc = coordinate increments b=x, c=y -> will be returned!
-    ; h = bridge lenght -> will be returned!
+    ; h = bridge length -> will be returned!
 
     ; CHECK IF ENOUGH MONEY -> return 0 and make sound if not
 
@@ -555,7 +555,7 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
     push    bc
     push    hl
 
-    ld      b,h ; b = lenght
+    ld      b,h ; b = length
     push    bc
     call    BuildingSelectedGetPricePointer
     call    BuildingPriceTempSet
@@ -568,7 +568,7 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
     and     a,a
     jr      nz,.enough_money
         call    SFX_BuildError
-        xor     a,a ; return 0 lenght (error)
+        xor     a,a ; return 0 length (error)
         ret
 .enough_money:
 
@@ -1231,7 +1231,7 @@ DrawCityCheckDeleteBridgeCheck:: ; Returns top or left bound in d=y, e=x.
     ; Check money. Return if not enough.
     ; ----------------------------------
 
-    ; b = lenght
+    ; b = length
     ; Preserve de, a
 
     push    af

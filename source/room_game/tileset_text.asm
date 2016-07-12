@@ -75,7 +75,7 @@ str_train_bridge: DB "Train Bridge",0
 str_power_bridge: DB "Power Lines Bridge",0
 str_police:      DB "Police Dept.",0
 str_firedept:    DB "Fire Dept.",0
-str_hospital:    DB "Hospital.",0
+str_hospital:    DB "Hospital",0
 str_park_small:  DB "Small Park",0
 str_park_big:    DB "Big Park",0
 str_stadium:     DB "Stadium",0
