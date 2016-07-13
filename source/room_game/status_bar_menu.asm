@@ -54,7 +54,7 @@ status_bar_on_top:: DS 1 ; 1 if on top, 0 if on the bottom
 status_menu_active::   DS 1 ; if 1, show menu
 status_menu_selection: DS 1
 
-MENU_NUMBER_ELEMENTS EQU 6
+MENU_NUMBER_ELEMENTS EQU 7
 
 ;###############################################################################
 
@@ -722,8 +722,9 @@ CURSOR_COORDINATE_OFFSET:
     DW 9*32+CURSOR_X+$9800
     DW 10*32+CURSOR_X+$9800
     DW 11*32+CURSOR_X+$9800
-    DW 13*32+CURSOR_X+$9800
+    DW 12*32+CURSOR_X+$9800
     DW 14*32+CURSOR_X+$9800
+    DW 15*32+CURSOR_X+$9800
 
 StatusBarMenuClearCursor:
 

@@ -341,9 +341,10 @@ WaitSimulationEnds:
 PAUSE_MENU_RESUME    EQU 0
 PAUSE_MENU_MINIMAP   EQU 1
 PAUSE_MENU_BUDGET    EQU 2
-PAUSE_MENU_CHEAT     EQU 3
-PAUSE_MENU_SAVE_GAME EQU 4
-PAUSE_MENU_MAIN_MENU EQU 5
+PAUSE_MENU_PAUSE     EQU 3
+PAUSE_MENU_HELP      EQU 4
+PAUSE_MENU_SAVE_GAME EQU 5
+PAUSE_MENU_MAIN_MENU EQU 6
 
 PauseMenuHandleOption:
 
@@ -396,17 +397,28 @@ PauseMenuHandleOption:
         ret
 
 .not_budget:
-    cp      a,PAUSE_MENU_CHEAT
-    jr      nz,.not_cheat
+    cp      a,PAUSE_MENU_PAUSE
+    jr      nz,.not_pause
 
-        ; Cheat
+        ; Pause
 
+        ; TODO
+
+        ret
+
+.not_pause:
+    cp      a,PAUSE_MENU_HELP
+    jr      nz,.not_help
+
+        ; Help
+
+        ; TODO : Replace this by an actual help menu
         ld      de,MONEY_AMOUNT_CHEAT
         call    MoneySet ; de = ptr to the amount of money to set
 
         ret
 
-.not_cheat:
+.not_help:
     cp      a,PAUSE_MENU_SAVE_GAME
     jr      nz,.not_save_game
 
