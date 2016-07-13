@@ -226,13 +226,14 @@ MessageBoxPrint:: ; bc = pointer to string
 
 MessageBoxPrintMessageID:: ; a = message ID
 
-    call    MessageRequestGetPointer ; a = message ID, returns hl = pointer
-
-    LD_DE_HL
+    ld      d,a ; save ID
     ld      b,ROM_BANK_TEXT_MSG
     call    rom_bank_push_set ; preserves de
-    LD_BC_DE
+    ld      a,d ; restore ID
 
+    call    MessageRequestGetPointer ; a = message ID, returns hl = pointer
+
+    LD_BC_HL
     call    MessageBoxPrint ; bc = pointer to string
 
     call    rom_bank_pop

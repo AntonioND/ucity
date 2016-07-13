@@ -31,11 +31,22 @@ ROM_BANK_TEXT_MSG EQU 3
 
 ; Labels should be named MSG_xxxx and IDs should be named ID_MSG_xxxx
 
-ID_MSG_EMPTY           EQU 0
-ID_MSG_CUSTOM          EQU 1 ; Can only be in the queue once! Be careful with it
-ID_MSG_POLLUTION_HIGH  EQU 2
+; Persistent messages should be placed right after ID_MSG_EMPTY
 
-ID_MSG_MAX_NUMBER      EQU 2
+ID_MSG_EMPTY EQU 0
+
+ID_MSG_CLASS_TOWN       EQU 1
+ID_MSG_CLASS_CITY       EQU 2
+ID_MSG_CLASS_METROPOLIS EQU 3
+ID_MSG_CLASS_CAPITAL    EQU 4
+
+ID_MSG_PERSISTENT_MAX EQU 4 ; Max message ID which usage is saved to SRAM
+
+ID_MSG_POLLUTION_HIGH EQU 5
+
+ID_MSG_MAX EQU 5
+
+ID_MSG_CUSTOM EQU $FF ; Can only be in the queue once! Careful with it!
 
 ;###############################################################################
 

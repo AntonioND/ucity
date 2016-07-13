@@ -61,6 +61,15 @@ MSG_EMPTY:
 MSG_CUSTOM: ; Placeholder, not actually used
     DB $00
 
+MSG_CLASS_TOWN:
+    DB "Your village is",$0A,"now a town!",$00
+MSG_CLASS_CITY:
+    DB "Your town is now a",$0A,"city!",$00
+MSG_CLASS_METROPOLIS:
+    DB "Your city is now a",$0A,"metropolis!",$00
+MSG_CLASS_CAPITAL:
+    DB "Your metropolis is",$0A,"now a capital!",$00
+
 MSG_POLLUTION_HIGH:
     DB "Pollution is too",$0A,"high!",$00
 
@@ -68,8 +77,17 @@ MSG_POLLUTION_HIGH:
 
 MSG_POINTERS: ; Array of pointer to messages. LSB first
     MSG_ADD  MSG_EMPTY
-    MSG_ADD  MSG_CUSTOM
+
+    MSG_ADD  MSG_CLASS_TOWN
+    MSG_ADD  MSG_CLASS_CITY
+    MSG_ADD  MSG_CLASS_METROPOLIS
+    MSG_ADD  MSG_CLASS_CAPITAL
+
     MSG_ADD  MSG_POLLUTION_HIGH
+
+    ; ...
+
+    MSG_ADD  MSG_CUSTOM
 
 ;###############################################################################
 
@@ -103,11 +121,11 @@ MessageRequestAdd:: ; a = message ID to show. returns a = 1 if ok, 0 if not
     ld      b,MSG_QUEUE_DEPTH
 .loop:
     ld      a,[hl+]
-    cp      a,c
+    cp      a,c ; (*)
     jr      nz,.dont_ret
         xor     a,a
         ret ; return 0 = not ok
-.dont_ret
+.dont_ret:
     dec     b
     jr      nz,.loop
 
@@ -212,6 +230,7 @@ MessageRequestGet:: ; returns a = message ID to show
 
 ;-------------------------------------------------------------------------------
 
+; This function must be called while on bank ROM_BANK_TEXT_MSG
 MessageRequestGetPointer:: ; a = message ID, returns hl = pointer to message
 
     cp      a,ID_MSG_CUSTOM
