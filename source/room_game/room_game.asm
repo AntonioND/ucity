@@ -61,6 +61,8 @@ animation_countdown: DS 1 ; When this reaches ANIMATION_COUNT_FRAMES, step
 ; immediately pause the simulation, it will wait until the current step ends.
 simulation_paused:: DS 1
 
+game_loop_end_requested: DS 1 ; If 1, exit game to main menu.
+
 ;###############################################################################
 
     SECTION "City Map Tiles",WRAMX,BANK[BANK_CITY_MAP_TILES]
@@ -432,6 +434,8 @@ PauseMenuHandleOption:
 
         ; Save Game
 
+        ; TODO - Create save menu
+
         ld      a,0
         call    CityMapSave
 
@@ -442,6 +446,9 @@ PauseMenuHandleOption:
     jr      nz,.not_main_menu
 
         ; Main Menu
+
+        ld      a,1
+        ld      [game_loop_end_requested],a
 
         ret
 
@@ -865,6 +872,7 @@ RoomGame::
     xor     a,a
     ld      [vbl_handler_working],a
     ld      [simulation_paused],a
+    ld      [game_loop_end_requested],a
 
     ld      a,1 ; load everything, not only graphics
     call    RoomGameLoad
@@ -895,6 +903,10 @@ RoomGame::
     ;   the actual write).
 
 .main_loop:
+
+    ld      a,[game_loop_end_requested]
+    and     a,a ; Check if there is a request to exit the game loop
+    jp      nz,.end_game_loop
 
     ld      a,[simulation_running]
     and     a,a ; Check if simulation has been requested
@@ -1027,6 +1039,10 @@ RoomGame::
 .end_simulation:
 
     jp      .main_loop
+
+    ; End of game loop
+
+.end_game_loop:
 
     call    SetDefaultVBLHandler
 

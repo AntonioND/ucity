@@ -89,6 +89,16 @@ RoomMenuVBLHandler:
 
 RoomMenuLoadBG:
 
+    ; Reset scroll
+    ; ------------
+
+    xor     a,a
+    ld      [rSCX],a
+    ld      [rSCY],a
+
+    ; Load graphics
+    ; -------------
+
     ld      b,BANK(MAIN_MENU_BG_MAP)
     call    rom_bank_push_set
 
@@ -150,6 +160,10 @@ RoomMenuLoadBG:
 ;-------------------------------------------------------------------------------
 
 RoomMenu::
+
+    xor     a,a
+    ld      [menu_selection],a
+    ld      [menu_exit],a
 
     call    SetPalettesAllBlack
 
