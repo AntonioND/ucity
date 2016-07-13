@@ -214,7 +214,8 @@ ENDC
 ; preserves bc and de
 TrafficAdd:
 
-    ; Check if it is a building. If so, add to queue immediately.
+    ; Check if it is a non-residential building. If so, add to queue
+    ; immediately.
 
     ; Only buildings can have density != 0, so check if it is different than
     ; residential and if density != 0, it can't be field or water. If both
@@ -980,7 +981,7 @@ Simulation_TrafficHandleSource::
 
 .loop_expand:
         ; In short:
-        ; 1) Check that there is population that need to continue traveling.
+        ; 1) Check that there is population that needs to continue traveling.
         ; 2) Check that there are tiles to handle.
         ; 3) Get tile coordinates to handle
         ; 4) Read tile type.
@@ -1026,7 +1027,8 @@ Simulation_TrafficHandleSource::
             ; Check if it has enough remaining density to accept more
             ; population. If there is some population left in the tile it means
             ; that it can accept more population. Reduce it as much as possible
-            ; and continue in next tile with the remaining population.
+            ; and continue in next tile obtained from the queue with the
+            ; remaining population.
 
             ; After that, retrace steps to increase traffic in all tiles used
             ; to get to this building (using the population that has actually
