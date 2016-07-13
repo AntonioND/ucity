@@ -57,6 +57,10 @@ simulation_running::  DS 1
 ANIMATION_COUNT_FRAMES EQU 60
 animation_countdown: DS 1 ; When this reaches ANIMATION_COUNT_FRAMES, step
 
+; If 1 the game is paused, if 0 it is unpaused. Setting it to 1 won't
+; immediately pause the simulation, it will wait until the current step ends.
+simulation_paused:: DS 1
+
 ;###############################################################################
 
     SECTION "City Map Tiles",WRAMX,BANK[BANK_CITY_MAP_TILES]
@@ -400,9 +404,13 @@ PauseMenuHandleOption:
     cp      a,PAUSE_MENU_PAUSE
     jr      nz,.not_pause
 
-        ; Pause
+        ; Pause / Unpause
+        ld      hl,simulation_paused
+        ld      a,1
+        xor     a,[hl]
+        ld      [hl],a
 
-        ; TODO
+        call    StatusBarMenuDrawPauseState
 
         ret
 
@@ -608,7 +616,7 @@ InputHandleModeEdit:
 
 .end_draw:
     ld      a,[simulation_running]
-    and     a,a ; If something is built mode while a simulation is running bad
+    and     a,a ; If something is built  while a simulation is running bad
     jr      nz,.error_draw ; things will happen
 
     call    CityMapDraw
@@ -856,6 +864,7 @@ RoomGame::
 
     xor     a,a
     ld      [vbl_handler_working],a
+    ld      [simulation_paused],a
 
     ld      a,1 ; load everything, not only graphics
     call    RoomGameLoad
@@ -890,6 +899,10 @@ RoomGame::
     ld      a,[simulation_running]
     and     a,a ; Check if simulation has been requested
     jp      z,.skip_simulation
+
+    ld      a,[simulation_paused]
+    and     a,a ; Check if the simulation is paused
+    jp      nz,.end_simulation_clear_flag
 
         ; NOTE: All VRAM-modifying code inside this loop must be thread-safe as
         ; it can be interrupted by the VBL handler and it can take a long time
@@ -995,6 +1008,8 @@ RoomGame::
 .skip_budget:
 
         ; End of this simulation step
+
+.end_simulation_clear_flag:
 
         xor     a,a
         ld      [simulation_running],a

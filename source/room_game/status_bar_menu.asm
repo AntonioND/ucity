@@ -345,6 +345,8 @@ StatusBarMenuShow::
 
 StatusBarMenuLoadGfx::
 
+    ; Load graphics
+
     xor     a,a
     ld      [status_bar_active],a
 
@@ -392,6 +394,10 @@ StatusBarMenuLoadGfx::
     jr      nz,.loop_attrs
 
     call    rom_bank_pop
+
+    ; Update pause sign
+
+    call    StatusBarMenuDrawPauseState
 
     ret
 
@@ -718,13 +724,13 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
 CURSOR_X EQU 4
 CURSOR_COORDINATE_OFFSET:
-    DW 8*32+CURSOR_X+$9800
-    DW 9*32+CURSOR_X+$9800
-    DW 10*32+CURSOR_X+$9800
-    DW 11*32+CURSOR_X+$9800
-    DW 12*32+CURSOR_X+$9800
-    DW 14*32+CURSOR_X+$9800
-    DW 15*32+CURSOR_X+$9800
+    DW 8*32+CURSOR_X+$9800 ; Resume
+    DW 9*32+CURSOR_X+$9800 ; Minimaps
+    DW 10*32+CURSOR_X+$9800 ; Budget
+    DW 11*32+CURSOR_X+$9800 ; Pause/Unpause
+    DW 12*32+CURSOR_X+$9800 ; Help
+    DW 14*32+CURSOR_X+$9800 ; Save Game
+    DW 15*32+CURSOR_X+$9800 ; Main Menu
 
 StatusBarMenuClearCursor:
 
@@ -799,5 +805,46 @@ StatusBarMenuHandle:: ; ret A = menu selection if the user presses A, $FF if not
 
     ld      a,$FF
     ret
+
+;-------------------------------------------------------------------------------
+
+StatusBarMenuDrawPauseState::
+
+    xor     a,a
+    ld      [rVBK],a
+
+    ld      a,[simulation_paused]
+    and     a,a
+    jr      z,.not_paused
+        ; Paused. Menu must show "Unpause"
+        ld      hl,.str_unpause
+    jr      .print
+.not_paused:
+        ; Unpaused. Menu must show "Pause"
+        ld      hl,.str_pause
+.print:
+    ld      b,7
+    ld      de,11*32+CURSOR_X+2+$9800 ; Pause/Unpause
+    call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+    ret
+
+.str_pause:
+    DB O_A_UPPERCASE - "A" + "P"
+    DB O_A_LOWERCASE - "a" + "a"
+    DB O_A_LOWERCASE - "a" + "u"
+    DB O_A_LOWERCASE - "a" + "s"
+    DB O_A_LOWERCASE - "a" + "e"
+    DB O_SPACE
+    DB O_SPACE
+
+.str_unpause:
+    DB O_A_UPPERCASE - "A" + "U"
+    DB O_A_LOWERCASE - "a" + "n"
+    DB O_A_LOWERCASE - "a" + "p"
+    DB O_A_LOWERCASE - "a" + "a"
+    DB O_A_LOWERCASE - "a" + "u"
+    DB O_A_LOWERCASE - "a" + "s"
+    DB O_A_LOWERCASE - "a" + "e"
 
 ;###############################################################################
