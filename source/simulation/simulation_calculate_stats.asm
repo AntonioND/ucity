@@ -28,6 +28,7 @@
     INCLUDE "room_game.inc"
     INCLUDE "money.inc"
     INCLUDE "tileset_info.inc"
+    INCLUDE "text_messages.inc"
 
 ;###############################################################################
 
@@ -493,6 +494,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
+    ld      a,ID_MSG_CLASS_TOWN
+    call    PersistentMessageShow
     ld      a,CLASS_TOWN
     ld      [city_class],a
 
@@ -502,6 +505,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
+    ld      a,ID_MSG_CLASS_CITY
+    call    PersistentMessageShow
     ld      a,CLASS_CITY
     ld      [city_class],a
 
@@ -514,6 +519,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
+    ld      a,ID_MSG_CLASS_METROPOLIS
+    call    PersistentMessageShow
     ld      a,CLASS_METROPOLIS
     ld      [city_class],a
 
@@ -523,6 +530,8 @@ Simulation_CalculateCityType::
     and     a,a
     ret     z ; continue actual population > reference population
 
+    ld      a,ID_MSG_CLASS_CAPITAL
+    call    PersistentMessageShow
     ld      a,CLASS_CAPITAL
     ld      [city_class],a
 
