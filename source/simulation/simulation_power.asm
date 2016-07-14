@@ -354,8 +354,8 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ; For each connected tile with scratch RAM value of 0 reduce the fill amount
     ; of the power plant by the energy consumption of that tile (if possible)
     ; and add the energy given to that tile to the scratch RAM. Power lines have
-    ; no energetic cost. Beware unconnected power line bridges -> Sometimes they
-    ; are not connected to the ground next to them.
+    ; energetic cost.
+
     push    de
     call    QueueInit
     pop     de
