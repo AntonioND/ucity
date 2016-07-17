@@ -428,7 +428,7 @@ Simulation_TrafficSetTileOkFlag::
 
                 ld      a,[hl] ; get traffic level
                 cp      a,TRAFFIC_MAX_LEVEL ; carry flag is set if n > a
-                jr      nc,.tile_res_flag
+                jr      c,.tile_res_flag
 
                 ; Count the number of road/train tiles that have too much
                 ; traffic to show warning messages to the player.
