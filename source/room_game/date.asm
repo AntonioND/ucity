@@ -152,6 +152,10 @@ DateStep::
     xor     a,a ; January
     ld      [date_month],a
 
+    ; Reset yearly messages
+
+    call    PersistentYearlyMessagesReset
+
     ; Year
 
     ; If year 9999 is reached, stay there!

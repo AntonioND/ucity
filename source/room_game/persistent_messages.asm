@@ -34,7 +34,7 @@
 ;-------------------------------------------------------------------------------
 
 ; Number of bytes needed to store a flag for each persistent message.
-BYTES_NEEDED_TO_STORE EQU ((ID_MSG_PERSISTENT_MAX+7)/8) ; Round up to 8 bits
+BYTES_NEEDED_TO_STORE EQU ((ID_MSG_PERSISTENT_NUM+7)/8) ; Round up to 8 bits
 
 persistent_msg_flags: DS BYTES_NEEDED_TO_STORE
 
@@ -46,7 +46,8 @@ persistent_msg_flags: DS BYTES_NEEDED_TO_STORE
 
 PersistentMessageDataLoad:: ; hl = ptr to data to load
 
-    ; TODO - Function that saves the bits to SRAM and restores them from SRAM
+    ; TODO - Function that saves the bits to SRAM and other that restores them
+    ; from SRAM
 
     ret
 
@@ -100,6 +101,22 @@ ENDM
 
     ld      a,c ; (**) get message id
     call    z,MessageRequestAdd ; a = message ID to show
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+PersistentYearlyMessagesReset::
+
+    ld      hl,persistent_msg_flags
+    ; hl = pointer to byte which contains the first flag
+
+    xor     a,a
+    ld      b,ID_MSG_RESET_YEAR_NUM/8
+.loop:
+    ld      [hl+],a
+    dec     b
+    jr      nz,.loop
 
     ret
 

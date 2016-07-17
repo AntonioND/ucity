@@ -26,6 +26,16 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "text_messages.inc"
+
+;###############################################################################
+
+    SECTION "Simulation Pollution Variables",WRAM0
+
+;-------------------------------------------------------------------------------
+
+; Total pollution in the city. LSB first
+pollution_total: DS 3 ; Max value = 255*64*64 (fits in 3 bytes!)
 
 ;###############################################################################
 
@@ -225,6 +235,12 @@ Simulation_Pollution::
 
     call    ClearWRAMX
 
+    ld      hl,pollution_total ; Reset total pollution
+    xor     a,a
+    ld      [hl+],a
+    ld      [hl+],a
+    ld      [hl+],a
+
     ; Add to the map the corresponding pollution for each tile
     ; --------------------------------------------------------
 
@@ -278,6 +294,22 @@ Simulation_Pollution::
 
         ld      [hl],b
 
+        ; Add to total pollution
+
+        ld      hl,pollution_total
+
+        ld      a,[hl]
+        add     a,b
+        ld      [hl+],a
+
+        ld      a,[hl]
+        add     a,0
+        ld      [hl+],a
+
+        ld      a,[hl]
+        add     a,0
+        ld      [hl],a
+
     pop     hl
 
     inc     hl
@@ -289,6 +321,24 @@ Simulation_Pollution::
     ; ----------
 
     call    Simulation_PollutionDiffuminate
+
+    ; Check if pollution is too high
+    ; ------------------------------
+
+    ; Max value = 255*64*64  = 0x0FF000
+    ; Complain if pollution >= 0x030000 so that we only need to check top byte
+
+    ld      hl,pollution_total+2
+    ld      a,[hl]
+    cp      a,$03 ; cy = 1 if n > a (threshold > current value)
+    ret     c
+
+    ; TODO - Use this for total city score or to make people not want to come
+    ; here?
+
+    ; This message is shown only once per year
+    ld      a,ID_MSG_POLLUTION_HIGH
+    call    PersistentMessageShow
 
     ret
 
@@ -354,8 +404,6 @@ Simulation_PollutionSetTileOkFlag::
             set     TILE_OK_POLLUTION_BIT,[hl]
             ;jr      .end_pollution_check
 .end_pollution_check:
-
-        ; TODO - Get average pollution and complain if it is too high
 
     pop     hl
 
