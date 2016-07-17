@@ -215,9 +215,11 @@ MessageBoxPrint:: ; bc = pointer to string
 
     push    bc
     ld      b,a
+    di
     WAIT_SCREEN_BLANK ; Clobbers registers A and C
     ld      a,b
     ld      [hl+],a
+    ei
     pop     bc
 
     jr      .loop
