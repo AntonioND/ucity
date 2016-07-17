@@ -27,6 +27,7 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "tileset_info.inc"
+    INCLUDE "text_messages.inc"
 
 ;###############################################################################
 
@@ -35,7 +36,10 @@
 ;-------------------------------------------------------------------------------
 
 ; Amount of tiles with traffic jams. It will stop counting when it reaches 255.
+; Traffic is considered high when it reaches TRAFFIC_MAX_LEVEL.
 simulation_traffic_jam_num_tiles:: DS 1
+
+TRAFFIC_MAX_LEVEL EQU (256/3) ; Max level of adequate traffic
 
 ;###############################################################################
 
@@ -384,10 +388,6 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 
 ;###############################################################################
 
-TRAFFIC_MAX_LEVEL EQU (256/3) ; Max level of adequate traffic
-
-;-------------------------------------------------------------------------------
-
 Simulation_TrafficSetTileOkFlag::
 
     ; NOTE: Don't call when drawing minimaps, this can only be called from the
@@ -425,7 +425,6 @@ Simulation_TrafficSetTileOkFlag::
 
                 ld      a,BANK_CITY_MAP_TRAFFIC
                 ld      [rSVBK],a
-
                 ld      a,[hl] ; get traffic level
                 cp      a,TRAFFIC_MAX_LEVEL ; carry flag is set if n > a
                 jr      c,.tile_res_flag
@@ -501,8 +500,21 @@ Simulation_TrafficSetTileOkFlag::
     bit     6,d ; CITY_MAP_HEIGHT = 64
     jr      z,.loopy
 
-    ; TODO - Do something with the value of [simulation_traffic_jam_num_tiles]
-    ; Set a flag to show a warning message or something.
+
+    ; Check if traffic is too high
+    ; ----------------------------
+
+    ; Complain if more than 64 tiles have high traffic
+    ld      a,[simulation_traffic_jam_num_tiles]
+    cp      a,64 ; cy = 1 if n > a (threshold > current value)
+    ret     c
+
+    ; TODO - Use this for total city score or to make people not want to come
+    ; here?
+
+    ; This message is shown only once per year
+    ld      a,ID_MSG_TRAFFIC_HIGH
+    call    PersistentMessageShow
 
     ret
 

@@ -35,6 +35,7 @@ ID_MSG_EMPTY EQU 0
 
 ; Messages that are only shown once per year.
 ID_MSG_POLLUTION_HIGH EQU 1
+ID_MSG_TRAFFIC_HIGH   EQU 2
 
 ID_MSG_RESET_YEAR_NUM EQU 8 ; Multiple of 8
 
