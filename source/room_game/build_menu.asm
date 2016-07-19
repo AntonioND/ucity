@@ -1113,6 +1113,24 @@ BuildOverlayIconHide::
 
 ;-------------------------------------------------------------------------------
 
+; Handle, but show the icon if it isn't showing and it should
+CPUBusyIconShowAndHandle::
+
+    ; Check if the icon is already showing
+
+    ld      a,[cpu_busy_icon_active]
+    and     a,a
+    jr      nz,CPUBusyIconHandle
+
+    ; Not showing, check if the simulation is running and show the icon if so
+
+    ld      a,[simulation_running]
+    and     a,a
+    ret     z ; not simulating, no need to do anything else
+
+    ; Call and ret from here. THis calls CPUBusyIconHandle internally
+    jp      CPUBusyIconShow
+
 CPUBusyIconHandle::
 
     ld      a,[cpu_busy_icon_active]

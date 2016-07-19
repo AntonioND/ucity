@@ -163,7 +163,8 @@ GameStateMachineHandle::
 
         call    StatusBarUpdate ; Update status bar text
 
-        call    CPUBusyIconHandle ; Not simulating, update busy icon
+        ; Not simulating, update busy icon, but show if it isn't showing
+        call    CPUBusyIconShowAndHandle
 
         ret
 
@@ -208,7 +209,8 @@ GameStateMachineHandle::
         ; The menu is an extended status bar, so...
         call    StatusBarUpdate ; Update status bar text
 
-        call    CPUBusyIconHandle ; Not simulating, update busy icon
+        ; Not simulating, update busy icon, but show if it isn't showing
+        call    CPUBusyIconShowAndHandle
 
         ret
 
