@@ -36,6 +36,24 @@
 
 ;-------------------------------------------------------------------------------
 
+CITY_HAS_STADIUM    EQU 1
+CITY_HAS_UNIVERSITY EQU 2
+CITY_HAS_MUSEUM     EQU 4
+CITY_HAS_LIBRARY    EQU 8
+CITY_HAS_AIRPORT    EQU 16
+CITY_HAS_PORT       EQU 32
+
+CITY_HAS_STADIUM_BIT    EQU 0
+CITY_HAS_UNIVERSITY_BIT EQU 1
+CITY_HAS_MUSEUM_BIT     EQU 2
+CITY_HAS_LIBRARY_BIT    EQU 3
+CITY_HAS_AIRPORT_BIT    EQU 4
+CITY_HAS_PORT_BIT       EQU 5
+CITY_HAS_unused1_BIT    EQU 6
+CITY_HAS_unused2_BIT    EQU 7
+; Each flag is set if the city has at least one of that kind of building
+city_services_flags: DS 1
+
 city_class:: DS 1 ; CLASS_CITY, etc
 
 city_population:: DS 5 ; BCD, LSB first!
@@ -352,6 +370,9 @@ Simulation_CalculateStatistics::
     ld      [hl+],a
     ENDR
 
+    xor     a,a
+    ld      [city_services_flags],a ; reset city flags
+
     ; Calculate
 
     ld      hl,CITY_MAP_TILES
@@ -366,13 +387,47 @@ Simulation_CalculateStatistics::
         and     a,TYPE_MASK ; without flags!
 
         cp      a,TYPE_FIELD
-        jr      z,.skip
+        jp      z,.skip
         cp      a,TYPE_FOREST
-        jr      z,.skip
+        jp      z,.skip
         cp      a,TYPE_WATER
-        jr      z,.skip
+        jp      z,.skip
         cp      a,TYPE_DOCK
-        jr      z,.skip
+        jp      z,.skip
+
+        ; Don't skip if the type is one of the following ones, but set the
+        ; corresponding city flag
+
+        LD_DE_HL ; (*) save HL in DE
+
+        ld      hl,city_services_flags
+
+        cp      a,TYPE_STADIUM
+        jr      nz,.not_stadium
+        set     CITY_HAS_STADIUM_BIT,[hl]
+.not_stadium:
+        cp      a,TYPE_UNIVERSITY
+        jr      nz,.not_university
+        set     CITY_HAS_UNIVERSITY_BIT,[hl]
+.not_university:
+        cp      a,TYPE_MUSEUM
+        jr      nz,.not_museum
+        set     CITY_HAS_MUSEUM_BIT,[hl]
+.not_museum:
+        cp      a,TYPE_LIBRARY
+        jr      nz,.not_library
+        set     CITY_HAS_LIBRARY_BIT,[hl]
+.not_library:
+        cp      a,TYPE_AIRPORT
+        jr      nz,.not_airport
+        set     CITY_HAS_AIRPORT_BIT,[hl]
+.not_airport:
+        cp      a,TYPE_PORT
+        jr      nz,.not_port
+        set     CITY_HAS_PORT_BIT,[hl]
+.not_port:
+
+        LD_HL_DE ; (*) restore HL
 
         ld      b,a
         push    bc ; (*) b = type
@@ -460,7 +515,7 @@ Simulation_CalculateStatistics::
     inc     hl
 
     bit     5,h ; Up to E000
-    jr      z,.loop
+    jp      z,.loop
 
     ; Save result to final variable!
 
@@ -485,8 +540,12 @@ Simulation_CalculateStatistics::
 
 Simulation_CalculateCityType::
 
+    ; Default to village
+
     ld      a,CLASS_VILLAGE
     ld      [city_class],a
+
+    ; Upgrade to town if the population is big enough
 
     ld      de,POPULATION_TOWN
     ld      hl,city_population
@@ -499,6 +558,12 @@ Simulation_CalculateCityType::
     ld      a,CLASS_TOWN
     ld      [city_class],a
 
+    ; Upgrade to city if enough population and there are libraries
+
+    ld      a,[city_services_flags]
+    and     a,CITY_HAS_LIBRARY
+    ret     z ; return if no libraries
+
     ld      de,POPULATION_CITY
     ld      hl,city_population
     call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
@@ -510,8 +575,13 @@ Simulation_CalculateCityType::
     ld      a,CLASS_CITY
     ld      [city_class],a
 
-    ; TODO - Check if there is at least one university, museums, airport, port,
-    ; etc. If not, the city cannot get to the next level.
+    ; Upgrade to metropolis if enough population and there are stadiums,
+    ; universities and museums
+
+    ld      a,[city_services_flags]
+    and     a,CITY_HAS_STADIUM|CITY_HAS_UNIVERSITY|CITY_HAS_MUSEUM
+    cp      a,CITY_HAS_STADIUM|CITY_HAS_UNIVERSITY|CITY_HAS_MUSEUM
+    ret     nz ; return if not one of each one of them
 
     ld      de,POPULATION_METROPOLIS
     ld      hl,city_population
@@ -523,6 +593,13 @@ Simulation_CalculateCityType::
     call    PersistentMessageShow
     ld      a,CLASS_METROPOLIS
     ld      [city_class],a
+
+    ; Upgrade to capital if enough population and there are airports and ports
+
+    ld      a,[city_services_flags]
+    and     a,CITY_HAS_AIRPORT|CITY_HAS_PORT
+    cp      a,CITY_HAS_AIRPORT|CITY_HAS_PORT
+    ret     nz ; return if not one of each one of them
 
     ld      de,POPULATION_CAPITAL
     ld      hl,city_population
