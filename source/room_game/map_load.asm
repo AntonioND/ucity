@@ -25,9 +25,11 @@
 
 ;-------------------------------------------------------------------------------
 
-    INCLUDE "room_game.inc"
-    INCLUDE "money.inc"
     INCLUDE "map_load.inc"
+    INCLUDE "money.inc"
+    INCLUDE "room_game.inc"
+    INCLUDE "save_struct.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -141,49 +143,138 @@ PredefinedMapLoad: ; b = bank, hl = tiles
 ; Returns de = xy start coordinates
 SRAMMapLoad: ; a = index to load from. Doesn't check bank limits
 
-    ; Load map and attributes
-    push    af ; (*) preserve index
+    ; Enable SRAM access
+    ; ------------------
 
-    inc     a
-    ld      [rRAMB],a
+    ld      [rRAMB],a ; switch to bank
 
     ld      a,CART_RAM_ENABLE
     ld      [rRAMG],a
 
+    ; Check save data integrity
+    ; -------------------------
+
+    ; TODO - Check SAV_MAGIC_STRING, SAV_CHECKSUM
+
+    ; Load map
+    ; --------
+
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ld      hl,_SRAM+0
+    ld      hl,SAV_MAP_TILE_BASE
     ld      de,CITY_MAP_TILES
     call    memcopy
 
+    ; Load attributes
+    ; ---------------
+
+    ; Unpack bits
+
     ld      a,BANK_CITY_MAP_ATTR
     ld      [rSVBK],a
-    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ld      hl,_SRAM+CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ld      de,CITY_MAP_ATTR
-    call    memcopy
 
-    ld      a,CART_RAM_DISABLE
-    ld      [rRAMG],a
+    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT/8 ; size/8
+    ld      hl,CITY_MAP_ATTR ; dst
+    ld      de,SAV_MAP_ATTR_BASE ; src of high bit
 
-    pop     af ; (*) restore index
+.loop_unpack:
+
+        ld      a,[de]
+        inc     de
+
+        REPT    8
+            ld      [hl+],a ; save all bits, not only the lowest one
+            rrca ; it will be masked out in the following loop
+        ENDR
+
+    dec     bc
+    ld      a,b
+    or      a,c
+    jr      nz,.loop_unpack
+
+    ; Fix position of unpacked bits and set palettes
+
+    push    hl
+    GLOBAL  TILESET_INFO
+    ld      b,BANK(TILESET_INFO)
+    call    rom_bank_push_set ; (*)
+    pop     hl
+
+    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT ; size
+    ld      hl,CITY_MAP_TILES ; src of tiles
+
+.loop_fix:
+
+        ld      a,BANK_CITY_MAP_TILES
+        ld      [rSVBK],a
+
+        ld      e,[hl]
+
+        ld      a,BANK_CITY_MAP_ATTR
+        ld      [rSVBK],a
+
+        ld      a,[hl]
+        and     a,1
+        ld      d,a
+
+        ; de = tile number up to 512
+
+        push    hl
+
+            ld      hl,TILESET_INFO
+            add     hl,de ; Use full 9 bit tile number to access the array.
+            add     hl,de ; hl points to the palette + bank1 bit
+            add     hl,de ; Tile number * 4
+            add     hl,de
+
+            IF TILESET_INFO_ELEMENT_SIZE != 4
+                FAIL "draw_city_map.asm: Fix this!"
+            ENDC
+
+            ld      d,[hl] ; d holds the palette + bank1 bit
+
+        pop     hl
+
+        ld      a,d
+        ld      [hl+],a
+
+    dec     bc
+    ld      a,b
+    or      a,c
+    jr      nz,.loop_fix
+
+    call    rom_bank_pop ; (*)
 
     ; Load extra information
+    ; ----------------------
 
-    ld      de,MONEY_AMOUNT_START
+    ld      de,SAV_MONEY
     call    MoneySet ; de = ptr to the amount of money to set
 
-    call    DateReset
+    ld      a,[SAV_YEAR+0]
+    ld      [date_year+0],a
+    ld      a,[SAV_YEAR+1]
+    ld      [date_year+1],a
+    ld      a,[SAV_MONTH]
+    ld      [date_month],a
 
-    ; TODO - Other information
-
-    ld      a,10 ; TODO - Load from SRAM
+    ld      a,[SAV_TAX_PERCENT]
     ld      [tax_percentage],a
 
     ; Return start coordinates
-    ld      d,(CITY_MAP_WIDTH-20)/2 ; X
-    ld      e,(CITY_MAP_HEIGHT-18)/2 ; Y
+    ; ------------------------
+
+    ld      a,[SAV_LAST_SCROLL_X]
+    ld      d,a ; X
+    ld      a,[SAV_LAST_SCROLL_Y]
+    ld      e,a ; Y
+
+    ; Disable SRAM access
+    ; -------------------
+
+    ld      a,CART_RAM_DISABLE
+    ld      [rRAMG],a
 
     ret
 
@@ -268,40 +359,96 @@ CityMapLoad:: ; returns de = xy start coordinates
 
 CityMapSave:: ; a = index to save data to. Doesn't check bank limits
 
-    ; Save map and attributes
-    push    af ; (*) preserve index
+    ; Enable SRAM access
+    ; ------------------
 
-    ld      b,a
+    ld      [rRAMB],a ; switch to bank
 
     ld      a,CART_RAM_ENABLE
     ld      [rRAMG],a
 
-    ld      a,b
-    inc     a
-    ld      [rRAMB],a
+    ; Save map
+    ; --------
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
     ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
+    ld      de,SAV_MAP_TILE_BASE
     ld      hl,CITY_MAP_TILES
-    ld      de,_SRAM+0
     call    memcopy
+
+    ; Save attributes
+    ; ---------------
+
+    ; Pack bits
 
     ld      a,BANK_CITY_MAP_ATTR
     ld      [rSVBK],a
-    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ld      hl,CITY_MAP_ATTR
-    ld      de,_SRAM+CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    call    memcopy
+
+    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT/8 ; size/8
+    ld      hl,CITY_MAP_ATTR ; src
+    ld      de,SAV_MAP_ATTR_BASE ; dst
+
+.loop_pack:
+
+        push    bc
+
+        ld      b,0
+        REPT    8
+            ld      a,[hl+]
+            and     a,%00001000 ; get only the 9th bit
+            rrca
+            rrca
+            rrca
+            or      a,b
+            rrca ; prepare for next bit
+            ld      b,a
+        ENDR
+
+        pop     bc
+
+        ld      [de],a
+        inc     de
+
+    dec     bc
+    ld      a,b
+    or      a,c
+    jr      nz,.loop_pack
+
+    ; Save extra information
+    ; ----------------------
+
+    ld      de,SAV_MONEY
+    call    MoneyGet ; de = ptr to store the current amount of money
+
+    ld      a,[date_year+0]
+    ld      [SAV_YEAR+0],a
+    ld      a,[date_year+1]
+    ld      [SAV_YEAR+1],a
+    ld      a,[date_month]
+    ld      [SAV_MONTH],a
+
+    ld      a,[tax_percentage]
+    ld      [SAV_TAX_PERCENT],a
+
+    ; Return start coordinates
+    ; ------------------------
+
+    ld      a,[bg_x]
+    ld      [SAV_LAST_SCROLL_X],a
+    ld      a,[bg_y]
+    ld      [SAV_LAST_SCROLL_Y],a
+
+    ; Save data integrity checks
+    ; --------------------------
+
+    ; TODO - Save SAV_MAGIC_STRING, SAV_CHECKSUM
+
+    ; Disable SRAM access
+    ; -------------------
 
     ld      a,CART_RAM_DISABLE
     ld      [rRAMG],a
-
-    pop     af ; (*) restore index
-
-    ; Save extra information
-
-    ; TODO
 
     ret
 

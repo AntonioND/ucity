@@ -61,6 +61,21 @@ MoneySet:: ; de = ptr to the amount of money to set
 
 ;-------------------------------------------------------------------------------
 
+MoneyGet:: ; de = ptr to store the current amount of money
+
+    ld      hl,MoneyWRAM
+    ld      b,MONEY_AMOUNT_SIZE
+.loop:
+        ld      a,[hl+]
+        ld      [de],a
+        inc     de
+    dec     b
+    jr      nz,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 MoneyIsThereEnough:: ; de = ptr to the amount of money. ret a=1 if enough else 0
 
     push    de
