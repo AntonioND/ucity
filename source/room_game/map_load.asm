@@ -54,6 +54,11 @@ PREDEFINED_MAP_0:
 
 ;-------------------------------------------------------------------------------
 
+; Note that MAGIC_STRING_LEN is 4
+MAGIC_STRING: DB "BTCY"
+
+;-------------------------------------------------------------------------------
+
 PREDEFINED_MAP_LIST:
     DB  BANK(PREDEFINED_MAP_0)
     DW  PREDEFINED_MAP_0
@@ -140,8 +145,120 @@ PredefinedMapLoad: ; b = bank, hl = tiles
 
 ;-------------------------------------------------------------------------------
 
+SRAMCalculateChecksum: ; Returns HL = checksum of currently enabled SRAM bank
+
+    ; The checksum is calculated as follows (BSD checksum):
+
+    ; u16 sum = 0
+    ; u8 * data = &start;
+    ; for i = 0 to size
+    ;    sum = (sum >> 1) | (sum << 15)
+    ;    sum += data[i]
+
+    ld      hl,$0000 ; Checksum accumulator
+    ld      de,SAV_CHECKSUM+2 ; pointer to start
+    ld      bc,$2000-(SAV_CHECKSUM+2-_SRAM) ; size to check
+
+.loop_checksum:
+
+    ld      a,l ; save lowest bit of hl
+    srl     h
+    rr      l ; HL = (u16)HL >> 1
+
+    rrca    ; A.7 = A.0
+    and     a,$80
+
+    or      a,h
+    ld      h,a ; HL = ( (u16)HL >> 1 ) | (L.0 << 15)
+
+    ld      a,[de]
+    inc     de ; A = read byte
+
+    add     a,l
+    ld      l,a
+    ld      a,h
+    adc     a,0
+    ld      h,a ; HL += (u16)A
+
+    dec     bc
+    ld      a,b
+    or      a,c
+    jr      nz,.loop_checksum
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Returns A = 1 if bank is ok, 0 if not. If A = 1, HL will hold the calculated
+; checksum.
+SRAMCheckBank: ; A = bank to check. This doesn't check limits.
+
+    ld      [rRAMB],a ; switch to bank
+
+    ld      a,CART_RAM_ENABLE
+    ld      [rRAMG],a
+
+    ; First, check magic string
+
+    ld      de,SAV_MAGIC_STRING
+    ld      hl,MAGIC_STRING
+    ld      c,MAGIC_STRING_LEN
+.loop_cmp:
+    ld      a,[de]
+    cp      a,[hl]
+    jr      nz,.exit_fail
+    inc     hl
+    inc     de
+    dec     c
+    jr      nz,.loop_cmp
+
+    ; Last, check checksum (magic string and checksum not included in checksum!)
+
+    call    SRAMCalculateChecksum ; HL = calculated checksum
+
+    ld      a,[SAV_CHECKSUM+0]
+    cp      a,l
+    jr      nz,.exit_fail
+
+    ld      a,[SAV_CHECKSUM+1]
+    cp      a,h
+    jr      nz,.exit_fail
+
+    ; End. HL should still hold the checksum!
+
+    ld      a,CART_RAM_DISABLE
+    ld      [rRAMG],a
+
+    ld      a,1 ; return A = 1, HL = calculated checksum
+    ret
+
+.exit_fail:
+
+    ld      a,CART_RAM_DISABLE
+    ld      [rRAMG],a
+
+    xor     a,a ; return A = 0
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Returns de = xy start coordinates
-SRAMMapLoad: ; a = index to load from. Doesn't check bank limits
+SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
+
+    ; Check save data integrity
+    ; -------------------------
+
+    ld      b,a
+    push    bc
+
+    call    SRAMCheckBank ; A = bank to check. This doesn't check limits.
+
+    pop     bc
+
+    and     a,a
+    ret     z ; if 0, just return!
+
+    ld      a,b
 
     ; Enable SRAM access
     ; ------------------
@@ -150,11 +267,6 @@ SRAMMapLoad: ; a = index to load from. Doesn't check bank limits
 
     ld      a,CART_RAM_ENABLE
     ld      [rRAMG],a
-
-    ; Check save data integrity
-    ; -------------------------
-
-    ; TODO - Check SAV_MAGIC_STRING, SAV_CHECKSUM
 
     ; Load map
     ; --------
@@ -367,6 +479,14 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ld      a,CART_RAM_ENABLE
     ld      [rRAMG],a
 
+    ; Clear bank
+    ; ----------
+
+    ld      d,0
+    ld      hl,_SRAM
+    ld      bc,$2000
+    call    memset ; d = value    hl = start address    bc = size
+
     ; Save map
     ; --------
 
@@ -442,13 +562,27 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ; Save data integrity checks
     ; --------------------------
 
-    ; TODO - Save SAV_MAGIC_STRING, SAV_CHECKSUM
+    call    SRAMCalculateChecksum ; HL = calculated checksum
+
+    ld      a,l
+    ld      [SAV_CHECKSUM+0],a
+    ld      a,h
+    ld      [SAV_CHECKSUM+1],a
+
+    ; Magic string...
+
+    ld      de,SAV_MAGIC_STRING
+    ld      hl,MAGIC_STRING
+    ld      bc,MAGIC_STRING_LEN
+    call    memcopy ; bc = size    hl = source address    de = dest address
 
     ; Disable SRAM access
     ; -------------------
 
     ld      a,CART_RAM_DISABLE
     ld      [rRAMG],a
+
+    ; TODO - Save SAV_MAGIC_STRING, SAV_CHECKSUM
 
     ret
 

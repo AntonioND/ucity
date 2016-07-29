@@ -33,8 +33,7 @@ SAVE_STRUCT_INC SET 1
 
 ;###############################################################################
 
-MAGIC_STRING        SET "BCTY"
-MAGIC_STRING_LEN    SET STRLEN({MAGIC_STRING})
+MAGIC_STRING_LEN    EQU 4
 
 ;-------------------------------------------------------------------------------
 
@@ -59,13 +58,13 @@ ENDM
 
     SAV_SET_PTR     0 ; Start
 
+    ; Magic string must always be first, checksum second.
     SAV_ADD_FIELD   SAV_MAGIC_STRING, MAGIC_STRING_LEN
-
-    SAV_ADD_FIELD   SAV_CHECKSUM, 2
+    SAV_ADD_FIELD   SAV_CHECKSUM, 2 ; LSB first
 
     SAV_ADD_FIELD   SAV_MONEY, MONEY_AMOUNT_SIZE
 
-    SAV_ADD_FIELD   SAV_YEAR,  2
+    SAV_ADD_FIELD   SAV_YEAR,  2 ; LSB first
     SAV_ADD_FIELD   SAV_MONTH, 1
 
     SAV_ADD_FIELD   SAV_TAX_PERCENT, 1
