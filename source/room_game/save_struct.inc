@@ -30,6 +30,7 @@ SAVE_STRUCT_INC SET 1
 ;-------------------------------------------------------------------------------
 
     INCLUDE "money.inc"
+    INCLUDE "text_messages.inc"
 
 ;###############################################################################
 
@@ -71,6 +72,8 @@ ENDM
 
     SAV_ADD_FIELD   SAV_LAST_SCROLL_X, 1
     SAV_ADD_FIELD   SAV_LAST_SCROLL_Y, 1
+
+    SAV_ADD_FIELD   SAV_PERSISTENT_MSG, BYTES_SAVE_PERSISTENT_MSG
 
     SAV_ADD_FIELD   SAV_MAP_ATTR_BASE, $1000/8
 

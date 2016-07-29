@@ -33,10 +33,7 @@
 
 ;-------------------------------------------------------------------------------
 
-; Number of bytes needed to store a flag for each persistent message.
-BYTES_NEEDED_TO_STORE EQU ((ID_MSG_PERSISTENT_NUM+7)/8) ; Round up to 8 bits
-
-persistent_msg_flags: DS BYTES_NEEDED_TO_STORE
+persistent_msg_flags: DS BYTES_SAVE_PERSISTENT_MSG
 
 ;###############################################################################
 
@@ -44,10 +41,23 @@ persistent_msg_flags: DS BYTES_NEEDED_TO_STORE
 
 ;-------------------------------------------------------------------------------
 
-PersistentMessageDataLoad:: ; hl = ptr to data to load
+; Load data from HL into persistent message flags
+PersistentMessageDataLoadFrom:: ; hl = ptr to data to load
 
-    ; TODO - Function that saves the bits to SRAM and other that restores them
-    ; from SRAM
+    ld      bc,BYTES_SAVE_PERSISTENT_MSG
+    ld      de,persistent_msg_flags
+    call    memcopy ; bc = size    hl = source address    de = dest address
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Save data to DE from persistent message flags
+PersistentMessageDataSaveTo:: ; de = ptr to space to save
+
+    ld      bc,BYTES_SAVE_PERSISTENT_MSG
+    ld      hl,persistent_msg_flags
+    call    memcopy ; bc = size    hl = source address    de = dest address
 
     ret
 

@@ -52,6 +52,11 @@ ID_MSG_PERSISTENT_NUM EQU 16 ; Multiple of 8
 ; Extra
 ID_MSG_CUSTOM EQU $FF ; Can only be in the queue once! Careful with it!
 
+;-------------------------------------------------------------------------------
+
+; Number of bytes needed to store a flag for each persistent message.
+BYTES_SAVE_PERSISTENT_MSG EQU ((ID_MSG_PERSISTENT_NUM+7)/8) ; Round up to 8 bits
+
 ;###############################################################################
 
     ENDC ; TEXT_MESSAGES_INC

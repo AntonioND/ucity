@@ -374,6 +374,9 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     ld      a,[SAV_TAX_PERCENT]
     ld      [tax_percentage],a
 
+    ld      hl,SAV_PERSISTENT_MSG
+    call    PersistentMessageDataLoadFrom ; hl = src
+
     ; Return start coordinates
     ; ------------------------
 
@@ -495,7 +498,7 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
     ld      de,SAV_MAP_TILE_BASE
     ld      hl,CITY_MAP_TILES
-    call    memcopy
+    call    memcopy ; bc = size    hl = source address    de = dest address
 
     ; Save attributes
     ; ---------------
@@ -551,6 +554,9 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ld      a,[tax_percentage]
     ld      [SAV_TAX_PERCENT],a
 
+    ld      de,SAV_PERSISTENT_MSG
+    call    PersistentMessageDataSaveTo ; de = src
+
     ; Return start coordinates
     ; ------------------------
 
@@ -581,8 +587,6 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
 
     ld      a,CART_RAM_DISABLE
     ld      [rRAMG],a
-
-    ; TODO - Save SAV_MAGIC_STRING, SAV_CHECKSUM
 
     ret
 
