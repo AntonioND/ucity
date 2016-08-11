@@ -58,7 +58,9 @@ ENDM
 
 ; To use this macro, do:
 ;     String2Tiles "S","t","r","i","n","g",0
-; This macro can (probably?) have as many arguments as needed, even more than 9.
+; This macro can (probably?) have as many arguments as needed. Normally, RGBDS
+; only lets the code access the lower 9 values (\1 to \9), but actually there
+; can be up to MAXMACROARGS arguments (as of now, 256).
 
 String2Tiles : MACRO
 
