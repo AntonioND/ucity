@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "map_load.inc"
+    INCLUDE "text.inc"
 
 ;###############################################################################
 
@@ -49,6 +50,9 @@ MAIN_MENU_BG_MAP::
 
 ;-------------------------------------------------------------------------------
 
+STR_INPUT_NAME:
+    String2Tiles "I","n","p","u","t"," ","N","a","m","e",":",0
+
 InputHandleMenu:
 
     ld      a,[joy_pressed]
@@ -57,6 +61,11 @@ InputHandleMenu:
 
         ld      a,0
         call    CityMapSet
+
+        ld      de,STR_INPUT_NAME
+        call    RoomTextInputSetPrompt ; de = pointer to string
+
+        call    RoomTextInput
 
         ld      a,1
         ld      [menu_exit],a
