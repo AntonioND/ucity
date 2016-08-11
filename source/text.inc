@@ -32,7 +32,7 @@ O_CURSOR        EQU 41
 O_RCI_BASE_BAR  EQU 42
 O_SPACE         EQU 53
 O_BAR           EQU 54
-O_COPYRIGHT     EQU 55 ; Mapped to "%"
+O_COPYRIGHT     EQU 55 ; Mapped to "$"
 O_COMMA         EQU 56
 O_DOT           EQU 57
 O_UNDERSCORE    EQU 58

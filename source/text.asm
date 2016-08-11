@@ -103,8 +103,8 @@ credits_ascii_to_tiles_table:
     ; ##@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _##
     ; ##` a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~  ##
 
-    ;   ' '     !             "      #       $      %           &      '            (      )
-    DB O_SPACE,O_EXCLAMATION,O_NONE,O_ARROW,O_NONE,O_COPYRIGHT,O_NONE,O_APOSTROPHE,O_NONE,O_NONE
+    ;   ' '     !             "      #      $           %         &      '            (      )
+    DB O_SPACE,O_EXCLAMATION,O_NONE,O_ARROW,O_COPYRIGHT,O_PERCENT,O_NONE,O_APOSTROPHE,O_NONE,O_NONE
     ;   *      +      ,       -      .     /
     DB O_NONE,O_NONE,O_COMMA,O_NONE,O_DOT,O_BAR
     ;   0 1 2 3 4 5 6 7 8 9
