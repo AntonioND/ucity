@@ -54,6 +54,80 @@ BCD2Tile : MACRO ; a = number from 0 to 9. Returns tile number in a
     add     a,O_ZERO
 ENDM
 
+;-------------------------------------------------------------------------------
+
+; To use this macro, do:
+;     String2Tiles "S","t","r","i","n","g",0
+; This macro can (probably?) have as many arguments as needed, even more than 9.
+
+String2Tiles : MACRO
+
+    REPT _NARG ; Repeat for each argument (even if there are more than 9!)
+
+        IF \1 == "%"
+            DB O_PERCENT
+        ENDC
+        IF \1 == "-"
+            DB O_DASH
+        ENDC
+        IF \1 == " "
+            DB O_SPACE
+        ENDC
+        IF \1 == "/"
+            DB O_BAR
+        ENDC
+        IF \1 == "$"
+            DB O_COPYRIGHT
+        ENDC
+        IF \1 == ","
+            DB O_COMMA
+        ENDC
+        IF \1 == "."
+            DB O_DOT
+        ENDC
+        IF \1 == "_"
+            DB O_UNDERSCORE
+        ENDC
+        IF \1 == "@"
+            DB O_AT
+        ENDC
+        IF \1 == ":"
+            DB O_COLON
+        ENDC
+        IF \1 == "#"
+            DB O_ARROW
+        ENDC
+        IF \1 == "'"
+            DB O_APOSTROPHE
+        ENDC
+        IF \1 == "?"
+            DB O_QUESTION
+        ENDC
+        IF \1 == "!"
+            DB O_EXCLAMATION
+        ENDC
+        IF \1 == "~"
+            DB O_NTILDE
+        ENDC
+        IF \1 >= "0" && \1 <= "9"
+            DB O_ZERO + \1 - "0"
+        ENDC
+        IF \1 >= "A" && \1 <= "Z"
+            DB O_A_UPPERCASE + \1 - "A"
+        ENDC
+        IF \1 >= "a" && \1 <= "z"
+            DB O_A_LOWERCASE + \1 - "a"
+        ENDC
+        IF \1 == 0
+            DB 0
+        ENDC
+
+        SHIFT ; Get next argument
+
+    ENDR
+
+ENDM
+
 ;###############################################################################
 
     ENDC ; TEXT_INC
