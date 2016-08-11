@@ -35,12 +35,13 @@
 text_prompt_string: DS TEXT_PROMPT_STRING_LENGHT
 text_input_buffer:  DS (TEXT_INPUT_LENGHT+1) ; Add 1 for the null terminator
 
-TEXT_INPUT_BLINK_FRAMES EQU 30
-text_input_ptr:     DS 1 ; pointer to the current char to be modified
+TEXT_CURSOR_BLINK_FRAMES EQU 30
 text_cursor_x:      DS 1 ; keyboard cursor coordinates
 text_cursor_y:      DS 1
 text_cursor_blink:  DS 1
 text_cursor_frames: DS 1 ; number of frames left before switching blink status
+
+text_input_ptr:     DS 1 ; pointer to the current char to be modified
 
 text_input_exit:    DS 1 ; set to 1 to exit
 
@@ -111,6 +112,11 @@ TextInputMoveRight:
     jr      z,TextInputMoveRight
     ; if empty, repeat until a valid position is found
 
+    ld      a,TEXT_CURSOR_BLINK_FRAMES
+    ld      [text_cursor_frames],a
+    ld      a,1
+    ld      [text_cursor_blink],a
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -129,6 +135,11 @@ TextInputMoveLeft:
     and     a,a
     jr      z,TextInputMoveLeft
     ; if empty, repeat until a valid position is found
+
+    ld      a,TEXT_CURSOR_BLINK_FRAMES
+    ld      [text_cursor_frames],a
+    ld      a,1
+    ld      [text_cursor_blink],a
 
     ret
 
@@ -149,6 +160,11 @@ TextInputMoveDown:
     jr      z,TextInputMoveDown
     ; if empty, repeat until a valid position is found
 
+    ld      a,TEXT_CURSOR_BLINK_FRAMES
+    ld      [text_cursor_frames],a
+    ld      a,1
+    ld      [text_cursor_blink],a
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -167,6 +183,11 @@ TextInputMoveUp:
     and     a,a
     jr      z,TextInputMoveUp
     ; if empty, repeat until a valid position is found
+
+    ld      a,TEXT_CURSOR_BLINK_FRAMES
+    ld      [text_cursor_frames],a
+    ld      a,1
+    ld      [text_cursor_blink],a
 
     ret
 
@@ -338,11 +359,38 @@ InputHandleTextInputMenu:
 
 ;-------------------------------------------------------------------------------
 
+CursorsBlinkHandle:
+
+    ld      hl,text_cursor_frames
+    dec     [hl]
+    jr      nz,.end_cursor_blink
+
+        ld      [hl],TEXT_CURSOR_BLINK_FRAMES
+
+        ld      hl,text_cursor_blink
+        ld      a,1
+        xor     a,[hl]
+        ld      [hl],a
+
+        and     a,a
+        jr      z,.cleared_cursor
+            call    TextInputDrawKeyboardCursor
+            jr      .end_cursor_blink
+.cleared_cursor:
+            call    TextInputClearKeyboardCursor
+            jr      .end_cursor_blink
+
+.end_cursor_blink:
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 TextInputMenuHandle:
 
     call    InputHandleTextInputMenu
 
-    ; TODO : text_cursor_blink TEXT_INPUT_BLINK_FRAMES text_cursor_frames
+    call    CursorsBlinkHandle
 
     ret
 
@@ -550,12 +598,14 @@ RoomTextInput::
 
     xor     a,a
     ld      [text_input_exit],a
+
     ld      [text_input_ptr],a
+
     ld      [text_cursor_x],a
     ld      [text_cursor_y],a
     ld      [text_cursor_blink],a
 
-    ld      a,TEXT_INPUT_BLINK_FRAMES
+    ld      a,TEXT_CURSOR_BLINK_FRAMES
     ld      [text_cursor_frames],a
 
     call    SetPalettesAllBlack
