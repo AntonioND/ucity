@@ -31,6 +31,7 @@ SAVE_STRUCT_INC SET 1
 
     INCLUDE "money.inc"
     INCLUDE "text_messages.inc"
+    INCLUDE "room_text_input.inc"
 
 ;###############################################################################
 
@@ -62,6 +63,8 @@ ENDM
     ; Magic string must always be first, checksum second.
     SAV_ADD_FIELD   SAV_MAGIC_STRING, MAGIC_STRING_LEN
     SAV_ADD_FIELD   SAV_CHECKSUM, 2 ; LSB first
+
+    SAV_ADD_FIELD   SAV_CITY_NAME, TEXT_INPUT_LENGHT
 
     SAV_ADD_FIELD   SAV_MONEY, MONEY_AMOUNT_SIZE
 

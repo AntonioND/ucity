@@ -30,12 +30,15 @@
     INCLUDE "room_game.inc"
     INCLUDE "save_struct.inc"
     INCLUDE "tileset_info.inc"
+    INCLUDE "room_text_input.inc"
 
 ;###############################################################################
 
     SECTION "Map Load Variables",WRAM0
 
 ;-------------------------------------------------------------------------------
+
+current_city_name:: DS TEXT_PROMPT_STRING_LENGHT+1 ; lenght + 0 terminator
 
 selected_map: DS 1
 
@@ -377,6 +380,13 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     ld      hl,SAV_PERSISTENT_MSG
     call    PersistentMessageDataLoadFrom ; hl = src
 
+    ld      bc,TEXT_PROMPT_STRING_LENGHT
+    ld      hl,SAV_CITY_NAME ; src
+    ld      de,current_city_name ; dst
+    call    memcopy
+    xor     a,a ; save 0 terminator!
+    ld      [de],a
+
     ; Return start coordinates
     ; ------------------------
 
@@ -556,6 +566,11 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
 
     ld      de,SAV_PERSISTENT_MSG
     call    PersistentMessageDataSaveTo ; de = src
+
+    ld      bc,TEXT_INPUT_LENGHT
+    ld      de,SAV_CITY_NAME ; dst
+    ld      hl,current_city_name ; src
+    call    memcopy
 
     ; Return start coordinates
     ; ------------------------

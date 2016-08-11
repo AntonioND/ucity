@@ -33,7 +33,7 @@
     SECTION "Room Text Input Variables",WRAM0
 
 text_prompt_string: DS TEXT_PROMPT_STRING_LENGHT
-text_input_buffer:  DS (TEXT_INPUT_LENGHT+1) ; Add 1 for the null terminator
+text_input_buffer:: DS (TEXT_INPUT_LENGHT+1) ; Add 1 for the null terminator
 
 TEXT_CURSOR_BLINK_FRAMES EQU 30
 text_cursor_x:      DS 1 ; keyboard cursor coordinates
