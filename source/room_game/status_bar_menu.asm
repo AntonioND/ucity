@@ -25,9 +25,10 @@
 
 ;-------------------------------------------------------------------------------
 
-    INCLUDE "room_game.inc"
     INCLUDE "building_info.inc"
+    INCLUDE "room_game.inc"
     INCLUDE "text.inc"
+    INCLUDE "room_text_input.inc"
 
 ;###############################################################################
 
@@ -398,6 +399,8 @@ StatusBarMenuLoadGfx::
     ; Update pause sign
 
     call    StatusBarMenuDrawPauseState
+
+    call    StatusBarMenuDrawCityName ; only do this once!
 
     ret
 
@@ -777,5 +780,49 @@ StatusBarMenuDrawPauseState::
 
 .str_unpause:
     String2Tiles "U","n","p","a","u","s","e"
+
+;-------------------------------------------------------------------------------
+
+StatusBarMenuDrawCityName:: ; only do this once, when loading the map!
+
+    ; Align name to the right
+
+    ; Get number of spaces needed before name
+
+    ld      b,0 ; counter
+    ld      hl,current_city_name
+.loop_count:
+    ld      a,[hl+]
+    and     a,a
+    jr      z,.loop_count_end ; terminator character
+    inc     b
+    ld      a,TEXT_INPUT_LENGTH ; limit to the max length
+    cp      a,b
+    jr      nz,.loop_count
+.loop_count_end:
+
+    ld      a,b
+    and     a,a
+    ret     z ; if name length is 0, return (this shouldn't happen!)
+
+    ; b = name lenght
+    ld      a,TEXT_INPUT_LENGTH ; limit to the max length
+    sub     a,b ; a = Number of spaces needed before name
+
+    push    bc ; preserve lenght
+
+        ld      b,0
+        ld      c,a
+        ld      d,O_SPACE
+        ld      hl,$9800+32*4+6
+        call    vram_memset ; bc = size    d = value    hl = dest address
+
+    pop     bc ; get lenght in b again
+
+    LD_DE_HL
+    ld      hl,current_city_name
+    call    vram_copy_fast ; b = size    hl = source address    de = dest
+
+    ret
 
 ;###############################################################################

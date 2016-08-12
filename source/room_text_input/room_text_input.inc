@@ -25,9 +25,9 @@ ROOM_TEXT_INPUT_INC SET 1
 
 ;###############################################################################
 
-TEXT_INPUT_LENGHT EQU 10 ; there's another extra char for the text terminator
+TEXT_INPUT_LENGTH EQU 10 ; there's another extra char for the text terminator
 
-TEXT_PROMPT_STRING_LENGHT EQU 18
+TEXT_PROMPT_STRING_LENGTH EQU 18
 
 ;###############################################################################
 

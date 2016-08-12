@@ -32,8 +32,8 @@
 
     SECTION "Room Text Input Variables",WRAM0
 
-text_prompt_string: DS TEXT_PROMPT_STRING_LENGHT
-text_input_buffer:: DS (TEXT_INPUT_LENGHT+1) ; Add 1 for the null terminator
+text_prompt_string: DS TEXT_PROMPT_STRING_LENGTH
+text_input_buffer:: DS (TEXT_INPUT_LENGTH+1) ; Add 1 for the null terminator
 
 TEXT_CURSOR_BLINK_FRAMES EQU 30
 text_cursor_x:      DS 1 ; keyboard cursor coordinates
@@ -435,7 +435,7 @@ TextPutChar: ; A = char to draw
     ld      b,a ; preserve char
 
     ld      a,[text_input_ptr]
-    cp      a,TEXT_INPUT_LENGHT
+    cp      a,TEXT_INPUT_LENGTH
     ret     z ; max lenght!
 
     ld      d,0
@@ -477,7 +477,7 @@ RoomTextInputSetPrompt:: ; de = pointer to string
     push    de
 
     ld      d,O_SPACE
-    ld      bc,TEXT_PROMPT_STRING_LENGHT
+    ld      bc,TEXT_PROMPT_STRING_LENGTH
     ld      hl,text_prompt_string
     call    memset
 
@@ -485,7 +485,7 @@ RoomTextInputSetPrompt:: ; de = pointer to string
 
     ; Copy string
 
-    ld      b,TEXT_PROMPT_STRING_LENGHT
+    ld      b,TEXT_PROMPT_STRING_LENGTH
     ld      hl,text_prompt_string
 
 .loop:
@@ -556,7 +556,7 @@ RoomTextInputLoadBG:
 
     push    hl ; preserve source pointer from previous copy
 
-        ld      b,TEXT_PROMPT_STRING_LENGHT
+        ld      b,TEXT_PROMPT_STRING_LENGTH
         ld      de,$9800+32*1+1
         ld      hl,text_prompt_string
         call    vram_copy_fast ; b = size - hl = source address - de = dest
@@ -607,6 +607,11 @@ RoomTextInput::
 
     ld      a,TEXT_CURSOR_BLINK_FRAMES
     ld      [text_cursor_frames],a
+
+    ld      d,0
+    ld      hl,text_input_buffer
+    ld      bc,TEXT_INPUT_LENGTH+1
+    call    memset ; d = value    hl = start address    bc = size
 
     call    SetPalettesAllBlack
 

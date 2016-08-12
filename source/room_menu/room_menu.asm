@@ -70,7 +70,7 @@ InputHandleMenu:
 
         ld      hl,text_input_buffer
         ld      de,current_city_name
-        ld      bc,TEXT_INPUT_LENGHT
+        ld      bc,TEXT_INPUT_LENGTH
         call    memcopy ; bc = size    hl = source address    de = dest address
 
         ld      a,1

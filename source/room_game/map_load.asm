@@ -38,7 +38,7 @@
 
 ;-------------------------------------------------------------------------------
 
-current_city_name:: DS TEXT_INPUT_LENGHT+1 ; lenght + 0 terminator
+current_city_name:: DS TEXT_INPUT_LENGTH+1 ; lenght + 0 terminator
 
 selected_map: DS 1
 
@@ -380,7 +380,7 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     ld      hl,SAV_PERSISTENT_MSG
     call    PersistentMessageDataLoadFrom ; hl = src
 
-    ld      bc,TEXT_PROMPT_STRING_LENGHT
+    ld      bc,TEXT_PROMPT_STRING_LENGTH
     ld      hl,SAV_CITY_NAME ; src
     ld      de,current_city_name ; dst
     call    memcopy
@@ -567,7 +567,7 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ld      de,SAV_PERSISTENT_MSG
     call    PersistentMessageDataSaveTo ; de = src
 
-    ld      bc,TEXT_INPUT_LENGHT
+    ld      bc,TEXT_INPUT_LENGTH
     ld      de,SAV_CITY_NAME ; dst
     ld      hl,current_city_name ; src
     call    memcopy
