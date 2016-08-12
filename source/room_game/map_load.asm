@@ -38,7 +38,7 @@
 
 ;-------------------------------------------------------------------------------
 
-current_city_name:: DS TEXT_PROMPT_STRING_LENGHT+1 ; lenght + 0 terminator
+current_city_name:: DS TEXT_INPUT_LENGHT+1 ; lenght + 0 terminator
 
 selected_map: DS 1
 
