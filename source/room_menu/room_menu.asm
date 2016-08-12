@@ -51,8 +51,8 @@ MAIN_MENU_BG_MAP::
 
 ;-------------------------------------------------------------------------------
 
-STR_INPUT_NAME:
-    String2Tiles "I","n","p","u","t"," ","N","a","m","e",":",0
+STR_CITY_NAME:
+    String2Tiles "C","i","t","y"," ","N","a","m","e",":",0
 
 InputHandleMenu:
 
@@ -63,7 +63,7 @@ InputHandleMenu:
         ld      a,0
         call    CityMapSet
 
-        ld      de,STR_INPUT_NAME
+        ld      de,STR_CITY_NAME
         call    RoomTextInputSetPrompt ; de = pointer to string
 
         call    RoomTextInput

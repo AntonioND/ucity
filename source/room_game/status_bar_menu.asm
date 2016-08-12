@@ -485,12 +485,7 @@ StatusBarUpdate::
 ;-----------------------------------
 
 .price_label:
-    DB O_A_UPPERCASE - "A" + "P"
-    DB O_A_LOWERCASE - "a" + "r"
-    DB O_A_LOWERCASE - "a" + "i"
-    DB O_A_LOWERCASE - "a" + "c"
-    DB O_A_LOWERCASE - "a" + "e"
-    DB O_COLON
+    String2Tiles "P","r","i","c","e",":"
 .end_price_label:
 
 PRICE_LABEL_LEN EQU .end_price_label - .price_label
@@ -526,14 +521,7 @@ PRICE_LABEL_LEN EQU .end_price_label - .price_label
 ;-----------------------------------
 
 .date_label:
-    DB O_A_UPPERCASE - "A" + "D"
-    DB O_A_LOWERCASE - "a" + "a"
-    DB O_A_LOWERCASE - "a" + "t"
-    DB O_A_LOWERCASE - "a" + "e"
-    DB O_COLON
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
+    String2Tiles "D","a","t","e",":"," "," "," "
 .end_date_label:
 
 DATE_LABEL_LEN EQU .end_date_label - .date_label
@@ -608,60 +596,15 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
 ; The strings have to be 10 chars long
 .class_village:
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_A_UPPERCASE - "A" + "V"
-    DB O_A_LOWERCASE - "a" + "i"
-    DB O_A_LOWERCASE - "a" + "l"
-    DB O_A_LOWERCASE - "a" + "l"
-    DB O_A_LOWERCASE - "a" + "a"
-    DB O_A_LOWERCASE - "a" + "g"
-    DB O_A_LOWERCASE - "a" + "e"
+    String2Tiles " "," "," ","V","i","l","l","a","g","e"
 .class_town:
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_A_UPPERCASE - "A" + "T"
-    DB O_A_LOWERCASE - "a" + "o"
-    DB O_A_LOWERCASE - "a" + "w"
-    DB O_A_LOWERCASE - "a" + "n"
+    String2Tiles " "," "," "," "," "," ","T","o","w","n"
 .class_city:
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_A_UPPERCASE - "A" + "C"
-    DB O_A_LOWERCASE - "a" + "i"
-    DB O_A_LOWERCASE - "a" + "t"
-    DB O_A_LOWERCASE - "a" + "y"
+    String2Tiles " "," "," "," "," "," ","C","i","t","y"
 .class_metropolis:
-    DB O_A_UPPERCASE - "A" + "M"
-    DB O_A_LOWERCASE - "a" + "e"
-    DB O_A_LOWERCASE - "a" + "t"
-    DB O_A_LOWERCASE - "a" + "r"
-    DB O_A_LOWERCASE - "a" + "o"
-    DB O_A_LOWERCASE - "a" + "p"
-    DB O_A_LOWERCASE - "a" + "o"
-    DB O_A_LOWERCASE - "a" + "l"
-    DB O_A_LOWERCASE - "a" + "i"
-    DB O_A_LOWERCASE - "a" + "s"
+    String2Tiles "M","e","t","r","o","p","o","l","i","s"
 .class_capital:
-    DB O_SPACE
-    DB O_SPACE
-    DB O_SPACE
-    DB O_A_UPPERCASE - "A" + "C"
-    DB O_A_LOWERCASE - "a" + "a"
-    DB O_A_LOWERCASE - "a" + "p"
-    DB O_A_LOWERCASE - "a" + "i"
-    DB O_A_LOWERCASE - "a" + "t"
-    DB O_A_LOWERCASE - "a" + "a"
-    DB O_A_LOWERCASE - "a" + "l"
+    String2Tiles " "," "," ","C","a","p","i","t","a","l"
 
 ;-----------------------------------
 
@@ -830,21 +773,9 @@ StatusBarMenuDrawPauseState::
     ret
 
 .str_pause:
-    DB O_A_UPPERCASE - "A" + "P"
-    DB O_A_LOWERCASE - "a" + "a"
-    DB O_A_LOWERCASE - "a" + "u"
-    DB O_A_LOWERCASE - "a" + "s"
-    DB O_A_LOWERCASE - "a" + "e"
-    DB O_SPACE
-    DB O_SPACE
+    String2Tiles "P","a","u","s","e"," "," "
 
 .str_unpause:
-    DB O_A_UPPERCASE - "A" + "U"
-    DB O_A_LOWERCASE - "a" + "n"
-    DB O_A_LOWERCASE - "a" + "p"
-    DB O_A_LOWERCASE - "a" + "a"
-    DB O_A_LOWERCASE - "a" + "u"
-    DB O_A_LOWERCASE - "a" + "s"
-    DB O_A_LOWERCASE - "a" + "e"
+    String2Tiles "U","n","p","a","u","s","e"
 
 ;###############################################################################

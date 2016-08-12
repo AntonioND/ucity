@@ -95,7 +95,7 @@ LoadText:: ; b = 1 -> load at bank 8800h, b = 0 -> load at bank at 8000h
 
 ;-------------------------------------------------------------------------------
 
-credits_ascii_to_tiles_table:
+ascii_to_tiles_table:
 
     ;   .--Space is here!
     ;   v
@@ -103,10 +103,10 @@ credits_ascii_to_tiles_table:
     ; ##@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _##
     ; ##` a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~  ##
 
-    ;   ' '     !             "      #      $           %         &      '            (      )
-    DB O_SPACE,O_EXCLAMATION,O_NONE,O_ARROW,O_COPYRIGHT,O_PERCENT,O_NONE,O_APOSTROPHE,O_NONE,O_NONE
-    ;   *      +      ,       -      .     /
-    DB O_NONE,O_NONE,O_COMMA,O_NONE,O_DOT,O_BAR
+    ;  ' '     !             "      #       $           %         &
+    DB O_SPACE,O_EXCLAMATION,O_NONE,O_ARROW,O_COPYRIGHT,O_PERCENT,O_NONE
+    ;  '            (      )      *      +      ,       -      .     /
+    DB O_APOSTROPHE,O_NONE,O_NONE,O_NONE,O_NONE,O_COMMA,O_NONE,O_DOT,O_BAR
     ;   0 1 2 3 4 5 6 7 8 9
 CHARACTER SET 0
     REPT 10
@@ -121,7 +121,7 @@ CHARACTER SET 0
         DB O_A_UPPERCASE+CHARACTER
 CHARACTER SET CHARACTER+1
     ENDR
-    ;   [      \      ]      ^      _            `
+    ;  [      \      ]      ^      _            `
     DB O_NONE,O_NONE,O_NONE,O_NONE,O_UNDERSCORE,O_NONE
     ; a b c d e f g h i j k l m n o p q r s t u v w x y z
 CHARACTER SET 0
@@ -129,7 +129,7 @@ CHARACTER SET 0
         DB O_A_LOWERCASE+CHARACTER
 CHARACTER SET CHARACTER+1
     ENDR
-    ;   {      |      }      ~
+    ;  {      |      }      ~
     DB O_NONE,O_NONE,O_NONE,O_NTILDE
 
 ;-------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ CHARACTER SET CHARACTER+1
 ASCII2Tile:: ; a = ascii code. Returns tile number in a. Destroys de and hl
 
     sub     a,32 ; Non-printing characters
-    ld      hl,credits_ascii_to_tiles_table
+    ld      hl,ascii_to_tiles_table
     ld      d,0
     ld      e,a
     add     hl,de
