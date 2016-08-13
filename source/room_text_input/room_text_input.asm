@@ -117,6 +117,8 @@ TextInputMoveRight:
     ld      a,1
     ld      [text_cursor_blink],a
 
+    call    TextInputDrawKeyboardCursor
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -140,6 +142,8 @@ TextInputMoveLeft:
     ld      [text_cursor_frames],a
     ld      a,1
     ld      [text_cursor_blink],a
+
+    call    TextInputDrawKeyboardCursor
 
     ret
 
@@ -165,6 +169,8 @@ TextInputMoveDown:
     ld      a,1
     ld      [text_cursor_blink],a
 
+    call    TextInputDrawKeyboardCursor
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -188,6 +194,8 @@ TextInputMoveUp:
     ld      [text_cursor_frames],a
     ld      a,1
     ld      [text_cursor_blink],a
+
+    call    TextInputDrawKeyboardCursor
 
     ret
 
@@ -365,7 +373,7 @@ InputHandleTextInputMenu:
 
 ;-------------------------------------------------------------------------------
 
-CursorsBlinkHandle:
+TextInputCursorsBlinkHandle:
 
     ld      hl,text_cursor_frames
     dec     [hl]
@@ -396,7 +404,7 @@ TextInputMenuHandle:
 
     call    InputHandleTextInputMenu
 
-    call    CursorsBlinkHandle
+    call    TextInputCursorsBlinkHandle
 
     ret
 
@@ -472,7 +480,7 @@ TextPutChar: ; A = char to draw
 
 ;###############################################################################
 
-    SECTION "Room Menu Code Data",ROM0
+    SECTION "Room Text Input Code Data",ROM0
 
 ;-------------------------------------------------------------------------------
 
