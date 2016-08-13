@@ -809,15 +809,21 @@ StatusBarMenuDrawCityName:: ; only do this once, when loading the map!
     ld      a,TEXT_INPUT_LENGTH ; limit to the max length
     sub     a,b ; a = Number of spaces needed before name
 
+    ld      hl,$9800+32*4+6 ; prepare pointer for VRAM writes
+
+    and     a,a
+    jr      z,.skip_spaces ; if name length is the max one, don't print spaces
+
     push    bc ; preserve lenght
 
         ld      b,0
         ld      c,a
         ld      d,O_SPACE
-        ld      hl,$9800+32*4+6
         call    vram_memset ; bc = size    d = value    hl = dest address
 
     pop     bc ; get lenght in b again
+
+.skip_spaces:
 
     LD_DE_HL
     ld      hl,current_city_name
