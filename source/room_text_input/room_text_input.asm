@@ -294,9 +294,12 @@ InputHandleTextInputMenu:
     ld      a,[joy_pressed]
     and     a,PAD_START
     jr      z,.not_start
-        ld      a,1
-        ld      [text_input_exit],a
-        ret
+        ld      a,[text_input_ptr]
+        and     a,a
+        jr      z,.not_start ; if text lenght is 0, don't allow to end
+            ld      a,1
+            ld      [text_input_exit],a
+            ret
 .not_start:
 
     ld      a,[joy_pressed]
@@ -305,9 +308,12 @@ InputHandleTextInputMenu:
         call    TextInputGetSelectedChar ; returns A = selected char (-1 = End)
         cp      a,-1
         jr      nz,.dont_end
-            ld      a,1
-            ld      [text_input_exit],a
-            ret
+            ld      a,[text_input_ptr]
+            and     a,a
+            jr      z,.not_a ; if text lenght is 0, don't allow to end
+                ld      a,1
+                ld      [text_input_exit],a
+                ret
 .dont_end:
         ; A = char to draw
         call    TextPutChar
