@@ -38,16 +38,12 @@ menu_exit:      DS 1
 
 ;###############################################################################
 
-    SECTION "Room Menu Data",ROMX
+    SECTION "Room Menu Code Data",ROMX
 
 ;-------------------------------------------------------------------------------
 
 MAIN_MENU_BG_MAP::
     INCBIN "data/main_menu_bg_map.bin"
-
-;###############################################################################
-
-    SECTION "Room Menu Code Data",ROM0
 
 ;-------------------------------------------------------------------------------
 
@@ -142,14 +138,6 @@ InputHandleMenu:
 
 ;-------------------------------------------------------------------------------
 
-RoomMenuVBLHandler:
-
-    call    refresh_OAM
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 RoomMenuLoadBG:
 
     ; Reset scroll
@@ -161,9 +149,6 @@ RoomMenuLoadBG:
 
     ; Load graphics
     ; -------------
-
-    ld      b,BANK(MAIN_MENU_BG_MAP)
-    call    rom_bank_push_set
 
     ; Tiles
 
@@ -216,8 +201,6 @@ RoomMenuLoadBG:
     dec     a
     jr      nz,.loop2
 
-    call    rom_bank_pop
-
     ret
 
 ;-------------------------------------------------------------------------------
@@ -267,6 +250,18 @@ RoomMenu::
     jr      z,.loop
 
     call    SetDefaultVBLHandler
+
+    ret
+
+;###############################################################################
+
+    SECTION "Room Menu Code ROM0",ROM0
+
+;-------------------------------------------------------------------------------
+
+RoomMenuVBLHandler:
+
+    call    refresh_OAM
 
     ret
 

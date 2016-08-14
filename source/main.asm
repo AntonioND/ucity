@@ -180,7 +180,7 @@ Main:
     set     0,[hl] ; IEF_VBLANK
 
 .main_loop:
-    call    RoomMenu
+    LONG_CALL   RoomMenu
     call    RoomGame
     jr      .main_loop
 
