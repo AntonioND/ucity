@@ -436,10 +436,15 @@ PauseMenuHandleOption:
 
         ; Save Game
 
-        ; TODO - Create save menu
+        ld      b,1 ; 1 = save data mode
+        LONG_CALL_ARGS    RoomSaveMenu ; returns A = SRAM bank, -1 if error
+        cp      a,$FF
+        ret     z ; if the user pressed -1 or there was an error, don't save
 
-        ld      a,0
-        call    CityMapSave
+        call    CityMapSave ; if ok, save to the bank selected by the user
+
+        ld      a,0 ; load gfx only
+        call    RoomGameLoad
 
         ret
 

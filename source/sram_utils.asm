@@ -29,9 +29,11 @@
 
 ;-------------------------------------------------------------------------------
 
-sram_bank_number: DS 1
+sram_num_available_banks:: DS 1 ; number of detected available SRAM banks
 
 SRAM_BANK_NUM_MAX EQU 16 ; Max number of banks supported by any mapper
+
+sram_bank_status:: DS SRAM_BANK_NUM_MAX ; 0 = not avail. 1 = ok, 2 = empty/bad
 
 ;###############################################################################
 
@@ -82,14 +84,14 @@ SRAM_PowerOnCheck::
     jr      z,.valid_value
         ; Oh... We didn't get any of the written values. 0 SRAM banks then...
         xor     a,a
-        ld      [sram_bank_number],a
+        ld      [sram_num_available_banks],a
         jr      .end_check
 .valid_value:
 
     ld      a,b
     and     a,$0F
     inc     a
-    ld      [sram_bank_number],a
+    ld      [sram_num_available_banks],a
 
     ; Restore data from bank 15 to 0
     ld      hl,sp+(SRAM_BANK_NUM_MAX-1)
@@ -116,11 +118,54 @@ SRAM_PowerOnCheck::
 
 ;-------------------------------------------------------------------------------
 
-SRAM_CheckIntegrity:: ; TODO
+SRAM_CheckIntegrity::
 
-    ld      a,[sram_bank_number]
+    ; Flag all banks as unavailable
+
+    ld      b,SRAM_BANK_NUM_MAX
+    ld      hl,sram_bank_status
+    ld      a,0
+    call    memset_fast ; a = value    hl = start address    b = size
+
+    ; If no banks available, just return
+
+    ld      a,[sram_num_available_banks]
     and     a,a
-    ret     z ; return if no SRAM available
+    ret     z
+
+    ; For all available banks, flag them as ok or corrupted (empty)
+
+    ld      b,0 ; sram number index
+    ld      hl,sram_bank_status
+.loop_check_bank:
+
+    push    bc
+    push    hl
+
+        ld      a,b
+
+        ; Returns A = 1 if bank is ok, 0 if not
+        call    SRAMCheckBank ; A = bank to check. This doesn't check limits.
+
+        and     a,a
+        jr      nz,.sram_bank_ok
+            ; Corrupted
+            ld      a,2
+        jr      .sram_bank_check_end
+.sram_bank_ok:
+            ; Ok
+            ld      a,1
+.sram_bank_check_end:
+
+    pop     hl
+    pop     bc
+
+    ld      [hl+],a ; save this bank status
+
+    inc     b
+    ld      a,[sram_num_available_banks]
+    cp      a,b
+    jr      nz,.loop_check_bank
 
     ret
 

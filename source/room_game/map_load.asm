@@ -194,7 +194,7 @@ SRAMCalculateChecksum: ; Returns HL = checksum of currently enabled SRAM bank
 
 ; Returns A = 1 if bank is ok, 0 if not. If A = 1, HL will hold the calculated
 ; checksum.
-SRAMCheckBank: ; A = bank to check. This doesn't check limits.
+SRAMCheckBank:: ; A = bank to check. This doesn't check limits.
 
     ld      [rRAMB],a ; switch to bank
 

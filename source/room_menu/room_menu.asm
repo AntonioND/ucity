@@ -51,6 +51,57 @@ MAIN_MENU_BG_MAP::
 
 ;-------------------------------------------------------------------------------
 
+MenuNewCity:
+
+    ld      a,0
+    call    CityMapSet
+
+    ld      de,STR_CITY_NAME
+    LONG_CALL_ARGS  RoomTextInputSetPrompt ; de = pointer to string
+
+    LONG_CALL   RoomTextInput
+
+    ld      hl,text_input_buffer
+    ld      de,current_city_name
+    ld      bc,TEXT_INPUT_LENGTH
+    call    memcopy ; bc = size    hl = source address    de = dest address
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MenuLoadCitySRAM:
+
+    ld      b,0 ; 0 = load data mode
+    LONG_CALL_ARGS    RoomSaveMenu ; returns A = SRAM bank, -1 if error
+    ld      b,a ; (*) save bank to b
+
+    cp      a,$FF
+    jr      z,.error ; no banks or user pressed cancel
+
+    ld      hl,sram_bank_status
+    ld      e,a
+    ld      d,0
+    add     hl,de
+    ld      a,[hl] ; get bank status
+
+    cp      a,1
+    jr      nz,.error ; bank is empty or corrupted
+
+    ld      a,b ; (*) get bank
+    or      a,CITY_MAP_SRAM_FLAG
+    call    CityMapSet
+
+    ret
+
+.error:
+
+    ; TODO
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 STR_CITY_NAME:
     String2Tiles "C","i","t","y"," ","N","a","m","e",":",0
 
@@ -60,18 +111,7 @@ InputHandleMenu:
     and     a,PAD_A
     jr      z,.not_a
 
-        ld      a,0
-        call    CityMapSet
-
-        ld      de,STR_CITY_NAME
-        LONG_CALL_ARGS  RoomTextInputSetPrompt ; de = pointer to string
-
-        LONG_CALL   RoomTextInput
-
-        ld      hl,text_input_buffer
-        ld      de,current_city_name
-        ld      bc,TEXT_INPUT_LENGTH
-        call    memcopy ; bc = size    hl = source address    de = dest address
+        call    MenuNewCity
 
         ld      a,1
         ld      [menu_exit],a
@@ -82,8 +122,7 @@ InputHandleMenu:
     and     a,PAD_B
     jr      z,.not_b
 
-        ld      a,0|CITY_MAP_SRAM_FLAG
-        call    CityMapSet
+        call    MenuLoadCitySRAM
 
         ld      a,1
         ld      [menu_exit],a
