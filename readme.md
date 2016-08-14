@@ -6,8 +6,8 @@ The open-source city building game for Game Boy Color.
 Introduction
 ------------
 
-This is a very early version of BitCity. As such, a lot of the functionality is
-missing. This is not playable yet, but it's getting there.
+This is an early version of BitCity. As such, a lot of the functionality is
+missing. This is not playable yet, but it's almost there.
 
 It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
 every once in a while.
@@ -18,10 +18,10 @@ you are interested please contact me at my email (antonio_nd@outlook.com).
 General to do list:
 - Simulation - Most parts are ready
   - Graphical output (trains, planes, boats...)
-- Save menus
+- Historical graphics
 - Sample cities
 - Random map generator
-- Compression
+- Compression for predefined cities
 - Cleanup code and document
 
 ![](screenshot.png)
@@ -48,7 +48,11 @@ GitHub: https://github.com/AntonioND
 
 Dependencies:
 - RGBDS: https://github.com/bentley/rgbds/
-- GBT Player: https://github.com/AntonioND/gbt-player
+
+It uses GBT Player, my music player library. It is not needed to install it as
+it comes with the game code, but it can be found here if you want to use it
+for your projects:
+- https://github.com/AntonioND/gbt-player
 
 Tools (for Windows, but they run on Wine):
 - GBMB (Game Boy Map Builder): http://www.devrs.com/gb/hmgd/gbmb.html
