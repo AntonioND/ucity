@@ -833,12 +833,15 @@ RoomSaveMenu:: ; returns A = selected SRAM bank, -1 if error
     ld      [save_menu_exit],a
     ld      [save_menu_exit_error],a
 
-    ; TODO - Load coordinates of last accesed SRAM bank instead of moving to 0,0
-
-    ld      [save_menu_cursor_x],a
-    ld      [save_menu_cursor_y],a
     ld      [save_menu_cursor_blink],a
     ld      [save_menu_cursor_frames],a
+
+    ; Load coordinates of last accesed SRAM bank instead of moving to 0,0.
+    ; The coordinates are set to 0 when loading the ROM (when clearing the WRAM)
+    ; and then they will remain at the last used position when the menu is
+    ; called again.
+;    ld      [save_menu_cursor_x],a
+;    ld      [save_menu_cursor_y],a
 
     call    SetPalettesAllBlack
 
