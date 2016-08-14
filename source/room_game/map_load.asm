@@ -380,7 +380,7 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     ld      hl,SAV_PERSISTENT_MSG
     call    PersistentMessageDataLoadFrom ; hl = src
 
-    ld      bc,TEXT_PROMPT_STRING_LENGTH
+    ld      bc,TEXT_INPUT_LENGTH
     ld      hl,SAV_CITY_NAME ; src
     ld      de,current_city_name ; dst
     call    memcopy
