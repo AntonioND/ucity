@@ -20,15 +20,49 @@
 ;
 ;###############################################################################
 
-    IF !DEF(SAVE_STRUCT_INC)
-SAVE_STRUCT_INC SET 1
+    INCLUDE "hardware.inc"
+
+;-------------------------------------------------------------------------------
+
+    INCLUDE "money.inc"
+    INCLUDE "room_text_input.inc"
+    INCLUDE "save_struct.inc"
+    INCLUDE "text_messages.inc"
 
 ;###############################################################################
 
-MAGIC_STRING_LEN    EQU 4
+    SECTION "Save Data", SRAM[_SRAM]
 
-;###############################################################################
+;-------------------------------------------------------------------------------
 
-    ENDC ; SAVE_STRUCT_INC
+; Each SRAM bank can hold information for one city.
+
+; Magic string must always be first, checksum second.
+SAV_MAGIC_STRING:: DS MAGIC_STRING_LEN
+SAV_CHECKSUM::     DS 2 ; LSB first
+
+SAV_CITY_NAME:: DS TEXT_INPUT_LENGTH
+
+SAV_MONEY:: DS MONEY_AMOUNT_SIZE
+
+SAV_YEAR::  DS 2 ; LSB first
+SAV_MONTH:: DS 1
+
+SAV_TAX_PERCENT:: DS 1
+
+SAV_LAST_SCROLL_X:: DS 1
+SAV_LAST_SCROLL_Y:: DS 1
+
+SAV_PERSISTENT_MSG:: DS BYTES_SAVE_PERSISTENT_MSG
+
+SAV_MAP_ATTR_BASE::  DS $1000/8 ; compressed, only the bank 0/1 bit is saved
+
+;-------------------------------------------------------------------------------
+
+    SECTION "Save Data 2", SRAM[_SRAM+$1000]
+
+;-------------------------------------------------------------------------------
+
+SAV_MAP_TILE_BASE:: DS $1000 ; Aligned to $1000
 
 ;###############################################################################
