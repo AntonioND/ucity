@@ -55,7 +55,7 @@ ENDM
 LONG_CALL_ARGS : MACRO ; function to call. Slower than LONG_CALL
     ld      a,BANK(\1)
     ld      hl,\1
-    ; It can use bc and de for passing arguments
+    ; It can use BC and DE for passing arguments
     ; Returned values in any register are preserved through this call
     call    ___long_call_args
 ENDM

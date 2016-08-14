@@ -478,9 +478,70 @@ TextPutChar: ; A = char to draw
 
     reti ; end of critical section and return
 
-;###############################################################################
+;-------------------------------------------------------------------------------
 
-    SECTION "Room Text Input Code Data",ROM0
+RoomTextInput::
+
+    xor     a,a
+    ld      [text_input_exit],a
+
+    ld      [text_input_ptr],a
+
+    ld      [text_cursor_x],a
+    ld      [text_cursor_y],a
+    ld      [text_cursor_blink],a
+
+    ld      a,TEXT_CURSOR_BLINK_FRAMES
+    ld      [text_cursor_frames],a
+
+    ld      d,0
+    ld      hl,text_input_buffer
+    ld      bc,TEXT_INPUT_LENGTH+1
+    call    memset ; d = value    hl = start address    bc = size
+
+    call    SetPalettesAllBlack
+
+    ld      bc,RoomTextInputVBLHandler
+    call    irq_set_VBL
+
+    call    RoomTextInputLoadBG
+
+    LONG_CALL   TextInputDrawKeyboardCursor
+
+    ld      b,0 ; bank at 8000h
+    call    LoadText
+
+    di ; Entering critical section
+
+    ld      b,144
+    call    wait_ly
+
+    xor     a,a
+    ld      [rIF],a
+
+    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
+    ld      [rLCDC],a
+
+    call    LoadTextPalette
+
+    ei ; End of critical section
+
+.loop:
+
+    call    wait_vbl
+
+    call    scan_keys
+    call    KeyAutorepeatHandle
+
+    LONG_CALL   TextInputMenuHandle
+
+    ld      a,[text_input_exit]
+    and     a,a
+    jr      z,.loop
+
+    call    SetDefaultVBLHandler
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -514,6 +575,10 @@ RoomTextInputSetPrompt:: ; de = pointer to string
     jr      nz,.loop
 
     ret
+
+;###############################################################################
+
+    SECTION "Room Text Input Code Data",ROM0
 
 ;-------------------------------------------------------------------------------
 
@@ -603,71 +668,6 @@ RoomTextInputLoadBG:
     jr      nz,.loop2
 
     call    rom_bank_pop
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-RoomTextInput::
-
-    xor     a,a
-    ld      [text_input_exit],a
-
-    ld      [text_input_ptr],a
-
-    ld      [text_cursor_x],a
-    ld      [text_cursor_y],a
-    ld      [text_cursor_blink],a
-
-    ld      a,TEXT_CURSOR_BLINK_FRAMES
-    ld      [text_cursor_frames],a
-
-    ld      d,0
-    ld      hl,text_input_buffer
-    ld      bc,TEXT_INPUT_LENGTH+1
-    call    memset ; d = value    hl = start address    bc = size
-
-    call    SetPalettesAllBlack
-
-    ld      bc,RoomTextInputVBLHandler
-    call    irq_set_VBL
-
-    call    RoomTextInputLoadBG
-
-    LONG_CALL   TextInputDrawKeyboardCursor
-
-    ld      b,0 ; bank at 8000h
-    call    LoadText
-
-    di ; Entering critical section
-
-    ld      b,144
-    call    wait_ly
-
-    xor     a,a
-    ld      [rIF],a
-
-    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
-    ld      [rLCDC],a
-
-    call    LoadTextPalette
-
-    ei ; End of critical section
-
-.loop:
-
-    call    wait_vbl
-
-    call    scan_keys
-    call    KeyAutorepeatHandle
-
-    LONG_CALL   TextInputMenuHandle
-
-    ld      a,[text_input_exit]
-    and     a,a
-    jr      z,.loop
-
-    call    SetDefaultVBLHandler
 
     ret
 

@@ -64,9 +64,9 @@ InputHandleMenu:
         call    CityMapSet
 
         ld      de,STR_CITY_NAME
-        call    RoomTextInputSetPrompt ; de = pointer to string
+        LONG_CALL_ARGS  RoomTextInputSetPrompt ; de = pointer to string
 
-        call    RoomTextInput
+        LONG_CALL   RoomTextInput
 
         ld      hl,text_input_buffer
         ld      de,current_city_name
