@@ -51,7 +51,7 @@ MAIN_MENU_BG_MAP::
 
 ;-------------------------------------------------------------------------------
 
-MenuNewCity:
+MenuNewCity: ; returns 1 if loaded correctly, 0 if not
 
     ld      a,0
     call    CityMapSet
@@ -66,11 +66,12 @@ MenuNewCity:
     ld      bc,TEXT_INPUT_LENGTH
     call    memcopy ; bc = size    hl = source address    de = dest address
 
+    ld      a,1
     ret
 
 ;-------------------------------------------------------------------------------
 
-MenuLoadCitySRAM:
+MenuLoadCitySRAM: ; returns 1 if loaded correctly, 0 if not
 
     ld      b,0 ; 0 = load data mode
     LONG_CALL_ARGS    RoomSaveMenu ; returns A = SRAM bank, -1 if error
@@ -92,12 +93,12 @@ MenuLoadCitySRAM:
     or      a,CITY_MAP_SRAM_FLAG
     call    CityMapSet
 
+    ld      a,1 ; return ok
     ret
 
 .error:
 
-    call    MenuNewCity ; TODO - Return to main menu if error
-
+    xor     a,a ; return error
     ret
 
 ;-------------------------------------------------------------------------------
@@ -111,9 +112,13 @@ InputHandleMenu:
     and     a,PAD_A
     jr      z,.not_a
 
-        call    MenuNewCity
-
-        ld      a,1
+        call    MenuNewCity ; returns 1 if loaded correctly, 0 if not
+        and     a,a
+        jr      nz,.dont_reload_gfx_a
+            push    af
+            call    RoomMenuLoadBG
+            pop     af
+.dont_reload_gfx_a:
         ld      [menu_exit],a
         ret
 .not_a:
@@ -122,9 +127,13 @@ InputHandleMenu:
     and     a,PAD_B
     jr      z,.not_b
 
-        call    MenuLoadCitySRAM
-
-        ld      a,1
+        call    MenuLoadCitySRAM ; returns 1 if loaded correctly, 0 if not
+        and     a,a
+        jr      nz,.dont_reload_gfx_b
+            push    af
+            call    RoomMenuLoadBG
+            pop     af
+.dont_reload_gfx_b:
         ld      [menu_exit],a
         ret
 .not_b:
