@@ -435,7 +435,13 @@ PauseMenuHandleOption:
     jr      nz,.not_save_game
 
         ; Save Game
+        ld      a,[simulation_running]
+        and     a,a ; If we save the city while the simulation is running we
+        jr      z,.continue_save  ; risk saving in an intermediate state.
+        call    SFX_ErrorUI
+        ret
 
+.continue_save:
         ld      b,1 ; 1 = save data mode
         LONG_CALL_ARGS    RoomSaveMenu ; returns A = SRAM bank, -1 if error
         cp      a,$FF
