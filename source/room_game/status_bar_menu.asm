@@ -535,6 +535,12 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
     ld      hl,sp+0
     LD_DE_HL
+
+    ld      a,[date_year+1] ; LSB first in date_year
+    ld      b,a
+    ld      a,[date_year+0]
+    ld      c,a
+    ld      a,[date_month]
     call    DatePrint
 
     ld      b,8

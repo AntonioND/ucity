@@ -44,12 +44,17 @@ MONTHS_IN_YEAR EQU 12
 
 ;-------------------------------------------------------------------------------
 
-DatePrint:: ; de = pointer to destination of print (8 chars)
+; a = month
+; bc = year (B = MSB, C = LSB)
+; de = pointer to destination of print (8 chars)
+DatePrint::
 
     ; Month
 
+    push    bc ; (*) save year
+
     ld      hl,.date_month_name
-    ld      a,[date_month]
+    ; a = month
     ld      c,a
     ld      b,0
     add     hl,bc
@@ -70,7 +75,11 @@ DatePrint:: ; de = pointer to destination of print (8 chars)
 
     ; Year
 
-    ld      a,[date_year+1] ; LSB first in date_year
+    pop     bc ; (*) get year
+
+    ld      h,c ; save LSB in H
+
+    ld      a,b ; MSB
     ld      b,a
     swap    a
     and     a,$0F
@@ -83,7 +92,7 @@ DatePrint:: ; de = pointer to destination of print (8 chars)
     ld      [de],a
     inc     de
 
-    ld      a,[date_year+0]
+    ld      a,h ; get LSB
     ld      b,a
     swap    a
     and     a,$0F
