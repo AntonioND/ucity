@@ -31,6 +31,8 @@
 
 sram_bank_number: DS 1
 
+SRAM_BANK_NUM_MAX EQU 16 ; Max number of banks supported by any mapper
+
 ;###############################################################################
 
     SECTION "SRAM Utils Functions",ROMX
@@ -40,7 +42,7 @@ sram_bank_number: DS 1
 ; Check number of available SRAM banks
 SRAM_PowerOnCheck::
 
-    add     sp,-16
+    add     sp,-SRAM_BANK_NUM_MAX
 
     ld      a,CART_RAM_ENABLE
     ld      [rRAMG],a
@@ -55,11 +57,11 @@ SRAM_PowerOnCheck::
         ld      [hl+],a
     ld      a,b
     inc     a
-    cp      a,16
+    cp      a,SRAM_BANK_NUM_MAX
     jr      nz,.save_loop
 
     ; Write bank number from 15 to 0 to SRAM banks or'ed with $C0
-    ld      a,15
+    ld      a,SRAM_BANK_NUM_MAX-1
 .write_loop:
     ld      [rRAMB],a
     ld      b,a
@@ -71,7 +73,7 @@ SRAM_PowerOnCheck::
 
     ; Read the number that we get from bank 15. If there are less banks it will
     ; wrap around and get the actual bank.
-    ld      a,15
+    ld      a,SRAM_BANK_NUM_MAX-1
     ld      [rRAMB],a
     ld      a,[_SRAM+0]
     ld      b,a
@@ -90,8 +92,8 @@ SRAM_PowerOnCheck::
     ld      [sram_bank_number],a
 
     ; Restore data from bank 15 to 0
-    ld      hl,sp+15
-    ld      a,15
+    ld      hl,sp+(SRAM_BANK_NUM_MAX-1)
+    ld      a,SRAM_BANK_NUM_MAX-1
 .restore_loop:
     ld      [rRAMB],a
     ld      b,a
@@ -105,7 +107,7 @@ SRAM_PowerOnCheck::
     ld      a,CART_RAM_DISABLE
     ld      [rRAMG],a
 
-    add     sp,+16
+    add     sp,+SRAM_BANK_NUM_MAX
 
     ; Now that we know how many banks there are, check data
     call    SRAM_CheckIntegrity
