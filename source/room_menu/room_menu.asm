@@ -114,12 +114,12 @@ InputHandleMenu:
 
         call    MenuNewCity ; returns 1 if loaded correctly, 0 if not
         and     a,a
-        jr      nz,.dont_reload_gfx_a
-            push    af
-            call    RoomMenuLoadBG
-            pop     af
-.dont_reload_gfx_a:
-        ld      [menu_exit],a
+        jr      z,.not_loaded_a
+            ld      a,1
+            ld      [menu_exit],a
+            ret
+.not_loaded_a:
+        call    RoomMenuLoadBG
         ret
 .not_a:
 
@@ -129,12 +129,12 @@ InputHandleMenu:
 
         call    MenuLoadCitySRAM ; returns 1 if loaded correctly, 0 if not
         and     a,a
-        jr      nz,.dont_reload_gfx_b
-            push    af
-            call    RoomMenuLoadBG
-            pop     af
-.dont_reload_gfx_b:
-        ld      [menu_exit],a
+        jr      z,.not_loaded_b
+            ld      a,1
+            ld      [menu_exit],a
+            ret
+.not_loaded_b:
+        call    RoomMenuLoadBG
         ret
 .not_b:
 
