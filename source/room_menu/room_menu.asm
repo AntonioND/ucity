@@ -96,7 +96,7 @@ MenuLoadCitySRAM:
 
 .error:
 
-    ; TODO
+    ; TODO - Return to main menu if error
 
     ret
 
