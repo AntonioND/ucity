@@ -41,6 +41,28 @@ sram_bank_status:: DS SRAM_BANK_NUM_MAX ; 0 = not avail. 1 = ok, 2 = empty/bad
 
 ;-------------------------------------------------------------------------------
 
+; Clears one SRAM bank. Call SRAM_CheckIntegrity after this!
+SRAM_ClearBank:: ; B = bank to clear
+
+    ld      a,CART_RAM_ENABLE
+    ld      [rRAMG],a
+
+    ld      a,b
+    ld      [rRAMB],a
+
+    ; It is enough to delete the first byte. It's part of the magic string. If
+    ; it is different than the first byte of magic string, the bank is
+    ; considered to be corrupted.
+    xor     a,a
+    ld      [_SRAM],a
+
+    ld      a,CART_RAM_DISABLE
+    ld      [rRAMG],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Check number of available SRAM banks
 SRAM_PowerOnCheck::
 

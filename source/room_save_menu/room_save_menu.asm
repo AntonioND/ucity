@@ -649,6 +649,34 @@ SaveMenuClearCursor:
 
 InputHandleSaveMenuMenu:
 
+    ; Clear data
+
+    ld      a,[joy_held]
+    ld      b,PAD_START|PAD_SELECT|PAD_UP|PAD_RIGHT ; Right+Up+Select + Start
+    and     a,b
+    cp      a,b
+    jr      nz,.not_clear_data
+
+        ; If this is called we can safely assume that the number of banks is
+        ; greater than 0. If not, the menu wouldn't have been shown, only the
+        ; error screen.
+        ld      b,0
+.loop_clear_data:
+        push    bc
+        LONG_CALL_ARGS  SRAM_ClearBank
+        pop     bc
+        inc     b
+        ld      a,[sram_num_available_banks]
+        cp      a,b
+        jr      nz,.loop_clear_data
+
+        ; Refresh integrity data
+        LONG_CALL   SRAM_CheckIntegrity
+
+.not_clear_data:
+
+    ; Regular commands
+
     ld      a,[joy_pressed]
     and     a,PAD_START|PAD_A
     jr      z,.not_start_a
