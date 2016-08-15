@@ -57,6 +57,10 @@ status_menu_selection: DS 1
 
 MENU_NUMBER_ELEMENTS EQU 7
 
+STATUS_MENU_BLINK_FRAMES EQU 30
+status_menu_blink_status: DS 1
+status_menu_blink_frames: DS 1 ; frames left to change status
+
 ;###############################################################################
 
     SECTION "Status Bar Functions Bank 0",ROM0
@@ -337,6 +341,11 @@ StatusBarMenuShow::
     xor     a,a
     ld      [status_bar_on_top],a
     ld      [status_menu_selection],a
+
+    ld      a,STATUS_MENU_BLINK_FRAMES
+    ld      [status_menu_blink_frames],a
+    ld      a,1
+    ld      [status_menu_blink_status],a
 
     call    StatusBarMenuDrawCursor
 
@@ -720,6 +729,24 @@ StatusBarMenuPlaceAtCursor: ; b = tile number
 
 StatusBarMenuHandle:: ; ret A = menu selection if the user presses A, $FF if not
 
+    ld      hl,status_menu_blink_frames
+    dec     [hl]
+    jr      nz,.end_blink
+        ld      [hl],STATUS_MENU_BLINK_FRAMES
+
+        ld      hl,status_menu_blink_status
+        ld      a,[hl]
+        xor     a,1
+        ld      [hl],a
+        and     a,a
+        jr      z,.clear_cursor
+            ; Draw cursor
+            call    StatusBarMenuDrawCursor
+            jr      .end_blink
+.clear_cursor:
+            call    StatusBarMenuClearCursor
+.end_blink:
+
     ; UP
     ld      a,[joy_pressed]
     and     a,PAD_UP
@@ -731,6 +758,10 @@ StatusBarMenuHandle:: ; ret A = menu selection if the user presses A, $FF if not
             ld      hl,status_menu_selection
             dec     [hl]
             call    StatusBarMenuDrawCursor
+            ld      a,STATUS_MENU_BLINK_FRAMES
+            ld      [status_menu_blink_frames],a
+            ld      a,1
+            ld      [status_menu_blink_status],a
 .not_up:
 
     ; DOWN
@@ -744,6 +775,10 @@ StatusBarMenuHandle:: ; ret A = menu selection if the user presses A, $FF if not
             ld      hl,status_menu_selection
             inc     [hl]
             call    StatusBarMenuDrawCursor
+            ld      a,STATUS_MENU_BLINK_FRAMES
+            ld      [status_menu_blink_frames],a
+            ld      a,1
+            ld      [status_menu_blink_status],a
 .not_down:
 
     ; A
@@ -753,7 +788,6 @@ StatusBarMenuHandle:: ; ret A = menu selection if the user presses A, $FF if not
         ld      a,[status_menu_selection]
         ret
 .not_a:
-
 
     ld      a,$FF
     ret
