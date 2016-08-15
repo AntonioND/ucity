@@ -74,6 +74,17 @@ TEXT_KEYBOARD_POSITION_INFO: ; Rows padded to 32 bytes
 
 ;-------------------------------------------------------------------------------
 
+TextInputResetCursorBlink:
+
+    ld      a,TEXT_CURSOR_BLINK_FRAMES
+    ld      [text_cursor_frames],a
+    ld      a,1
+    ld      [text_cursor_blink],a
+
+    jp      TextInputDrawKeyboardCursor ; call and return from there
+
+;-------------------------------------------------------------------------------
+
 ; Gets the current value for the cursor from TEXT_KEYBOARD_POSITION_INFO
 TextInputGetInfo:
 
@@ -112,14 +123,7 @@ TextInputMoveRight:
     jr      z,TextInputMoveRight
     ; if empty, repeat until a valid position is found
 
-    ld      a,TEXT_CURSOR_BLINK_FRAMES
-    ld      [text_cursor_frames],a
-    ld      a,1
-    ld      [text_cursor_blink],a
-
-    call    TextInputDrawKeyboardCursor
-
-    ret
+    jp      TextInputResetCursorBlink ; call and ret from there
 
 ;-------------------------------------------------------------------------------
 
@@ -138,14 +142,7 @@ TextInputMoveLeft:
     jr      z,TextInputMoveLeft
     ; if empty, repeat until a valid position is found
 
-    ld      a,TEXT_CURSOR_BLINK_FRAMES
-    ld      [text_cursor_frames],a
-    ld      a,1
-    ld      [text_cursor_blink],a
-
-    call    TextInputDrawKeyboardCursor
-
-    ret
+    jp      TextInputResetCursorBlink ; call and ret from there
 
 ;-------------------------------------------------------------------------------
 
@@ -164,14 +161,7 @@ TextInputMoveDown:
     jr      z,TextInputMoveDown
     ; if empty, repeat until a valid position is found
 
-    ld      a,TEXT_CURSOR_BLINK_FRAMES
-    ld      [text_cursor_frames],a
-    ld      a,1
-    ld      [text_cursor_blink],a
-
-    call    TextInputDrawKeyboardCursor
-
-    ret
+    jp      TextInputResetCursorBlink ; call and ret from there
 
 ;-------------------------------------------------------------------------------
 
@@ -190,14 +180,7 @@ TextInputMoveUp:
     jr      z,TextInputMoveUp
     ; if empty, repeat until a valid position is found
 
-    ld      a,TEXT_CURSOR_BLINK_FRAMES
-    ld      [text_cursor_frames],a
-    ld      a,1
-    ld      [text_cursor_blink],a
-
-    call    TextInputDrawKeyboardCursor
-
-    ret
+    jp      TextInputResetCursorBlink ; call and ret from there
 
 ;-------------------------------------------------------------------------------
 
@@ -451,6 +434,10 @@ TextPutChar: ; A = char to draw
     ld      a,[text_input_ptr]
     cp      a,TEXT_INPUT_LENGTH
     ret     z ; max lenght!
+
+    push    af
+    call    TextInputResetCursorBlink
+    pop     af
 
     ld      d,0
     ld      e,a
