@@ -29,14 +29,10 @@
 
 ;-------------------------------------------------------------------------------
 
-; IO REGISTERS MIRROR
-
-bg_scx: DS 1 ; updated in VBL
+; IO registers mirror, used by scroll code and writen to the actual registers
+; during VBL to avoid glitches
+bg_scx: DS 1
 bg_scy: DS 1
-
-;###############################################################################
-
-    SECTION "Map_Handling_Vars",WRAM0
 
 ;-------------------------------------------------------------------------------
 

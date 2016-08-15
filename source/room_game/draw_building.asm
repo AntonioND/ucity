@@ -31,7 +31,7 @@
 
 ;###############################################################################
 
-    SECTION "City Map Draw Building Variables",WRAM0
+    SECTION "City Map Draw Building Variables",HRAM
 
 ;-------------------------------------------------------------------------------
 
@@ -367,21 +367,23 @@ MapDrawBuilding:: ; Puts a building at the cursor. Check money and terrain.
 
 ;-------------------------------------------------------------------------------
 
-MapDeleteBuildingSetTileDestroyed:: ; BC = tile
+MapDeleteBuildingSetTileDestroyed : MACRO ; BC = tile
 
     ld      a,c
     ld      [delete_tile+0],a ; LSB First
     ld      a,b
     ld      [delete_tile+1],a
-    ret
 
-MapDeleteBuildingGetTileDestroyed:: ; returns BC = tile, destroys A
+ENDM
+
+MapDeleteBuildingGetTileDestroyed : MACRO ; returns BC = tile, destroys A
 
     ld      a,[delete_tile+0] ; LSB First
     ld      c,a
     ld      a,[delete_tile+1]
     ld      b,a
-    ret
+
+ENDM
 
 ;-------------------------------------------------------------------------------
 
@@ -538,19 +540,19 @@ ENDC
     cp      a,TYPE_RESIDENTIAL
     jr      nz,.not_residential
     ld      bc,T_RESIDENTIAL ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
+    MapDeleteBuildingSetTileDestroyed
     jr      .end_destroyed_tile_set
 .not_residential:
     cp      a,TYPE_INDUSTRIAL
     jr      nz,.not_industrial
     ld      bc,T_INDUSTRIAL ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
+    MapDeleteBuildingSetTileDestroyed
     jr      .end_destroyed_tile_set
 .not_industrial:
     cp      a,TYPE_COMMERCIAL
     jr      nz,.not_commercial
     ld      bc,T_COMMERCIAL ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
+    MapDeleteBuildingSetTileDestroyed
     jr      .end_destroyed_tile_set
 .not_commercial:
 
@@ -559,7 +561,7 @@ ENDC
     ; Set default demolished tile
 
     ld      bc,T_DEMOLISHED ; Set as a demolished tile!
-    call    MapDeleteBuildingSetTileDestroyed
+    MapDeleteBuildingSetTileDestroyed
 
 .end_destroyed_tile_set:
 
@@ -667,7 +669,7 @@ ENDC
         push    de
 
             ld      d,b ; d = y
-            call    MapDeleteBuildingGetTileDestroyed
+            MapDeleteBuildingGetTileDestroyed
             call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
 
         pop     de
