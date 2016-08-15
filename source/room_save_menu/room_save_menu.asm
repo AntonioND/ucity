@@ -651,6 +651,10 @@ InputHandleSaveMenuMenu:
 
     ; Clear data
 
+    ld      a,[save_menu_select_any]
+    cp      a,0 ; 0 = load mode
+    jr      nz,.not_clear_data ; if this is not load mode, don't allow this
+
     ld      a,[joy_held]
     ld      b,PAD_START|PAD_SELECT|PAD_UP|PAD_RIGHT ; Right+Up+Select + Start
     and     a,b
