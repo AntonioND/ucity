@@ -47,7 +47,7 @@ ENDM
 ; Tile Add
 T_ADD : MACRO ; 1=Name Define, 2=Pointer to name string
     TILE_SET_COUNT (\1)
-    DW (\2)
+    DW (\2) ; LSB first
 CURTILE SET CURTILE+1 ; Set cursor for next item
 ENDM
 
