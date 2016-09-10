@@ -451,7 +451,7 @@ rom_bank_pop:: ; preserves bc and de
 
     add     a,l
     ld      l,a
-    ld      a,0
+    ld      a,0 ; don't change to 'xor a,a'!
     adc     a,h ; hl += a
     ld      h,a ; hl now holds the pointer to the bank we want to change to
     ld      a,[hl] ; and a the bank we want to change to
@@ -484,7 +484,7 @@ rom_bank_set:: ; preserves de
     ldh     a,[rom_position]
     add     a,l
     ld      l,a
-    ld      a,0
+    ld      a,0 ; don't change to 'xor a,a'!
     adc     a,h
     ld      h,a
 
@@ -510,7 +510,7 @@ rom_bank_push_set:: ; preserves de
     ld      hl,rom_stack
     add     a,l
     ld      l,a
-    ld      a,0
+    ld      a,0 ; don't change to 'xor a,a'!
     adc     a,h
     ld      h,a
 
