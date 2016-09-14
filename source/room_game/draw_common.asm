@@ -30,6 +30,36 @@
 
 ;###############################################################################
 
+    SECTION "City Map Draw Data",ROM0[$3C00]
+
+;-------------------------------------------------------------------------------
+
+; This should be used all around the code!
+CLAMP_0_63:: ; Clamps value to 0 ~ 63
+
+VAL SET 0 ; 0 to 63
+    REPT 64
+    DB  VAL
+VAL SET VAL+1
+    ENDR
+
+    REPT 64 ; 64 to 127, clamp to 63
+    DB  63
+    ENDR
+
+    REPT 128 ; -128 to -1, clamp to 0
+    DB  0
+    ENDR
+
+IF CITY_MAP_WIDTH != 64
+    FAIL "Invalid map width!"
+ENDC
+IF CITY_MAP_HEIGHT != 64
+    FAIL "Invalid map height!"
+ENDC
+
+;###############################################################################
+
     SECTION "City Map Draw Functions",ROM0
 
 ;-------------------------------------------------------------------------------
@@ -106,35 +136,16 @@ CityMapRefreshTypeMap::
 ; Expand type of the tile in the border (water or field).
 
 ; Internal function called by CityMapGetType and CityMapGetTypeAndTile
-; The coordinates passed as arguments should be 1 and only 1 tile away from the
-; map (in both X and Y coordinates).
+; The coordinates passed as arguments should be only a few tiles away from the
+; border (in both X and Y coordinates), but it could go up to 127 and down to
+; -128 and still work.
 _CityMapFixBorderCoordinates: ; Arguments: e = x , d = y
 
-    ; Correct X
-    bit     7,e
-    jr      z,.not_negative_x
-    ld      e,0
-    jr      .end_x
-.not_negative_x:
-    bit     6,e
-    jr      z,.greater_than_64_x
-    ld      e,CITY_MAP_WIDTH-1
-.greater_than_64_x:
-
-.end_x:
-
-    ; Correct Y
-    bit     7,d
-    jr      z,.not_negative_y
-    ld      d,0
-    jr      .end_y
-.not_negative_y:
-    bit     6,d
-    jr      z,.greater_than_64_y
-    ld      d,CITY_MAP_HEIGHT-1
-.greater_than_64_y:
-
-.end_y:
+    ld      h,CLAMP_0_63>>8
+    ld      l,e
+    ld      e,[hl]
+    ld      l,d
+    ld      d,[hl]
 
     GET_MAP_ADDRESS ; preserves de and bc
 
@@ -167,7 +178,7 @@ CityMapGetType:: ; Arguments: e = x , d = y
     or      a,d
     and     a,128+64 ; ~63
     ; if x or y less than 0 or higher than 63 expand map to sea or field
-    jp      nz,_CityMapFixBorderCoordinates ; returns from there
+    jr      nz,_CityMapFixBorderCoordinates ; returns from there
 
     GET_MAP_ADDRESS ; preserves de and bc
 
@@ -202,7 +213,7 @@ CityMapGetTile:: ; Arguments: e = x , d = y
     or      a,d
     and     a,128+64 ; ~63
     ; if x or y less than 0 or higher than 63 expand map to sea or field
-    jp      nz,_CityMapFixBorderCoordinates ; returns from there
+    jr      nz,_CityMapFixBorderCoordinates ; returns from there
 
     GET_MAP_ADDRESS ; preserves de and bc
 
