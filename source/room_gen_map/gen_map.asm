@@ -20,6 +20,14 @@
 ;
 ;###############################################################################
 
+    INCLUDE "hardware.inc"
+
+;-------------------------------------------------------------------------------
+
+    INCLUDE "room_game.inc"
+
+;###############################################################################
+
     SECTION "Genenerate Map Variables",HRAM
 
 ;-------------------------------------------------------------------------------
@@ -143,7 +151,7 @@ is_inside_circle_64: ; b = x, a = y
 
     ret
 
-;-------------------------------------------------------------------------------
+;###############################################################################
 
 gen_map_srand:: ; a = seed x, b = seed y
 
@@ -159,7 +167,7 @@ gen_map_srand:: ; a = seed x, b = seed y
 
 ;-------------------------------------------------------------------------------
 
-gen_map_rand:: ; returns a = random number
+gen_map_rand:: ; returns a = random number. Preserves DE
 
     ; char t = _x ^ (_x << 3);
 
@@ -207,6 +215,84 @@ gen_map_rand:: ; returns a = random number
     ldh     [seedw],a
 
     ; return _w;
+
+    ret
+
+;###############################################################################
+
+MAP_READ_CLAMPED : MACRO ; e = x, d = y, returns a = tile (LSB), preserves bc
+
+    ld      h,CLAMP_0_63>>8
+    ld      l,e
+    ld      e,[hl]
+    ld      l,d
+    ld      d,[hl]
+
+    GET_MAP_ADDRESS ; e = x , d = y (0 to 63). preserves de and bc
+    ; returns hl = address
+
+    ld      a,[hl]
+
+ENDM
+
+;-------------------------------------------------------------------------------
+
+map_initialize:
+
+    ; memset attribute bank to 0. Terrain tiles are always < 256
+
+    ; TODO : Move this to room code, this only needs to be done once in the room
+
+    ld      a,BANK_CITY_MAP_TILES
+    ld      [rSVBK],a
+
+    call    ClearWRAMX ; Sets D000 - DFFF to 0 ($1000 bytes)
+
+    ; initialize tile bank to random values
+
+    ld      a,BANK_CITY_MAP_TILES
+    ld      [rSVBK],a
+
+.loop:
+    ld      hl,CITY_MAP_TILES
+    ld      de,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
+
+    push    hl
+    call    gen_map_rand ; preserves DE
+    pop     hl
+
+    and     a,63
+    add     a,128-32
+    ld      [hl+],a ; tile[i] = 128 + ( (rand() & 63) - 32 )
+
+    dec     de
+    ld      a,d
+    or      a,e
+    jr      nz,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+map_add_circle:
+
+    ; TODO
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+map_normalize:
+
+    ; TODO
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+map_smooth:
+
+    ; TODO
 
     ret
 
