@@ -159,7 +159,7 @@ MinimapDrawSelectedMap::
 
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
-    call    APA_BufferClear
+    LONG_CALL   APA_BufferClear
     call    APA_BufferUpdate
 
     ret
@@ -219,7 +219,7 @@ RoomMinimapLoadBG:
     ; Clear APA buffer
     ; ----------------
 
-    call    APA_BufferClear
+    LONG_CALL   APA_BufferClear
     call    APA_BufferUpdate
 
     ; Load border

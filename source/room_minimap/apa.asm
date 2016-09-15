@@ -238,8 +238,9 @@ APA_PixelStreamPlot2x2::
     ret
 
 ;-------------------------------------------------------------------------------
-IF 0 ; Unused for now
-APA_PixelStreamPlot::
+
+; Draws in a 64x64 buffer instead of 128x128
+APA_64x64PixelStreamPlot::
 
     ld      a,[apa_colors+0]
     ld      c,a
@@ -295,13 +296,13 @@ APA_PixelStreamPlot::
     ld      a,[pixel_stream_cur_x_tile]
     inc     a
     ld      [pixel_stream_cur_x_tile],a
-    cp      a,APA_TILE_WIDTH
+    cp      a,APA_TILE_WIDTH/2
     jr      nz,.save_ptr
 
     xor     a,a
     ld      [pixel_stream_cur_x_tile],a
 
-    ld      bc,2-(16*APA_TILE_WIDTH) ; + pixel row - map row
+    ld      bc,2-(16*(APA_TILE_WIDTH/2)) ; + pixel row - map row
     add     hl,bc
 
     ld      a,[pixel_stream_cur_y_in_tile]
@@ -313,7 +314,7 @@ APA_PixelStreamPlot::
     xor     a,a
     ld      [pixel_stream_cur_y_in_tile],a
 
-    ld      bc,16*(APA_TILE_WIDTH-1) ; next tile row
+    ld      bc,16*((APA_TILE_WIDTH/2)-1) ; next tile row
     add     hl,bc
 
 .save_ptr:
@@ -323,7 +324,7 @@ APA_PixelStreamPlot::
     ld      [pixel_stream_ptr+1],a
 
     ret
-ENDC
+
 ;-------------------------------------------------------------------------------
 IF 0 ; Unused for now
 APA_Plot:: ; b = x, c = y (0-127!)
@@ -494,10 +495,6 @@ ENDC
 
     ret
 
-;###############################################################################
-
-    SECTION "All Points Addressable Functions Bank 0",ROM0
-
 ;-------------------------------------------------------------------------------
 
 APA_BufferClear::
@@ -521,6 +518,10 @@ ENDC
     jr      nz,.loop
 
     ret
+
+;###############################################################################
+
+    SECTION "All Points Addressable Functions Bank 0",ROM0
 
 ;-------------------------------------------------------------------------------
 
@@ -555,6 +556,14 @@ APA_LoadPalette:: ; hl = palette to slot APA_PALETTE_INDEX
     call    bg_set_palette
 
     reti ; End of critical section
+
+;-------------------------------------------------------------------------------
+
+APA_SetColor0:: ; a = color 0
+
+    ld      [apa_colors+0],a
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
