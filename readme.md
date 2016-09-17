@@ -18,9 +18,10 @@ you are interested please contact me at my email (antonio_nd@outlook.com).
 General to do list:
 - Simulation - Most parts are ready
   - Graphical output (trains, planes, boats...)
+  - Fires!
 - Historical graphics
 - Sample cities
-- Random map generator
+- Random map generator (In progress...)
 - Compression for predefined cities
 - Cleanup code and document
 
