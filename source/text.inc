@@ -64,6 +64,8 @@ ENDM
 
 String2Tiles : MACRO
 
+String2TilesLenght SET 0
+
     REPT _NARG ; Repeat for each argument (even if there are more than 9!)
 
         IF \1 == "%"
@@ -125,6 +127,8 @@ String2Tiles : MACRO
         ENDC
 
         SHIFT ; Get next argument
+
+String2TilesLenght SET String2TilesLenght + 1
 
     ENDR
 
