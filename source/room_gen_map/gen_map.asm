@@ -220,7 +220,14 @@ gen_map_rand:: ; returns a = random number. Preserves DE
 
 ;###############################################################################
 
-MAP_READ_CLAMPED : MACRO ; e = x, d = y, returns a = tile (LSB), preserves bc
+; Allocate banks for the intermediate and final stages of the map generation
+BANK_TEMP1 EQU BANK_CITY_MAP_TYPE
+BANK_TEMP2 EQU BANK_CITY_MAP_TRAFFIC
+BANK_TILES EQU BANK_CITY_MAP_TILES
+
+;-------------------------------------------------------------------------------
+
+MAP_READ_CLAMPED : MACRO ; e = x, d = y, returns value in a, preserves bc
 
     ld      h,CLAMP_0_63>>8
     ld      l,e
@@ -237,26 +244,23 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-map_initialize:
+map_initialize: ; result saved to bank 1
 
     ; memset attribute bank to 0. Terrain tiles are always < 256
 
     ; TODO : Move this to room code, this only needs to be done once in the room
-
-    ld      a,BANK_CITY_MAP_TILES
+    ld      a,BANK_CITY_MAP_ATTR
     ld      [rSVBK],a
-
     call    ClearWRAMX ; Sets D000 - DFFF to 0 ($1000 bytes)
 
     ; initialize tile bank to random values
 
-    ld      a,BANK_CITY_MAP_TILES
+    ld      a,BANK_TEMP1
     ld      [rSVBK],a
 
-.loop:
     ld      hl,CITY_MAP_TILES
-    ld      de,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
 
+.loop:
     push    hl
     call    gen_map_rand ; preserves DE
     pop     hl
@@ -265,10 +269,8 @@ map_initialize:
     add     a,128-32
     ld      [hl+],a ; tile[i] = 128 + ( (rand() & 63) - 32 )
 
-    dec     de
-    ld      a,d
-    or      a,e
-    jr      nz,.loop
+    bit     5,h ; Up to E000
+    jr      z,.loop
 
     ret
 
@@ -282,7 +284,7 @@ map_add_circle:
 
 ;-------------------------------------------------------------------------------
 
-map_normalize:
+map_add_circle_all:
 
     ; TODO
 
@@ -290,9 +292,262 @@ map_normalize:
 
 ;-------------------------------------------------------------------------------
 
-map_smooth:
+map_normalize: ; normalizes bank 2. ret A = 1 if ok, 0 if we have to start again
 
-    ; TODO
+    ld      a,BANK_TEMP2
+    ld      [rSVBK],a
+
+    ; Make sure that there is enough variability to make this map interesting
+    ; -----------------------------------------------------------------------
+
+    ld      hl,CITY_MAP_TILES
+
+    ld      b,[hl] ; b = min
+    ld      c,b ; c = max
+
+.loop_minmax:
+
+        ld      a,[hl+]
+
+        cp      a,b ; cy = 1 if b > a (min > val)
+        jr      nc,.skipmin
+            ld      b,a
+.skipmin:
+
+        cp      a,c ; cy = 1 if b > a (max > val)
+        jr      c,.skipmax
+            ld      c,a
+.skipmax:
+
+    bit     5,h ; Up to E000
+    jr      z,.loop_minmax
+
+    ld      a,c
+    sub     a,b
+    cp      a,$40 ; cy = 1 if $40 > a (threshold > val)
+    jr      nc,.map_ok
+        xor     a,a ; If not, return and repeat!
+        ret
+.map_ok:
+
+    ; Calculate average value
+    ; -----------------------
+
+    ld      hl,CITY_MAP_TILES
+
+    ld      de,0
+    ld      bc,0 ; cde = total value, b = helper zero register
+
+.loop_add:
+
+        ld      a,[hl+]
+        add     a,e
+        ld      e,a
+
+        ld      a,b
+        adc     a,d
+        ld      d,a
+
+        ld      a,b
+        adc     a,c
+        ld      c,a
+
+    bit     5,h ; Up to E000
+    jr      z,.loop_add
+
+    ; Divide by 64x64 = >> (6*2) = >> (8 + 4) -> ignore e, shift cd by 4
+
+    swap    d
+    ld      a,d
+    and     a,$0F ; get MSB 4 bits from D and save them to LSB in A
+
+    swap    c
+    or      a,c ; get LSB 4 bits from C and save them to MSB in A
+
+    ; top 4 bits in C can't be different from 0 because 256*64*64 = $100000,
+    ; and 256 can't be reached in any case so the total value must be lower
+
+    ; A = average
+
+    ; Subtract average value from all tiles in the map
+    ; ------------------------------------------------
+
+    ld      c,a ; C = average
+    ld      a,128 ; 128 = middle value
+    ; TODO: Add 0x20 to A if we want less water
+    sub     a,c ; a = value we have to add to all the tiles
+    ; cy = 1 if c > a (c > 128 -> result is negative)
+    jr      c,.negative
+    ld      b,0
+    jr      .end_sign_expand
+.negative:
+    ld      b,$FF
+.end_sign_expand:
+    ; bc = value to add
+
+    ld      de,CITY_MAP_TILES
+
+    ld      h,0 ; sign expand tile values (they are 0-255)
+
+.loop_normalize:
+
+        ld      a,[de]
+
+        ld      l,a ; hl = tile
+        add     hl,bc ; add value
+
+        ; Clamp HL to 0,255
+
+        ; The only possibilities are negative numbers or 0-510
+
+        bit     7,h
+        jr      z,.not_negative
+            ld      l,0
+        jr      .end_overflow_check
+.not_negative:
+        bit     0,h
+        jr      z,.not_positive_overflow
+            ld      l,255
+.not_positive_overflow:
+.end_overflow_check:
+
+        ld      a,l
+
+        ld      [de],a
+        inc     de
+
+    bit     5,d ; Up to E000
+    jr      z,.loop_normalize
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MAP_SMOOTH_FN : MACRO ; \1 = src bank, \2 = dst bank
+
+    ld      hl,$D000 ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy:
+
+        ld      e,0 ; e = x
+.loopx:
+
+        push    de ; (*)
+        push    hl
+
+            ; Read source data first
+
+            ld      a,\1
+            ld      [rSVBK],a
+
+            ld      bc,0 ; bc = accumulator
+
+            push    hl
+                push    de
+                dec     d
+                MAP_READ_CLAMPED ; e = x, d = y, returns a = tile, preserves bc
+                pop     de
+                add     a,c
+                ld      c,a
+                ld      a,0
+                adc     a,b
+                ld      b,a ; bc += tile
+
+                push    de
+                inc     d
+                MAP_READ_CLAMPED
+                pop     de
+                add     a,c
+                ld      c,a
+                ld      a,0
+                adc     a,b
+                ld      b,a
+
+                push    de
+                dec     e
+                MAP_READ_CLAMPED
+                pop     de
+                add     a,c
+                ld      c,a
+                ld      a,0
+                adc     a,b
+                ld      b,a
+
+                push    de
+                inc     e
+                MAP_READ_CLAMPED
+                pop     de
+                add     a,c
+                ld      c,a
+                ld      a,0
+                adc     a,b
+                ld      b,a
+            pop     hl
+
+            srl     b
+            rr      c
+            srl     b
+            rr      c ; divide by 4
+
+            ld      l,[hl]
+            ld      h,0
+            add     hl,bc ; hl = C + (L+R+U+D)/4
+
+            srl     h
+            rr      l ; divide by 2
+
+            ld      a,l
+
+            ; A = result. It can't overflow to H!
+
+        pop     hl
+        pop     de ; (*)
+
+        ld      a,\2 ; set destination bank
+        ld      [rSVBK],a
+
+        ld      [hl+],a ; save value, inc hl
+
+        inc     e
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jp      z,.loopx
+
+    inc     d
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jp      z,.loopy
+
+    ret
+
+ENDM
+
+map_smooth_1_to_2:
+    MAP_SMOOTH_FN   BANK_TEMP1, BANK_TEMP2
+map_smooth_2_to_1:
+    MAP_SMOOTH_FN   BANK_TEMP2, BANK_TEMP1
+
+;-------------------------------------------------------------------------------
+
+map_generate::
+
+    call    map_initialize ; result is saved to temp bank 1
+
+    call    map_smooth_1_to_2 ; temp bank 1 -> temp bank 2
+
+    call    map_add_circle_all
+
+    call    map_normalize ; bank 2.  ret A = 1 if ok, 0 = start again
+    and     a,a
+    jr      z,map_generate ; TODO: Check if infinite loop?
+
+    call    map_smooth_2_to_1
+    call    map_smooth_1_to_2
+
+    ; TODO : Thresholds to convert to water, field and forest
+
+    ; TODO : Convert to real tiles
+
+    ; TODO : Draw minimap
 
     ret
 
