@@ -67,7 +67,7 @@ rebuild:
 	@make
 	@rm -f $(OBJ)
 
-run:
+run: $(BIN)
 	$(EMULATOR) $(BIN)
 
 clean:
