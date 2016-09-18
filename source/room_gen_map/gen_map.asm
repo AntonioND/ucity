@@ -303,8 +303,6 @@ map_initialize: ; result saved to bank 1
 
     and     a,63
     add     a,128-32
-
-    ld      a,127
     ld      [hl+],a ; tile[i] = 128 + ( (rand() & 63) - 32 )
 
     bit     5,h ; Up to E000
@@ -313,6 +311,8 @@ map_initialize: ; result saved to bank 1
     ret
 
 ;-------------------------------------------------------------------------------
+
+STEP_INCREMENT EQU 16 ; Amount to be added with each circle
 
 ADD_CIRCLE : MACRO ; \1 = radius
 
@@ -369,13 +369,21 @@ map_add_circle_\1:
                 ld      a,[circlecount]
                 and     a,1
                 jr      nz,.negative
-                    ld      a,32
+                    ld      a,STEP_INCREMENT
+                    add     a,[hl]
+                    jr      nc,.not_positive_overflow
+                    ld      a,255
+.not_positive_overflow:
+                    ld      [hl],a
                 jr      .endsetsign
 .negative:
-                    ld      a,-32
+                    ld      a,-STEP_INCREMENT
+                    add     a,[hl]
+                    jr      c,.not_negative_overflow
+                    ld      a,0
+.not_negative_overflow:
+                    ld      [hl],a
 .endsetsign:
-                add     a,[hl]
-                ld      [hl],a
 .outsidebounds:
 
             pop     de ; (***)
@@ -454,9 +462,6 @@ map_add_circle_all:
 
     push    hl
 
-        ld      hl,circlecount
-        inc     [hl]
-
         ; Calculate starting coordinates for the circle
         ; x,y = (rand() & (MAP_W - 1)) + (rand() & (R-1)) - R/2
 
@@ -523,6 +528,9 @@ map_add_circle_all:
         ; b,c = coordinates
 
         call    map_add_circle
+
+        ld      hl,circlecount
+        inc     [hl]
 
     pop     hl
 
