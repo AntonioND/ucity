@@ -324,11 +324,12 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
     ret
 .not_port:
 
-    ; Can't delete any of the following types
-    cp      a,TYPE_FOREST
-    ret     z
+    ; Can't delete water!
     cp      a,TYPE_WATER
     ret     z
+
+    cp      a,TYPE_FOREST
+    jp      z,MapClearDemolishedTile ; call and return from there
 
     cp      a,TYPE_FIELD ; If field, check if tile is the demolished one.
     jr      nz,.not_field
@@ -342,8 +343,7 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
     jr      nz,.not_demolished
     pop     de ; get coordinates
 
-    call    MapClearDemolishedTile
-    ret
+    jp      MapClearDemolishedTile ; call and return from there
 
 .not_demolished: ; Normal field, do nothing...
     pop     de ; get coordinates
