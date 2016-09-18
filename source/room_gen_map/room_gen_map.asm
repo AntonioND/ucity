@@ -164,6 +164,8 @@ RoomGenerateMap::
 
     call    LoadTextPalette
 
+    LONG_CALL   map_generate
+
     xor     a,a
     ld      [gen_map_room_exit],a
 

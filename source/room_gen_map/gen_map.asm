@@ -20,15 +20,17 @@
 ;
 ;###############################################################################
 
+    INCLUDE "engine.inc"
     INCLUDE "hardware.inc"
 
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
-    SECTION "Genenerate Map Variables",HRAM
+    SECTION "Genenerate Map Variables HRAM",HRAM
 
 ;-------------------------------------------------------------------------------
 
@@ -39,28 +41,46 @@ seedw: DS 1
 
 ;###############################################################################
 
+    SECTION "Genenerate Map Variables",WRAM0
+
+;-------------------------------------------------------------------------------
+
+circlecount: DS 1
+
+;###############################################################################
+
     SECTION "Genenerate Map Code Data",ROMX[$4000]
 
 ;-------------------------------------------------------------------------------
 
 ; Aligned to $100
-abs_clamp_array_64: ; returns absolute value up to 63, clamped to 63
 
+ABS_CLAMP_ARRAY_GEN : MACRO ; \1 = number to clamp to
+
+abs_clamp_array_\1: ; returns absolute value up to N-1, clamped to N-1
 VAL SET 0 ; 0 to 63
-    REPT 64
+    REPT \1
     DB  VAL
 VAL SET VAL+1
     ENDR
 
-    REPT 129 ; 64 - 191 (64 to 123, -64 to -128
-    DB  63
+    REPT 257+(-\1-\1) ; 64 - 191 (64 to 123, -64 to -128
+    DB  \1-1
     ENDR
 
-VAL SET 63 ; -63 to -1
-    REPT 63
+VAL SET \1+(-1) ; -63 to -1
+    REPT \1-1
     DB  VAL
 VAL SET VAL+(-1) ; WTF, RGBDS, really?
     ENDR
+
+ENDM
+
+    ABS_CLAMP_ARRAY_GEN 64
+    ABS_CLAMP_ARRAY_GEN 32
+    ABS_CLAMP_ARRAY_GEN 16
+    ABS_CLAMP_ARRAY_GEN 8
+    ABS_CLAMP_ARRAY_GEN 4
 
 ;-------------------------------------------------------------------------------
 
@@ -75,6 +95,14 @@ shift_left_six: ; LSB first, MSB second
     DB $00,$0A,$40,$0A,$80,$0A,$C0,$0A,$00,$0B,$40,$0B,$80,$0B,$C0,$0B
     DB $00,$0C,$40,$0C,$80,$0C,$C0,$0C,$00,$0D,$40,$0D,$80,$0D,$C0,$0D
     DB $00,$0E,$40,$0E,$80,$0E,$C0,$0E,$00,$0F,$40,$0F,$80,$0F,$C0,$0F
+
+    DS 128 ; align next table!
+
+shift_left_five: ; LSB first, MSB second
+    DB $00,$00,$20,$00,$40,$00,$60,$00,$80,$00,$A0,$00,$C0,$00,$E0,$00
+    DB $00,$01,$20,$01,$40,$01,$60,$01,$80,$01,$A0,$01,$C0,$01,$E0,$01
+    DB $00,$02,$20,$02,$40,$02,$60,$02,$80,$02,$A0,$02,$C0,$02,$E0,$02
+    DB $00,$03,$20,$03,$40,$03,$60,$03,$80,$03,$A0,$03,$C0,$03,$E0,$03
 
 ;-------------------------------------------------------------------------------
 
@@ -95,38 +123,18 @@ shift_left_six: ; LSB first, MSB second
 ; will read from them.
 
 ; It doesn't need to be aligned to $100
-gen_map_circle: ; 64x64
+
     INCLUDE "gen_map_circle.inc"
 
 ;-------------------------------------------------------------------------------
 
 ; X and Y are signed 8 bit values
-
-is_inside_circle_4: ; b = x, a = y
-
-    sla     b
-    add     a,a ; sla a
-
-is_inside_circle_8: ; b = x, a = y
-
-    sla     b
-    add     a,a ; sla a
-
-is_inside_circle_16: ; b = x, a = y
-
-    sla     b
-    add     a,a ; sla a
-
-is_inside_circle_32: ; b = x, a = y
-
-    sla     b
-    add     a,a ; sla a
-
-is_inside_circle_64: ; b = x, a = y
+; b = x, a = y
+IS_INSIDE_CIRCLE : MACRO ; \1 = radius
 
     ; Get absolute clamped value
 
-    ld      h,abs_clamp_array_64>>8
+    ld      h,(abs_clamp_array_\1)>>8
     ld      l,b
     ld      b,[hl]
     ld      l,a
@@ -134,22 +142,50 @@ is_inside_circle_64: ; b = x, a = y
 
     ; Get offset
 
+IF \1 == 64
     ld      h,shift_left_six>>8 ; Y << 6
     sla     l
     ld      a,[hl+] ; LSB
     ld      h,[hl] ; MSB
+ENDC
+IF \1 == 32
+    ld      h,shift_left_five>>8 ; Y << 5
+    sla     l
+    ld      a,[hl+] ; LSB
+    ld      h,[hl] ; MSB
+ENDC
+IF \1 == 16
+    ld      h,0
+    ld      a,l
+    add     a,a
+    add     a,a
+    add     a,a
+    add     a,a
+ENDC
+IF \1 == 8
+    ld      h,0
+    ld      a,l
+    add     a,a
+    add     a,a
+    add     a,a
+ENDC
+IF \1 == 4
+    ld      h,0
+    ld      a,l
+    add     a,a
+    add     a,a
+ENDC
 
     or      a,b ; or X
     ld      l,a
-
     ; Access array
 
-    ld      de,gen_map_circle
+    ld      de,gen_map_circle_\1
     add     hl,de
 
     ld      a,[hl]
 
-    ret
+ENDM
 
 ;###############################################################################
 
@@ -267,6 +303,8 @@ map_initialize: ; result saved to bank 1
 
     and     a,63
     add     a,128-32
+
+    ld      a,127
     ld      [hl+],a ; tile[i] = 128 + ( (rand() & 63) - 32 )
 
     bit     5,h ; Up to E000
@@ -276,19 +314,228 @@ map_initialize: ; result saved to bank 1
 
 ;-------------------------------------------------------------------------------
 
-map_add_circle:
+ADD_CIRCLE : MACRO ; \1 = radius
 
-    ; TODO
+map_add_circle_\1:
+
+    ; b = x, c = y
+    ; coordinates of top left corner of the circle at top left corner of the map
+
+    ld      d,1-\1 ; d = y
+.loopy:
+
+        ld      e,1-\1 ; e = x
+.loopx:
+
+        push    bc
+        push    de ; (*)
+
+        ld      b,e ; x
+        ld      a,d ; y
+        IS_INSIDE_CIRCLE    \1 ; b = x, a = y
+
+        pop     de ; (*)
+        pop     bc
+
+        push    bc
+
+        and     a,a
+        jr      z,.dontadd
+
+            push    de ; (***)
+
+            LD_DE_BC
+            xor     a,a
+            sub     a,d
+            ld      d,a
+            xor     a,a
+            sub     a,e ; e = x, d = y
+            ld      e,a ; x = -x, y = -y
+            pop     bc ; base coordinates of circle
+            push    bc
+            ld      a,b
+            add     a,e
+            add     a,\1
+            ld      e,a
+            ld      a,c
+            add     a,d
+            add     a,\1
+            ld      d,a ; add coordinates inside circle
+
+            or      a,e ; a = x|y
+            and     a,(~63)&$FF ; check if outside the map
+            jr      nz,.outsidebounds
+                GET_MAP_ADDRESS ; e = x , d = y (0 to 63). preserves de and bc
+                ld      a,[circlecount]
+                and     a,1
+                jr      nz,.negative
+                    ld      a,32
+                jr      .endsetsign
+.negative:
+                    ld      a,-32
+.endsetsign:
+                add     a,[hl]
+                ld      [hl],a
+.outsidebounds:
+
+            pop     de ; (***)
+
+.dontadd:
+
+        pop     bc
+
+        inc     e
+        ld      a,\1
+        cp      a,e
+        jr      nz,.loopx
+
+    inc     d
+    ld      a,\1
+    cp      a,d
+    jr      nz,.loopy
 
     ret
+
+ENDM
+
+map_add_circle: ; a = radius, b,c = coordinates of top left corner
+
+    ld      d,a ; d = radius
+
+    xor     a,a
+    sub     a,b
+    ld      b,a ; x = -x
+    xor     a,a
+    sub     a,c
+    ld      c,a ; y = -y
+
+    ld      a,64
+    cp      a,d
+    jp      z,map_add_circle_64
+    ld      a,32
+    cp      a,d
+    jp      z,map_add_circle_32
+    ld      a,16
+    cp      a,d
+    jp      z,map_add_circle_16
+    ld      a,8
+    cp      a,d
+    jp      z,map_add_circle_8
+    ld      a,4
+    cp      a,d
+    jp      z,map_add_circle_4
+
+    ld      b,b ; Shouldn't happen!
+    ret
+
+    ADD_CIRCLE 64
+    ADD_CIRCLE 32
+    ADD_CIRCLE 16
+    ADD_CIRCLE 8
+    ADD_CIRCLE 4
 
 ;-------------------------------------------------------------------------------
 
 map_add_circle_all:
 
-    ; TODO
+    xor     a,a
+    ld      [circlecount],a
 
-    ret
+    ld      a,BANK_TEMP2
+    ld      [rSVBK],a
+
+    ld      hl,.circle_radius_array
+
+.loop:
+
+    ld      a,[hl+]
+    and     a,a ; exit if 0
+    ret     z
+
+    push    hl
+
+        ld      hl,circlecount
+        inc     [hl]
+
+        ; Calculate starting coordinates for the circle
+        ; x,y = (rand() & (MAP_W - 1)) + (rand() & (R-1)) - R/2
+
+        push    af ; preserve radius
+
+        call    gen_map_rand ; returns a = random number. Preserves DE
+        ld      d,a
+        call    gen_map_rand ; returns a = random number. Preserves DE
+        ld      e,a
+        push    de
+        call    gen_map_rand ; returns a = random number. Preserves DE
+        ld      d,a
+        call    gen_map_rand ; returns a = random number. Preserves DE
+        ld      e,a
+        pop     bc
+
+        pop     af
+
+        ; a = radius
+        ; b,c,d,e = rand()
+
+        ld      h,a ; preserve radius
+
+        ld      a,CITY_MAP_WIDTH-1
+        and     a,b
+        ld      b,a
+        ld      a,CITY_MAP_HEIGHT-1
+        and     a,c
+        ld      c,a ; b, c = rand() & (MAP_W -1)
+
+        ld      a,h ; get radius
+        dec     a
+
+        ld      l,a ; save temp
+
+        ld      a,d
+        and     a,l
+        ld      d,a
+        ld      a,e
+        and     a,l
+        ld      e,a ; d,e = (rand() & (R-1))
+
+        ld      a,h ; get R
+        sra     a ; R/2
+        ld      l,a ;save temp
+
+        ld      a,d
+        sub     a,l
+        ld      d,a
+        ld      a,e
+        sub     a,l
+        ld      e,a ; d,e = (rand() & (R-1)) - R/2
+
+        ld      a,b
+        add     a,d
+        ld      b,a
+        ld      a,c
+        add     a,e
+        ld      e,a ; b,c = final values
+
+        ld      a,h ; get radius
+
+        ; a = radius
+        ; b,c = coordinates
+
+        call    map_add_circle
+
+    pop     hl
+
+    jr      .loop
+
+.circle_radius_array: ; Must be powers of 2 (4 to 64 only)
+    DB 64, 64
+    DB 32, 32, 32, 32
+    DB 16, 16, 16, 16, 16, 16, 16, 16
+    DB  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8
+    DB  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4
+    DB  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4
+    DB  0
 
 ;-------------------------------------------------------------------------------
 
@@ -372,18 +619,18 @@ map_normalize: ; normalizes bank 2. ret A = 1 if ok, 0 if we have to start again
     ; Subtract average value from all tiles in the map
     ; ------------------------------------------------
 
-    ld      c,a ; C = average
-    ld      a,128 ; 128 = middle value
-    ; TODO: Add 0x20 to A if we want less water
-    sub     a,c ; a = value we have to add to all the tiles
-    ; cy = 1 if c > a (c > 128 -> result is negative)
-    jr      c,.negative
-    ld      b,0
-    jr      .end_sign_expand
-.negative:
-    ld      b,$FF
-.end_sign_expand:
-    ; bc = value to add
+    ; a = average
+    cpl
+    add     a,1
+    ld      c,a
+    ld      a,$FF
+    adc     a,0
+    ld      b,a ; bc = -average
+
+    ld      hl,128
+
+    add     hl,bc
+    LD_BC_HL ; BC = value we have to add to all the tiles
 
     ld      de,CITY_MAP_TILES
 
@@ -392,7 +639,6 @@ map_normalize: ; normalizes bank 2. ret A = 1 if ok, 0 if we have to start again
 .loop_normalize:
 
         ld      a,[de]
-
         ld      l,a ; hl = tile
         add     hl,bc ; add value
 
@@ -497,15 +743,15 @@ MAP_SMOOTH_FN : MACRO ; \1 = src bank, \2 = dst bank
             srl     h
             rr      l ; divide by 2
 
+            ld      a,\2 ; set destination bank
+            ld      [rSVBK],a
+
             ld      a,l
 
             ; A = result. It can't overflow to H!
 
         pop     hl
         pop     de ; (*)
-
-        ld      a,\2 ; set destination bank
-        ld      [rSVBK],a
 
         ld      [hl+],a ; save value, inc hl
 
@@ -528,7 +774,116 @@ map_smooth_2_to_1:
 
 ;-------------------------------------------------------------------------------
 
+map_apply_height_threshold:
+
+    ; TODO: Add 0x20 to HL if we want less water
+
+    ld      a,BANK_TEMP2
+    ld      [rSVBK],a
+
+    ld      hl,CITY_MAP_TILES
+
+FIELD_THRESHOLD  EQU 128
+FOREST_THRESHOLD EQU 128+24
+
+.loop:
+    ld      a,[hl]
+
+    cp      a,FIELD_THRESHOLD ; cy = 1 if n > a
+    jr      c,.water
+    cp      a,FOREST_THRESHOLD ; cy = 1 if n > a
+    jr      c,.field
+    ;jr      .forest
+.forest:
+    ld      a,T_FOREST
+    jr      .end_selection
+.field:
+    ld      a,T_GRASS
+    jr      .end_selection
+.water:
+    ld      a,T_WATER
+.end_selection:
+
+    ld      [hl+],a
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+GEN_MAP_PALETTE_BLACK:
+    DW  0, 0, 0, 0
+
+GEN_MAP_PALETTE:
+    DW  0, 31<<5, 31<<10, (31<<10)|(31<<5)|31 ; BLACK, GREEN, BLUE, WHITE
+
+map_draw:
+
+    ld      hl,GEN_MAP_PALETTE_BLACK
+    call    APA_LoadPalette
+
+    LONG_CALL   APA_BufferClear
+    LONG_CALL   APA_PixelStreamStart
+
+    ld      hl,CITY_MAP_TILES
+
+.loop:
+
+    ld      a,BANK_TEMP2
+    ld      [rSVBK],a
+
+    ld      a,[hl+]
+
+    push    hl
+
+    cp      a,T_FOREST
+    jr      z,.green
+    cp      a,T_GRASS
+    jr      z,.white
+    cp      a,T_WATER
+    jr      z,.blue
+    ;jr      .black
+
+.black:
+        ld      a,0
+        call    APA_SetColor0
+        jr      .endcolorselect
+.green:
+        ld      a,1
+        call    APA_SetColor0
+        jr      .endcolorselect
+.blue:
+        ld      a,2
+        call    APA_SetColor0
+        jr      .endcolorselect
+.white:
+        ld      a,3
+        call    APA_SetColor0
+.endcolorselect:
+
+    LONG_CALL   APA_64x64PixelStreamPlot
+
+    pop     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    call    APA_BufferUpdate
+
+    ld      hl,GEN_MAP_PALETTE
+    call    APA_LoadPalette
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 map_generate::
+
+    ld      a,21
+    ld      b,229
+    call    gen_map_srand ; a = seed x, b = seed y
 
     call    map_initialize ; result is saved to temp bank 1
 
@@ -538,16 +893,19 @@ map_generate::
 
     call    map_normalize ; bank 2.  ret A = 1 if ok, 0 = start again
     and     a,a
-    jr      z,map_generate ; TODO: Check if infinite loop?
+    jr      nz,.map_ok
+        ld      b,b ; Not the end of the world, but nice to know as developer...
+        jr      map_generate ; TODO: Check if infinite loop?
+.map_ok:
 
     call    map_smooth_2_to_1
     call    map_smooth_1_to_2
 
-    ; TODO : Thresholds to convert to water, field and forest
+    call    map_apply_height_threshold ; Convert to water, field and forest
 
-    ; TODO : Convert to real tiles
+    ; TODO : Convert to real tiles, not all forms are allowed by the tileset
 
-    ; TODO : Draw minimap
+    call    map_draw
 
     ret
 

@@ -78,6 +78,8 @@ MenuNewCity: ; returns 1 if loaded correctly, 0 if not
     ld      bc,TEXT_INPUT_LENGTH
     call    memcopy ; bc = size    hl = source address    de = dest address
 
+    LONG_CALL   RoomGenerateMap
+
     ld      a,1
     ret
 
