@@ -47,13 +47,29 @@ MAIN_MENU_BG_MAP::
 
 ;-------------------------------------------------------------------------------
 
+STR_CITY_NAME:
+    String2Tiles "C","i","t","y"," ","N","a","m","e",":",0
+STR_CITY_LEN EQU String2TilesLenght ; includes string terminator!
+
 MenuNewCity: ; returns 1 if loaded correctly, 0 if not
 
     ld      a,0
     call    CityMapSet
 
-    ld      de,STR_CITY_NAME
-    LONG_CALL_ARGS  RoomTextInputSetPrompt ; de = pointer to string
+    add     sp,-STR_CITY_LEN
+
+        ; Save string to the stack so that any bank can see the data!
+        ld      bc,STR_CITY_LEN ; bc = size
+        ld      hl,sp+0
+        LD_DE_HL ; de = dest
+        ld      hl,STR_CITY_NAME ; hl = src
+        call    memcopy
+
+        ld      hl,sp+0
+        LD_DE_HL
+        LONG_CALL_ARGS  RoomTextInputSetPrompt ; de = pointer to string
+
+    add     sp,+STR_CITY_LEN
 
     LONG_CALL   RoomTextInput
 
@@ -98,9 +114,6 @@ MenuLoadCitySRAM: ; returns 1 if loaded correctly, 0 if not
     ret
 
 ;-------------------------------------------------------------------------------
-
-STR_CITY_NAME:
-    String2Tiles "C","i","t","y"," ","N","a","m","e",":",0
 
 InputHandleMenu:
 
