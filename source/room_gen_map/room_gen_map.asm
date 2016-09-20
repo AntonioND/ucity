@@ -186,6 +186,8 @@ RoomGenerateMap::
 
     call    SetPalettesAllBlack
 
+    LONG_CALL   map_tilemap_to_real_tiles
+
     ret
 
 ;###############################################################################

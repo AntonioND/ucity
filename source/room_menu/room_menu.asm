@@ -53,7 +53,10 @@ STR_CITY_LEN EQU String2TilesLenght ; includes string terminator!
 
 MenuNewCity: ; returns 1 if loaded correctly, 0 if not
 
-    ld      a,0
+    ; TODO : Scenarios should set the city map to a positive value instead
+    ; of the CITY_MAP_GENERATE_RANDOM value
+
+    ld      a,CITY_MAP_GENERATE_RANDOM
     call    CityMapSet
 
     add     sp,-STR_CITY_LEN

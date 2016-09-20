@@ -282,13 +282,6 @@ ENDM
 
 map_initialize: ; result saved to bank 1
 
-    ; memset attribute bank to 0. Terrain tiles are always < 256
-
-    ; TODO : Move this to room code, this only needs to be done once in the room
-    ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
-    call    ClearWRAMX ; Sets D000 - DFFF to 0 ($1000 bytes)
-
     ; initialize tile bank to random values
 
     ld      a,BANK_TEMP1
@@ -679,7 +672,7 @@ map_normalize: ; normalizes bank 2. ret A = 1 if ok, 0 if we have to start again
 
 MAP_SMOOTH_FN : MACRO ; \1 = src bank, \2 = dst bank
 
-    ld      hl,$D000 ; Base address of the map!
+    ld      hl,CITY_MAP_TILES ; Base address of the map!
 
     ld      d,0 ; d = y
 .loopy:
@@ -821,6 +814,599 @@ FOREST_THRESHOLD EQU 128+24
 
 ;-------------------------------------------------------------------------------
 
+FIX_TILE_TYPE : MACRO ; \1 = T_WATER or T_FOREST
+
+    ld      hl,CITY_MAP_TILES ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy:
+
+        ld      e,0 ; e = x
+.loopx:
+
+        ld      a,[hl]
+        cp      a,\1
+        jp      nz,.skip_tile
+
+        push    de ; (*)
+        push    hl
+
+            ; Check top
+
+            LD_BC_DE
+            dec     d
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            LD_DE_BC
+            cp      a,\1
+            jp      nz,.not_top
+
+                LD_BC_DE
+                dec     e
+                dec     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,\1
+                jp      nz,.not_top_left
+
+                    LD_BC_DE
+                    dec     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,\1
+                    jp      z,.leave_tile
+
+.not_top_left:
+
+                LD_BC_DE
+                inc     e
+                dec     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,\1
+                jp      nz,.not_top_right
+
+                    LD_BC_DE
+                    inc     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,\1
+                    jp      z,.leave_tile
+
+.not_top_right:
+.not_top:
+
+            LD_BC_DE
+            inc     d
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            LD_DE_BC
+            cp      a,\1
+            jp      nz,.remove_tile
+
+                LD_BC_DE
+                dec     e
+                inc     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,\1
+                jp      nz,.not_bottom_left
+
+                    LD_BC_DE
+                    dec     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,\1
+                    jp      z,.leave_tile
+
+.not_bottom_left:
+
+                LD_BC_DE
+                inc     e
+                inc     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,\1
+                jp      nz,.not_bottom_right
+
+                    LD_BC_DE
+                    inc     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,\1
+                    jp      z,.leave_tile
+
+.not_bottom_right:
+
+.remove_tile:
+        ld      a,T_GRASS
+        jr      .end_tile
+.leave_tile:
+        ld      a,\1
+.end_tile:
+
+        pop     hl
+        pop     de ; (*)
+
+        ld      [hl],a
+
+.skip_tile:
+
+        inc     hl
+
+        inc     e
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jp      z,.loopx
+
+    inc     d
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jp      z,.loopy
+
+ENDM
+
+FIX_BLEND_GRASS_TO_TYPE : MACRO
+
+    ld      hl,CITY_MAP_TILES ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy:
+
+        ld      e,0 ; e = x
+.loopx:
+
+        ld      a,[hl]
+        cp      a,T_GRASS
+        jp      nz,.skip_tile
+
+        push    de ; (*)
+        push    hl
+
+            ; Check top
+
+            LD_BC_DE
+            dec     d
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            LD_DE_BC
+            cp      a,T_GRASS
+            jp      nz,.not_top
+
+                LD_BC_DE
+                dec     e
+                dec     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,T_GRASS
+                jp      nz,.not_top_left
+
+                    LD_BC_DE
+                    dec     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,T_GRASS
+                    jp      z,.leave_tile
+
+.not_top_left:
+
+                LD_BC_DE
+                inc     e
+                dec     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,T_GRASS
+                jp      nz,.not_top_right
+
+                    LD_BC_DE
+                    inc     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,T_GRASS
+                    jp      z,.leave_tile
+
+.not_top_right:
+.not_top:
+
+            LD_BC_DE
+            inc     d
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            LD_DE_BC
+            cp      a,T_GRASS
+            jp      nz,.remove_tile
+
+                LD_BC_DE
+                dec     e
+                inc     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,T_GRASS
+                jp      nz,.not_bottom_left
+
+                    LD_BC_DE
+                    dec     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,T_GRASS
+                    jp      z,.leave_tile
+
+.not_bottom_left:
+
+                LD_BC_DE
+                inc     e
+                inc     d
+                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                LD_DE_BC
+                cp      a,T_GRASS
+                jp      nz,.not_bottom_right
+
+                    LD_BC_DE
+                    inc     e
+                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+                    LD_DE_BC
+                    cp      a,T_GRASS
+                    jp      z,.leave_tile
+
+.not_bottom_right:
+
+.remove_tile: ; use the tile we just read
+        jr      .end_tile
+.leave_tile:
+        ld      a,T_GRASS
+.end_tile:
+
+        pop     hl
+        pop     de ; (*)
+
+        ld      [hl],a
+
+.skip_tile:
+
+        inc     hl
+
+        inc     e
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jp      z,.loopx
+
+    inc     d
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jp      z,.loopy
+
+ENDM
+
+map_fix_water:
+    FIX_TILE_TYPE T_WATER
+    ret
+
+map_fix_forest:
+    FIX_TILE_TYPE T_FOREST
+    ret
+
+;-------------------------------------------------------------------------------
+
+map_tilemap_fix: ; fix invalid patterns of tiles
+
+    ld      a,BANK_TEMP2
+    ld      [rSVBK],a
+
+    ; Fix water and forest tiles
+
+    call    map_fix_water
+    call    map_fix_forest
+
+    FIX_BLEND_GRASS_TO_TYPE
+
+    call    map_fix_water
+    call    map_fix_forest
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+COARSE_TILES_TO_TILESET : MACRO ; \1 = T_WATER/T_FOREST, \2 = array
+
+    ; Switch to bank with original data
+
+    ld      a,BANK_TEMP2
+    ld      [rSVBK],a
+
+    ld      hl,CITY_MAP_TILES ; Base address of the map!
+
+    ld      d,0 ; d = y
+.loopy:
+
+        ld      e,0 ; e = x
+.loopx:
+
+        ld      a,[hl]
+        cp      a,\1
+        jp      nz,.skip_tile
+
+        push    de ; (*)
+        push    hl
+
+            ld      b,0
+
+            push    de
+            dec     d
+            dec     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip0
+            set     0,b
+.skip0:     pop     de
+
+            push    de
+            dec     d
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip1
+            set     1,b
+.skip1:     pop     de
+
+            push    de
+            dec     d
+            inc     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip2
+            set     2,b
+.skip2:     pop     de
+
+            push    de
+            dec     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip3
+            set     3,b
+.skip3:     pop     de
+
+            push    de
+            inc     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip4
+            set     4,b
+.skip4:     pop     de
+
+            push    de
+            inc     d
+            dec     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip5
+            set     5,b
+.skip5:     pop     de
+
+            push    de
+            inc     d
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip6
+            set     6,b
+.skip6:     pop     de
+
+            push    de
+            inc     d
+            inc     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip7
+            set     7,b
+.skip7:     pop     de
+
+        ; b = data read
+
+        ld      hl,\2 ; ptr to array
+.loop_search:
+        ld      a,[hl+] ; mask
+        ld      c,a
+        ld      a,[hl+] ; expected result
+        ld      d,a
+        ld      a,[hl+] ; result tile
+        ld      e,a
+
+        ld      a,b
+        and     a,c
+        cp      a,d
+        jr      nz,.loop_search
+
+        pop     hl
+        push    hl
+
+        ; e = resulting tile
+
+        ; Switch to bank with destination data
+
+        ld      a,BANK_TILES
+        ld      [rSVBK],a
+
+        ld      [hl],e
+
+        ; Switch to bank with original data
+
+        ld      a,BANK_TEMP2
+        ld      [rSVBK],a
+
+        pop     hl
+        pop     de ; (*)
+
+.skip_tile:
+
+        inc     hl
+
+        inc     e
+        bit     6,e ; CITY_MAP_WIDTH = 64
+        jp      z,.loopx
+
+    inc     d
+    bit     6,d ; CITY_MAP_HEIGHT = 64
+    jp      z,.loopy
+
+ENDM
+
+    ; From more restrictive to less restrictive
+
+    ; 0 1 2
+    ; 3 . 4 <- Bit order
+    ; 5 6 7
+
+WATER_TILES: ; MASK, EXPECTED RESULT, RESULTING TILE
+
+    ; 1 = Water, 0 = Grass or forest
+
+    DB %01011011,%00001011,T_WATER__GRASS_BR
+    DB %01011110,%00010110,T_WATER__GRASS_BL
+    DB %01111010,%01101000,T_WATER__GRASS_TR
+    DB %11011010,%11010000,T_WATER__GRASS_TL
+
+    DB %01011010,%00011010,T_WATER__GRASS_BC
+    DB %01011010,%01011000,T_WATER__GRASS_TC
+    DB %01011010,%01001010,T_WATER__GRASS_CR
+    DB %01011010,%01010010,T_WATER__GRASS_CL
+
+    DB %11011010,%01011010,T_WATER__GRASS_CORNER_BR
+    DB %01111010,%01011010,T_WATER__GRASS_CORNER_BL
+    DB %01011110,%01011010,T_WATER__GRASS_CORNER_TR
+    DB %01011011,%01011010,T_WATER__GRASS_CORNER_TL
+
+    DB %00000000,%00000000,T_WATER ; Default -> Always valid
+
+FOREST_TILES: ; MASK, EXPECTED RESULT, RESULTING TILE
+
+    ; 1 = Forest, 0 = Grass or water
+
+    DB %01011011,%01011010,T_GRASS__FOREST_BR
+    DB %01011110,%01011010,T_GRASS__FOREST_BL
+    DB %01111010,%01011010,T_GRASS__FOREST_TR
+    DB %11011010,%01011010,T_GRASS__FOREST_TL
+
+    DB %01011011,%00001011,T_GRASS__FOREST_CORNER_TL
+    DB %01011110,%00010110,T_GRASS__FOREST_CORNER_TR
+    DB %01111010,%01101000,T_GRASS__FOREST_CORNER_BL
+    DB %11011010,%11010000,T_GRASS__FOREST_CORNER_BR
+
+    DB %01011010,%00011010,T_GRASS__FOREST_TC
+    DB %01011010,%01011000,T_GRASS__FOREST_BC
+    DB %01011010,%01001010,T_GRASS__FOREST_CL
+    DB %01011010,%01010010,T_GRASS__FOREST_CR
+
+    DB %00000000,%00000000,T_FOREST ; Default -> Always valid
+
+fix_water_border_tiles:
+    COARSE_TILES_TO_TILESET T_WATER, WATER_TILES
+    ret
+
+fix_forest_border_tiles:
+    COARSE_TILES_TO_TILESET T_FOREST, FOREST_TILES
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Call this when leaving the map generation room, this is only needed for
+; graphics, the minimap itself won't change after this. This uses the values
+; left in BANK_TEMP2 from the last map generation.
+
+map_tilemap_to_real_tiles::
+
+    ; Copy map to a new bank
+    ; ----------------------
+
+    ; First, we copy the map. Then, we read from the original data and overwrite
+    ; the tiles that have to change.
+
+    ld      b,BANK_TEMP2
+    ld      c,BANK_TILES
+    ld      de,CITY_MAP_TILES
+    ld      hl,rSVBK
+.loop:
+    ld      [hl],b ; rSVBK = BANK_TEMP2
+
+    ld      a,[de]
+
+    ld      [hl],c ; rSVBK = BANK_TILES
+
+    ld      [de],a
+    inc     de
+
+    bit     5,d ; Up to E000
+    jr      z,.loop
+
+    ; Convert to corners, etc, while moving to BANK_TILES
+    ; ---------------------------------------------------
+
+    ; T_GRASS will remain unchanged!
+
+    call    fix_water_border_tiles
+    call    fix_forest_border_tiles
+
+    ; Randomize some of the tiles to the alternate versions
+    ; -----------------------------------------------------
+
+    ld      a,BANK_TILES
+    ld      [rSVBK],a
+
+    ld      de,CITY_MAP_TILES
+.loop_rand:
+
+    call    gen_map_rand ; returns a = random number. Preserves DE
+
+    and     a,63
+    inc     a ; advance between 1 and 64 tiles
+
+    ld      l,a
+    ld      h,0
+    add     hl,de ; increase pointer by rand()
+    LD_DE_HL
+
+    bit     5,d ; Up to E000 (but this will catch small overflows)
+    jr      nz,.exit_rand
+
+    ld      a,[de]
+    cp      a,T_GRASS
+    jr      nz,.not_grass
+        ld      a,T_GRASS_EXTRA
+        ld      [de],a
+        jr      .loop_rand
+.not_grass:
+    cp      a,T_FOREST
+    jr      nz,.not_forest
+        ld      a,T_FOREST_EXTRA
+        ld      [de],a
+        jr      .loop_rand
+.not_forest:
+    cp      a,T_WATER
+    jr      nz,.not_water
+        ld      a,T_WATER_EXTRA
+        ld      [de],a
+        ;jr      .loop_rand
+.not_water:
+
+    jr      .loop_rand
+.exit_rand:
+
+    ; Clear attribute bank. Terrain tiles are always < 256
+    ; ----------------------------------------------------
+
+    ; Unfortunately, we still have to set the palettes...
+
+    ld      hl,CITY_MAP_TILES
+.loop_fill_attrs:
+
+    ld      a,BANK_CITY_MAP_TILES
+    ld      [rSVBK],a
+
+    ld      c,[hl]
+    ld      b,0
+
+    push    hl
+    call    CityMapDrawTerrainTileAddress ; bc = tile, hl = address
+    pop     hl
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop_fill_attrs
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 GEN_MAP_PALETTE_BLACK:
     DW  0, 0, 0, 0
 
@@ -909,11 +1495,12 @@ map_generate::
     call    map_smooth_2_to_1
     call    map_smooth_1_to_2
 
-    call    map_apply_height_threshold ; Convert to water, field and forest
+    call    map_apply_height_threshold ; Bank 2. Convert to water/field/forest
 
-    ; TODO : Convert to real tiles, not all forms are allowed by the tileset
+    ; Convert to real tiles, not all forms are allowed by the tileset
+    call    map_tilemap_fix ; Bank 2 -> Bank 2
 
-    call    map_draw
+    call    map_draw ; Bank 2
 
     ret
 
