@@ -809,8 +809,8 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
         ; Clear WRAMX
 
-        ld      a,1
-.clear_wramx_loop:
+        ld      a,3 ; Do not clear tile and attribute map, they may contain
+.clear_wramx_loop:  ; a randomly generated map.
         ld      [rSVBK],a
         push    af
         call    ClearWRAMX
