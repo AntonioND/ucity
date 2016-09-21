@@ -53,9 +53,6 @@ STR_CITY_LEN EQU String2TilesLenght ; includes string terminator!
 
 MenuNewCity: ; returns 1 if loaded correctly, 0 if not
 
-    ; TODO : Scenarios should set the city map to a positive value instead
-    ; of the CITY_MAP_GENERATE_RANDOM value
-
     ld      a,CITY_MAP_GENERATE_RANDOM
     call    CityMapSet
 
@@ -88,6 +85,20 @@ MenuNewCity: ; returns 1 if loaded correctly, 0 if not
 
 ;-------------------------------------------------------------------------------
 
+MenuScenario: ; returns 1 if loaded correctly, 0 if not
+
+    ; TODO : Scenarios should set the city map to a positive value instead of
+    ; just 0!
+
+    ld      a,0
+    call    CityMapSet
+
+    ; TODO : Actually load something!
+
+    ld      a,1
+    ret
+
+;-------------------------------------------------------------------------------
 MenuLoadCitySRAM: ; returns 1 if loaded correctly, 0 if not
 
     ld      b,0 ; 0 = load data mode
@@ -136,6 +147,21 @@ InputHandleMenu:
         call    RoomMenuLoadBG
         ret
 .not_a:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_START
+    jr      z,.not_start
+
+        call    MenuScenario ; returns 1 if loaded correctly, 0 if not
+        and     a,a
+        jr      z,.not_loaded_start
+            ld      a,1
+            ld      [menu_exit],a
+            ret
+.not_loaded_start:
+        call    RoomMenuLoadBG
+        ret
+.not_start:
 
     ld      a,[joy_pressed]
     and     a,PAD_B
