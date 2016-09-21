@@ -422,7 +422,7 @@ CityMapLoad:: ; returns de = xy start coordinates
         ; Random map
         ; ----------
 
-        ; TODO : Default values for everything
+        call    PredefinedMapSetupGameVariables
 
         ld      d,(CITY_MAP_WIDTH-20)/2 ; X
         ld      e,(CITY_MAP_HEIGHT-18)/2 ; Y

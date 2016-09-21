@@ -1392,10 +1392,10 @@ map_draw:
 
 ;-------------------------------------------------------------------------------
 
-map_generate::
+map_generate:: ; call this with LONG_CALL_ARGS. b = seed x, c = seed y (229)
 
-    ld      a,21
-    ld      b,229
+    ld      a,b
+    ld      b,c
     call    gen_map_srand ; a = seed x, b = seed y
 
     call    map_initialize ; result is saved to temp bank 1

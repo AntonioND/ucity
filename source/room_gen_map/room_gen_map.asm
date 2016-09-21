@@ -33,6 +33,9 @@
 
 ;-------------------------------------------------------------------------------
 
+gen_map_seed: DS 1
+gen_map_generated: DS 1 ; set to 1 after generating a map
+
 gen_map_room_exit:  DS 1 ; set to 1 to exit room
 
 ;###############################################################################
@@ -49,15 +52,90 @@ GEN_MAP_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
+GenMapUpdateGUI:
+
+    xor     a,a
+    ld      [rVBK],a ; Tile map
+
+    ld      a,[gen_map_seed]
+    ld      b,a
+    swap    a
+    and     a,$0F
+    BCD2Tile
+    ld      d,a ; MSB
+    ld      a,b
+    and     a,$0F
+    BCD2Tile
+    ld      e,a ; LSB
+
+    ld      hl,$9800 + 7*32 + 4
+
+    di ; critical section
+
+    WAIT_SCREEN_BLANK ; clobbers A and C
+
+    ld      a,d
+    ld      [hl+],a
+    ld      [hl],e ; 5 cycles. there should be enough time in LCD mode 2
+
+    reti ; end of critical section
+
+;-------------------------------------------------------------------------------
+
 GenMapMandleInput: ; If it returns 1, exit room. If 0, continue
 
-    ; Exit if B or START are pressed
     ld      a,[joy_pressed]
-    and     a,PAD_B|PAD_START
-    jr      z,.end_b_start
+    and     a,PAD_UP
+    jr      z,.end_up
+        ld      hl,gen_map_seed
+        inc     [hl]
+        call    GenMapUpdateGUI
+.end_up:
+    ld      a,[joy_pressed]
+    and     a,PAD_DOWN
+    jr      z,.end_down
+        ld      hl,gen_map_seed
+        dec     [hl]
+        call    GenMapUpdateGUI
+.end_down:
+    ld      a,[joy_pressed]
+    and     a,PAD_RIGHT
+    jr      z,.end_right
+        ld      hl,gen_map_seed
+        ld      a,$10
+        add     [hl]
+        ld      [hl],a
+        call    GenMapUpdateGUI
+.end_right:
+    ld      a,[joy_pressed]
+    and     a,PAD_LEFT
+    jr      z,.end_left
+        ld      hl,gen_map_seed
+        ld      a,-$10
+        add     [hl]
+        ld      [hl],a
+        call    GenMapUpdateGUI
+.end_left:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_A
+    jr      z,.end_a
+        ld      hl,gen_map_seed
+        ld      b,[hl] ; 21
+        ld      c,229
+        LONG_CALL_ARGS  map_generate ; b = seed x, c = seed y (229)
+
         ld      a,1
-        ret ; return 1
-.end_b_start:
+        ld      [gen_map_generated],a
+.end_a:
+
+    ; Exit if START is pressed and a map is generated
+    ld      a,[joy_pressed]
+    and     a,PAD_START
+    jr      z,.end_start
+        ld      a,[gen_map_generated]
+        ret ; return 1 if map has been generated
+.end_start:
 
     xor     a,a
     ret ; return 0
@@ -164,7 +242,8 @@ RoomGenerateMap::
 
     call    LoadTextPalette
 
-    LONG_CALL   map_generate
+    ld      a,0
+    ld      [gen_map_generated],a
 
     xor     a,a
     ld      [gen_map_room_exit],a
