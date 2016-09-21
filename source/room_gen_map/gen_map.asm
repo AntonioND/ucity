@@ -39,6 +39,8 @@ seedy: DS 1
 seedz: DS 1
 seedw: DS 1
 
+fix_map_changed: DS 1
+
 ;###############################################################################
 
     SECTION "Genenerate Map Variables",WRAM0
@@ -816,6 +818,10 @@ FOREST_THRESHOLD EQU 128+24
 
 FIX_TILE_TYPE : MACRO ; \1 = T_WATER or T_FOREST
 
+.start:
+    xor     a,a
+    ld      [fix_map_changed],a
+
     ld      hl,CITY_MAP_TILES ; Base address of the map!
 
     ld      d,0 ; d = y
@@ -831,229 +837,109 @@ FIX_TILE_TYPE : MACRO ; \1 = T_WATER or T_FOREST
         push    de ; (*)
         push    hl
 
-            ; Check top
+            ld      b,0
 
-            LD_BC_DE
+            push    de
+            dec     d
+            dec     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip0
+            set     0,b
+.skip0:     pop     de
+
+            push    de
             dec     d
             MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-            LD_DE_BC
             cp      a,\1
-            jp      nz,.not_top
+            jr      nz,.skip1
+            set     1,b
+.skip1:     pop     de
 
-                LD_BC_DE
-                dec     e
-                dec     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,\1
-                jp      nz,.not_top_left
+            push    de
+            dec     d
+            inc     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip2
+            set     2,b
+.skip2:     pop     de
 
-                    LD_BC_DE
-                    dec     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,\1
-                    jp      z,.leave_tile
+            push    de
+            dec     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip3
+            set     3,b
+.skip3:     pop     de
 
-.not_top_left:
+            push    de
+            inc     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip4
+            set     4,b
+.skip4:     pop     de
 
-                LD_BC_DE
-                inc     e
-                dec     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,\1
-                jp      nz,.not_top_right
+            push    de
+            inc     d
+            dec     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip5
+            set     5,b
+.skip5:     pop     de
 
-                    LD_BC_DE
-                    inc     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,\1
-                    jp      z,.leave_tile
-
-.not_top_right:
-.not_top:
-
-            LD_BC_DE
+            push    de
             inc     d
             MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-            LD_DE_BC
             cp      a,\1
-            jp      nz,.remove_tile
+            jr      nz,.skip6
+            set     6,b
+.skip6:     pop     de
 
-                LD_BC_DE
-                dec     e
-                inc     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,\1
-                jp      nz,.not_bottom_left
+            push    de
+            inc     d
+            inc     e
+            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
+            cp      a,\1
+            jr      nz,.skip7
+            set     7,b
+.skip7:     pop     de
 
-                    LD_BC_DE
-                    dec     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,\1
-                    jp      z,.leave_tile
+        ; b = data read
 
-.not_bottom_left:
+        ld      hl,FIX_TILES ; ptr to array
+.loop_search:
+        ld      a,[hl+] ; mask
+        ld      c,a
+        ld      a,[hl+] ; expected result
+        ld      d,a
+        ld      a,[hl+] ; result tile
+        ld      e,a
 
-                LD_BC_DE
-                inc     e
-                inc     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,\1
-                jp      nz,.not_bottom_right
-
-                    LD_BC_DE
-                    inc     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,\1
-                    jp      z,.leave_tile
-
-.not_bottom_right:
-
-.remove_tile:
-        ld      a,T_GRASS
-        jr      .end_tile
-.leave_tile:
-        ld      a,\1
-.end_tile:
+        ld      a,b
+        and     a,c
+        cp      a,d
+        jr      nz,.loop_search
 
         pop     hl
-        pop     de ; (*)
-
-        ld      [hl],a
-
-.skip_tile:
-
-        inc     hl
-
-        inc     e
-        bit     6,e ; CITY_MAP_WIDTH = 64
-        jp      z,.loopx
-
-    inc     d
-    bit     6,d ; CITY_MAP_HEIGHT = 64
-    jp      z,.loopy
-
-ENDM
-
-FIX_BLEND_GRASS_TO_TYPE : MACRO
-
-    ld      hl,CITY_MAP_TILES ; Base address of the map!
-
-    ld      d,0 ; d = y
-.loopy:
-
-        ld      e,0 ; e = x
-.loopx:
-
-        ld      a,[hl]
-        cp      a,T_GRASS
-        jp      nz,.skip_tile
-
-        push    de ; (*)
         push    hl
 
-            ; Check top
+        ld      a,e ; e = result
+        and     a,a
+        jr      nz,.leave_tile
 
-            LD_BC_DE
-            dec     d
-            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-            LD_DE_BC
-            cp      a,T_GRASS
-            jp      nz,.not_top
+            ld      a,T_GRASS
+            ld      [hl],a
+            ld      a,1
+            ld      [fix_map_changed],a
 
-                LD_BC_DE
-                dec     e
-                dec     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,T_GRASS
-                jp      nz,.not_top_left
-
-                    LD_BC_DE
-                    dec     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,T_GRASS
-                    jp      z,.leave_tile
-
-.not_top_left:
-
-                LD_BC_DE
-                inc     e
-                dec     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,T_GRASS
-                jp      nz,.not_top_right
-
-                    LD_BC_DE
-                    inc     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,T_GRASS
-                    jp      z,.leave_tile
-
-.not_top_right:
-.not_top:
-
-            LD_BC_DE
-            inc     d
-            MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-            LD_DE_BC
-            cp      a,T_GRASS
-            jp      nz,.remove_tile
-
-                LD_BC_DE
-                dec     e
-                inc     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,T_GRASS
-                jp      nz,.not_bottom_left
-
-                    LD_BC_DE
-                    dec     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,T_GRASS
-                    jp      z,.leave_tile
-
-.not_bottom_left:
-
-                LD_BC_DE
-                inc     e
-                inc     d
-                MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                LD_DE_BC
-                cp      a,T_GRASS
-                jp      nz,.not_bottom_right
-
-                    LD_BC_DE
-                    inc     e
-                    MAP_READ_CLAMPED ; e = x, d = y, return = a, preserves bc
-                    LD_DE_BC
-                    cp      a,T_GRASS
-                    jp      z,.leave_tile
-
-.not_bottom_right:
-
-.remove_tile: ; use the tile we just read
-        jr      .end_tile
 .leave_tile:
-        ld      a,T_GRASS
 .end_tile:
 
         pop     hl
         pop     de ; (*)
-
-        ld      [hl],a
 
 .skip_tile:
 
@@ -1067,7 +953,41 @@ FIX_BLEND_GRASS_TO_TYPE : MACRO
     bit     6,d ; CITY_MAP_HEIGHT = 64
     jp      z,.loopy
 
+    ld      a,[fix_map_changed]
+    and     a,a
+    jp      nz,.start
+
 ENDM
+
+    ; From more restrictive to less restrictive
+
+    ; 0 1 2
+    ; 3 . 4 <- Bit order
+    ; 5 6 7
+
+FIX_TILES: ; MASK, EXPECTED RESULT, TILE VALID
+
+    ; 1 = Tile (water or  forest), 0 = No tile
+
+    DB %11111111,%11111111,1
+
+    DB %11111111,%01111111,1
+    DB %11111111,%11011111,1
+    DB %11111111,%11111011,1
+    DB %11111111,%11111110,1
+
+    DB %01011111,%00011111,1
+    DB %11111010,%11111000,1
+    DB %01111011,%01101011,1
+    DB %11011110,%11010110,1
+
+    DB %01011011,%00001011,1
+    DB %01011110,%00010110,1
+    DB %01111010,%01101000,1
+    DB %11011010,%11010000,1
+
+    DB %00000000,%00000000,0 ; Default -> Remove tile
+
 
 map_fix_water:
     FIX_TILE_TYPE T_WATER
@@ -1085,11 +1005,6 @@ map_tilemap_fix: ; fix invalid patterns of tiles
     ld      [rSVBK],a
 
     ; Fix water and forest tiles
-
-    call    map_fix_water
-    call    map_fix_forest
-
-    FIX_BLEND_GRASS_TO_TYPE
 
     call    map_fix_water
     call    map_fix_forest
@@ -1250,43 +1165,47 @@ WATER_TILES: ; MASK, EXPECTED RESULT, RESULTING TILE
 
     ; 1 = Water, 0 = Grass or forest
 
+    DB %11111111,%11111111,T_WATER
+
+    DB %11111111,%01111111,T_WATER__GRASS_CORNER_BR
+    DB %11111111,%11011111,T_WATER__GRASS_CORNER_BL
+    DB %11111111,%11111011,T_WATER__GRASS_CORNER_TR
+    DB %11111111,%11111110,T_WATER__GRASS_CORNER_TL
+
+    DB %01011111,%00011111,T_WATER__GRASS_BC
+    DB %11111010,%11111000,T_WATER__GRASS_TC
+    DB %01111011,%01101011,T_WATER__GRASS_CR
+    DB %11011110,%11010110,T_WATER__GRASS_CL
+
     DB %01011011,%00001011,T_WATER__GRASS_BR
     DB %01011110,%00010110,T_WATER__GRASS_BL
     DB %01111010,%01101000,T_WATER__GRASS_TR
     DB %11011010,%11010000,T_WATER__GRASS_TL
 
-    DB %01011010,%00011010,T_WATER__GRASS_BC
-    DB %01011010,%01011000,T_WATER__GRASS_TC
-    DB %01011010,%01001010,T_WATER__GRASS_CR
-    DB %01011010,%01010010,T_WATER__GRASS_CL
-
-    DB %11011010,%01011010,T_WATER__GRASS_CORNER_BR
-    DB %01111010,%01011010,T_WATER__GRASS_CORNER_BL
-    DB %01011110,%01011010,T_WATER__GRASS_CORNER_TR
-    DB %01011011,%01011010,T_WATER__GRASS_CORNER_TL
-
-    DB %00000000,%00000000,T_WATER ; Default -> Always valid
+    DB %00000000,%00000000,T_INDUSTRIAL ; Default -> Error!
 
 FOREST_TILES: ; MASK, EXPECTED RESULT, RESULTING TILE
 
     ; 1 = Forest, 0 = Grass or water
 
-    DB %01011011,%01011010,T_GRASS__FOREST_BR
-    DB %01011110,%01011010,T_GRASS__FOREST_BL
-    DB %01111010,%01011010,T_GRASS__FOREST_TR
-    DB %11011010,%01011010,T_GRASS__FOREST_TL
+    DB %11111111,%11111111,T_FOREST
+
+    DB %11111111,%01111111,T_GRASS__FOREST_TL
+    DB %11111111,%11011111,T_GRASS__FOREST_TR
+    DB %11111111,%11111011,T_GRASS__FOREST_BL
+    DB %11111111,%11111110,T_GRASS__FOREST_BR
+
+    DB %01011111,%00011111,T_GRASS__FOREST_TC
+    DB %11111010,%11111000,T_GRASS__FOREST_BC
+    DB %01111011,%01101011,T_GRASS__FOREST_CL
+    DB %11011110,%11010110,T_GRASS__FOREST_CR
 
     DB %01011011,%00001011,T_GRASS__FOREST_CORNER_TL
     DB %01011110,%00010110,T_GRASS__FOREST_CORNER_TR
     DB %01111010,%01101000,T_GRASS__FOREST_CORNER_BL
     DB %11011010,%11010000,T_GRASS__FOREST_CORNER_BR
 
-    DB %01011010,%00011010,T_GRASS__FOREST_TC
-    DB %01011010,%01011000,T_GRASS__FOREST_BC
-    DB %01011010,%01001010,T_GRASS__FOREST_CL
-    DB %01011010,%01010010,T_GRASS__FOREST_CR
-
-    DB %00000000,%00000000,T_FOREST ; Default -> Always valid
+    DB %00000000,%00000000,T_INDUSTRIAL ; Default -> Error!
 
 fix_water_border_tiles:
     COARSE_TILES_TO_TILESET T_WATER, WATER_TILES
