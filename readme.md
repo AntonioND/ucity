@@ -21,7 +21,7 @@ General to do list:
   - Fires!
 - Historical graphics
 - Sample cities
-- Random map generator (In progress...)
+- Loans
 - Compression for predefined cities
 - Cleanup code and document
 

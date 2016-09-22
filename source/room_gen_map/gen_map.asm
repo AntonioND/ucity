@@ -49,6 +49,12 @@ fix_map_changed: DS 1
 
 circlecount: DS 1
 
+FIELD_DEFAULT_THRESHOLD  EQU 128
+FOREST_DEFAULT_THRESHOLD EQU 128+24
+
+field_threshold  DS 1
+forest_threshold DS 1
+
 ;###############################################################################
 
     SECTION "Genenerate Map Code Data",ROMX[$4000]
@@ -779,22 +785,22 @@ map_smooth_2_to_1:
 
 map_apply_height_threshold:
 
-    ; TODO: Add 0x20 to HL if we want less water
-
     ld      a,BANK_TEMP2
     ld      [rSVBK],a
 
     ld      hl,CITY_MAP_TILES
 
-FIELD_THRESHOLD  EQU 128
-FOREST_THRESHOLD EQU 128+24
+    ld      a,[field_threshold]
+    ld      b,a
+    ld      a,[forest_threshold]
+    ld      c,a
 
 .loop:
     ld      a,[hl]
 
-    cp      a,FIELD_THRESHOLD ; cy = 1 if n > a
+    cp      a,b ; cy = 1 if b > a
     jr      c,.water
-    cp      a,FOREST_THRESHOLD ; cy = 1 if n > a
+    cp      a,c ; cy = 1 if c > a
     jr      c,.field
     ;jr      .forest
 .forest:
@@ -1392,7 +1398,17 @@ map_draw:
 
 ;-------------------------------------------------------------------------------
 
-map_generate:: ; call this with LONG_CALL_ARGS. b = seed x, c = seed y (229)
+; b = seed x, c = seed y (229)
+; d = offset
+map_generate:: ; call this with LONG_CALL_ARGS
+
+    ld      a,FIELD_DEFAULT_THRESHOLD
+    add     a,d
+    ld      [field_threshold],a
+
+    ld      a,FOREST_DEFAULT_THRESHOLD
+    add     a,d
+    ld      [forest_threshold],a
 
     ld      a,b
     ld      b,c

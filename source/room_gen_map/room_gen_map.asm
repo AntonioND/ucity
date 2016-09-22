@@ -38,6 +38,10 @@ gen_map_generated: DS 1 ; set to 1 after generating a map
 
 gen_map_room_exit:  DS 1 ; set to 1 to exit room
 
+GEN_MAP_SELECT_WATER EQU 0
+GEN_MAP_SELECT_LAND  EQU 1
+gen_map_selection: DS 1
+
 ;###############################################################################
 
     SECTION "Room Gen Map Code Data",ROMX
@@ -56,6 +60,8 @@ GenMapUpdateGUI:
 
     xor     a,a
     ld      [rVBK],a ; Tile map
+
+    ; Draw seed
 
     ld      a,[gen_map_seed]
     ld      b,a
@@ -77,6 +83,40 @@ GenMapUpdateGUI:
     ld      a,d
     ld      [hl+],a
     ld      [hl],e ; 5 cycles. there should be enough time in LCD mode 2
+
+    ei ; end of critical section
+
+    ; Clear type map cursor
+
+    ld      hl,$9800 + 14*32 + 1
+    ld      de,32*2
+    ld      b,O_SPACE
+    di
+    WAIT_SCREEN_BLANK ; clobbers A and C
+    ld      [hl],b
+    add     hl,de
+    ld      [hl],b
+    ei
+
+    ; Draw cursor
+
+    ld      a,[gen_map_selection]
+    swap    a
+    add     a,a ; sla a
+    add     a,a ; sla a
+    ; a <<= 6 ( = 32 * 2)
+    ld      e,a
+    ld      d,0
+    ld      hl,$9800 + 14*32 + 1
+    add     hl,de
+
+    ld      b,O_ARROW
+
+    di ; critical section
+
+    WAIT_SCREEN_BLANK ; clobbers A and C
+
+    ld      [hl],b
 
     reti ; end of critical section
 
@@ -120,14 +160,36 @@ GenMapMandleInput: ; If it returns 1, exit room. If 0, continue
     ld      a,[joy_pressed]
     and     a,PAD_A
     jr      z,.end_a
-        ld      hl,gen_map_seed
-        ld      b,[hl] ; 21
-        ld      c,229
-        LONG_CALL_ARGS  map_generate ; b = seed x, c = seed y (229)
+
+        ld      a,[gen_map_seed] ; 21 is the default of the algorithm...
+        add     a,$80 ; I don't like the results of the seed 0 for water...
+        ld      b,a
+        ld      c,229 ; b, c = seeds
+
+        ld      a,[gen_map_selection]
+        cp      a,GEN_MAP_SELECT_LAND
+        jr      nz,.not_land
+            ld      d,-$20 ; More land
+            jr      .end_selection
+.not_land:
+            ld      d,0 ; More water
+.end_selection: ; d = offset
+
+        LONG_CALL_ARGS  map_generate ; b = seed x, c = seed y (229), d = offset
 
         ld      a,1
         ld      [gen_map_generated],a
 .end_a:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_SELECT
+    jr      z,.end_select
+        ld      hl,gen_map_selection
+        ld      a,[hl]
+        xor     a,1
+        ld      [hl],a
+        call    GenMapUpdateGUI
+.end_select:
 
     ; Exit if START is pressed and a map is generated
     ld      a,[joy_pressed]
@@ -225,6 +287,12 @@ RoomGenerateMap::
 
     call    SetPalettesAllBlack
 
+    ld      a,0
+    ld      [gen_map_generated],a
+
+    ld      a,GEN_MAP_SELECT_WATER
+    ld      [gen_map_selection],a
+
     ld      bc,GenMapMenuVBLHandler
     call    irq_set_VBL
 
@@ -241,9 +309,6 @@ RoomGenerateMap::
     call    RoomGenMapLoadBG
 
     call    LoadTextPalette
-
-    ld      a,0
-    ld      [gen_map_generated],a
 
     xor     a,a
     ld      [gen_map_room_exit],a
