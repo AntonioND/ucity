@@ -82,7 +82,7 @@ graph_value_i:: DS 1 ; central value
 
 ;-------------------------------------------------------------------------------
 
-; Must be alligned to $100
+; Must be aligned to $100
 tile_rci_population_pointer: ; Pointer to variable to add population. LSB first
     DW  population_other ; TYPE_FIELD - No population, but don't set the
     DW  population_other ; TYPE_FOREST  to NULL.
@@ -533,10 +533,10 @@ Simulation_CalculateStatistics::
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT   POPULATION_TOWN,        1000
-    DATA_MONEY_AMOUNT   POPULATION_CITY,        5000
-    DATA_MONEY_AMOUNT   POPULATION_METROPOLIS, 10000
-    DATA_MONEY_AMOUNT   POPULATION_CAPITAL,    50000
+    DATA_MONEY_AMOUNT   POPULATION_TOWN,        500
+    DATA_MONEY_AMOUNT   POPULATION_CITY,       1000
+    DATA_MONEY_AMOUNT   POPULATION_METROPOLIS, 3000
+    DATA_MONEY_AMOUNT   POPULATION_CAPITAL,    6000
 
 Simulation_CalculateCityType::
 
@@ -551,7 +551,7 @@ Simulation_CalculateCityType::
     ld      hl,city_population
     call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
     and     a,a
-    ret     z ; continue actual population > reference population
+    ret     z ; continue if actual population > reference population
 
     ld      a,ID_MSG_CLASS_TOWN
     call    PersistentMessageShow
@@ -568,7 +568,7 @@ Simulation_CalculateCityType::
     ld      hl,city_population
     call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
     and     a,a
-    ret     z ; continue actual population > reference population
+    ret     z ; continue if actual population > reference population
 
     ld      a,ID_MSG_CLASS_CITY
     call    PersistentMessageShow
@@ -587,7 +587,7 @@ Simulation_CalculateCityType::
     ld      hl,city_population
     call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
     and     a,a
-    ret     z ; continue actual population > reference population
+    ret     z ; continue if actual population > reference population
 
     ld      a,ID_MSG_CLASS_METROPOLIS
     call    PersistentMessageShow
@@ -605,7 +605,7 @@ Simulation_CalculateCityType::
     ld      hl,city_population
     call    BCD_HL_GE_DE ; Returns 1 if [hl] >= [de]
     and     a,a
-    ret     z ; continue actual population > reference population
+    ret     z ; continue if actual population > reference population
 
     ld      a,ID_MSG_CLASS_CAPITAL
     call    PersistentMessageShow
