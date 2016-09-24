@@ -169,7 +169,7 @@ GenMapMandleInput: ; If it returns 1, exit room. If 0, continue
         ld      a,[gen_map_selection]
         cp      a,GEN_MAP_SELECT_LAND
         jr      nz,.not_land
-            ld      d,-$20 ; More land
+            ld      d,-$18 ; More land
             jr      .end_selection
 .not_land:
             ld      d,0 ; More water
