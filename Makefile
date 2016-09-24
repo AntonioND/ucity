@@ -58,7 +58,7 @@ INCLUDES := $(foreach dir,$(SOURCE_ALL_DIRS_REL),-i$(CURDIR)/$(dir)/)
 OBJ = $(ASMFILES:.asm=.obj)
 
 # Targets
-.PHONY : all rebuild clean
+.PHONY : all rebuild clean run
 
 all: $(BIN)
 
