@@ -63,6 +63,11 @@ TypeHasElectricityExtended:: ; preserves c, de, hl
     sub     a,TYPE_DOCK ; if result is 0, return 0. Don't replace sub by cp!
     ret     z
 
+    ld      a,b ; get type
+    sub     a,TYPE_FIRE ; if result is 0, return 0. Don't replace sub by cp!
+    ret     z ; This is important, fire destroys whole buildings, not tiles.
+    ; We want the power lines to update themselves when that happens!
+
     ; The rest of types need power, even parks (because of lights)
     ld      a,TYPE_HAS_POWER
     ret
@@ -92,6 +97,11 @@ TypeBuildingHasElectricity:: ; preserves c, de, hl
     ld      a,b ; get type
     sub     a,TYPE_DOCK ; if result is 0, return 0. Don't replace sub by cp!
     ret     z
+
+    ld      a,b ; get type
+    sub     a,TYPE_FIRE ; if result is 0, return 0. Don't replace sub by cp!
+    ret     z ; This is important, fire destroys whole buildings, not tiles.
+    ; We want the power lines to update themselves when that happens!
 
     ; The rest of types need power, even parks (because of lights)
     ld      a,TYPE_HAS_POWER

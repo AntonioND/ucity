@@ -102,6 +102,7 @@ str_commercial_3: DB "Dense Commercial",0
 str_industrial_1: DB "Light Industrial",0
 str_industrial_2: DB "Medium Ind.",0
 str_industrial_3: DB "Dense Industrial",0
+str_fire: DB "Fire",0
 
 ;-------------------------------------------------------------------------------
 
@@ -639,6 +640,9 @@ CITY_TILE_NAME:: ; 512 entries. LSB first
     T_ADD   T_INDUSTRIAL_S3_D+6, str_industrial_3
     T_ADD   T_INDUSTRIAL_S3_D+7, str_industrial_3
     T_ADD   T_INDUSTRIAL_S3_D+8, str_industrial_3
+
+    T_ADD   T_FIRE_1, str_fire
+    T_ADD   T_FIRE_2, str_fire
 
     TILE_SET_COUNT 512 ; Fill array
 

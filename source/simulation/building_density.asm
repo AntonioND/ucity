@@ -293,6 +293,9 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
     T_ADD   T_INDUSTRIAL_S3_C, 5*9,10, 255
     T_ADD   T_INDUSTRIAL_S3_D, 6*9,10, 255
 
+    T_ADD   T_FIRE_1, 0,0, 0 ; Fires should pollute, but simulation should
+    T_ADD   T_FIRE_2, 0,0, 0 ; be disabled in "disaster mode".
+
     T_ADD   512, 0,0,0 ; Fill array
 
 ;###############################################################################

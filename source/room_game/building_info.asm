@@ -328,6 +328,9 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
     cp      a,TYPE_WATER
     ret     z
 
+    cp      a,TYPE_FIRE ; Or fire!
+    ret     z
+
     cp      a,TYPE_FOREST
     jp      z,MapClearDemolishedTile ; call and return from there
 

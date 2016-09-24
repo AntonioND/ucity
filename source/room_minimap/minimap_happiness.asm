@@ -241,6 +241,7 @@ FTRA EQU TILE_OK_TRAFFIC
     DB  FPOW|FSER|FTRA, FPOW|FSER ; TYPE_PORT
     DB  FPOW|FSER, FPOW ; TYPE_DOCK
     DB  FSER|FTRA, 0 ; TYPE_POWER_PLANT
+    DB  0, 0 ; TYPE_FIRE - Placeholder, never used.
     ; End of valid types
 
 ;###############################################################################
