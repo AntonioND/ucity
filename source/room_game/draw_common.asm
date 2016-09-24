@@ -522,6 +522,19 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
     add     a,b
     ld      e,a ; x += x increment
 
+    ; Instead of checking if the final coordinates are inside the map, check
+    ; each step. The function that returns the type of the map returns water
+    ; or field even if the coordinates are outside the map. If both sides have
+    ; water, it could wrap around the map and enter from the other side.
+
+    ld      a,d
+    or      a,e
+    and     a,128+64
+    jr      z,.not_outside ; check if < 0 or > 63
+        xor     a,a
+        ret ; return 0
+.not_outside:
+
     inc     h ; increment length
 
     jr      .check_loop
@@ -548,16 +561,6 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
     ret
 
 .not_water:
-
-    ; Not water! Check final coordinates to see if we are outside the map
-
-    ld      a,d
-    or      a,e
-    and     a,128+64
-    jr      z,.not_outside ; check if < 0 or > 63
-    xor     a,a
-    ret ; return 0
-.not_outside:
 
     ; bc = coordinate increments b=x, c=y -> will be returned!
     ; h = bridge length -> will be returned!
