@@ -607,6 +607,9 @@ TILESET_INFO:: ; Up to 512 elements
   T_ADD T_INDUSTRIAL_S3_D+7, 2, TYPE_INDUSTRIAL, -1,-2
   T_ADD T_INDUSTRIAL_S3_D+8, 2, TYPE_INDUSTRIAL, -2,-2
 
+  T_ADD T_FIRE_1, 5, TYPE_FIRE, 0,0
+  T_ADD T_FIRE_2, 5, TYPE_FIRE, 0,0
+
   TILE_SET_COUNT 512 ; Fill array
 
 ;###############################################################################

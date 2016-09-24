@@ -139,6 +139,7 @@ TYPE_AIRPORT            EQU 16
 TYPE_PORT               EQU 17
 TYPE_DOCK               EQU 18
 TYPE_POWER_PLANT        EQU 19
+TYPE_FIRE               EQU 20
 
 TYPE_NUMBER             EQU 32 ; Max. number. Upper 3 bits used as flags
 
