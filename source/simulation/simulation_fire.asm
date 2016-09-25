@@ -36,7 +36,8 @@
 ;-------------------------------------------------------------------------------
 
 ; For a map created by a sane person this should reasonably be 1-16 (?) but it
-; can actually go over 255, so the count saturates to 255.
+; can actually go over 255, so the count saturates to 31-1. The number is always
+; increased by 1 to make sure that fires end!
 initial_number_fire_stations: DS 1
 
 ;###############################################################################
@@ -362,6 +363,8 @@ Simulation_Fire::
         jr      nz,.loop_remove_not_fire
 
             ld      a,[initial_number_fire_stations]
+            inc     a ; if not, fire would never end with no fire stations
+            add     a,a ; sla a
             ld      d,a
 
             call    GetRandom ; bc and de preserved
@@ -541,7 +544,7 @@ ELSE
 ENDC
 
                 ld      a,[initial_number_fire_stations]
-                cp      a,255 ; saturate top 255
+                cp      a,30 ; saturate to 30
                 jr      z,.skip_count_restore
                     inc     a
                     ld      [initial_number_fire_stations],a
