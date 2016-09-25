@@ -48,7 +48,7 @@ delete_tile: DS 2 ; Tile that will be drawn on deleted buildings. LSB first
 ; Arguments:
 ; e = x, d = width
 ; b = y, c = height
-MapUpdateBuildingSuroundingPowerLines:
+MapUpdateBuildingSuroundingPowerLines::
 
     ld      a,d
     ld      d,b

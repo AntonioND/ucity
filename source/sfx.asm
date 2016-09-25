@@ -44,4 +44,7 @@ SFX_Clear:: ; Remove destroyed tile
 SFX_ErrorUI:: ; Invalid option in menu, etc
     ret
 
+SFX_FireExplosion::
+    ret
+
 ;###############################################################################

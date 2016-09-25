@@ -198,8 +198,8 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
     T_ADD   T_ROAD_TLB,  0,0, 0, 0
     T_ADD   T_ROAD_TLR,  0,0, 0, 0
     T_ADD   T_ROAD_TLRB, 0,0, 0, 0
-    T_ADD   T_ROAD_TB_POWER_LINES, 0,1, 0, 16
-    T_ADD   T_ROAD_LR_POWER_LINES, 0,1, 0, 16
+    T_ADD   T_ROAD_TB_POWER_LINES, 0,1, 0, 8
+    T_ADD   T_ROAD_LR_POWER_LINES, 0,1, 0, 8
     T_ADD   T_ROAD_TB_BRIDGE, 0,0, 0, 0
     T_ADD   T_ROAD_LR_BRIDGE, 0,0, 0, 0
 
@@ -216,22 +216,22 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
     T_ADD   T_TRAIN_TLRB, 0,0, 0, 0
     T_ADD   T_TRAIN_LR_ROAD, 0,0, 0, 0
     T_ADD   T_TRAIN_TB_ROAD, 0,0, 0, 0
-    T_ADD   T_TRAIN_TB_POWER_LINES, 0,1, 0, 16
-    T_ADD   T_TRAIN_LR_POWER_LINES, 0,1, 0, 16
+    T_ADD   T_TRAIN_TB_POWER_LINES, 0,1, 0, 8
+    T_ADD   T_TRAIN_LR_POWER_LINES, 0,1, 0, 8
     T_ADD   T_TRAIN_TB_BRIDGE, 0,0, 0, 0
     T_ADD   T_TRAIN_LR_BRIDGE, 0,0, 0, 0
 
-    T_ADD   T_POWER_LINES_TB,   0,1, 0, 16
-    T_ADD   T_POWER_LINES_LR,   0,1, 0, 16
-    T_ADD   T_POWER_LINES_RB,   0,1, 0, 16
-    T_ADD   T_POWER_LINES_LB,   0,1, 0, 16
-    T_ADD   T_POWER_LINES_TR,   0,1, 0, 16
-    T_ADD   T_POWER_LINES_TL,   0,1, 0, 16
-    T_ADD   T_POWER_LINES_TRB,  0,1, 0, 16
-    T_ADD   T_POWER_LINES_LRB,  0,1, 0, 16
-    T_ADD   T_POWER_LINES_TLB,  0,1, 0, 16
-    T_ADD   T_POWER_LINES_TLR,  0,1, 0, 16
-    T_ADD   T_POWER_LINES_TLRB, 0,1, 0, 16
+    T_ADD   T_POWER_LINES_TB,   0,1, 0, 8
+    T_ADD   T_POWER_LINES_LR,   0,1, 0, 8
+    T_ADD   T_POWER_LINES_RB,   0,1, 0, 8
+    T_ADD   T_POWER_LINES_LB,   0,1, 0, 8
+    T_ADD   T_POWER_LINES_TR,   0,1, 0, 8
+    T_ADD   T_POWER_LINES_TL,   0,1, 0, 8
+    T_ADD   T_POWER_LINES_TRB,  0,1, 0, 8
+    T_ADD   T_POWER_LINES_LRB,  0,1, 0, 8
+    T_ADD   T_POWER_LINES_TLB,  0,1, 0, 8
+    T_ADD   T_POWER_LINES_TLR,  0,1, 0, 8
+    T_ADD   T_POWER_LINES_TLRB, 0,1, 0, 8
     T_ADD   T_POWER_LINES_TB_BRIDGE, 0,1, 0, 0 ; It is problematic to burn
     T_ADD   T_POWER_LINES_LR_BRIDGE, 0,1, 0, 0 ; things in water...
 

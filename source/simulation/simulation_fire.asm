@@ -44,6 +44,113 @@ initial_number_fire_stations: DS 1
 
 ;-------------------------------------------------------------------------------
 
+; Doesn't update VRAM map.
+; d = y, e = x -> Coordinates of one of the tiles.
+MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
+
+    ; Check origin of coordinates of the building
+    ; -------------------------------------------
+
+    ; de = coordinates of one tile, returns de = coordinates of the origin
+    call    BuildingGetCoordinateOrigin
+
+    ; All there's left to calculate is the building type! Save coordinates for
+    ; later, we'll need them together with the building type.
+
+    ; Get base tile
+    push    de
+    call    CityMapGetTypeAndTile ; returns tile in de
+    ld      b,d
+    ld      c,e
+    pop     de
+    ; bc = base tile
+    ; de = coordinates
+
+    push    de
+    LONG_CALL_ARGS  BuildingGetSizeFromBaseTileIgnoreErrors
+    pop     bc ; bc = coordinates
+    ; de = size
+
+    ; Now the demolition can begin!
+    ; Size is needed to calculate the money to be spent. Preserve coordinates
+    ; and size through the money check!
+
+    ; Delete building and place fire tiles
+    ; ------------------------------------
+
+    ; The coordinates and size come from the calculations above!
+
+    ; bc = coordinates (b = y, c = x)
+    ; de = size (d = height, e = width)
+
+    ; Swap some registers (b remains unchanged)
+
+    ld      a,c ; x
+    ld      c,d ; c = height
+    ld      d,a ; d = x
+
+    ; bc is ready
+
+    ld      a,e ; width
+    ld      e,d ; e = x
+    ld      d,a ; d = width
+
+    ; e = x, d = width
+    ; b = y, c = height
+
+    push    bc
+    push    de ; save for later (***)
+
+    ; Loop rows
+
+.height_loop:
+
+    push    de ; save width and x
+.width_loop:
+
+        ; Loop
+
+        push    bc
+        push    de
+
+            ld      d,b ; d = y
+            ld      bc,T_FIRE_1
+            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
+
+        pop     de
+        pop     bc
+
+        inc     e ; inc x
+
+        dec     d ; dec width
+        jr      nz,.width_loop
+
+    pop     de ; restore width and x
+
+    ; Next row
+    inc     b ; inc y
+
+    dec     c ; dec height
+    jr      nz,.height_loop
+
+    pop     de
+    pop     bc ; restore for next step (***)
+
+    ; Update power lines around!
+    ; --------------------------
+
+    ; No need to preserve de or bc for the next steps
+    LONG_CALL_ARGS  MapUpdateBuildingSuroundingPowerLines
+
+    ; Sound
+    ; -----
+
+    call    SFX_FireExplosion
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 Simulation_FireExpand: ; e = x, d = y, hl = address
 
     ; Up
@@ -284,34 +391,30 @@ Simulation_Fire::
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
 
-    ld      bc,CITY_MAP_TILES ; Map base
+    ld      hl,CITY_MAP_TILES ; Map base
 
-.loop_add:
+    ld      d,0 ; y
+.loopy_add:
+        ld      e,0 ; x
+.loopx_add:
 
-        ld      a,[bc]
+        ld      a,[hl]
         and     a,a
         jr      z,.not_flagged
 
-            ld      d,a
+            push    hl
+            ld      b,a
             call    GetRandom ; bc and de preserved
-            cp      a,d ; cy = 1 if d > a | d = threshold
+            cp      a,b ; cy = 1 if b > a | d = threshold
+            pop     hl
             jr      nc,.over_threshold
 
-                LD_HL_BC
-
-                ; TODO : Destroy whatever is here and fill it with fire!
-
-                ld      a,BANK_CITY_MAP_TILES
-                ld      [rSVBK],a
-                ld      [hl],T_FIRE_1&$FF
-
-                ld      a,BANK_CITY_MAP_ATTR
-                ld      [rSVBK],a
-                ld      [hl],T_FIRE_1>>8 | 5 | (1<<3)
-
-                ld      a,BANK_CITY_MAP_TYPE
-                ld      [rSVBK],a
-                ld      [hl],TYPE_FIRE
+                push    hl
+                push    de
+                ; d = y, e = x -> Coordinates of one of the tiles.
+                call    MapDeleteBuildingFire
+                pop     de
+                pop     hl
 
                 ld      a,BANK_SCRATCH_RAM
                 ld      [rSVBK],a
@@ -320,10 +423,42 @@ Simulation_Fire::
 
 .not_flagged:
 
-    inc     bc
+        inc     hl
 
-    bit     5,b ; Up to E000
-    jr      z,.loop_add
+        inc     e
+        ld      a,CITY_MAP_WIDTH
+        cp      a,e
+        jr      nz,.loopx_add
+
+    inc     d
+    ld      a,CITY_MAP_HEIGHT
+    cp      a,d
+    jr      nz,.loopy_add
+
+    ; Check if there is fire or not. If not, go back to non-disaster mode
+    ; -------------------------------------------------------------------
+
+    ld      hl,CITY_MAP_TILES ; Map base
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+.loop_extinguish:
+
+        ld      a,[hl+] ; Get type
+
+        cp      a,TYPE_FIRE
+        jr      z,.found_fire
+
+    bit     5,h ; Up to E000
+    jr      z,.loop_extinguish
+
+    ; If not found fire, go back to normal mode
+
+    xor     a,a
+    ld      [simulation_disaster_mode],a
+
+.found_fire:
 
     ; Done
     ; ----
