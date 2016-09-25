@@ -67,6 +67,9 @@ simulation_paused:: DS 1
 
 game_loop_end_requested: DS 1 ; If 1, exit game to main menu.
 
+game_requested_focus_x: DS 1 ; Coordinates of requested area to scroll to.
+game_requested_focus_y: DS 1 ; $FF if nothing requested.
+
 ;###############################################################################
 
     SECTION "City Map Tiles",WRAMX,BANK[BANK_CITY_MAP_TILES]
@@ -110,6 +113,48 @@ ClearWRAMX:: ; Sets D000 - DFFF to 0 ($1000 bytes)
     ENDR
     dec     d
     jr      nz,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+GameRequestCoordinateFocus:: ; e = x, d = y
+
+    ld      a,e
+    ld      [game_requested_focus_x],a
+    ld      a,d
+    ld      [game_requested_focus_y],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+GameCoordinateFocusApply:
+
+    call    MessageRequestQueueNotEmpty ; returns a = 1 if queue is not empty
+    and     a,a
+    ret     nz ; wait until there are no more messages left
+
+    call    MessageBoxIsShowing
+    and     a,a
+    ret     nz ; if there is a message showing, wait
+
+    ld      a,[game_requested_focus_x]
+    ld      d,a
+    ld      a,[game_requested_focus_y]
+    ld      e,a
+
+    ld      a,$FF ; return if disabled
+    cp      a,d
+    ret     z
+    cp      a,e
+    ret     z
+
+    ld      [game_requested_focus_x],a ; Disable focus
+    ld      [game_requested_focus_y],a
+
+    ; Set scroll and refresh screen
+    call    bg_set_scroll_main ; d = up left x    e = y
 
     ret
 
@@ -811,6 +856,8 @@ RoomGameVBLHandler:
     ; before handling user input.
     ei
 
+    call    GameCoordinateFocusApply
+
     call    scan_keys
     call    KeyAutorepeatHandle
 
@@ -1048,6 +1095,10 @@ RoomGame::
     ld      [vbl_handler_working],a
     ld      [simulation_paused],a
     ld      [game_loop_end_requested],a
+
+    ld      a,$FF
+    ld      [game_requested_focus_x],a ; disable focus
+    ld      [game_requested_focus_y],a
 
     ld      a,1 ; load everything, not only graphics
     call    RoomGameLoad

@@ -43,6 +43,8 @@ MESSAGE_BOX_MSG_TILES_HEIGHT EQU 3 ; 2 tiles for the border
 MESSAGE_BOX_Y   EQU (((144-MESSAGE_BOX_HEIGHT)/2)&(~7)) ; Align to 8 pixels
 MESSAGE_BOX_SCY EQU (144-MESSAGE_BOX_Y)
 
+message_box_enabled: DS 1 ; 1 if enabled
+
 ;###############################################################################
 
     SECTION "Message Box Functions Bank 0",ROM0
@@ -129,11 +131,17 @@ MessageBoxHide::
 
     ei
 
+    xor     a,a
+    ld      [message_box_enabled],a
+
     ret
 
 ;-------------------------------------------------------------------------------
 
 MessageBoxShow::
+
+    ld      a,1
+    ld      [message_box_enabled],a
 
     ld      a,[rSCX]
     ld      [saved_scx],a
@@ -148,6 +156,14 @@ MessageBoxShow::
 
     ld      hl,rIE
     set     1,[hl] ; enable STAT interrupt
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MessageBoxIsShowing::
+
+    ld      a,[message_box_enabled]
 
     ret
 

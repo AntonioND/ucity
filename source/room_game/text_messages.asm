@@ -204,6 +204,25 @@ MessageRequestAddCustom:: ; bc = pointer to message. ret a = 1 if ok, 0 if not
 
 ;-------------------------------------------------------------------------------
 
+MessageRequestQueueNotEmpty:: ; returns a = 1 if queue is not empty
+
+    ; Check if there are messages left, and return the first one if so
+
+    ld      a,[msg_out_ptr]
+    ld      hl,msg_stack
+    ld      e,a
+    ld      d,0
+    add     hl,de
+
+    ld      a,[hl]
+    and     a,a
+    ret     z ; return 0 if the message is 0 (empty)
+
+    ld      a,1
+    ret ; return not empty
+
+;-------------------------------------------------------------------------------
+
 MessageRequestGet:: ; returns a = message ID to show
 
     ; Check if there are messages left, and return the first one if so

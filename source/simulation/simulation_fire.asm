@@ -649,7 +649,7 @@ ENDC
 .not_negative_x:
     ld      e,a
 
-    ; Set scroll and refresh screen
+    call    GameRequestCoordinateFocus ; e = x, d = y
 
     ; Remove all traffic tiles from the map, as well as other animations
     ; ------------------------------------------------------------------
