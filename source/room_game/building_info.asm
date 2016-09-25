@@ -513,11 +513,11 @@ BUILDING_INFO_STRUCTS_ARRAY::
 
 ;-------------------------------------------------------------------------------
 
-BuildingGetSizeFromBaseTile:: ; bc = base tile. returns size: d=height, e=width
-
 IF BUILDING_INFO_POINTERS_ARRAY_ELEMENT_SIZE != 4
     FAIL "ERROR: Modify element size at building_info.inc"
 ENDC
+
+BUILDING_GET_SIZE_FROM_BASE_TILE : MACRO ; \1 = ignore debug errors if this is 0
 
     ; Search!
     ld      hl,BUILDING_INFO_STRUCTS_ARRAY+2 ; start from tile info
@@ -530,8 +530,10 @@ ENDC
     and     a,d
     cp      a,$FF
     jr      nz,.not_end_error ; $FFFF = last element...
+IF \1 != 0
         ; Error!
         ld      b,b
+ENDC
         ld      de,$0101 ; Try not to delete anything... This shouldn't happen
         ret
 .not_end_error:
@@ -557,6 +559,18 @@ ENDC
     add     hl,de ; point to next element
 
     jr      .loop
+
+ENDM
+
+; bc = base tile. returns size: d=height, e=width
+; If it didn't find a building with that base tile, breakpoint and return 1x1.
+BuildingGetSizeFromBaseTile::
+    BUILDING_GET_SIZE_FROM_BASE_TILE 1
+
+; bc = base tile. returns size: d=height, e=width.
+; If it didn't find a building with that base tile, return 1x1
+BuildingGetSizeFromBaseTileIgnoreErrors::
+    BUILDING_GET_SIZE_FROM_BASE_TILE 0
 
 ;###############################################################################
 
