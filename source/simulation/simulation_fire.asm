@@ -27,6 +27,7 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "tileset_info.inc"
+    INCLUDE "text_messages.inc"
 
 ;###############################################################################
 
@@ -514,31 +515,6 @@ Simulation_FireTryStart::
     and     a,a
     ret     nz ; Don't start a fire if there is already a fire
 
-    ret ; TODO: Remove
-
-    ; Check if a fire has to start or not
-    ; -----------------------------------
-
-    ; TODO
-
-    ; If so, start it!
-    ; ----------------
-
-    ; TODO
-
-    ld      hl,$D000+32*64+33
-    ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
-    ld      [hl],T_FIRE_1&$FF
-    ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
-    ld      [hl],T_FIRE_1>>8 | 5 | 8
-    ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
-    ld      [hl],TYPE_FIRE
-
-    ;call    bg_reload_main ; refresh bg and set correct scroll
-
     ; Count number of fire stations and save it
     ; -----------------------------------------
 
@@ -581,6 +557,99 @@ ENDC
 
     bit     5,h ; Up to E000
     jr      z,.loop_count
+
+    ; Check if a fire has to start or not
+    ; -----------------------------------
+
+    ld      a,[initial_number_fire_stations]
+    ld      b,16
+.shift_loop:
+    and     a,a
+    jr      z,.end_shift_loop
+    sra     b
+    jr      nz,.shift_loop
+.end_shift_loop:
+    inc     b ; leave at least a 1/256 chance of fire!
+
+    call    GetRandom ; bc and de preserved
+
+    cp      a,b ; cy = 1 if b > a
+    ret     nc
+
+    ; If so, try to start it!
+    ; -----------------------
+
+    ; Try to get valid starting coordinates a few times, there must be a valid
+    ; burnable tile there.
+
+    ld      a,10 ; try ten times
+.loop_coordinates:
+    push    af
+
+        call    GetRandom ; bc and de preserved
+        ld      b,a
+        call    GetRandom ; bc and de preserved
+        and     a,CITY_MAP_WIDTH-1
+        ld      e,a ; e = X
+        ld      a,CITY_MAP_HEIGHT-1
+        and     a,b
+        ld      d,a ; d = Y
+
+        push    de
+
+            call    CityMapGetTile ; Arguments: e = x , d = y
+
+            push    hl
+            call    CityTileFireProbability ; de = tile, returns d = probability
+            pop     hl
+
+            ld      a,d ; a = probability (it is burnable if != 0)
+
+        pop     de
+
+        and     a,a
+        jr      z,.continue_coordinates
+
+            pop     af ; restore stack pointer
+            jr      .valid_coordinates
+
+.continue_coordinates:
+    pop     af
+    dec     a
+    jr      nz,.loop_coordinates
+
+    ; Well, it seems that we couldn't find a valid starting point. Someone has
+    ; been lucky... :)
+
+    ret
+
+.valid_coordinates:
+
+    ; d = y, e = x -> Coordinates of one of the tiles.
+    push    de
+        call    MapDeleteBuildingFire
+
+        ld      a,ID_MSG_FIRE_INITED
+        call    MessageRequestAdd
+    pop     de
+
+    ld      a,d
+    sub     a,18/2 ; Vertical size of the screen in tiles
+    bit     7,a
+    jr      z,.not_negative_y
+    xor     a,a
+.not_negative_y:
+    ld      d,a
+
+    ld      a,e
+    sub     a,20/2 ; Horizontal size of the screen in tiles
+    bit     7,a
+    jr      z,.not_negative_x
+    xor     a,a
+.not_negative_x:
+    ld      e,a
+
+    ; Set scroll and refresh screen
 
     ; Remove all traffic tiles from the map, as well as other animations
     ; ------------------------------------------------------------------

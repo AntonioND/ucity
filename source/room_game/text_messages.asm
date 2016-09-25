@@ -75,6 +75,9 @@ MSG_CLASS_METROPOLIS:
 MSG_CLASS_CAPITAL:
     DB "Your metropolis is",$0A,"now a capital!",$00
 
+MSG_FIRE_INITED:
+    DB "A fire has started",$0A,"in the city!",$00
+
 ;-------------------------------------------------------------------------------
 
 MSG_POINTERS: ; Array of pointer to messages. LSB first
@@ -88,6 +91,7 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
     MSG_ADD  MSG_CLASS_METROPOLIS
     MSG_ADD  MSG_CLASS_CAPITAL
 
+    MSG_ADD  MSG_FIRE_INITED
     ; ...
 
     MSG_ADD  MSG_CUSTOM
