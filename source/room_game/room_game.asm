@@ -54,6 +54,9 @@ vbl_handler_working: DS 1
 ; It can be set by any function to tell the simulation loop to do a step.
 simulation_running::  DS 1
 
+; This is set to 1 when in disaster mode
+simulation_disaster_mode:: DS 1
+
 ANIMATION_COUNT_FRAMES EQU 60
 animation_countdown: DS 1 ; When this reaches ANIMATION_COUNT_FRAMES, step
 
@@ -121,14 +124,29 @@ GameAnimateMap:
     ret
 .animate:
 
-    ; Reasons for not animating: Some of the direction pad keys are pressed
-    ; or the map is still moving after releasing a key.
-
     xor     a,a
     ld      [animation_countdown],a
 
-    ; This doesn't refresh tile map!
-    LONG_CALL   Simulation_TrafficAnimate
+    ; Reasons for not animating: Some of the direction pad keys are pressed
+    ; or the map is still moving after releasing a key.
+
+
+    ld      a,[simulation_disaster_mode]
+    and     a,a
+    jr      nz,.disaster_mode
+
+        ; This doesn't refresh tile map!
+        LONG_CALL   Simulation_TrafficAnimate
+
+        jr      .end_animation
+
+.disaster_mode:
+
+        ; TODO : Animate fire
+
+        ;jr      .end_animation
+
+.end_animation:
 
     ; Refresh tile map
     call    bg_refresh_main
@@ -879,6 +897,134 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
 ;-------------------------------------------------------------------------------
 
+RoomGameSimulateStepNormal:
+
+    ; First, get data from last frame and build new buildings or destroy
+    ; them (if there haven't been changes since the previous step!)
+    ; depending on the tile ok flags map. In the first iteration step the
+    ; flags should be 0, so this can be called as well.
+
+    ; NOTE: This function doesn't update the VRAM map after removing or
+    ; creating buildings because the animation handler will take care of it.
+
+    LONG_CALL   Simulation_CreateBuildings
+
+    ; Now, simulate this new map. First, power distribution, as it will be
+    ; needed for other simulations
+
+    LONG_CALL   Simulation_PowerDistribution
+    LONG_CALL   Simulation_PowerDistributionSetTileOkFlag
+
+    ; After knowing the power distribution, the rest of the simulations can
+    ; be done.
+
+    LONG_CALL   Simulation_Traffic
+    LONG_CALL   Simulation_TrafficSetTileOkFlag
+
+    ; Simulate services, like police and firemen. They depend on the power
+    ; simulation, as they can't work without electricity, so handle this
+    ; after simulating the power grid.
+
+    ld      bc,T_POLICE_DEPT_CENTER
+    LONG_CALL_ARGS  Simulation_Services
+    LONG_CALL   Simulation_ServicesSetTileOkFlag
+
+    ld      a,[city_class]
+    cp      a,CLASS_VILLAGE
+    jr      z,.too_small_for_fire_hospital ; Ignore if the city is too small
+
+        ld      bc,T_FIRE_DEPT_CENTER
+        LONG_CALL_ARGS  Simulation_Services
+        LONG_CALL   Simulation_ServicesAddTileOkFlag
+
+        ld      bc,T_HOSPITAL_CENTER
+        LONG_CALL_ARGS  Simulation_Services
+        LONG_CALL   Simulation_ServicesAddTileOkFlag
+
+.too_small_for_fire_hospital:
+
+    ld      bc,T_SCHOOL_CENTER
+    LONG_CALL_ARGS  Simulation_Services
+    LONG_CALL   Simulation_EducationSetTileOkFlag
+
+    ld      a,[city_class]
+    cp      a,CLASS_VILLAGE
+    jr      z,.too_small_for_high_school ; Ignore if the city is too small
+
+        ld      bc,T_HIGH_SCHOOL_CENTER
+        LONG_CALL_ARGS  Simulation_ServicesBig
+        LONG_CALL   Simulation_EducationAddTileOkFlag
+
+.too_small_for_high_school:
+
+    ; After simulating traffic, power, etc, simulate pollution
+
+    LONG_CALL   Simulation_Pollution
+    LONG_CALL   Simulation_PollutionSetTileOkFlag
+
+    ; After simulating, flag buildings to be created or demolished.
+
+    LONG_CALL   Simulation_FlagCreateBuildings
+
+    ; Calculate total population and other statistics
+
+    LONG_CALL   Simulation_CalculateStatistics
+
+    ; Calculate RCI graph
+
+    LONG_CALL   Simulation_CalculateRCIDemand
+
+    ; Update date, apply budget, etc.
+    ; Note: Only if this is not the first iteration step!
+
+    ld      a,[first_simulation_iteration]
+    and     a,a
+    jr      z,.not_first_iteration
+
+        xor     a,a ; flag as not first iteration for the next one
+        ld      [first_simulation_iteration],a
+        jr      .skip_budget
+
+.not_first_iteration:
+    call    DateStep
+
+    ld      a,[date_month]
+    cp      a,0 ; Check if january
+    jr      nz,.skip_budget
+
+        ; Calculate and apply budget when a year starts (Dec -> Jan)
+        LONG_CALL   Simulation_CalculateBudgetAndTaxes
+        LONG_CALL   Simulation_ApplyBudgetAndTaxes
+
+.skip_budget:
+
+    ; End of this simulation step
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomGameSimulateStepDisaster:
+
+    ; TODO
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomGameSimulateStep:
+
+    ; NOTE: All VRAM-modifying code inside this loop must be thread-safe as
+    ; it can be interrupted by the VBL handler and it can take a long time
+    ; to return control to the simulation loop.
+
+    ld      a,[simulation_disaster_mode]
+    and     a,a
+    jp      z,RoomGameSimulateStepNormal ; Call one of them and return from it.
+    jp      RoomGameSimulateStepDisaster
+
+;-------------------------------------------------------------------------------
+
 RoomGame::
 
     xor     a,a
@@ -918,139 +1064,36 @@ RoomGame::
 
     ld      a,[game_loop_end_requested]
     and     a,a ; Check if there is a request to exit the game loop
-    jp      nz,.end_game_loop
+    jr      nz,.end_game_loop
 
     ld      a,[simulation_running]
     and     a,a ; Check if simulation has been requested
-    jp      z,.skip_simulation
+    jr      z,.skip_simulation
 
     ld      a,[simulation_paused]
     and     a,a ; Check if the simulation is paused
-    jp      nz,.end_simulation_clear_flag
+    jr      nz,.end_simulation_clear_flag
 
-        ; NOTE: All VRAM-modifying code inside this loop must be thread-safe as
-        ; it can be interrupted by the VBL handler and it can take a long time
-        ; to return control to the simulation loop.
-
-        ; First, get data from last frame and build new buildings or destroy
-        ; them (if there haven't been changes since the previous step!)
-        ; depending on the tile ok flags map. In the first iteration step the
-        ; flags should be 0, so this can be called as well.
-
-        ; NOTE: This function doesn't update the VRAM map after removing or
-        ; creating buildings because the animation handler will take care of it.
-
-        LONG_CALL   Simulation_CreateBuildings
-
-        ; Now, simulate this new map. First, power distribution, as it will be
-        ; needed for other simulations
-
-        LONG_CALL   Simulation_PowerDistribution
-        LONG_CALL   Simulation_PowerDistributionSetTileOkFlag
-
-        ; After knowing the power distribution, the rest of the simulations can
-        ; be done.
-
-        LONG_CALL   Simulation_Traffic
-        LONG_CALL   Simulation_TrafficSetTileOkFlag
-
-        ; Simulate services, like police and firemen. They depend on the power
-        ; simulation, as they can't work without electricity, so handle this
-        ; after simulating the power grid.
-
-        ld      bc,T_POLICE_DEPT_CENTER
-        LONG_CALL_ARGS  Simulation_Services
-        LONG_CALL   Simulation_ServicesSetTileOkFlag
-
-        ld      a,[city_class]
-        cp      a,CLASS_VILLAGE
-        jr      z,.too_small_for_fire_hospital ; Ignore if the city is too small
-
-            ld      bc,T_FIRE_DEPT_CENTER
-            LONG_CALL_ARGS  Simulation_Services
-            LONG_CALL   Simulation_ServicesAddTileOkFlag
-
-            ld      bc,T_HOSPITAL_CENTER
-            LONG_CALL_ARGS  Simulation_Services
-            LONG_CALL   Simulation_ServicesAddTileOkFlag
-
-.too_small_for_fire_hospital:
-
-        ld      bc,T_SCHOOL_CENTER
-        LONG_CALL_ARGS  Simulation_Services
-        LONG_CALL   Simulation_EducationSetTileOkFlag
-
-        ld      a,[city_class]
-        cp      a,CLASS_VILLAGE
-        jr      z,.too_small_for_high_school ; Ignore if the city is too small
-
-            ld      bc,T_HIGH_SCHOOL_CENTER
-            LONG_CALL_ARGS  Simulation_ServicesBig
-            LONG_CALL   Simulation_EducationAddTileOkFlag
-
-.too_small_for_high_school:
-
-        ; After simulating traffic, power, etc, simulate pollution
-
-        LONG_CALL   Simulation_Pollution
-        LONG_CALL   Simulation_PollutionSetTileOkFlag
-
-        ; After simulating, flag buildings to be created or demolished.
-
-        LONG_CALL   Simulation_FlagCreateBuildings
-
-        ; Calculate total population and other statistics
-
-        LONG_CALL   Simulation_CalculateStatistics
-
-        ; Calculate RCI graph
-
-        LONG_CALL   Simulation_CalculateRCIDemand
-
-        ; Update date, apply budget, etc.
-        ; Note: Only if this is not the first iteration step!
-
-        ld      a,[first_simulation_iteration]
-        and     a,a
-        jr      z,.not_first_iteration
-
-            xor     a,a ; flag as not first iteration for the next one
-            ld      [first_simulation_iteration],a
-            jr      .skip_budget
-
-.not_first_iteration:
-        call    DateStep
-
-        ld      a,[date_month]
-        cp      a,0 ; Check if january
-        jr      nz,.skip_budget
-
-            ; Calculate and apply budget when a year starts (Dec -> Jan)
-            LONG_CALL   Simulation_CalculateBudgetAndTaxes
-            LONG_CALL   Simulation_ApplyBudgetAndTaxes
-
-.skip_budget:
-
-        ; End of this simulation step
+        call    RoomGameSimulateStep
 
 .end_simulation_clear_flag:
 
-        xor     a,a
-        ld      [simulation_running],a
+    xor     a,a
+    ld      [simulation_running],a
 
-        call    CPUBusyIconHide
+    call    CPUBusyIconHide
 
-        jr      .end_simulation
+    jr      .end_simulation
 
 .skip_simulation:
 
-        halt
+    halt
 
-        ;jr      .end_simulation
+    ;jr      .end_simulation
 
 .end_simulation:
 
-    jp      .main_loop
+    jr      .main_loop
 
     ; End of game loop
 
