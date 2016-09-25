@@ -1023,7 +1023,7 @@ RoomGameSimulateStepNormal:
 
 RoomGameSimulateStepDisaster:
 
-    ; TODO
+    LONG_CALL   Simulation_Fire
 
     ret
 
