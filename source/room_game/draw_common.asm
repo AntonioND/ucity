@@ -320,9 +320,6 @@ CityMapGetTileAtAddress:: ; Arguments: hl = address. Preserves BC and HL
 ; need to have their type set here, but it doesn't hurt either. It also clears
 ; all tile flags to make the previous simulation state invalid.
 
-; Note: Only C is actually used, but B must be 0. This is done like this in
-; case it was needed to add compatibility with all tiles.
-
 CityMapDrawTerrainTile:: ; bc = tile, e = x, d = y
 
     GET_MAP_ADDRESS ; preserves de and bc
@@ -339,7 +336,7 @@ CityMapDrawTerrainTileAddress:: ; bc = tile, hl = address
 
     ld      a,BANK_CITY_MAP_FLAGS
     ld      [rSVBK],a
-    ld      [hl],0 ; Clear tile flags of a tile when modifying it
+    ld      [hl],0 ; Clear tile simulation flags when modifying it
 
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
