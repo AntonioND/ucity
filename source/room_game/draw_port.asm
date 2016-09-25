@@ -202,7 +202,7 @@ MapBuildDocksSurrounding:
         cp      a,TYPE_WATER
         jr      nz,.not_water_top
             ld      bc,T_PORT_WATER_U
-            LONG_CALL_ARGS  CityMapDrawTerrainTile ; bc = tile, e = x, d = y
+            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
 .not_water_top:
         pop     de
         pop     bc
@@ -236,7 +236,7 @@ MapBuildDocksSurrounding:
         cp      a,TYPE_WATER
         jr      nz,.not_water_bottom
             ld      bc,T_PORT_WATER_D
-            LONG_CALL_ARGS  CityMapDrawTerrainTile ; bc = tile, e = x, d = y
+            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
 .not_water_bottom:
         pop     de
         pop     bc
@@ -268,7 +268,7 @@ MapBuildDocksSurrounding:
         cp      a,TYPE_WATER
         jr      nz,.not_water_left
             ld      bc,T_PORT_WATER_L
-            LONG_CALL_ARGS  CityMapDrawTerrainTile ; bc = tile, e = x, d = y
+            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
 .not_water_left:
         pop     de
         pop     bc
@@ -302,7 +302,7 @@ MapBuildDocksSurrounding:
         cp      a,TYPE_WATER
         jr      nz,.not_water_right
             ld      bc,T_PORT_WATER_R
-            LONG_CALL_ARGS  CityMapDrawTerrainTile ; bc = tile, e = x, d = y
+            call    CityMapDrawTerrainTile ; bc = tile, e = x, d = y
 .not_water_right:
         pop     de
         pop     bc
