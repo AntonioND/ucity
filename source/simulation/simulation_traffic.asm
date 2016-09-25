@@ -301,6 +301,70 @@ Simulation_Traffic::
 
 ;-------------------------------------------------------------------------------
 
+Simulation_TrafficRemoveAnimationTiles:: ; This doesn't refresh tile map!
+
+    ld      a,BANK_CITY_MAP_ATTR
+    ld      [rSVBK],a
+
+    ld      hl,CITY_MAP_TILES
+
+.loop:
+
+    ld      a,[hl] ; read attributes
+    bit     3,a
+    jr      nz,.skip ; all tiles for road are < 256
+
+        ld      a,BANK_CITY_MAP_TILES
+        ld      [rSVBK],a
+
+        ld      a,[hl]
+
+        cp      a,T_ROAD_TB
+        jr      z,.end_change
+        cp      a,T_ROAD_TB_1
+        jr      z,.change_tb
+        cp      a,T_ROAD_TB_2
+        jr      z,.change_tb
+        cp      a,T_ROAD_TB_3
+        jr      z,.change_tb
+
+        cp      a,T_ROAD_LR
+        jr      z,.end_change
+        cp      a,T_ROAD_LR_1
+        jr      z,.change_lr
+        cp      a,T_ROAD_LR_2
+        jr      z,.change_lr
+        cp      a,T_ROAD_LR_3
+        jr      z,.change_lr
+
+        jr      .end_change
+
+.change_tb:
+
+        ld      [hl],T_ROAD_TB
+        jr      .end_change
+
+.change_lr:
+
+        ld      [hl],T_ROAD_LR
+        ;jr      .end_change
+
+.end_change:
+
+        ld      a,BANK_CITY_MAP_ATTR
+        ld      [rSVBK],a
+
+.skip:
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jp      z,.loop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 
     ; Animate tiles of the map with traffic animation
@@ -383,6 +447,8 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 
     bit     5,h ; Up to E000
     jr      z,.loop
+
+    ; TODO : Animate trains, planes, etc?
 
     ret
 

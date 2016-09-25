@@ -57,8 +57,9 @@ simulation_running::  DS 1
 ; This is set to 1 when in disaster mode
 simulation_disaster_mode:: DS 1
 
-ANIMATION_COUNT_FRAMES EQU 60
-animation_countdown: DS 1 ; When this reaches ANIMATION_COUNT_FRAMES, step
+ANIMATION_COUNT_FRAMES_NORMAL   EQU 60
+ANIMATION_COUNT_FRAMES_DISASTER EQU 15
+animation_countdown: DS 1 ; This goes from 0 to the desired value
 
 ; If 1 the game is paused, if 0 it is unpaused. Setting it to 1 won't
 ; immediately pause the simulation, it will wait until the current step ends.
@@ -116,17 +117,6 @@ ClearWRAMX:: ; Sets D000 - DFFF to 0 ($1000 bytes)
 
 GameAnimateMap:
 
-    ld      hl,animation_countdown
-    ld      a,[hl]
-    cp      a,ANIMATION_COUNT_FRAMES
-    jr      z,.animate
-    inc     [hl] ; increment and exit
-    ret
-.animate:
-
-    xor     a,a
-    ld      [animation_countdown],a
-
     ; Reasons for not animating: Some of the direction pad keys are pressed
     ; or the map is still moving after releasing a key.
 
@@ -135,6 +125,17 @@ GameAnimateMap:
     and     a,a
     jr      nz,.disaster_mode
 
+        ld      hl,animation_countdown
+        ld      a,[hl]
+        cp      a,ANIMATION_COUNT_FRAMES_NORMAL
+        jr      z,.animate_normal
+            inc     [hl] ; increment and exit
+            ret
+.animate_normal:
+
+        xor     a,a
+        ld      [animation_countdown],a
+
         ; This doesn't refresh tile map!
         LONG_CALL   Simulation_TrafficAnimate
 
@@ -142,7 +143,19 @@ GameAnimateMap:
 
 .disaster_mode:
 
-        ; TODO : Animate fire
+        ld      hl,animation_countdown
+        ld      a,[hl]
+        cp      a,ANIMATION_COUNT_FRAMES_DISASTER
+        jr      z,.animate_disaster
+            inc     [hl] ; increment and exit
+            ret
+.animate_disaster:
+
+        xor     a,a
+        ld      [animation_countdown],a
+
+        ; This doesn't refresh tile map!
+        LONG_CALL   Simulation_FireAnimate
 
         ;jr      .end_animation
 
@@ -997,6 +1010,10 @@ RoomGameSimulateStepNormal:
         LONG_CALL   Simulation_ApplyBudgetAndTaxes
 
 .skip_budget:
+
+    ; Start disasters
+
+    LONG_CALL   Simulation_FireTryStart
 
     ; End of this simulation step
 

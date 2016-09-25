@@ -214,8 +214,8 @@ T_INDUSTRIAL_S3_B  EQU 453
 T_INDUSTRIAL_S3_C  EQU 462
 T_INDUSTRIAL_S3_D  EQU 471
 
-T_FIRE_1    EQU 480
-T_FIRE_2    EQU 481
+T_FIRE_1    EQU 480 ; Make sure this one is even and
+T_FIRE_2    EQU 481 ; this one is odd
 
 ; TODO Unique buildings (only one per map) ?
 T_CITY_HALL EQU 482
