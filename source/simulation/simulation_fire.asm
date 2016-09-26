@@ -40,6 +40,8 @@
 ; increased by 1 to make sure that fires end!
 initial_number_fire_stations: DS 1
 
+is_destroying_port: DS 1
+
 ;###############################################################################
 
     SECTION "Simulation Fire Functions",ROMX
@@ -49,6 +51,9 @@ initial_number_fire_stations: DS 1
 ; Doesn't update VRAM map.
 ; d = y, e = x -> Coordinates of one of the tiles.
 MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
+
+    xor     a,a
+    ld      [is_destroying_port],a
 
     ; Check origin of coordinates of the building
     ; -------------------------------------------
@@ -67,6 +72,16 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
     pop     de
     ; bc = base tile
     ; de = coordinates
+
+    ld      a,T_PORT & $FF
+    cp      a,c
+    jr      nz,.not_port
+    ld      a,T_PORT>>8
+    cp      a,b
+    jr      nz,.not_port
+    ld      a,1
+    ld      [is_destroying_port],a
+.not_port:
 
     push    de
     LONG_CALL_ARGS  BuildingGetSizeFromBaseTileIgnoreErrors
@@ -99,6 +114,29 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
 
     ; e = x, d = width
     ; b = y, c = height
+
+    ld      a,[is_destroying_port]
+    and     a,a
+    jr      z,.skip_port
+    push    bc
+    push    de
+
+        ld      a,d
+        ld      d,b
+        ld      b,a
+
+        push    bc
+        push    de
+        LONG_CALL_ARGS  MapConvertDocksIntoWater
+        pop     de
+        pop     bc
+        ; e = x, d = y
+        ; b = width, c = height
+        LONG_CALL_ARGS  MapRemoveDocksSurrounding
+
+    pop     de
+    pop     bc
+.skip_port:
 
     push    bc
     push    de ; save for later (***)
@@ -141,7 +179,7 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
     ; Update power lines around!
     ; --------------------------
 
-    ; No need to preserve de or bc for the next steps
+    ; bc and de won't be needed after this
     LONG_CALL_ARGS  MapUpdateBuildingSuroundingPowerLines
 
     ; Sound

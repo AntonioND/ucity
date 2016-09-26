@@ -325,7 +325,7 @@ MapBuildDocksSurrounding:
 ; Arguments:
 ; e = x, d = y
 ; b = width, c = height
-MapConvertDocksIntoWater:
+MapConvertDocksIntoWater::
 
     ; Top row
     ; -------
@@ -484,7 +484,7 @@ MapConvertDocksIntoWater:
 ; Arguments:
 ; e = x, d = y
 ; b = width, c = height
-MapRemoveDocksSurrounding:
+MapRemoveDocksSurrounding::
 
     ; Top row
     ; -------
