@@ -67,8 +67,10 @@ simulation_paused:: DS 1
 
 game_loop_end_requested: DS 1 ; If 1, exit game to main menu.
 
-game_requested_focus_x: DS 1 ; Coordinates of requested area to scroll to.
-game_requested_focus_y: DS 1 ; $FF if nothing requested.
+game_requested_focus_x:  DS 1 ; Coordinates of requested area to scroll to.
+game_requested_focus_y:  DS 1 ; $FF if nothing requested.
+
+game_requested_disaster: DS 1 ; Set to a value != 0 to cause a disaster
 
 ;###############################################################################
 
@@ -102,13 +104,10 @@ SCRATCH_RAM_2:: DS $1000
 ClearWRAMX:: ; Sets D000 - DFFF to 0 ($1000 bytes)
 
     xor     a,a ; a = 0
-
     ld      d,a ; d = $100
-
     ld      hl,$D000
-
 .loop:
-    REPT    $10
+    REPT    $10 ; unroll for speed
     ld      [hl+],a
     ENDR
     dec     d
@@ -155,6 +154,42 @@ GameCoordinateFocusApply:
 
     ; Set scroll and refresh screen
     call    bg_set_scroll_main ; d = up left x    e = y
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+GameRequestDisaster:: ; a = type, 0 to disable
+
+    ld      b,a
+    ld      hl,game_requested_disaster
+    ld      [hl],0
+
+    ld      a,[simulation_disaster_mode]
+    and     a,a
+    ret     nz ; if there is a disaster, ignore this!
+
+    ; For now, there are no types, only fire
+
+    ld      [hl],b
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+GameDisasterApply:
+
+    ld      a,[game_requested_disaster]
+    and     a,a
+    ret     z ; return if no disasters are requested
+
+    xor     a,a
+    ld      [game_requested_disaster],a ; clear request
+
+    ; TODO
+
+    ld      b,1 ; force fire
+    LONG_CALL_ARGS   Simulation_FireTryStart ; Returns if any disaster present
 
     ret
 
@@ -485,7 +520,10 @@ PauseMenuHandleOption:
 
         ; Options
 
-        ; TODO
+        ld      a,1
+        call    GameRequestDisaster
+
+        ; TODO : Replace this by a real menu
 
         ret
 
@@ -1069,7 +1107,10 @@ RoomGameSimulateStepNormal:
 
     ; Start disasters
 
-    LONG_CALL   Simulation_FireTryStart
+    call    GameDisasterApply
+
+    ld      b,0 ; don't force fire
+    LONG_CALL_ARGS   Simulation_FireTryStart ; Returns if any disaster present
 
     ; End of this simulation step
 
@@ -1106,8 +1147,11 @@ RoomGame::
     ld      [game_loop_end_requested],a
 
     ld      a,$FF
-    ld      [game_requested_focus_x],a ; disable focus
+    ld      [game_requested_focus_x],a ; disable focus request
     ld      [game_requested_focus_y],a
+
+    xor     a,a
+    ld      [game_requested_disaster],a ; disable disaster request
 
     ld      a,1 ; load everything, not only graphics
     call    RoomGameLoad

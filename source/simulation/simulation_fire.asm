@@ -550,11 +550,14 @@ ENDC
 
 ;-------------------------------------------------------------------------------
 
-Simulation_FireTryStart::
+; Call with LONG_CALL_ARGS
+Simulation_FireTryStart:: ; b = 1 to force fire, 0 to make it random
 
     ld      a,[simulation_disaster_mode]
     and     a,a
     ret     nz ; Don't start a fire if there is already a fire
+
+    push    bc ; (*) preserve B
 
     ; Count number of fire stations and save it
     ; -----------------------------------------
@@ -602,6 +605,13 @@ ENDC
     ; Check if a fire has to start or not
     ; -----------------------------------
 
+    pop     bc ; (*) restore B
+    ld      a,b
+    and     a,a
+    jr      nz,.force_fire
+
+    ; Probabilities depend on the number of fire stations
+
     ld      a,[initial_number_fire_stations]
     ld      b,16
 .shift_loop:
@@ -616,6 +626,8 @@ ENDC
 
     cp      a,b ; cy = 1 if b > a
     ret     nc
+
+.force_fire:
 
     ; If so, try to start it!
     ; -----------------------
