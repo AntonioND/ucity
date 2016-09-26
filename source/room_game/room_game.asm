@@ -422,47 +422,17 @@ WaitSimulationEnds:
 
     DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,0999999999
 
-PAUSE_MENU_RESUME    EQU 0
-PAUSE_MENU_MINIMAP   EQU 1
-PAUSE_MENU_BUDGET    EQU 2
-PAUSE_MENU_PAUSE     EQU 3
-PAUSE_MENU_HELP      EQU 4
-PAUSE_MENU_SAVE_GAME EQU 5
-PAUSE_MENU_MAIN_MENU EQU 6
+PAUSE_MENU_BUDGET    EQU 0
+PAUSE_MENU_MINIMAPS  EQU 1
+PAUSE_MENU_GRAPHS    EQU 2
+PAUSE_MENU_OPTIONS   EQU 3
+PAUSE_MENU_PAUSE     EQU 4
+PAUSE_MENU_HELP      EQU 5
+PAUSE_MENU_SAVE_GAME EQU 6
+PAUSE_MENU_MAIN_MENU EQU 7
 
 PauseMenuHandleOption:
 
-    cp      a,PAUSE_MENU_RESUME
-    jr      nz,.not_resume
-
-        ; Resume
-
-        call    StatusBarMenuHide
-        ld      a,GAME_STATE_WATCH
-        call    GameStateMachineStateSet
-
-        ret
-
-.not_resume:
-    cp      a,PAUSE_MENU_MINIMAP
-    jr      nz,.not_minimap
-
-        ; Minimap
-        ld      a,[simulation_running]
-        and     a,a ; If minimap room is entered while a simulation is running
-        jr      z,.continue_minimap  ; bad things will happen.
-        call    SFX_ErrorUI
-        ret
-
-.continue_minimap:
-        call    RoomMinimap
-
-        ld      a,0 ; load gfx only
-        call    RoomGameLoad
-
-        ret
-
-.not_minimap:
     cp      a,PAUSE_MENU_BUDGET
     jr      nz,.not_budget
 
@@ -481,6 +451,45 @@ PauseMenuHandleOption:
         ret
 
 .not_budget:
+    cp      a,PAUSE_MENU_MINIMAPS
+    jr      nz,.not_minimaps
+
+        ; Minimap
+        ld      a,[simulation_running]
+        and     a,a ; If minimap room is entered while a simulation is running
+        jr      z,.continue_minimaps  ; bad things will happen.
+        call    SFX_ErrorUI
+        ret
+
+.continue_minimaps:
+        call    RoomMinimap
+
+        ld      a,0 ; load gfx only
+        call    RoomGameLoad
+
+        ret
+
+.not_minimaps:
+    cp      a,PAUSE_MENU_GRAPHS
+    jr      nz,.not_graphs
+
+        ; Graphs
+
+        ; TODO
+
+        ret
+
+.not_graphs:
+    cp      a,PAUSE_MENU_OPTIONS
+    jr      nz,.not_options
+
+        ; Options
+
+        ; TODO
+
+        ret
+
+.not_options:
     cp      a,PAUSE_MENU_PAUSE
     jr      nz,.not_pause
 

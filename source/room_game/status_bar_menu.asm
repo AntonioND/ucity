@@ -55,7 +55,7 @@ status_bar_on_top:: DS 1 ; 1 if on top, 0 if on the bottom
 status_menu_active::   DS 1 ; if 1, show menu
 status_menu_selection: DS 1
 
-MENU_NUMBER_ELEMENTS EQU 7
+MENU_NUMBER_ELEMENTS EQU 8
 
 STATUS_MENU_BLINK_FRAMES EQU 30
 status_menu_blink_status: DS 1
@@ -685,13 +685,14 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
 CURSOR_X EQU 4
 CURSOR_COORDINATE_OFFSET:
-    DW 8*32+CURSOR_X+$9800 ; Resume
+    DW 8*32+CURSOR_X+$9800 ; Budget
     DW 9*32+CURSOR_X+$9800 ; Minimaps
-    DW 10*32+CURSOR_X+$9800 ; Budget
-    DW 11*32+CURSOR_X+$9800 ; Pause/Unpause
-    DW 12*32+CURSOR_X+$9800 ; Help
-    DW 14*32+CURSOR_X+$9800 ; Save Game
-    DW 15*32+CURSOR_X+$9800 ; Main Menu
+    DW 10*32+CURSOR_X+$9800 ; Graphs
+    DW 11*32+CURSOR_X+$9800 ; Options
+    DW 12*32+CURSOR_X+$9800 ; Pause/Unpause
+    DW 13*32+CURSOR_X+$9800 ; Help
+    DW 15*32+CURSOR_X+$9800 ; Save Game
+    DW 16*32+CURSOR_X+$9800 ; Main Menu
 
 StatusBarMenuClearCursor:
 
@@ -810,7 +811,7 @@ StatusBarMenuDrawPauseState::
         ld      hl,.str_pause
 .print:
     ld      b,7
-    ld      de,11*32+CURSOR_X+2+$9800 ; Pause/Unpause
+    ld      de,12*32+CURSOR_X+2+$9800 ; Pause/Unpause
     call    vram_copy_fast ; b = size - hl = source address - de = dest
 
     ret
