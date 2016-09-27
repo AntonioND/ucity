@@ -261,6 +261,8 @@ GameStateMachineHandle::
 
         call    GameAnimateMap
 
+        call    CPUBusyIconHide
+
         ld      a,1
         ld      [simulation_running],a ; Always simulate in watch mode
 
@@ -286,6 +288,8 @@ GameStateMachineHandle::
         call    InputHandleModeWatchFastMove
 
         call    GameAnimateMap
+
+        call    CPUBusyIconHide
 
         ld      a,1
         ld      [simulation_running],a ; Always simulate in fast move mode
