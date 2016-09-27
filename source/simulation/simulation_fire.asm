@@ -562,6 +562,9 @@ Simulation_FireTryStart:: ; b = 1 to force fire, 0 to make it random
     ; Count number of fire stations and save it
     ; -----------------------------------------
 
+    xor     a,a ; reset count
+    ld      [initial_number_fire_stations],a
+
     ld      hl,CITY_MAP_TILES ; Map base
 
     ld      a,BANK_CITY_MAP_TILES
