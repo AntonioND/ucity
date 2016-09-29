@@ -77,6 +77,10 @@ MinimapDrawDisastersMap::
                 ld      d,a
                 jr      .end_color
 .not_fire:
+
+            bit     TYPE_HAS_POWER_BIT,a
+            jr      nz,.not_water ; Only power line bridges are burnable!
+
             and     a,TYPE_MASK
             cp      a,TYPE_WATER
             jr      nz,.not_water

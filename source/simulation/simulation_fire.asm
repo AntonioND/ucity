@@ -73,6 +73,9 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
     ; bc = base tile
     ; de = coordinates
 
+    ; Special code for sea ports
+    ; --------------------------
+
     ld      a,T_PORT & $FF
     cp      a,c
     jr      nz,.not_port
@@ -82,6 +85,39 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
     ld      a,1
     ld      [is_destroying_port],a
 .not_port:
+
+    ; Special code for bridges
+    ; ------------------------
+
+    ld      a,T_POWER_LINES_TB_BRIDGE & $FF
+    cp      a,c
+    jr      nz,.not_bridge_tb
+    ld      a,T_POWER_LINES_TB_BRIDGE>>8
+    cp      a,b
+    jr      z,.bridge_tb
+
+.not_bridge_tb:
+
+    ld      a,T_POWER_LINES_LR_BRIDGE & $FF
+    cp      a,c
+    jr      nz,.not_bridge_lr
+    ld      a,T_POWER_LINES_LR_BRIDGE>>8
+    cp      a,b
+    jr      nz,.not_bridge_lr
+
+.bridge_tb:
+
+        xor     a,a ; don't check money
+        call    DrawCityDeleteBridgeWithCheck ; d=y, e=x
+
+        call    SFX_FireExplosion
+
+        ret
+
+.not_bridge_lr:
+
+    ; Rest of tiles
+    ; -------------
 
     push    de
     LONG_CALL_ARGS  BuildingGetSizeFromBaseTileIgnoreErrors
@@ -427,7 +463,7 @@ Simulation_Fire::
     bit     5,b ; Up to E000
     jr      z,.loop_remove
 
-    ; Place fire wherever it was flagged in the previoys loop
+    ; Place fire wherever it was flagged in the previous loop
     ; -------------------------------------------------------
 
     ld      a,BANK_SCRATCH_RAM

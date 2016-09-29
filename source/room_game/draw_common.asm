@@ -60,6 +60,14 @@ ENDC
 
 ;###############################################################################
 
+    SECTION "City Map Draw Variables",WRAM0
+
+;-------------------------------------------------------------------------------
+
+check_money_delete_bridge: DS 1
+
+;###############################################################################
+
     SECTION "City Map Draw Functions",ROM0
 
 ;-------------------------------------------------------------------------------
@@ -962,8 +970,8 @@ UpdateWater:: ; e = x, d = y
 ; Inputs: top or left bound of the bridge in de, and b=inc y, c=inc x
 ; It is assumed that at least the tile in de is a bridge.
 ; It will refresh the tiles at both ends of the bridge and all water tiles
-; affected by the demolition.
-DrawCityDeleteBridgeForce: ; Reloads map too.
+; affected by the demolition, but doesn't reload the VRAM map
+DrawCityDeleteBridgeForce:
 
     push    bc
     push    de ; save arguments to update later (***)
@@ -1072,11 +1080,6 @@ DrawCityDeleteBridgeForce: ; Reloads map too.
 .not_power_2:
     pop     af
 
-    ; Reload map
-    ; ----------
-
-    call    bg_refresh_main
-
     ret
 
 ;-------------------------------------------------------------------------------
@@ -1095,9 +1098,12 @@ BRIDGE_TILE_INFO: ; All bridge tile indexes should be < 256
     DB 0,0 ; End
 
 ; Checks length of the bridge to see if there is money to delete. If so, it
-; calls DrawCityDeleteBridgeForce and reduces the money.
-; Input: d=y, e=x.
-DrawCityCheckDeleteBridgeCheck:: ; Returns top or left bound in d=y, e=x.
+; calls DrawCityDeleteBridgeForce and reduces the money. The money check
+; can be disabled.
+; Input: d=y, e=x, a=1 will check if there is money, 0 will ignore the check
+DrawCityDeleteBridgeWithCheck:: ; Returns top or left bound in d=y, e=x.
+
+    ld      [check_money_delete_bridge],a
 
     ; Check tile to see which direction to go (up or left)
     ; ----------------------------------------------------
@@ -1245,6 +1251,12 @@ DrawCityCheckDeleteBridgeCheck:: ; Returns top or left bound in d=y, e=x.
     ; Check money. Return if not enough.
     ; ----------------------------------
 
+    ld      h,a ; preserve orientation
+    ld      a,[check_money_delete_bridge]
+    and     a,a
+    ld      a,h ; restore orientation
+    jr      z,.ignore_money_check
+
     ; b = length
     ; Preserve de, a
 
@@ -1265,6 +1277,8 @@ DrawCityCheckDeleteBridgeCheck:: ; Returns top or left bound in d=y, e=x.
 .enough_money:
     pop     af
 
+.ignore_money_check:
+
     ; Delete tiles and refresh VRAM map
     ; ---------------------------------
 
@@ -1284,9 +1298,15 @@ DrawCityCheckDeleteBridgeCheck:: ; Returns top or left bound in d=y, e=x.
     ; Reduce money, play sound
     ; ------------------------
 
+    ld      a,[check_money_delete_bridge]
+    and     a,a
+    jr      z,.ignore_money_check_2
+
     call    BuildingPriceTempGet ; returns pointer in de
     call    MoneyReduce
     call    SFX_Build
+
+.ignore_money_check_2:
 
     ; Ready!
     ; ------

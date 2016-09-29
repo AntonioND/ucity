@@ -232,8 +232,8 @@ CITY_TILE_DENSITY:: ; 512 entries - Population, energy cost, pollution level
     T_ADD   T_POWER_LINES_TLB,  0,1, 0, 8
     T_ADD   T_POWER_LINES_TLR,  0,1, 0, 8
     T_ADD   T_POWER_LINES_TLRB, 0,1, 0, 8
-    T_ADD   T_POWER_LINES_TB_BRIDGE, 0,1, 0, 0 ; It is problematic to burn
-    T_ADD   T_POWER_LINES_LR_BRIDGE, 0,1, 0, 0 ; things in water...
+    T_ADD   T_POWER_LINES_TB_BRIDGE, 0,1, 0, 8 ; This is the only bridge that
+    T_ADD   T_POWER_LINES_LR_BRIDGE, 0,1, 0, 8 ; can burn.
 
     T_ADD   T_POLICE_DEPT, 1*9,1, 0, 8
     T_ADD   T_FIRE_DEPT,   1*9,1, 0, 4

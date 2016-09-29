@@ -236,7 +236,9 @@ BuildingRemoveRoadTrainPowerLines: ; de = coordinates, a = type
     cp      a,TYPE_WATER
     jr      nz,.not_bridge
 
-    call    DrawCityCheckDeleteBridgeCheck ; internally updates map
+    ld      a,1 ; check money!
+    call    DrawCityDeleteBridgeWithCheck ; doesn't update map internally
+    call    bg_refresh_main
     ret
 
 .not_bridge:
