@@ -42,6 +42,8 @@ MINIMAP_SELECTION_HAPPINESS          EQU 13
 
 MINIMAP_SELECTION_MAX                EQU 13
 
+MINIMAP_SELECTION_DISASTERS          EQU 14
+
 ; There's no room for any other map with the current selection menu!
 
 ;###############################################################################

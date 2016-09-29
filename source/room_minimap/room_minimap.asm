@@ -157,6 +157,12 @@ MinimapDrawSelectedMap::
         ret
 .not_happiness:
 
+    cp      a,MINIMAP_SELECTION_DISASTERS
+    jr      nz,.not_disasters
+        LONG_CALL   MinimapDrawDisastersMap
+        ret
+.not_disasters:
+
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
     LONG_CALL   APA_BufferClear
@@ -192,6 +198,22 @@ MinimapSelectMap:: ; a = map to select
 ;-------------------------------------------------------------------------------
 
 InputHandleMinimap:
+
+    ld      a,[simulation_disaster_mode]
+    and     a,a
+    jr      z,.normal_mode
+
+        ; Exit if  B or START are pressed
+        ld      a,[joy_pressed]
+        and     a,PAD_B|PAD_START
+        jr      z,.end_b_start
+            ld      a,1
+            ld      [minimap_room_exit],a ; exit
+            ret
+.end_b_start:
+        ret ; don't exit
+
+.normal_mode:
 
     call    MinimapMenuHandleInput ; If it returns 1, exit room
     and     a,a
@@ -422,13 +444,28 @@ RoomMinimap::
 
     call    LoadTextPalette
 
-    ld      a,MINIMAP_SELECTION_OVERVIEW
-    ld      [minimap_selected_map],a
-    LONG_CALL   MinimapDrawSelectedMap
+    ld      a,[simulation_disaster_mode]
+    and     a,a
+    jr      nz,.disaster_mode
 
-    ; This can be loaded after the rest, it isn't shown until A is pressed so
-    ; there is no hurry.
-    call    MinimapMenuLoadGFX
+        ld      a,MINIMAP_SELECTION_OVERVIEW
+        ld      [minimap_selected_map],a
+
+        LONG_CALL   MinimapDrawSelectedMap
+
+        ; This can be loaded after the rest, it isn't shown until A is pressed
+        ; so there is no hurry.
+        call    MinimapMenuLoadGFX
+
+        jr      .end_start_selection
+.disaster_mode:
+
+        ld      a,MINIMAP_SELECTION_DISASTERS
+        ld      [minimap_selected_map],a
+
+        LONG_CALL   MinimapDrawSelectedMap
+
+.end_start_selection:
 
     xor     a,a
     ld      [minimap_room_exit],a
