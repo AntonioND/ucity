@@ -561,6 +561,13 @@ PauseMenuHandleOption:
     cp      a,PAUSE_MENU_SAVE_GAME
     jr      nz,.not_save_game
 
+        ld      a,[simulation_disaster_mode]
+        and     a,a ; if disaster mode is active, don't allow the player to save
+        push    af
+        call    NZ,SFX_ErrorUI
+        pop     af
+        ret     nz
+
         ; Save Game
         ld      a,[simulation_running]
         and     a,a ; If we save the city while the simulation is running we
