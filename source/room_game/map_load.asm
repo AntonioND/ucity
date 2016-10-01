@@ -30,6 +30,7 @@
     INCLUDE "room_game.inc"
     INCLUDE "save_struct.inc"
     INCLUDE "tileset_info.inc"
+    INCLUDE "text.inc"
     INCLUDE "room_text_input.inc"
 
 ;###############################################################################
@@ -102,7 +103,14 @@ PredefinedMapGetStartCoordinates: ; a = number, returns de = xy
 
     ret
 
+PREDEFINED_STR_CITY_NAME:
+    String2Tiles "S","c","e","n","a","r","i","o",0
+PREDEFINED_STR_CITY_LEN EQU String2TilesLenght ; includes string terminator!
+
 PredefinedMapSetupGameVariables:
+
+    ; TODO : Divide this into 2 functions, one for scenarios and other one
+    ; for random maps.
 
     ld      de,MONEY_AMOUNT_START
     call    MoneySet ; de = ptr to the amount of money to set
@@ -111,6 +119,15 @@ PredefinedMapSetupGameVariables:
 
     ld      a,10
     ld      [tax_percentage],a
+
+    ld      a,[selected_map]
+    cp      a,CITY_MAP_GENERATE_RANDOM
+    ret     z ; if random map, the name has been specified before
+
+    ld      hl,PREDEFINED_STR_CITY_NAME
+    ld      de,current_city_name
+    ld      bc,PREDEFINED_STR_CITY_LEN
+    call    memcopy ; bc = size    hl = source address    de = dest address
 
     ret
 
