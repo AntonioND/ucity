@@ -162,8 +162,8 @@ GenMapMandleInput: ; If it returns 1, exit room. If 0, continue
     jr      z,.end_a
 
         ld      a,[gen_map_seed] ; 21 is the default of the algorithm...
-        add     a,$80 ; I don't like the results of the seed 0 for water...
-        ld      b,a
+        add     a,$80 ; I don't like the results of the seed 0 for water, so
+        ld      b,a ; let's hide it... :P
         ld      c,229 ; b, c = seeds
 
         ld      a,[gen_map_selection]

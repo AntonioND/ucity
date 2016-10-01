@@ -548,43 +548,10 @@ map_add_circle_all:
 
 ;-------------------------------------------------------------------------------
 
-map_normalize: ; normalizes bank 2. ret A = 1 if ok, 0 if we have to start again
+map_normalize: ; normalizes bank 2
 
     ld      a,BANK_TEMP2
     ld      [rSVBK],a
-
-    ; Make sure that there is enough variability to make this map interesting
-    ; -----------------------------------------------------------------------
-
-    ld      hl,CITY_MAP_TILES
-
-    ld      b,[hl] ; b = min
-    ld      c,b ; c = max
-
-.loop_minmax:
-
-        ld      a,[hl+]
-
-        cp      a,b ; cy = 1 if b > a (min > val)
-        jr      nc,.skipmin
-            ld      b,a
-.skipmin:
-
-        cp      a,c ; cy = 1 if b > a (max > val)
-        jr      c,.skipmax
-            ld      c,a
-.skipmax:
-
-    bit     5,h ; Up to E000
-    jr      z,.loop_minmax
-
-    ld      a,c
-    sub     a,b
-    cp      a,$40 ; cy = 1 if $40 > a (threshold > val)
-    jr      nc,.map_ok
-        xor     a,a ; If not, return and repeat!
-        ret
-.map_ok:
 
     ; Calculate average value
     ; -----------------------
@@ -1420,12 +1387,7 @@ map_generate:: ; call this with LONG_CALL_ARGS
 
     call    map_add_circle_all
 
-    call    map_normalize ; bank 2.  ret A = 1 if ok, 0 = start again
-    and     a,a
-    jr      nz,.map_ok
-        ld      b,b ; Not the end of the world, but nice to know as developer...
-        jr      map_generate ; TODO: Check if infinite loop?
-.map_ok:
+    call    map_normalize ; bank 2
 
     call    map_smooth_2_to_1
     call    map_smooth_1_to_2
