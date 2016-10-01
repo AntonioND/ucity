@@ -50,11 +50,11 @@ BUDGET_MENU_HEIGHT EQU 18
 
 ;###############################################################################
 
-    SECTION "Room Minimap Code Bank 0",ROM0
+    SECTION "Room Budget Code Bank 0",ROM0
 
 ;-------------------------------------------------------------------------------
 
-BudgetMenuMandleInput: ; If it returns 1, exit room. If 0, continue
+BudgetMenuHandleInput: ; If it returns 1, exit room. If 0, continue
 
     ; Exit if B or START are pressed
     ld      a,[joy_pressed]
@@ -246,7 +246,7 @@ BudgetMenuPrintTaxPercent:
 
 InputHandleBudgetMenu:
 
-    call    BudgetMenuMandleInput ; If it returns 1, exit room. If 0, continue
+    call    BudgetMenuHandleInput ; If it returns 1, exit room. If 0, continue
     and     a,a
     ret     z ; don't exit
 

@@ -122,7 +122,7 @@ GenMapUpdateGUI:
 
 ;-------------------------------------------------------------------------------
 
-GenMapMandleInput: ; If it returns 1, exit room. If 0, continue
+GenMapHandleInput: ; If it returns 1, exit room. If 0, continue
 
     ld      a,[joy_pressed]
     and     a,PAD_UP
@@ -206,7 +206,7 @@ GenMapMandleInput: ; If it returns 1, exit room. If 0, continue
 
 InputHandleGenMap:
 
-    call    GenMapMandleInput ; If it returns 1, exit room. If 0, continue
+    call    GenMapHandleInput ; If it returns 1, exit room. If 0, continue
     and     a,a
     ret     z ; don't exit
 

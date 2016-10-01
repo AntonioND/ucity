@@ -174,7 +174,7 @@ ICON_TO_BUILDING_PAL: ; Get palette and building from icon
     ICON_SET_BUILDING Icon_PowerPlantSolar, B_PowerPlantSolar, 5,5
     ICON_SET_BUILDING Icon_PowerPlantFusion, B_PowerPlantFusion, 1,1
 
-    ; For unused spaces on the menu
+    ; Placeholder for unused spaces in the menu
     ICON_SET_BUILDING Icon_NULL, B_None, 0,0
     ; End list
 
