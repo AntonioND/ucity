@@ -1034,6 +1034,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ld      [last_frame_y],a
 
     call    InitKeyAutorepeat
+
     ret
 
 ;-------------------------------------------------------------------------------

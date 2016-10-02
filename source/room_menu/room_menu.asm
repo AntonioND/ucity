@@ -99,6 +99,7 @@ MenuScenario: ; returns 1 if loaded correctly, 0 if not
     ret
 
 ;-------------------------------------------------------------------------------
+
 MenuLoadCitySRAM: ; returns 1 if loaded correctly, 0 if not
 
     ld      b,0 ; 0 = load data mode
