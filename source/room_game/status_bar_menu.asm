@@ -684,7 +684,7 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 ;-------------------------------------------------------------------------------
 
 CURSOR_X EQU 4
-CURSOR_COORDINATE_OFFSET:
+STATUS_BAR_CURSOR_COORDINATE_OFFSET:
     DW 8*32+CURSOR_X+$9800 ; Budget
     DW 9*32+CURSOR_X+$9800 ; Minimaps
     DW 10*32+CURSOR_X+$9800 ; Graphs
@@ -705,7 +705,7 @@ StatusBarMenuDrawCursor:
 
 StatusBarMenuPlaceAtCursor: ; b = tile number
 
-    add     sp,-1
+    add     sp,-1 ; Create space in the stack for the value to write
     ld      hl,sp+0
     ld      a,b
     ld      [hl],a
@@ -715,11 +715,14 @@ StatusBarMenuPlaceAtCursor: ; b = tile number
     ld      h,0
     add     hl,hl
 
-    ld      de,CURSOR_COORDINATE_OFFSET
+    ld      de,STATUS_BAR_CURSOR_COORDINATE_OFFSET
     add     hl,de
     ld      e,[hl]
     inc     hl
     ld      d,[hl]
+
+    xor     a,a
+    ld      [rVBK],a
 
     ld      b,1
     ld      hl,sp+0

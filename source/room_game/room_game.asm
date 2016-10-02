@@ -56,6 +56,7 @@ simulation_running::  DS 1
 
 ; This is set to 1 when in disaster mode
 simulation_disaster_mode:: DS 1
+simulation_disaster_disabled:: DS 1 ; 0 if disasters are enabled, 1 if not
 
 ANIMATION_COUNT_FRAMES_NORMAL   EQU 60
 ANIMATION_COUNT_FRAMES_DISASTER EQU 15
@@ -185,6 +186,10 @@ GameDisasterApply:
 
     xor     a,a
     ld      [game_requested_disaster],a ; clear request
+
+    ld      a,[simulation_disaster_disabled]
+    and     a,a
+    ret     nz ; if 1, disasters are disabled. return!
 
     ; TODO
 
@@ -476,6 +481,8 @@ PauseMenuHandleOption:
     jr      nz,.not_budget
 
         ; Budget
+        ; ------
+
         ld      a,[simulation_running]
         and     a,a ; If budget menu room is entered while a simulation is
         jr      z,.continue_budget  ; running, bad things may happen when.
@@ -494,6 +501,8 @@ PauseMenuHandleOption:
     jr      nz,.not_minimaps
 
         ; Minimap
+        ; -------
+
         ld      a,[simulation_running]
         and     a,a ; If minimap room is entered while a simulation is running
         jr      z,.continue_minimaps  ; bad things will happen.
@@ -513,6 +522,7 @@ PauseMenuHandleOption:
     jr      nz,.not_graphs
 
         ; Graphs
+        ; ------
 
         ; TODO
 
@@ -523,12 +533,19 @@ PauseMenuHandleOption:
     jr      nz,.not_options
 
         ; Options
+        ; -------
 
-        ld      a,1
-        call    GameRequestDisaster
+        ld      a,[simulation_running]
+        and     a,a ; If options menu room is entered while a simulation is
+        jr      z,.continue_options  ; running, bad things may happen.
+        call    SFX_ErrorUI
+        ret
 
-        ; TODO : Replace this by a real menu
+.continue_options:
+        LONG_CALL   RoomOptionsMenu
 
+        ld      a,0 ; load gfx only
+        call    RoomGameLoad
         ret
 
 .not_options:
@@ -536,6 +553,8 @@ PauseMenuHandleOption:
     jr      nz,.not_pause
 
         ; Pause / Unpause
+        ; ---------------
+
         ld      hl,simulation_paused
         ld      a,1
         xor     a,[hl]
@@ -550,6 +569,7 @@ PauseMenuHandleOption:
     jr      nz,.not_help
 
         ; Help
+        ; ----
 
         ; TODO : Replace this by an actual help menu
         ld      de,MONEY_AMOUNT_CHEAT
@@ -561,6 +581,9 @@ PauseMenuHandleOption:
     cp      a,PAUSE_MENU_SAVE_GAME
     jr      nz,.not_save_game
 
+        ; Save Game
+        ; ---------
+
         ld      a,[simulation_disaster_mode]
         and     a,a ; if disaster mode is active, don't allow the player to save
         push    af
@@ -568,7 +591,6 @@ PauseMenuHandleOption:
         pop     af
         ret     nz
 
-        ; Save Game
         ld      a,[simulation_running]
         and     a,a ; If we save the city while the simulation is running we
         jr      z,.continue_save  ; risk saving in an intermediate state.
@@ -592,6 +614,7 @@ PauseMenuHandleOption:
     jr      nz,.not_main_menu
 
         ; Main Menu
+        ; ---------
 
         ld      a,1
         ld      [game_loop_end_requested],a
@@ -1120,8 +1143,15 @@ RoomGameSimulateStepNormal:
 
     call    GameDisasterApply
 
-    ld      b,0 ; don't force fire
-    LONG_CALL_ARGS   Simulation_FireTryStart ; Returns if any disaster present
+    ld      a,[simulation_disaster_disabled]
+    and     a,a
+    jr      nz,.ignore_disasters ; if 1, disasters are disabled
+
+        ld      b,0 ; don't force fire
+        ; This function Returns if any other disaster is present
+        LONG_CALL_ARGS   Simulation_FireTryStart
+
+.ignore_disasters:
 
     ; End of this simulation step
 
