@@ -120,6 +120,9 @@ PredefinedMapSetupGameVariables:
     ld      a,10
     ld      [tax_percentage],a
 
+    xor     a,a ; enable disasters by default
+    ld      [simulation_disaster_disabled],a
+
     ld      a,[selected_map]
     cp      a,CITY_MAP_GENERATE_RANDOM
     ret     z ; if random map, the name has been specified before
@@ -404,6 +407,12 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     xor     a,a ; save 0 terminator!
     ld      [de],a
 
+    ; Player-set options
+    ; ------------------
+
+    ld      a,[SAV_OPTIONS_DISASTERS_DISABLED]
+    ld      [simulation_disaster_disabled],a
+
     ; Return start coordinates
     ; ------------------------
 
@@ -589,8 +598,14 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ld      hl,current_city_name ; src
     call    memcopy
 
-    ; Return start coordinates
-    ; ------------------------
+    ; Player-set options
+    ; ------------------
+
+    ld      a,[simulation_disaster_disabled]
+    ld      [SAV_OPTIONS_DISASTERS_DISABLED],a
+
+    ; Save start coordinates
+    ; ----------------------
 
     ld      a,[bg_x]
     ld      [SAV_LAST_SCROLL_X],a
