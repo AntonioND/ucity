@@ -1048,7 +1048,9 @@ RoomSaveMenuLoadBG:
     dec     a
     jr      nz,.loop1
 
-    ; Print number of availabe pages
+    ; Print number of available pages
+
+    push    hl ; (*) preserve current src pointer
 
     ld      a,[save_menu_num_pages]
     BCD2Tile
@@ -1065,7 +1067,9 @@ RoomSaveMenuLoadBG:
 
         ld      [hl],b
 
-    reti ; end of critical section and return
+    ei ; end of critical section and return
+
+    pop     hl ; (*) restore current src pointer
 
     ; Attributes
 
@@ -1091,6 +1095,9 @@ RoomSaveMenuLoadBG:
     pop     af
     dec     a
     jr      nz,.loop2
+
+    xor     a,a
+    ld      [rVBK],a
 
     call    rom_bank_pop
 
