@@ -52,7 +52,7 @@ GraphsDrawSelected::
 
     cp      a,GRAPHS_SELECTION_POPULATION
     jr      nz,.not_population
-        ;LONG_CALL   GraphDrawTotalPopulation - TODO
+        LONG_CALL   GraphDrawTotalPopulation
         ret
 .not_population:
 
