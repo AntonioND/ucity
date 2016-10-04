@@ -656,7 +656,7 @@ ENDC
 .shift_loop:
     and     a,a
     jr      z,.end_shift_loop
-    sra     b
+    dec     b
     jr      nz,.shift_loop
 .end_shift_loop:
     inc     b ; leave at least a 1/256 chance of fire!
