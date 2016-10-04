@@ -191,7 +191,7 @@ GameDisasterApply:
     and     a,a
     ret     nz ; if 1, disasters are disabled. return!
 
-    ; TODO
+    ; TODO - More disasters?
 
     ld      b,1 ; force fire
     LONG_CALL_ARGS   Simulation_FireTryStart ; Returns if any disaster present
@@ -504,8 +504,8 @@ PauseMenuHandleOption:
         ; -------
 
         ld      a,[simulation_running]
-        and     a,a ; If minimap room is entered while a simulation is running
-        jr      z,.continue_minimaps  ; bad things will happen.
+        and     a,a ; If minimap room is entered while the simulation is running
+        jr      z,.continue_minimaps ; bad things will happen.
         call    SFX_ErrorUI
         ret
 
@@ -524,7 +524,17 @@ PauseMenuHandleOption:
         ; Graphs
         ; ------
 
-        ; TODO
+        ld      a,[simulation_running]
+        and     a,a ; If minimap room is entered while the simulation is running
+        jr      z,.continue_graphs ; bad things will happen.
+        call    SFX_ErrorUI
+        ret
+
+.continue_graphs:
+        LONG_CALL   RoomGraphs
+
+        ld      a,0 ; load gfx only
+        call    RoomGameLoad
 
         ret
 
