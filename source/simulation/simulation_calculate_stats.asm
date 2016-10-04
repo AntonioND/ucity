@@ -64,6 +64,7 @@ population_residential:: DS 4 ; binary, LSB first
 population_commercial::  DS 4 ; binary, LSB first
 population_industrial::  DS 4 ; binary, LSB first
 population_other::       DS 4 ; binary, LSB first
+population_total::       DS 4 ; binary, LSB first
 
 residential_area_empty: DS 2 ; LSB first. Area in tiles
 residential_area_used:  DS 2
@@ -526,6 +527,38 @@ Simulation_CalculateStatistics::
     ld      a,[hl+]
     ld      [de],a
     inc     de
+    ENDR
+
+    ; Calculate total population in binary
+
+    ld      d,0
+    ld      hl,0
+
+COUNT SET 0
+    REPT    4
+
+        ; l = previous overflow
+
+        ld      a,[population_residential + COUNT]
+        ld      e,a
+        add     hl,de
+        ld      a,[population_commercial + COUNT]
+        ld      e,a
+        add     hl,de
+        ld      a,[population_industrial + COUNT]
+        ld      e,a
+        add     hl,de
+        ld      a,[population_other + COUNT]
+        ld      e,a
+        add     hl,de
+
+        ld      a,l
+        ld      [population_total + COUNT],a
+
+        ld      l,h
+        ld      h,0
+
+COUNT SET COUNT + 1
     ENDR
 
     ; Save city type to variable
