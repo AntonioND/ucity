@@ -214,7 +214,8 @@ MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
         ; Deactivate and load next map
         call    MinimapMenuHide
         ld      a,[minimap_menu_selection]
-        call    MinimapSelectMap
+        ld      b,a
+        LONG_CALL_ARGS  MinimapSelectMap
         LONG_CALL   MinimapDrawSelectedMap
         xor     a,a
         ret ; return 0

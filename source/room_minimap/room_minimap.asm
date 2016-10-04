@@ -61,9 +61,108 @@ MINIMAP_TILES:
 
 MINIMAP_TILE_NUM EQU ((.e-MINIMAP_TILES)/16)
 
-;###############################################################################
+;-------------------------------------------------------------------------------
 
-    SECTION "Room Minimap Functions",ROMX
+RoomMinimapLoadBG:: ; Also used for the graphs room. Loads BG + Palettes
+
+    ; Clear APA buffer
+    ; ----------------
+
+    LONG_CALL   APA_BufferClear
+    call    APA_BufferUpdate
+
+    ; Load tiles
+    ; ----------
+
+    xor     a,a
+    ld      [rVBK],a
+
+    ld      bc,MINIMAP_TILE_NUM
+    ld      de,256
+    ld      hl,MINIMAP_TILES
+    call    vram_copy_tiles
+
+    ; Load map
+    ; --------
+
+    ; Tiles
+    xor     a,a
+    ld      [rVBK],a
+
+    ld      de,$9800
+    ld      hl,MINIMAP_BG_MAP
+
+    ld      a,MINIMAP_HEIGHT
+.loop1:
+    push    af
+
+    ld      b,MINIMAP_WIDTH
+    call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+    push    hl
+    ld      hl,32-MINIMAP_WIDTH
+    add     hl,de
+    ld      d,h
+    ld      e,l
+    pop     hl
+
+    pop     af
+    dec     a
+    jr      nz,.loop1
+
+    ; Attributes
+    ld      a,1
+    ld      [rVBK],a
+
+    ld      de,$9800
+
+    ld      a,MINIMAP_HEIGHT
+.loop2:
+    push    af
+
+    ld      b,MINIMAP_WIDTH
+    call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+    push    hl
+    ld      hl,32-MINIMAP_WIDTH
+    add     hl,de
+    ld      d,h
+    ld      e,l
+    pop     hl
+
+    pop     af
+    dec     a
+    jr      nz,.loop2
+
+    ; Prepare APA map
+    ; ---------------
+
+    LONG_CALL   APA_ResetBackgroundMapping
+
+    ; Load palettes
+    ; -------------
+
+    di ; Entering critical section - BG will be shown as soon as VBL ends
+
+    ld      b,144
+    call    wait_ly
+
+    xor     a,a
+    ld      hl,MINIMAP_PALETTES
+.loop_pal:
+    push    af
+    call    bg_set_palette ; a = palette number - hl = pointer to data
+    pop     af
+    inc     a
+    cp      a,MINIMAP_PALETTE_NUM
+    jr      nz,.loop_pal
+
+    ld      hl,APA_PALETTE_DEFAULT
+    call    APA_LoadPalette ; This enables the interrupts with a 'reti'
+
+    ei ; End of critical section
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -170,27 +269,11 @@ MinimapDrawSelectedMap::
 
     ret
 
-;###############################################################################
-
-    SECTION "Room Minimap Code Bank 0",ROM0
-
 ;-------------------------------------------------------------------------------
 
-APA_PALETTE_DEFAULT:
-    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(31<<5)|(31<<0)
-    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(31<<5)|(31<<0)
+MinimapSelectMap:: ; b = map to select
 
-MinimapSetDefaultPalette::
-
-    ld      hl,APA_PALETTE_DEFAULT
-    call    APA_LoadPalette
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-MinimapSelectMap:: ; a = map to select
-
+    ld      a,b
     ld      [minimap_selected_map],a
 
     ret
@@ -226,6 +309,80 @@ InputHandleMinimap:
 
 ;-------------------------------------------------------------------------------
 
+RoomMinimap::
+
+    call    SetPalettesAllBlack
+
+    call    MinimapMenuReset
+
+    ld      bc,RoomMinimapVBLHandler
+    call    irq_set_VBL
+
+    xor     a,a
+    ld      [rSCX],a
+    ld      [rSCY],a
+
+    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
+    ld      [rLCDC],a
+
+    ld      b,1 ; bank at 8800h
+    call    LoadText
+
+    call    RoomMinimapLoadBG
+
+    call    LoadTextPalette
+
+    ld      a,[simulation_disaster_mode]
+    and     a,a
+    jr      nz,.disaster_mode
+
+        ld      a,MINIMAP_SELECTION_OVERVIEW
+        ld      [minimap_selected_map],a
+
+        LONG_CALL   MinimapDrawSelectedMap
+
+        ; This can be loaded after the rest, it isn't shown until A is pressed
+        ; so there is no hurry.
+        call    MinimapMenuLoadGFX
+
+        jr      .end_start_selection
+.disaster_mode:
+
+        ld      a,MINIMAP_SELECTION_DISASTERS
+        ld      [minimap_selected_map],a
+
+        LONG_CALL   MinimapDrawSelectedMap
+
+.end_start_selection:
+
+    xor     a,a
+    ld      [minimap_room_exit],a
+
+.loop:
+
+    call    wait_vbl
+
+    call    scan_keys
+    call    KeyAutorepeatHandle
+
+    call    InputHandleMinimap
+
+    ld      a,[minimap_room_exit]
+    and     a,a
+    jr      z,.loop
+
+    call    SetDefaultVBLHandler
+
+    call    SetPalettesAllBlack
+
+    ret
+
+;###############################################################################
+
+    SECTION "Room Minimap Code Bank 0",ROM0
+
+;-------------------------------------------------------------------------------
+
 RoomMinimapVBLHandler:
 
     call    MinimapMenuVBLHandler
@@ -236,117 +393,7 @@ RoomMinimapVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
-RoomMinimapLoadBG:
-
-    ; Clear APA buffer
-    ; ----------------
-
-    LONG_CALL   APA_BufferClear
-    call    APA_BufferUpdate
-
-    ; Load border
-    ; -----------
-
-    ld      b,BANK(MINIMAP_TILES)
-    call    rom_bank_push_set
-
-        ; Load tiles
-        ; ----------
-
-        xor     a,a
-        ld      [rVBK],a
-
-        ld      bc,MINIMAP_TILE_NUM
-        ld      de,256
-        ld      hl,MINIMAP_TILES
-        call    vram_copy_tiles
-
-        ; Load map
-        ; --------
-
-        ; Tiles
-        xor     a,a
-        ld      [rVBK],a
-
-        ld      de,$9800
-        ld      hl,MINIMAP_BG_MAP
-
-        ld      a,MINIMAP_HEIGHT
-.loop1:
-        push    af
-
-        ld      b,MINIMAP_WIDTH
-        call    vram_copy_fast ; b = size - hl = source address - de = dest
-
-        push    hl
-        ld      hl,32-MINIMAP_WIDTH
-        add     hl,de
-        ld      d,h
-        ld      e,l
-        pop     hl
-
-        pop     af
-        dec     a
-        jr      nz,.loop1
-
-        ; Attributes
-        ld      a,1
-        ld      [rVBK],a
-
-        ld      de,$9800
-
-        ld      a,MINIMAP_HEIGHT
-.loop2:
-        push    af
-
-        ld      b,MINIMAP_WIDTH
-        call    vram_copy_fast ; b = size - hl = source address - de = dest
-
-        push    hl
-        ld      hl,32-MINIMAP_WIDTH
-        add     hl,de
-        ld      d,h
-        ld      e,l
-        pop     hl
-
-        pop     af
-        dec     a
-        jr      nz,.loop2
-
-        ; Prepare APA map
-        ; ---------------
-
-        LONG_CALL   APA_ResetBackgroundMapping
-
-        ; Load palettes
-        ; -------------
-
-        di ; Entering critical section - BG will be shown as soon as VBL ends
-
-        ld      b,144
-        call    wait_ly
-
-        xor     a,a
-        ld      hl,MINIMAP_PALETTES
-.loop_pal:
-        push    af
-        call    bg_set_palette ; a = palette number - hl = pointer to data
-        pop     af
-        inc     a
-        cp      a,MINIMAP_PALETTE_NUM
-        jr      nz,.loop_pal
-
-        ld      hl,APA_PALETTE_DEFAULT
-        call    APA_LoadPalette ; This enables the interrupts with a 'reti'
-
-        ei ; End of critical section
-
-    call    rom_bank_pop
-
-    ret
-
-;-------------------------------------------------------------------------------
-
+; This needs to be in bank 0 because the string may be in any ROM bank
 RoomMinimapDrawTitle:: ; hl = ptr to text string
 
     xor     a,a
@@ -421,71 +468,14 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
 
 ;-------------------------------------------------------------------------------
 
-RoomMinimap::
+APA_PALETTE_DEFAULT:
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(31<<5)|(31<<0)
+    DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(31<<5)|(31<<0)
 
-    call    SetPalettesAllBlack
+MinimapSetDefaultPalette::
 
-    call    MinimapMenuReset
-
-    ld      bc,RoomMinimapVBLHandler
-    call    irq_set_VBL
-
-    xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
-
-    ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
-
-    ld      b,1 ; bank at 8800h
-    call    LoadText
-
-    call    RoomMinimapLoadBG
-
-    call    LoadTextPalette
-
-    ld      a,[simulation_disaster_mode]
-    and     a,a
-    jr      nz,.disaster_mode
-
-        ld      a,MINIMAP_SELECTION_OVERVIEW
-        ld      [minimap_selected_map],a
-
-        LONG_CALL   MinimapDrawSelectedMap
-
-        ; This can be loaded after the rest, it isn't shown until A is pressed
-        ; so there is no hurry.
-        call    MinimapMenuLoadGFX
-
-        jr      .end_start_selection
-.disaster_mode:
-
-        ld      a,MINIMAP_SELECTION_DISASTERS
-        ld      [minimap_selected_map],a
-
-        LONG_CALL   MinimapDrawSelectedMap
-
-.end_start_selection:
-
-    xor     a,a
-    ld      [minimap_room_exit],a
-
-.loop:
-
-    call    wait_vbl
-
-    call    scan_keys
-    call    KeyAutorepeatHandle
-
-    call    InputHandleMinimap
-
-    ld      a,[minimap_room_exit]
-    and     a,a
-    jr      z,.loop
-
-    call    SetDefaultVBLHandler
-
-    call    SetPalettesAllBlack
+    ld      hl,APA_PALETTE_DEFAULT
+    call    APA_LoadPalette
 
     ret
 

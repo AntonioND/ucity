@@ -510,7 +510,7 @@ PauseMenuHandleOption:
         ret
 
 .continue_minimaps:
-        call    RoomMinimap
+        LONG_CALL   RoomMinimap
 
         ld      a,0 ; load gfx only
         call    RoomGameLoad
