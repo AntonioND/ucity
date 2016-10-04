@@ -123,6 +123,9 @@ PredefinedMapSetupGameVariables:
     xor     a,a ; enable disasters by default
     ld      [simulation_disaster_disabled],a
 
+    ; TODO : Allow predefined maps to start with some historical data?
+    LONG_CALL   GraphsClearRecords
+
     ld      a,[selected_map]
     cp      a,CITY_MAP_GENERATE_RANDOM
     ret     z ; if random map, the name has been specified before
@@ -413,6 +416,11 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     ld      a,[SAV_OPTIONS_DISASTERS_DISABLED]
     ld      [simulation_disaster_disabled],a
 
+    ; Historical data
+    ; ---------------
+
+    LONG_CALL   GraphsLoadRecords
+
     ; Return start coordinates
     ; ------------------------
 
@@ -603,6 +611,11 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
 
     ld      a,[simulation_disaster_disabled]
     ld      [SAV_OPTIONS_DISASTERS_DISABLED],a
+
+    ; Historical data
+    ; ---------------
+
+    LONG_CALL   GraphsSaveRecords
 
     ; Save start coordinates
     ; ----------------------

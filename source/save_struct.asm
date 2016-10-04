@@ -25,6 +25,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "money.inc"
+    INCLUDE "room_graphs.inc"
     INCLUDE "room_text_input.inc"
     INCLUDE "save_struct.inc"
     INCLUDE "text_messages.inc"
@@ -61,9 +62,15 @@ SAV_OPTIONS_DISASTERS_DISABLED:: DS 1
 
 ; TODO : Reorganize every field so that it makes sense
 
+; Historical data for graphs:
+
+SAV_GRAPH_POPULATION_DATA::   DS GRAPH_SIZE
+SAV_GRAPH_POPULATION_OFFSET:: DS 1 ; Circular buffer start index
+SAV_GRAPH_POPULATION_SCALE::  DS 1
+
 ;-------------------------------------------------------------------------------
 
-    SECTION "Save Data 2", SRAM[_SRAM+$1000]
+    SECTION "Save Data Map", SRAM[_SRAM+$1000]
 
 ;-------------------------------------------------------------------------------
 

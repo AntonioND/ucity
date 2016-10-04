@@ -1164,6 +1164,10 @@ RoomGameSimulateStepNormal:
 
 .ignore_disasters:
 
+    ; Handle historical records
+
+    LONG_CALL   GraphHandleRecords
+
     ; End of this simulation step
 
     ret

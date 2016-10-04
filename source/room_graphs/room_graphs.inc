@@ -29,6 +29,13 @@ GRAPHS_SELECTION_POPULATION EQU 0
 
 GRAPHS_SELECTION_MAX        EQU 1
 
+;-------------------------------------------------------------------------------
+
+; Valid values are 0-127
+GRAPH_INVALID_ENTRY EQU -1 ; Entries that should be considered empty
+
+GRAPH_SIZE EQU 128 ; Entries per graph
+
 ;###############################################################################
 
     ENDC ; ROOM_GRAPHS_INC
