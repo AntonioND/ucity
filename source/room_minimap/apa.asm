@@ -326,7 +326,7 @@ APA_64x64PixelStreamPlot::
     ret
 
 ;-------------------------------------------------------------------------------
-IF 0 ; Unused for now
+
 APA_Plot:: ; b = x, c = y (0-127!)
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
@@ -428,7 +428,7 @@ APA_Plot:: ; b = x, c = y (0-127!)
     ld      [hl],d
 
     ret
-ENDC
+
 ;-------------------------------------------------------------------------------
 
 APA_ResetBackgroundMapping:: ; de = bg base pointer
