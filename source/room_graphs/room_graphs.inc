@@ -34,7 +34,7 @@ GRAPHS_SELECTION_MAX        EQU 1
 ; Valid values are 0-127
 GRAPH_INVALID_ENTRY EQU -1 ; Entries that should be considered empty
 
-GRAPH_SIZE EQU 128 ; Entries per graph
+GRAPH_SIZE EQU 128 ; Entries per graph. It must be a power of 2
 
 ;###############################################################################
 

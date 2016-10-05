@@ -18,9 +18,11 @@ you are interested please contact me at my email (antonio_nd@outlook.com).
 General to do list:
 - Simulation - Most parts are ready
   - Graphical output (trains, planes, boats...)
-- Historical graphics
+- Historical graphics (In progress)
 - Sample cities (compressed)
 - Loans
+- Music, SFX
+- Improve graphics
 - Cleanup code and document
 
 ![](screenshot.png)

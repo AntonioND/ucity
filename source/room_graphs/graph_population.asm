@@ -23,6 +23,10 @@
     INCLUDE "hardware.inc"
     INCLUDE "engine.inc"
 
+;-------------------------------------------------------------------------------
+
+    INCLUDE "room_graphs.inc"
+
 ;###############################################################################
 
     SECTION "Total Population Graph Functions",ROMX
@@ -49,20 +53,48 @@ GraphDrawTotalPopulation::
     ; Draw graph
     ; ----------
 
+    ld      hl,GRAPH_POPULATION_DATA
+    ld      d,0
+    ld      a,[GRAPH_POPULATION_OFFSET]
+    ld      e,a
+    add     hl,de ; hl = start of data
+
+    ld      d,a ; d = current offset
     ld      e,0 ; e = x
 .loopx:
 
+    push    hl
     push    de ; (*)
 
-        ld      b,e
-        ld      c,e
-        LONG_CALL_ARGS  APA_Plot ; b = x, c = y (0-127!)
+        ld      a,[hl]
+        cp      a,GRAPH_INVALID_ENTRY
+        jr      z,.skip_entry
+
+            ld      c,a ; 127-y
+            ld      b,e ; x
+
+            ld      a,127
+            sub     a,c
+            ld      c,a
+
+            LONG_CALL_ARGS  APA_Plot ; b = x, c = y (0-127!)
+.skip_entry:
 
     pop     de ; (*)
+    pop     hl
+
+    inc     hl
+    inc     d
+
+    bit     7,d
+    jr      z,.not_overflow_ring_buffer
+        ld      hl,GRAPH_POPULATION_DATA
+        ld      d,0
+.not_overflow_ring_buffer:
 
     inc     e
-    bit     7,e ; Up to 128
-    jp      z,.loopx
+    bit     7,e ; GRAPH_SIZE = 128
+    jr      z,.loopx
 
     ; Set White
     call    MinimapSetDefaultPalette
