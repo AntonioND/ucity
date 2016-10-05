@@ -163,10 +163,6 @@ MinimapMenuRefresh::
 
     ret
 
-;###############################################################################
-
-    SECTION "Minimap Menu Code Bank 0",ROM0
-
 ;-------------------------------------------------------------------------------
 
 MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
@@ -304,6 +300,80 @@ MinimapMenuHide::
 
 ;-------------------------------------------------------------------------------
 
+MinimapMenuLoadGFX::
+
+    ld      a,[rLCDC]
+    or      a,LCDCF_OBJON|LCDCF_OBJ16
+    ld      [rLCDC],a
+
+    call    MinimapMenuHide
+
+    ; Load graphics
+    ; -------------
+
+    ; Tile map
+    ; --------
+
+    xor     a,a
+    ld      [rVBK],a
+
+    ld      hl,MINIMAP_MENU_MAP
+
+    ld      de,$9C00
+    ld      b,MINIMAP_MENU_WIDTH*MINIMAP_MENU_HEIGHT
+    call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+    ; Attributes
+
+    ld      a,1
+    ld      [rVBK],a
+
+    ld      de,$9C00
+    ld      b,MINIMAP_MENU_WIDTH*MINIMAP_MENU_HEIGHT
+    call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+
+    ; Load tiles
+    ; ----------
+
+    xor     a,a
+    ld      [rVBK],a
+
+    ld      bc,MINIMAP_MENU_NUM_TILES
+    ld      de,MINIMAP_MENU_TILE_BASE
+    ld      hl,MINIMAP_MENU_TILES
+    call    vram_copy_tiles
+
+    ; Load palettes
+    ; -------------
+
+    ld      hl,MINIMAP_MENU_PALETTES
+
+    ld      a,0
+    call    bg_set_palette_safe ; hl will increase inside
+    ld      a,1
+    call    bg_set_palette_safe
+    ld      a,2
+    call    bg_set_palette_safe
+    ld      a,3
+    call    bg_set_palette_safe
+
+    ld      hl,MINIMAP_MENU_SPRITE_PALETTE
+
+    ld      a,MINIMAP_SPRITE_PALETTE_INDEX
+    call    spr_set_palette_safe
+
+    ; End
+    ; ---
+
+    ret
+
+;###############################################################################
+
+    SECTION "Minimap Menu Code Bank 0",ROM0
+
+;-------------------------------------------------------------------------------
+
 MinimapMenuLCDHandler:: ; Only called when it is active, no need to check
 
     ; This is a critical section, but inside an interrupt handler, so no need
@@ -385,81 +455,6 @@ MinimapMenuReset::
     ld      [rSTAT],a
     ld      a,MINIMAP_MENU_BASE_Y-1
     ld      [rLYC],a
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-MinimapMenuLoadGFX::
-
-    ld      a,[rLCDC]
-    or      a,LCDCF_OBJON|LCDCF_OBJ16
-    ld      [rLCDC],a
-
-    call    MinimapMenuHide
-
-    ; Load graphics
-    ; -------------
-
-    ld      b,BANK(MINIMAP_MENU_MAP)
-    call    rom_bank_push_set
-
-    ; Tile map
-    ; --------
-
-    xor     a,a
-    ld      [rVBK],a
-
-    ld      hl,MINIMAP_MENU_MAP
-
-    ld      de,$9C00
-    ld      b,MINIMAP_MENU_WIDTH*MINIMAP_MENU_HEIGHT
-    call    vram_copy_fast ; b = size - hl = source address - de = dest
-
-    ; Attributes
-
-    ld      a,1
-    ld      [rVBK],a
-
-    ld      de,$9C00
-    ld      b,MINIMAP_MENU_WIDTH*MINIMAP_MENU_HEIGHT
-    call    vram_copy_fast ; b = size - hl = source address - de = dest
-
-
-    ; Load tiles
-    ; ----------
-
-    xor     a,a
-    ld      [rVBK],a
-
-    ld      bc,MINIMAP_MENU_NUM_TILES
-    ld      de,MINIMAP_MENU_TILE_BASE
-    ld      hl,MINIMAP_MENU_TILES
-    call    vram_copy_tiles
-
-    ; Load palettes
-    ; -------------
-
-    ld      hl,MINIMAP_MENU_PALETTES
-
-    ld      a,0
-    call    bg_set_palette_safe ; hl will increase inside
-    ld      a,1
-    call    bg_set_palette_safe
-    ld      a,2
-    call    bg_set_palette_safe
-    ld      a,3
-    call    bg_set_palette_safe
-
-    ld      hl,MINIMAP_MENU_SPRITE_PALETTE
-
-    ld      a,MINIMAP_SPRITE_PALETTE_INDEX
-    call    spr_set_palette_safe
-
-    ; End
-    ; ---
-
-    call    rom_bank_pop
 
     ret
 

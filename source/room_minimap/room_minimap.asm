@@ -298,7 +298,7 @@ InputHandleMinimap:
 
 .normal_mode:
 
-    call    MinimapMenuHandleInput ; If it returns 1, exit room
+    LONG_CALL_ARGS  MinimapMenuHandleInput ; If it returns 1, exit room
     and     a,a
     ret     z ; don't exit
 
@@ -343,7 +343,7 @@ RoomMinimap::
 
         ; This can be loaded after the rest, it isn't shown until A is pressed
         ; so there is no hurry.
-        call    MinimapMenuLoadGFX
+        LONG_CALL   MinimapMenuLoadGFX
 
         jr      .end_start_selection
 .disaster_mode:
