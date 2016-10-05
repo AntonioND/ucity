@@ -653,9 +653,10 @@ ENDC
 
     ld      a,[initial_number_fire_stations]
     ld      b,16
-.shift_loop:
+.shift_loop: ; wait until fire stations is 0 or b is 0
     and     a,a
     jr      z,.end_shift_loop
+    dec     a
     dec     b
     jr      nz,.shift_loop
 .end_shift_loop:
