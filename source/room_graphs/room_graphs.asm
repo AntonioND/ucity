@@ -60,6 +60,11 @@ GraphsDrawSelected::
         LONG_CALL   GraphDrawRCI
         ret
 .not_rci:
+    cp      a,GRAPHS_SELECTION_MONEY
+    jr      nz,.not_money
+        LONG_CALL   GraphDrawMoney
+        ret
+.not_money:
 
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette

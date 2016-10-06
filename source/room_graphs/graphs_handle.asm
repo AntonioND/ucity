@@ -49,6 +49,10 @@ GRAPH_INDUSTRIAL_DATA::   DS GRAPH_SIZE
 GRAPH_INDUSTRIAL_OFFSET:: DS 1 ; Circular buffer start index
 GRAPH_INDUSTRIAL_SCALE:   DS 1
 
+GRAPH_MONEY_DATA::   DS GRAPH_SIZE
+GRAPH_MONEY_OFFSET:: DS 1 ; Circular buffer start index
+GRAPH_MONEY_SCALE:   DS 1
+
 ;###############################################################################
 
     SECTION "Graph Handling Functions",ROMX
@@ -92,6 +96,17 @@ GraphsClearRecords:: ; Clear WRAM
     ld      [GRAPH_COMMERCIAL_SCALE],a
     ld      [GRAPH_INDUSTRIAL_OFFSET],a
     ld      [GRAPH_INDUSTRIAL_SCALE],a
+
+    ; Money graph
+
+    ld      hl,GRAPH_MONEY_DATA
+    ld      a,GRAPH_INVALID_ENTRY
+    ld      b,GRAPH_SIZE
+    call    memset_fast ; a = value    hl = start address    b = size
+
+    xor     a,a
+    ld      [GRAPH_MONEY_OFFSET],a
+    ld      [GRAPH_MONEY_SCALE],a
 
     ret
 
@@ -139,6 +154,18 @@ GraphsSaveRecords:: ; Save to SRAM
     ld      [SAV_GRAPH_COMMERCIAL_OFFSET],a
     ld      a,[GRAPH_INDUSTRIAL_SCALE]
     ld      [SAV_GRAPH_INDUSTRIAL_SCALE],a
+
+    ; Money graph
+
+    ld      bc,GRAPH_SIZE
+    ld      hl,GRAPH_MONEY_DATA
+    ld      de,SAV_GRAPH_MONEY_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+
+    ld      a,[GRAPH_MONEY_OFFSET]
+    ld      [SAV_GRAPH_MONEY_OFFSET],a
+    ld      a,[GRAPH_MONEY_SCALE]
+    ld      [SAV_GRAPH_MONEY_SCALE],a
 
     ; Disable SRAM
 
@@ -192,6 +219,18 @@ GraphsLoadRecords:: ; Load from SRAM
     ld      a,[SAV_GRAPH_INDUSTRIAL_SCALE]
     ld      [GRAPH_INDUSTRIAL_SCALE],a
 
+    ; Money graph
+
+    ld      bc,GRAPH_SIZE
+    ld      de,GRAPH_MONEY_DATA
+    ld      hl,SAV_GRAPH_MONEY_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+
+    ld      a,[SAV_GRAPH_MONEY_OFFSET]
+    ld      [GRAPH_MONEY_OFFSET],a
+    ld      a,[SAV_GRAPH_MONEY_SCALE]
+    ld      [GRAPH_MONEY_SCALE],a
+
     ; Disable SRAM
 
     ld      a,CART_RAM_DISABLE
@@ -209,7 +248,7 @@ GraphHandleRecords::
 
     call    GraphRCIAddRecord
 
-    ; call    GraphMoneyAddRecord ; TODO : Uncomment this!
+    call    GraphMoneyAddRecord
 
     ret
 
@@ -453,7 +492,69 @@ ENDM
 
     ; BCDE = current money in binary!
 
-    ; TODO : Add scaled value to graphic
+    ; Now, add scaled value to graphic
+
+    ; Calculate value
+    ; ---------------
+
+.loop_calculate:
+
+        push    bc ; Preserve value for next iteration of the loop
+        push    de ; (*12)
+
+        ld      a,[GRAPH_MONEY_SCALE]
+
+        call    SRL32 ; a = shift value, bcde = value to shift
+
+        ld      a,e
+        and     a,$80
+        or      a,d
+        or      a,c
+        or      a,b ; check if it fits in 127 (0000007F)
+        jr      z,.end_loop
+
+        ; If it is bigger than the scale, change scale and scale stored data
+
+        ld      hl,GRAPH_MONEY_SCALE
+        inc     [hl] ; no need to check, we are only shifting a 32 bit value
+        ; so a shift by 32 should make anything fit in the graph.
+
+        ; Divide by 2 the stored data
+
+        ld      b,GRAPH_SIZE
+        ld      hl,GRAPH_MONEY_DATA
+.loop_scale_down:
+        sra     [hl] ; GRAPH_INVALID_ENTRY == -1, it will be preserved
+        inc     hl
+        dec     b
+        jr      nz,.loop_scale_down
+
+        pop     de ; (*1)
+        pop     bc
+
+    jr      .loop_calculate
+
+.end_loop:
+
+    add     sp,+4 ; (*2)
+
+    ld      b,e ; b = value to save
+
+    ; Finally, save this value
+    ; ------------------------
+
+    ld      a,[GRAPH_MONEY_OFFSET]
+    ld      e,a
+    ld      d,0
+    ld      hl,GRAPH_MONEY_DATA
+    add     hl,de ; hl = pointer to next entry
+
+    ld      [hl],b
+
+    ld      a,[GRAPH_MONEY_OFFSET]
+    inc     a
+    and     a,GRAPH_SIZE-1
+    ld      [GRAPH_MONEY_OFFSET],a
 
     ret
 

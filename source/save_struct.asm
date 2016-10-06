@@ -80,6 +80,10 @@ SAV_GRAPH_INDUSTRIAL_DATA::   DS GRAPH_SIZE
 SAV_GRAPH_INDUSTRIAL_OFFSET:: DS 1 ; Circular buffer start index
 SAV_GRAPH_INDUSTRIAL_SCALE::  DS 1
 
+SAV_GRAPH_MONEY_DATA::   DS GRAPH_SIZE
+SAV_GRAPH_MONEY_OFFSET:: DS 1 ; Circular buffer start index
+SAV_GRAPH_MONEY_SCALE::  DS 1
+
 ;-------------------------------------------------------------------------------
 
     SECTION "Save Data Map", SRAM[_SRAM+$1000]
