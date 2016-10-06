@@ -414,23 +414,19 @@ BCDE_ADD_A : MACRO ; BCDE += A
 .no_carry\@:
 ENDM
 
-BCD_2_BIN_ADD_LOW_NIBBLE : MACRO ; decrements hl
-    push    hl
+BCD_2_BIN_ADD_LOW_NIBBLE : MACRO ; \1 = byte inside money array
     call    MultBy10 ; BCDE = value, returned value in BCDE, clobbers HL
-    pop     hl
 
-    ld      a,[hl-]
+    ld      a,[MoneyWRAM+\1]
     and     a,$0F
 
     BCDE_ADD_A ; BCDE += A
 ENDM
 
-BCD_2_BIN_ADD_HIGH_NIBBLE : MACRO ; doesn't decrement hl
-    push    hl
+BCD_2_BIN_ADD_HIGH_NIBBLE : MACRO ; \1 = byte inside money array
     call    MultBy10 ; BCDE = value, returned value in BCDE, clobbers HL
-    pop     hl
 
-    ld      a,[hl]
+    ld      a,[MoneyWRAM+\1]
     swap    a
     and     a,$0F
 
@@ -440,21 +436,18 @@ ENDM
     ld      bc,0
     ld      de,0 ; Accumulated binary value = 0
 
-    ; Point to the MSB nibble
-    ld      hl,MoneyWRAM+4 ; BCD, LSB first, LSB in lower nibbles (9 digits)
-
     ; for each nibble from MSB to LSB
     ;     value = value * 10 + nibble
 
-    BCD_2_BIN_ADD_LOW_NIBBLE  ; Low nibble of byte 4
-    BCD_2_BIN_ADD_HIGH_NIBBLE ; 3
-    BCD_2_BIN_ADD_LOW_NIBBLE
-    BCD_2_BIN_ADD_HIGH_NIBBLE ; 2
-    BCD_2_BIN_ADD_LOW_NIBBLE
-    BCD_2_BIN_ADD_HIGH_NIBBLE ; 1
-    BCD_2_BIN_ADD_LOW_NIBBLE
-    BCD_2_BIN_ADD_HIGH_NIBBLE ; 0
-    BCD_2_BIN_ADD_LOW_NIBBLE
+    BCD_2_BIN_ADD_LOW_NIBBLE  4 ; Only low nibble of byte 4
+    BCD_2_BIN_ADD_HIGH_NIBBLE 3
+    BCD_2_BIN_ADD_LOW_NIBBLE  3
+    BCD_2_BIN_ADD_HIGH_NIBBLE 2
+    BCD_2_BIN_ADD_LOW_NIBBLE  2
+    BCD_2_BIN_ADD_HIGH_NIBBLE 1
+    BCD_2_BIN_ADD_LOW_NIBBLE  1
+    BCD_2_BIN_ADD_HIGH_NIBBLE 0
+    BCD_2_BIN_ADD_LOW_NIBBLE  0
 
 .end_bcd_to_binary:
 
