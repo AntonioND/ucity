@@ -37,6 +37,18 @@ GRAPH_POPULATION_DATA::   DS GRAPH_SIZE
 GRAPH_POPULATION_OFFSET:: DS 1 ; Circular buffer start index
 GRAPH_POPULATION_SCALE:   DS 1
 
+GRAPH_RESIDENTIAL_DATA::   DS GRAPH_SIZE
+GRAPH_RESIDENTIAL_OFFSET:: DS 1 ; Circular buffer start index
+GRAPH_RESIDENTIAL_SCALE:   DS 1
+
+GRAPH_COMMERCIAL_DATA::   DS GRAPH_SIZE
+GRAPH_COMMERCIAL_OFFSET:: DS 1 ; Circular buffer start index
+GRAPH_COMMERCIAL_SCALE:   DS 1
+
+GRAPH_INDUSTRIAL_DATA::   DS GRAPH_SIZE
+GRAPH_INDUSTRIAL_OFFSET:: DS 1 ; Circular buffer start index
+GRAPH_INDUSTRIAL_SCALE:   DS 1
+
 ;###############################################################################
 
     SECTION "Graph Handling Functions",ROMX
@@ -55,6 +67,31 @@ GraphsClearRecords:: ; Clear WRAM
     xor     a,a
     ld      [GRAPH_POPULATION_OFFSET],a
     ld      [GRAPH_POPULATION_SCALE],a
+
+    ; Population per sectors graph
+
+    ld      hl,GRAPH_RESIDENTIAL_DATA
+    ld      a,GRAPH_INVALID_ENTRY
+    ld      b,GRAPH_SIZE
+    call    memset_fast ; a = value    hl = start address    b = size
+
+    ld      hl,GRAPH_COMMERCIAL_DATA
+    ld      a,GRAPH_INVALID_ENTRY
+    ld      b,GRAPH_SIZE
+    call    memset_fast ; a = value    hl = start address    b = size
+
+    ld      hl,GRAPH_INDUSTRIAL_DATA
+    ld      a,GRAPH_INVALID_ENTRY
+    ld      b,GRAPH_SIZE
+    call    memset_fast ; a = value    hl = start address    b = size
+
+    xor     a,a
+    ld      [GRAPH_RESIDENTIAL_OFFSET],a
+    ld      [GRAPH_RESIDENTIAL_SCALE],a
+    ld      [GRAPH_COMMERCIAL_OFFSET],a
+    ld      [GRAPH_COMMERCIAL_SCALE],a
+    ld      [GRAPH_INDUSTRIAL_OFFSET],a
+    ld      [GRAPH_INDUSTRIAL_SCALE],a
 
     ret
 
@@ -76,9 +113,32 @@ GraphsSaveRecords:: ; Save to SRAM
 
     ld      a,[GRAPH_POPULATION_OFFSET]
     ld      [SAV_GRAPH_POPULATION_OFFSET],a
-
     ld      a,[GRAPH_POPULATION_SCALE]
     ld      [SAV_GRAPH_POPULATION_SCALE],a
+
+    ; Population per sectors graph
+
+    ld      bc,GRAPH_SIZE
+    ld      hl,GRAPH_RESIDENTIAL_DATA
+    ld      de,SAV_GRAPH_RESIDENTIAL_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+    ld      bc,GRAPH_SIZE
+    ld      hl,GRAPH_COMMERCIAL_DATA
+    ld      de,SAV_GRAPH_COMMERCIAL_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+    ld      bc,GRAPH_SIZE
+    ld      hl,GRAPH_INDUSTRIAL_DATA
+    ld      de,SAV_GRAPH_INDUSTRIAL_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+
+    ld      a,[GRAPH_RESIDENTIAL_OFFSET]
+    ld      [SAV_GRAPH_RESIDENTIAL_OFFSET],a
+    ld      a,[GRAPH_RESIDENTIAL_SCALE]
+    ld      [SAV_GRAPH_RESIDENTIAL_SCALE],a
+    ld      a,[GRAPH_COMMERCIAL_OFFSET]
+    ld      [SAV_GRAPH_COMMERCIAL_OFFSET],a
+    ld      a,[GRAPH_INDUSTRIAL_SCALE]
+    ld      [SAV_GRAPH_INDUSTRIAL_SCALE],a
 
     ; Disable SRAM
 
@@ -105,9 +165,32 @@ GraphsLoadRecords:: ; Load from SRAM
 
     ld      a,[SAV_GRAPH_POPULATION_OFFSET]
     ld      [GRAPH_POPULATION_OFFSET],a
-
     ld      a,[SAV_GRAPH_POPULATION_SCALE]
     ld      [GRAPH_POPULATION_SCALE],a
+
+    ; Population per sectors graph
+
+    ld      bc,GRAPH_SIZE
+    ld      de,GRAPH_RESIDENTIAL_DATA
+    ld      hl,SAV_GRAPH_RESIDENTIAL_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+    ld      bc,GRAPH_SIZE
+    ld      de,GRAPH_COMMERCIAL_DATA
+    ld      hl,SAV_GRAPH_COMMERCIAL_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+    ld      bc,GRAPH_SIZE
+    ld      de,GRAPH_INDUSTRIAL_DATA
+    ld      hl,SAV_GRAPH_INDUSTRIAL_DATA
+    call    memcopy ; bc = size    hl = source address    de = dest address
+
+    ld      a,[SAV_GRAPH_RESIDENTIAL_OFFSET]
+    ld      [GRAPH_RESIDENTIAL_OFFSET],a
+    ld      a,[SAV_GRAPH_RESIDENTIAL_SCALE]
+    ld      [GRAPH_RESIDENTIAL_SCALE],a
+    ld      a,[SAV_GRAPH_COMMERCIAL_OFFSET]
+    ld      [GRAPH_COMMERCIAL_OFFSET],a
+    ld      a,[SAV_GRAPH_INDUSTRIAL_SCALE]
+    ld      [GRAPH_INDUSTRIAL_SCALE],a
 
     ; Disable SRAM
 
@@ -123,6 +206,8 @@ GraphHandleRecords::
     ; This calls the individual graph handling functions
 
     call    GraphTotalPopulationAddRecord
+
+    call    GraphRCIAddRecord
 
     ret
 
@@ -179,14 +264,14 @@ SRL32: ; a = shift value, bcde = value (B = MSB, E = LSB), return value = bcde
 
 ;-------------------------------------------------------------------------------
 
-GraphTotalPopulationAddRecord:
+ADD_RECORD_POPULATION : MACRO ; \1 = name in lowercase, \2 = name in uppercase
 
     ; Calculate value
     ; ---------------
 
-.loop_calculate:
+.loop_calculate\@:
 
-        ld      hl,population_total ; LSB first, 4 bytes
+        ld      hl,population_\1 ; LSB first, 4 bytes
         ld      a,[hl+]
         ld      e,a
         ld      a,[hl+]
@@ -195,7 +280,7 @@ GraphTotalPopulationAddRecord:
         ld      c,a
         ld      b,[hl]
 
-        ld      a,[GRAPH_POPULATION_SCALE]
+        ld      a,[GRAPH_\2_SCALE]
 
         call    SRL32 ; a = shift value, bcde = value to shift
 
@@ -204,46 +289,60 @@ GraphTotalPopulationAddRecord:
         or      a,d
         or      a,c
         or      a,b ; check if it fits in 127 (0000007F)
-        jr      z,.end_loop
+        jr      z,.end_loop\@
 
         ; If it is bigger than the scale, change scale and scale stored data
 
-        ld      hl,GRAPH_POPULATION_SCALE
+        ld      hl,GRAPH_\2_SCALE
         inc     [hl] ; no need to check, we are only shifting a 32 bit value
         ; so a shift by 32 should make anything fit in the graph.
 
         ; Divide by 2 the stored data
 
         ld      b,GRAPH_SIZE
-        ld      hl,GRAPH_POPULATION_DATA
-.loop_scale_down:
+        ld      hl,GRAPH_\2_DATA
+.loop_scale_down\@:
         sra     [hl] ; GRAPH_INVALID_ENTRY == -1, it will be preserved
         inc     hl
         dec     b
-        jr      nz,.loop_scale_down
+        jr      nz,.loop_scale_down\@
 
-    jr      .loop_calculate
+    jr      .loop_calculate\@
 
-.end_loop:
+.end_loop\@:
 
     ld      b,e ; b = value to save
 
     ; Finally, save this value
     ; ------------------------
 
-    ld      a,[GRAPH_POPULATION_OFFSET]
+    ld      a,[GRAPH_\2_OFFSET]
     ld      e,a
     ld      d,0
-    ld      hl,GRAPH_POPULATION_DATA
+    ld      hl,GRAPH_\2_DATA
     add     hl,de ; hl = pointer to next entry
 
     ld      [hl],b
 
-    ld      a,[GRAPH_POPULATION_OFFSET]
+    ld      a,[GRAPH_\2_OFFSET]
     inc     a
     and     a,GRAPH_SIZE-1
-    ld      [GRAPH_POPULATION_OFFSET],a
+    ld      [GRAPH_\2_OFFSET],a
 
+ENDM
+
+;-------------------------------------------------------------------------------
+
+GraphTotalPopulationAddRecord:
+    ADD_RECORD_POPULATION total, POPULATION
+    ret
+
+;-------------------------------------------------------------------------------
+
+GraphRCIAddRecord:
+    ADD_RECORD_POPULATION residential, RESIDENTIAL
+    ADD_RECORD_POPULATION commercial,  COMMERCIAL
+    ADD_RECORD_POPULATION industrial,  INDUSTRIAL
     ret
 
 ;###############################################################################

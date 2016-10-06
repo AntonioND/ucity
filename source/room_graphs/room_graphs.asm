@@ -55,6 +55,11 @@ GraphsDrawSelected::
         LONG_CALL   GraphDrawTotalPopulation
         ret
 .not_population:
+    cp      a,GRAPHS_SELECTION_RCI
+    jr      nz,.not_rci
+        LONG_CALL   GraphDrawRCI
+        ret
+.not_rci:
 
     ld      b,b ; Not found!
     call    MinimapSetDefaultPalette
