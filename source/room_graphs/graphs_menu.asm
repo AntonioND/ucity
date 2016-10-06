@@ -61,7 +61,7 @@ GRAPHS_MENU_BASE_Y    EQU 144-16
 GRAPHS_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
 GRAPHS_MENU_NUM_ICONS_BORDER EQU ((160/16)/2)-5 ; Icons to allow to overflow
 
-GRAPHS_SPRITE_TILE_INDEX     EQU 136 ; After the menu icons
+GRAPHS_SPRITE_TILE_INDEX     EQU 140 ; After the menu icons
 GRAPHS_SPRITE_PALETTE_INDEX  EQU 0 ; Palette slot to be used by the cursor
 GRAPHS_SPRITE_BASE_Y         EQU (144-16-16)+16
 GRAPHS_SPRITE_OAM_INDEX      EQU 0
