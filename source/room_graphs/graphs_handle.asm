@@ -209,6 +209,8 @@ GraphHandleRecords::
 
     call    GraphRCIAddRecord
 
+    ; call    GraphMoneyAddRecord ; TODO : Uncomment this!
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -343,6 +345,123 @@ GraphRCIAddRecord:
     ADD_RECORD_POPULATION residential, RESIDENTIAL
     ADD_RECORD_POPULATION commercial,  COMMERCIAL
     ADD_RECORD_POPULATION industrial,  INDUSTRIAL
+    ret
+
+;-------------------------------------------------------------------------------
+
+MultBy10: ; BCDE = value, returned value in BCDE, clobbers HL
+
+    sla     e ; Shift by 1
+    rl      d
+    rl      c
+    rl      b
+
+    push    bc ; Push top 16 bit first, low 16 bits second. That way they will
+    push    de ; be read in reverse order as we need.
+
+    REPT    2
+    sla     e ; Shift by 2
+    rl      d
+    rl      c
+    rl      b
+    ENDR
+
+    ; BCDE  = value * 8
+    ; STACK = value * 2
+
+    pop     hl ; pop low 16 bits
+    add     hl,de ; add low 16 bits
+    jr      nc,.no_carry
+    inc     bc ; increment top 16 bit if carry
+.no_carry:
+    LD_DE_HL ; move data back to its place
+
+    pop     hl ; pop high 16 bits
+    add     hl,bc ; add top 16 bits
+    LD_BC_HL ; move data back to its place
+    ; ignore overflows...
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+GraphMoneyAddRecord:
+
+    ; Get BCD value and convert it to binary
+    ; --------------------------------------
+
+    ; If lower than 0, use 0!
+    ld      de,MoneyWRAM
+    call    BCD_DE_LW_ZERO ; returns a = 1 if [de] < 0
+    and     a,a
+    jr      z,.greater_than_zero
+
+        ; Lower than zero
+        ld      bc,0
+        ld      de,0 ; use 0
+        jp      .end_bcd_to_binary
+
+.greater_than_zero:
+
+BCDE_ADD_A : MACRO ; BCDE += A
+    add     a,e
+    ld      e,a
+    ld      a,0
+    adc     a,d
+    ld      d,a
+    jr      nc,.no_carry\@
+    inc     bc
+.no_carry\@:
+ENDM
+
+BCD_2_BIN_ADD_LOW_NIBBLE : MACRO ; decrements hl
+    push    hl
+    call    MultBy10 ; BCDE = value, returned value in BCDE, clobbers HL
+    pop     hl
+
+    ld      a,[hl-]
+    and     a,$0F
+
+    BCDE_ADD_A ; BCDE += A
+ENDM
+
+BCD_2_BIN_ADD_HIGH_NIBBLE : MACRO ; doesn't decrement hl
+    push    hl
+    call    MultBy10 ; BCDE = value, returned value in BCDE, clobbers HL
+    pop     hl
+
+    ld      a,[hl]
+    swap    a
+    and     a,$0F
+
+    BCDE_ADD_A ; BCDE += A
+ENDM
+
+    ld      bc,0
+    ld      de,0 ; Accumulated binary value = 0
+
+    ; Point to the MSB nibble
+    ld      hl,MoneyWRAM+4 ; BCD, LSB first, LSB in lower nibbles (9 digits)
+
+    ; for each nibble from MSB to LSB
+    ;     value = value * 10 + nibble
+
+    BCD_2_BIN_ADD_LOW_NIBBLE  ; Low nibble of byte 4
+    BCD_2_BIN_ADD_HIGH_NIBBLE ; 3
+    BCD_2_BIN_ADD_LOW_NIBBLE
+    BCD_2_BIN_ADD_HIGH_NIBBLE ; 2
+    BCD_2_BIN_ADD_LOW_NIBBLE
+    BCD_2_BIN_ADD_HIGH_NIBBLE ; 1
+    BCD_2_BIN_ADD_LOW_NIBBLE
+    BCD_2_BIN_ADD_HIGH_NIBBLE ; 0
+    BCD_2_BIN_ADD_LOW_NIBBLE
+
+.end_bcd_to_binary:
+
+    ; BCDE = current money in binary!
+
+    ; TODO : Add scaled value to graphic
+
     ret
 
 ;###############################################################################
