@@ -26,8 +26,10 @@ ROOM_GRAPHS_INC SET 1
 ;###############################################################################
 
 GRAPHS_SELECTION_POPULATION EQU 0
+GRAPHS_SELECTION_RCI        EQU 1
+GRAPHS_SELECTION_unused     EQU 2
 
-GRAPHS_SELECTION_MAX        EQU 1
+GRAPHS_SELECTION_MAX        EQU 2
 
 ;-------------------------------------------------------------------------------
 

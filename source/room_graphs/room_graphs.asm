@@ -76,22 +76,22 @@ GraphsSelectGraph:: ; b = graph to select
 
 InputHandleGraphs:
 
-    ; Exit if  B or START are pressed
-    ld      a,[joy_pressed]
-    and     a,PAD_B|PAD_START
-    jr      z,.end_b_start
-        ld      a,1
-        ld      [graphs_room_exit],a ; exit
-        ret
-.end_b_start:
+    LONG_CALL_ARGS  GraphsMenuHandleInput ; If it returns 1, exit room
+    and     a,a
+    ret     z ; don't exit
 
-    ret ; don't exit
+    ; Exit
+    ld      a,1
+    ld      [graphs_room_exit],a
+    ret
 
 ;-------------------------------------------------------------------------------
 
 RoomGraphs::
 
     call    SetPalettesAllBlack
+
+    call    GraphsMenuReset
 
     ld      bc,RoomGraphsVBLHandler
     call    irq_set_VBL
@@ -114,6 +114,10 @@ RoomGraphs::
     ld      [graphs_selected],a
 
     LONG_CALL   GraphsDrawSelected
+
+    ; This can be loaded after the rest, it isn't shown until A is pressed
+    ; so there is no hurry.
+    LONG_CALL   GraphsMenuLoadGFX
 
     xor     a,a
     ld      [graphs_room_exit],a
@@ -144,6 +148,8 @@ RoomGraphs::
 ;-------------------------------------------------------------------------------
 
 RoomGraphsVBLHandler:
+
+    call    GraphsMenuVBLHandler
 
     call    refresh_OAM
 
