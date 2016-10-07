@@ -112,12 +112,7 @@ GraphsClearRecords:: ; Clear WRAM
 
 ;-------------------------------------------------------------------------------
 
-GraphsSaveRecords:: ; Save to SRAM
-
-    ; Enable SRAM
-
-    ld      a,CART_RAM_ENABLE
-    ld      [rRAMG],a
+GraphsSaveRecords:: ; Save to SRAM - SRAM should be enabled!
 
     ; Total population graph
 
@@ -167,21 +162,11 @@ GraphsSaveRecords:: ; Save to SRAM
     ld      a,[GRAPH_MONEY_SCALE]
     ld      [SAV_GRAPH_MONEY_SCALE],a
 
-    ; Disable SRAM
-
-    ld      a,CART_RAM_DISABLE
-    ld      [rRAMG],a
-
     ret
 
 ;-------------------------------------------------------------------------------
 
-GraphsLoadRecords:: ; Load from SRAM
-
-    ; Enable SRAM
-
-    ld      a,CART_RAM_ENABLE
-    ld      [rRAMG],a
+GraphsLoadRecords:: ; Load from SRAM - SRAM should be enabled!
 
     ; Total population graph
 
@@ -230,11 +215,6 @@ GraphsLoadRecords:: ; Load from SRAM
     ld      [GRAPH_MONEY_OFFSET],a
     ld      a,[SAV_GRAPH_MONEY_SCALE]
     ld      [GRAPH_MONEY_SCALE],a
-
-    ; Disable SRAM
-
-    ld      a,CART_RAM_DISABLE
-    ld      [rRAMG],a
 
     ret
 
