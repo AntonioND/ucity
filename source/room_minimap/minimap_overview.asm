@@ -67,7 +67,7 @@ MINIMAP_OVERVIEW_TYPE_COLOR_ARRAY:
     DB C_BLACK,C_WHITE,C_BLACK,C_WHITE ; TYPE_FIRE - Placeholder, never used.
 
 MINIMAP_OVERVIEW_TITLE:
-    DB "Overview",0
+    STR_ADD "Overview"
 
 ;-------------------------------------------------------------------------------
 

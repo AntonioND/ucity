@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_graphs.inc"
+    INCLUDE "text.inc"
 
 ;###############################################################################
 
@@ -38,7 +39,7 @@ GRAPH_TOTAL_POPULATION_PALETTE:
     DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(0<<0)
 
 GRAPH_TOTAL_POPULATION_TITLE:
-    DB "Total Population",0
+    STR_ADD "Total Population"
 
 GraphDrawTotalPopulation::
 

@@ -25,6 +25,7 @@
 
 ;-------------------------------------------------------------------------------
 
+    INCLUDE "text.inc"
     INCLUDE "tileset_info.inc"
 
 ;###############################################################################
@@ -57,52 +58,52 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-str_forest: DB "Forest",0
-str_field:  DB "Field",0
-str_water:  DB "Water",0
-str_residential: DB "Residential",0
-str_commercial:  DB "Commercial",0
-str_industrial:  DB "Industrial",0
-str_demolished:  DB "Demolished",0
-str_road:  DB "Road",0
-str_train: DB "Train",0
-str_power: DB "Power Lines",0
-str_road_train:   DB "Road, Train",0
-str_road_power:   DB "Road, Power Lines",0
-str_train_power:  DB "Train, Power Lines",0
-str_road_bridge:  DB "Road Bridge",0
-str_train_bridge: DB "Train Bridge",0
-str_power_bridge: DB "Power Lines Bridge",0
-str_police:      DB "Police Dept.",0
-str_firedept:    DB "Fire Dept.",0
-str_hospital:    DB "Hospital",0
-str_park_small:  DB "Small Park",0
-str_park_big:    DB "Big Park",0
-str_stadium:     DB "Stadium",0
-str_school:      DB "School",0
-str_high_school: DB "High School",0
-str_university:  DB "University",0
-str_museum:      DB "Museum",0
-str_library:     DB "Library",0
-str_ariport: DB "Airport",0
-str_port:    DB "Port",0
-str_dock:    DB "Dock",0
-str_power_coal:    DB "Coal Power",0
-str_power_oil:     DB "Oil Power",0
-str_power_wind:    DB "Wind Power",0
-str_power_solar:   DB "Solar Power",0
-str_power_nuclear: DB "Nuclear Power",0
-str_power_fusion:  DB "Fusion Power",0
-str_residential_1: DB "Light Residential",0
-str_residential_2: DB "Medium Res.",0
-str_residential_3: DB "Dense Residential",0
-str_commercial_1: DB "Light Commercial",0
-str_commercial_2: DB "Medium Com.",0
-str_commercial_3: DB "Dense Commercial",0
-str_industrial_1: DB "Light Industrial",0
-str_industrial_2: DB "Medium Ind.",0
-str_industrial_3: DB "Dense Industrial",0
-str_fire: DB "Fire",0
+str_forest: STR_ADD "Forest"
+str_field:  STR_ADD "Field"
+str_water:  STR_ADD "Water"
+str_residential: STR_ADD "Residential"
+str_commercial:  STR_ADD "Commercial"
+str_industrial:  STR_ADD "Industrial"
+str_demolished:  STR_ADD "Demolished"
+str_road:  STR_ADD "Road"
+str_train: STR_ADD "Train"
+str_power: STR_ADD "Power Lines"
+str_road_train:   STR_ADD "Road. Train"
+str_road_power:   STR_ADD "Road. Power Lines"
+str_train_power:  STR_ADD "Train. Power Lines"
+str_road_bridge:  STR_ADD "Road Bridge"
+str_train_bridge: STR_ADD "Train Bridge"
+str_power_bridge: STR_ADD "Power Lines Bridge"
+str_police:      STR_ADD "Police Dept."
+str_firedept:    STR_ADD "Fire Dept."
+str_hospital:    STR_ADD "Hospital"
+str_park_small:  STR_ADD "Small Park"
+str_park_big:    STR_ADD "Big Park"
+str_stadium:     STR_ADD "Stadium"
+str_school:      STR_ADD "School"
+str_high_school: STR_ADD "High School"
+str_university:  STR_ADD "University"
+str_museum:      STR_ADD "Museum"
+str_library:     STR_ADD "Library"
+str_ariport: STR_ADD "Airport"
+str_port:    STR_ADD "Port"
+str_dock:    STR_ADD "Dock"
+str_power_coal:    STR_ADD "Coal Power"
+str_power_oil:     STR_ADD "Oil Power"
+str_power_wind:    STR_ADD "Wind Power"
+str_power_solar:   STR_ADD "Solar Power"
+str_power_nuclear: STR_ADD "Nuclear Power"
+str_power_fusion:  STR_ADD "Fusion Power"
+str_residential_1: STR_ADD "Light Residential"
+str_residential_2: STR_ADD "Medium Res."
+str_residential_3: STR_ADD "Dense Residential"
+str_commercial_1: STR_ADD "Light Commercial"
+str_commercial_2: STR_ADD "Medium Com."
+str_commercial_3: STR_ADD "Dense Commercial"
+str_industrial_1: STR_ADD "Light Industrial"
+str_industrial_2: STR_ADD "Medium Ind."
+str_industrial_3: STR_ADD "Dense Industrial"
+str_fire: STR_ADD "Fire"
 
 ;-------------------------------------------------------------------------------
 

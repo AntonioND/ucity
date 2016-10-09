@@ -50,7 +50,7 @@ MINIMAP_POPULATION_DENSITY_MAP_PALETTE:
     DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
 MINIMAP_POPULATION_DENSITY_MAP_TITLE:
-    DB "Population Density",0
+    STR_ADD "Population Density"
 
 MinimapDrawPopulationDensityMap::
 

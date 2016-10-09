@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_graphs.inc"
+    INCLUDE "text.inc"
 
 ;###############################################################################
 
@@ -38,7 +39,7 @@ GRAPH_RCI_PALETTE: ; White, Green, Yellow, Blue
     DW (0<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
 
 GRAPH_RCI_TITLE:
-    DB "Sector Population",0
+    STR_ADD "Sector Population"
 
 GraphDrawRCI::
 

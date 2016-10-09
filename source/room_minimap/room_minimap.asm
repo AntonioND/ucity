@@ -449,12 +449,6 @@ RoomMinimapDrawTitle:: ; hl = ptr to text string
     and     a,a
     ret     z ; return from function from here!
 
-    push    hl
-    push    de
-    call    ASCII2Tile
-    pop     de
-    pop     hl
-
     ld      b,a
     di ; Entering critical section
     WAIT_SCREEN_BLANK ; Clobbers A and C

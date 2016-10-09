@@ -45,7 +45,7 @@ MINIMAP_DISASTERS_MAP_PALETTE:
     DW (0<<10)|(0<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
 
 MINIMAP_DISASTERS_MAP_TITLE:
-    DB "Disasters",0
+    STR_ADD "Disasters"
 
 MinimapDrawDisastersMap::
 

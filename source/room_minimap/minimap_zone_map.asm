@@ -67,7 +67,7 @@ MINIMAP_ZONE_MAP_TYPE_COLOR_ARRAY:
     DB C_WHITE, C_WHITE, C_WHITE, C_WHITE  ; TYPE_FIRE - Placeholder, never used
 
 MINIMAP_ZONE_MAP_TITLE:
-    DB "Zone Map",0
+    STR_ADD "Zone Map"
 
 ;-------------------------------------------------------------------------------
 

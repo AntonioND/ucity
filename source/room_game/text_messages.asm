@@ -25,6 +25,7 @@
 
 ;-------------------------------------------------------------------------------
 
+    INCLUDE "text.inc"
     INCLUDE "text_messages.inc"
 
 ;###############################################################################
@@ -59,24 +60,24 @@ ENDM
 
 MSG_EMPTY:
 MSG_CUSTOM: ; Placeholder, not actually used
-    DB $00
+    DB 0 ; End string
 
 MSG_POLLUTION_HIGH:
-    DB "Pollution is too",$0A,"high!",$00
+    STR_ADD "Pollution is too<nl>high!"
 MSG_TRAFFIC_HIGH:
-    DB "Traffic is too",$0A,"high!",$00
+    STR_ADD "Traffic is too<nl>high!"
 
 MSG_CLASS_TOWN:
-    DB "Your village is",$0A,"now a town!",$00
+    STR_ADD "Your village is<nl>now a town!"
 MSG_CLASS_CITY:
-    DB "Your town is now a",$0A,"city!",$00
+    STR_ADD "Your town is now a<nl>city!"
 MSG_CLASS_METROPOLIS:
-    DB "Your city is now a",$0A,"metropolis!",$00
+    STR_ADD "Your city is now a<nl>metropolis!"
 MSG_CLASS_CAPITAL:
-    DB "Your metropolis is",$0A,"now a capital!",$00
+    STR_ADD "Your metropolis is<nl>now a capital!"
 
 MSG_FIRE_INITED:
-    DB "A fire has started",$0A,"in the city!",$00
+    STR_ADD "A fire has started<nl>in the city!"
 
 ;-------------------------------------------------------------------------------
 

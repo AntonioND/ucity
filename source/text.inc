@@ -25,6 +25,11 @@ TEXT_INC SET 1
 
 ;###############################################################################
 
+; NOTE: This file should be included by any file that stores ASCII strings in
+; the ROM, as the charmap defined below will convert them to tile indexes.
+
+;###############################################################################
+
 ; Offsets
 O_PERCENT       EQU 39
 O_DASH          EQU 40
@@ -55,22 +60,6 @@ BCD2Tile : MACRO ; a = number from 0 to 9. Returns tile number in a
 ENDM
 
 ;-------------------------------------------------------------------------------
-
-    CHARMAP "%",O_PERCENT
-    CHARMAP "-",O_DASH
-    CHARMAP " ",O_SPACE
-    CHARMAP "/",O_BAR
-    CHARMAP "$",O_COPYRIGHT
-    CHARMAP ",",O_COMMA
-    CHARMAP ".",O_DOT
-    CHARMAP "_",O_UNDERSCORE
-    CHARMAP "@",O_AT
-    CHARMAP ":",O_COLON
-    CHARMAP "#",O_ARROW
-    CHARMAP "'",O_APOSTROPHE
-    CHARMAP "?",O_QUESTION
-    CHARMAP "!",O_EXCLAMATION
-    CHARMAP "~",O_NTILDE
 
     CHARMAP "0",O_ZERO+0
     CHARMAP "1",O_ZERO+1
@@ -136,6 +125,24 @@ ENDM
     CHARMAP "x",O_A_LOWERCASE+23
     CHARMAP "y",O_A_LOWERCASE+24
     CHARMAP "z",O_A_LOWERCASE+25
+
+    CHARMAP "%",O_PERCENT
+    CHARMAP "-",O_DASH
+    CHARMAP " ",O_SPACE
+    CHARMAP "/",O_BAR
+    CHARMAP "$",O_COPYRIGHT
+    CHARMAP ",",O_COMMA
+    CHARMAP ".",O_DOT
+    CHARMAP "_",O_UNDERSCORE
+    CHARMAP "@",O_AT
+    CHARMAP ":",O_COLON
+    CHARMAP "#",O_ARROW
+    CHARMAP "'",O_APOSTROPHE
+    CHARMAP "?",O_QUESTION
+    CHARMAP "!",O_EXCLAMATION
+    CHARMAP "~",O_NTILDE
+
+    CHARMAP "<nl>", $0A ; New line
 
 ;-------------------------------------------------------------------------------
 

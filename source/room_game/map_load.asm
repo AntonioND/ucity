@@ -59,7 +59,7 @@ PREDEFINED_MAP_0:
 ;-------------------------------------------------------------------------------
 
 ; Note that MAGIC_STRING_LEN is 4
-MAGIC_STRING: DB "BTCY"
+MAGIC_STRING: DB 66,84,67,89 ; BTCY - Prevent charmap from modifying it
 
 ;-------------------------------------------------------------------------------
 

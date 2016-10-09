@@ -45,7 +45,7 @@ MINIMAP_POWER_GRID_MAP_PALETTE:
     DW (0<<10)|(0<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)
 
 MINIMAP_POWER_GRID_MAP_TITLE:
-    DB "Power Grid",0
+    STR_ADD "Power Grid"
 
 MinimapDrawPowerGridMap::
 
@@ -168,7 +168,7 @@ MINIMAP_POWER_DENSITY_MAP_PALETTE:
     DW (0<<10)|(15<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
 MINIMAP_POWER_DENSITY_MAP_TITLE:
-    DB "Power Density",0
+    STR_ADD "Power Density"
 
 MinimapDrawPowerDensityMap::
 

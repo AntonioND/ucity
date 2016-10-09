@@ -67,7 +67,7 @@ MINIMAP_TRANSPORT_MAP_TYPE_COLOR_ARRAY:
     DB C_WHITE, C_WHITE, C_WHITE, C_WHITE ; TYPE_FIRE - Placeholder, never used
 
 MINIMAP_TRANSPORT_MAP_TITLE:
-    DB "Transport",0
+    STR_ADD "Transport"
 
 ;-------------------------------------------------------------------------------
 

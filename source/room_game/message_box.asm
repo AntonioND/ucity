@@ -225,10 +225,6 @@ MessageBoxPrint:: ; bc = pointer to string
         jr      .loop ; continue
 .not_line_jump:
 
-    push    hl
-    call    ASCII2Tile ; destroys de and hl
-    pop     hl
-
     push    bc
     ld      b,a
     di

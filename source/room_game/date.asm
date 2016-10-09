@@ -106,25 +106,8 @@ DatePrint::
     inc     de
     ret
 
-MONTH_NAME : MACRO ; \1 \2 \3 = "J" "a" "n", etc (first one uppercase)
-    DB O_A_UPPERCASE - "A" + \1
-    DB O_A_LOWERCASE - "a" + \2
-    DB O_A_LOWERCASE - "a" + \3
-ENDM
-
 .date_month_name:
-    MONTH_NAME "J","a","n"
-    MONTH_NAME "F","e","b"
-    MONTH_NAME "M","a","r"
-    MONTH_NAME "A","p","r"
-    MONTH_NAME "M","a","y"
-    MONTH_NAME "J","u","n"
-    MONTH_NAME "J","u","l"
-    MONTH_NAME "A","u","g"
-    MONTH_NAME "S","e","p"
-    MONTH_NAME "O","c","t"
-    MONTH_NAME "N","o","v"
-    MONTH_NAME "D","e","c"
+    STR_ADD "JanFebMarAprMayJunJulAugSepOctNovDec"
 
 ;-------------------------------------------------------------------------------
 

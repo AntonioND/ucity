@@ -108,7 +108,7 @@ MINIMAP_POLICE_PALETTE:
     DW (31<<10)|(0<<5)|(0<<0), (15<<10)|(0<<5)|(0<<0)
 
 MINIMAP_POLICE_TITLE:
-    DB "Police Influence",0
+    STR_ADD "Police Influence"
 
 MinimapDrawPolice::
 
@@ -145,7 +145,7 @@ MINIMAP_FIRE_PROTECTION_PALETTE:
     DW (0<<10)|(15<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
 MINIMAP_FIRE_PROTECTION_TITLE:
-    DB "Fire Protection",0
+    STR_ADD "Fire Protection"
 
 MinimapDrawFireProtection::
 
@@ -182,7 +182,7 @@ MINIMAP_HOSPITALS_PALETTE:
     DW (0<<10)|(31<<5)|(0<<0), (0<<10)|(10<<5)|(0<<0)
 
 MINIMAP_HOSPITALS_TITLE:
-    DB "Hospitals",0
+    STR_ADD "Hospitals"
 
 MinimapDrawHospitals::
 
@@ -219,7 +219,7 @@ MINIMAP_SCHOOLS_PALETTE:
     DW (10<<10)|(5<<5)|(10<<0), (5<<10)|(0<<5)|(5<<0)
 
 MINIMAP_SCHOOLS_TITLE:
-    DB "Schools",0
+    STR_ADD "Schools"
 
 MinimapDrawSchools::
 
@@ -256,7 +256,7 @@ MINIMAP_HIGH_SCHOOLS_PALETTE:
     DW (10<<10)|(10<<5)|(5<<0), (5<<10)|(5<<5)|(0<<0)
 
 MINIMAP_HIGH_SCHOOLS_TITLE:
-    DB "High Schools",0
+    STR_ADD "High Schools"
 
 MinimapDrawHighSchools::
 

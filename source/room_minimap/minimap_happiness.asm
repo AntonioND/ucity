@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
+    INCLUDE "text.inc"
 
 ;###############################################################################
 
@@ -54,7 +55,7 @@ MINIMAP_HAPPINESS_MAP_PALETTE:
     DW (0<<10)|(31<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
 MINIMAP_HAPPINESS_MAP_TITLE:
-    DB "Happiness",0
+    STR_ADD "Happiness"
 
 MinimapDrawHappinessMap::
 

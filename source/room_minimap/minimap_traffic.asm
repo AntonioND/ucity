@@ -55,7 +55,7 @@ MINIMAP_TRAFFIC_MAP_PALETTE:
     DW (0<<10)|(15<<5)|(31<<0), (0<<10)|(0<<5)|(31<<0)
 
 MINIMAP_TRAFFIC_MAP_TITLE:
-    DB "Traffic",0
+    STR_ADD "Traffic"
 
 MinimapDrawTrafficMap::
 
