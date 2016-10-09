@@ -56,82 +56,97 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-; To use this macro, do:
-;     String2Tiles "S","t","r","i","n","g",0
-; This macro can (probably?) have as many arguments as needed. Normally, RGBDS
-; only lets the code access the lower 9 values (\1 to \9), but actually there
-; can be up to MAXMACROARGS arguments (as of now, 256).
+    CHARMAP "%",O_PERCENT
+    CHARMAP "-",O_DASH
+    CHARMAP " ",O_SPACE
+    CHARMAP "/",O_BAR
+    CHARMAP "$",O_COPYRIGHT
+    CHARMAP ",",O_COMMA
+    CHARMAP ".",O_DOT
+    CHARMAP "_",O_UNDERSCORE
+    CHARMAP "@",O_AT
+    CHARMAP ":",O_COLON
+    CHARMAP "#",O_ARROW
+    CHARMAP "'",O_APOSTROPHE
+    CHARMAP "?",O_QUESTION
+    CHARMAP "!",O_EXCLAMATION
+    CHARMAP "~",O_NTILDE
 
-String2Tiles : MACRO
+    CHARMAP "0",O_ZERO+0
+    CHARMAP "1",O_ZERO+1
+    CHARMAP "2",O_ZERO+2
+    CHARMAP "3",O_ZERO+3
+    CHARMAP "4",O_ZERO+4
+    CHARMAP "5",O_ZERO+5
+    CHARMAP "6",O_ZERO+6
+    CHARMAP "7",O_ZERO+7
+    CHARMAP "8",O_ZERO+8
+    CHARMAP "9",O_ZERO+9
 
-String2TilesLenght SET 0
+    CHARMAP "A",O_A_UPPERCASE+0
+    CHARMAP "B",O_A_UPPERCASE+1
+    CHARMAP "C",O_A_UPPERCASE+2
+    CHARMAP "D",O_A_UPPERCASE+3
+    CHARMAP "E",O_A_UPPERCASE+4
+    CHARMAP "F",O_A_UPPERCASE+5
+    CHARMAP "G",O_A_UPPERCASE+6
+    CHARMAP "H",O_A_UPPERCASE+7
+    CHARMAP "I",O_A_UPPERCASE+8
+    CHARMAP "J",O_A_UPPERCASE+9
+    CHARMAP "K",O_A_UPPERCASE+10
+    CHARMAP "L",O_A_UPPERCASE+11
+    CHARMAP "M",O_A_UPPERCASE+12
+    CHARMAP "N",O_A_UPPERCASE+13
+    CHARMAP "O",O_A_UPPERCASE+14
+    CHARMAP "P",O_A_UPPERCASE+15
+    CHARMAP "Q",O_A_UPPERCASE+16
+    CHARMAP "R",O_A_UPPERCASE+17
+    CHARMAP "S",O_A_UPPERCASE+18
+    CHARMAP "T",O_A_UPPERCASE+19
+    CHARMAP "U",O_A_UPPERCASE+20
+    CHARMAP "V",O_A_UPPERCASE+21
+    CHARMAP "W",O_A_UPPERCASE+22
+    CHARMAP "X",O_A_UPPERCASE+23
+    CHARMAP "Y",O_A_UPPERCASE+24
+    CHARMAP "Z",O_A_UPPERCASE+25
 
-    REPT _NARG ; Repeat for each argument (even if there are more than 9!)
+    CHARMAP "a",O_A_LOWERCASE+0
+    CHARMAP "b",O_A_LOWERCASE+1
+    CHARMAP "c",O_A_LOWERCASE+2
+    CHARMAP "d",O_A_LOWERCASE+3
+    CHARMAP "e",O_A_LOWERCASE+4
+    CHARMAP "f",O_A_LOWERCASE+5
+    CHARMAP "g",O_A_LOWERCASE+6
+    CHARMAP "h",O_A_LOWERCASE+7
+    CHARMAP "i",O_A_LOWERCASE+8
+    CHARMAP "j",O_A_LOWERCASE+9
+    CHARMAP "k",O_A_LOWERCASE+10
+    CHARMAP "l",O_A_LOWERCASE+11
+    CHARMAP "m",O_A_LOWERCASE+12
+    CHARMAP "n",O_A_LOWERCASE+13
+    CHARMAP "o",O_A_LOWERCASE+14
+    CHARMAP "p",O_A_LOWERCASE+15
+    CHARMAP "q",O_A_LOWERCASE+16
+    CHARMAP "r",O_A_LOWERCASE+17
+    CHARMAP "s",O_A_LOWERCASE+18
+    CHARMAP "t",O_A_LOWERCASE+19
+    CHARMAP "u",O_A_LOWERCASE+20
+    CHARMAP "v",O_A_LOWERCASE+21
+    CHARMAP "w",O_A_LOWERCASE+22
+    CHARMAP "x",O_A_LOWERCASE+23
+    CHARMAP "y",O_A_LOWERCASE+24
+    CHARMAP "z",O_A_LOWERCASE+25
 
-        IF \1 == "%"
-            DB O_PERCENT
-        ENDC
-        IF \1 == "-"
-            DB O_DASH
-        ENDC
-        IF \1 == " "
-            DB O_SPACE
-        ENDC
-        IF \1 == "/"
-            DB O_BAR
-        ENDC
-        IF \1 == "$"
-            DB O_COPYRIGHT
-        ENDC
-        IF \1 == ","
-            DB O_COMMA
-        ENDC
-        IF \1 == "."
-            DB O_DOT
-        ENDC
-        IF \1 == "_"
-            DB O_UNDERSCORE
-        ENDC
-        IF \1 == "@"
-            DB O_AT
-        ENDC
-        IF \1 == ":"
-            DB O_COLON
-        ENDC
-        IF \1 == "#"
-            DB O_ARROW
-        ENDC
-        IF \1 == "'"
-            DB O_APOSTROPHE
-        ENDC
-        IF \1 == "?"
-            DB O_QUESTION
-        ENDC
-        IF \1 == "!"
-            DB O_EXCLAMATION
-        ENDC
-        IF \1 == "~"
-            DB O_NTILDE
-        ENDC
-        IF \1 >= "0" && \1 <= "9"
-            DB O_ZERO + \1 - "0"
-        ENDC
-        IF \1 >= "A" && \1 <= "Z"
-            DB O_A_UPPERCASE + \1 - "A"
-        ENDC
-        IF \1 >= "a" && \1 <= "z"
-            DB O_A_LOWERCASE + \1 - "a"
-        ENDC
-        IF \1 == 0
-            DB 0
-        ENDC
+;-------------------------------------------------------------------------------
 
-        SHIFT ; Get next argument
-
-String2TilesLenght SET String2TilesLenght + 1
-
-    ENDR
-
+STR_ADD : MACRO ; \1 = String, \2 = Name (optional)
+IF _NARG == 2
+\2:
+ENDC
+    DB \1,0
+IF _NARG == 2
+\2_LEN EQU STRLEN(\1)+1
+ENDC
 ENDM
 
 ;###############################################################################

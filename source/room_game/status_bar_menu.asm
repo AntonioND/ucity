@@ -496,12 +496,6 @@ StatusBarUpdate::
 
 ;-----------------------------------
 
-.price_label:
-    String2Tiles "P","r","i","c","e",":"
-.end_price_label:
-
-PRICE_LABEL_LEN EQU .end_price_label - .price_label
-
 .print_price:
     call    BuildingTypeGet
     cp      a,B_None
@@ -523,20 +517,17 @@ PRICE_LABEL_LEN EQU .end_price_label - .price_label
     ld      hl,$9800+32*1+6
     call    vram_nitro_copy
 
-    ld      b,PRICE_LABEL_LEN
+    ld      b,6
     ld      de,.price_label
     ld      hl,$9800+32*1+0
     call    vram_nitro_copy
 
     ret
 
+.price_label:
+    STR_ADD "Price:"
+
 ;-----------------------------------
-
-.date_label:
-    String2Tiles "D","a","t","e",":"," "," "," "
-.end_date_label:
-
-DATE_LABEL_LEN EQU .end_date_label - .date_label
 
 .print_date:
 
@@ -560,12 +551,15 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
     add     sp,+8
 
-    ld      b,DATE_LABEL_LEN
+    ld      b,8
     ld      de,.date_label
     ld      hl,$9800+32*1+0
     call    vram_nitro_copy
 
     ret
+
+.date_label:
+    STR_ADD "Date:   "
 
 ;-----------------------------------
 
@@ -614,15 +608,15 @@ DATE_LABEL_LEN EQU .end_date_label - .date_label
 
 ; The strings have to be 10 chars long
 .class_village:
-    String2Tiles " "," "," ","V","i","l","l","a","g","e"
+    STR_ADD "   Village"
 .class_town:
-    String2Tiles " "," "," "," "," "," ","T","o","w","n"
+    STR_ADD "      Town"
 .class_city:
-    String2Tiles " "," "," "," "," "," ","C","i","t","y"
+    STR_ADD "      City"
 .class_metropolis:
-    String2Tiles "M","e","t","r","o","p","o","l","i","s"
+    STR_ADD "Metropolis"
 .class_capital:
-    String2Tiles " "," "," ","C","a","p","i","t","a","l"
+    STR_ADD "   Capital"
 
 ;-----------------------------------
 
@@ -820,10 +814,10 @@ StatusBarMenuDrawPauseState::
     ret
 
 .str_pause:
-    String2Tiles "P","a","u","s","e"," "," "
+    STR_ADD "Pause  "
 
 .str_unpause:
-    String2Tiles "U","n","p","a","u","s","e"
+    STR_ADD "Unpause"
 
 ;-------------------------------------------------------------------------------
 

@@ -406,9 +406,9 @@ SaveMenuPrintSRAMBankEmpty:
     ret
 
 .str_empty_city_name:
-    String2Tiles "E","m","p","t","y"," "," "," "," "," "
+    STR_ADD "Empty     "
 .str_empty_city_date:
-    String2Tiles " "," "," "," "," "," "," "," "
+    STR_ADD "        "
 
 ;-------------------------------------------------------------------------------
 
@@ -462,9 +462,9 @@ SaveMenuPrintSRAMBankNotAvailable:
     ret
 
 .str_doesnt_exist_city_name:
-    String2Tiles " "," "," "," "," "," "," "," "," "," "
+    STR_ADD "          "
 .str_doesnt_exist_city_date:
-    String2Tiles " "," "," "," "," "," "," "," "
+    STR_ADD "        "
 
 ;-------------------------------------------------------------------------------
 

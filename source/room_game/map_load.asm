@@ -103,9 +103,7 @@ PredefinedMapGetStartCoordinates: ; a = number, returns de = xy
 
     ret
 
-PREDEFINED_STR_CITY_NAME:
-    String2Tiles "S","c","e","n","a","r","i","o",0
-PREDEFINED_STR_CITY_LEN EQU String2TilesLenght ; includes string terminator!
+    STR_ADD "Scenario", PREDEFINED_STR_CITY_NAME
 
 PredefinedMapSetupGameVariables:
 
@@ -132,7 +130,7 @@ PredefinedMapSetupGameVariables:
 
     ld      hl,PREDEFINED_STR_CITY_NAME
     ld      de,current_city_name
-    ld      bc,PREDEFINED_STR_CITY_LEN
+    ld      bc,PREDEFINED_STR_CITY_NAME_LEN
     call    memcopy ; bc = size    hl = source address    de = dest address
 
     ret

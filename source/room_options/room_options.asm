@@ -256,10 +256,10 @@ OptionsMenuDrawDisastersEnabledState:
     ret
 
 .str_enabled:
-    String2Tiles "E","n","a","b","l","e","d"," "
+    STR_ADD "Enabled "
 
 .str_disabled:
-    String2Tiles "D","i","s","a","b","l","e","d"
+    STR_ADD "Disabled"
 
 ;-------------------------------------------------------------------------------
 
