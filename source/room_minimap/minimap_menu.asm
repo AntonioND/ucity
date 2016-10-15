@@ -36,7 +36,7 @@
 
 minimap_scroll_x:        DS 1
 minimap_menu_selection:  DS 1 ; selected item
-minimap_menu_active:     DS 1 ; 0 if not active, 1 if active
+minimap_menu_active::    DS 1 ; 0 if not active, 1 if active
 minimap_cursor_y_offset: DS 1 ; value to add to base Y
 minimap_cursor_y_offset_countdown: DS 1 ; frames to move
 
@@ -62,9 +62,9 @@ MINIMAP_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
 MINIMAP_MENU_NUM_ICONS_BORDER EQU ((160/16)/2)-2 ; Icons to allow to overflow
 
 MINIMAP_SPRITE_TILE_INDEX     EQU 184 ; After the menu icons
-MINIMAP_SPRITE_PALETTE_INDEX  EQU 0 ; Palette slot to be used by the cursor
+MINIMAP_SPRITE_PALETTE_INDEX  EQU 1 ; Palette slot to be used by the cursor
 MINIMAP_SPRITE_BASE_Y         EQU (144-16-16)+16
-MINIMAP_SPRITE_OAM_INDEX      EQU 0
+MINIMAP_SPRITE_OAM_INDEX      EQU 4
 MINIMAP_CURSOR_COUNTDOWN_MOVEMENT EQU 20 ; frames to wait to move
 
 ;-------------------------------------------------------------------------------
@@ -186,6 +186,7 @@ MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
         and     a,PAD_A|PAD_LEFT|PAD_RIGHT
         ret     z ; return 0
 
+        call    RoomMinimapHideCursor
         call    MinimapMenuShow
         xor     a,a
         ret ; return 0
@@ -200,6 +201,7 @@ MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
     jr      z,.end_b
         ; Deactivate
         call    MinimapMenuHide
+        call    RoomMinimapShowCursor
         xor     a,a
         ret ; return 0
 .end_b:
@@ -209,6 +211,7 @@ MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
     jr      z,.end_a
         ; Deactivate and load next map
         call    MinimapMenuHide
+        call    RoomMinimapShowCursor
         ld      a,[minimap_menu_selection]
         ld      b,a
         LONG_CALL_ARGS  MinimapSelectMap

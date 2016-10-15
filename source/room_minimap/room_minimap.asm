@@ -309,6 +309,71 @@ InputHandleMinimap:
 
 ;-------------------------------------------------------------------------------
 
+RoomMinimapShowCursor::
+
+    call    CursorShow
+    ld      hl,rLCDC
+    res     2,[hl] ; spr 8x8
+
+    ret
+
+RoomMinimapHideCursor::
+
+    call    CursorHide
+    call    wait_vbl
+    ld      hl,rLCDC
+    set     2,[hl] ; spr 8x16
+
+    call    CursorRefresh
+    call    wait_vbl ; wait for the OAM to be updated
+
+    ret
+
+RoomMinimapSetupCursor:
+
+    call    CursorLoad
+
+    ; Ignore status bar for the size and position of the cursor!
+
+    ld      a,[bg_x] ; cursor x = bg scroll in tiles * px per tile /
+    ld      e,a      ;            map tiles per vram map tile = bg_x * 8 / 4
+    sla     e
+
+    ld      a,[bg_y]
+    ld      d,a
+    sla     d
+
+    ld      a,16 + 8 - 4 ; add bg offset and OAM sprite displacement
+    add     a,e ; subtract half of the size to make it frame the correct area
+    ld      e,a
+
+    ld      a,16 + 16 - 4
+    add     a,d
+    ld      d,a
+
+    call    CursorSetCoordinates ; e = x, d = y
+
+    ld      b,160 / 4 ; Pixels in screen / real tiles per tile in minimap
+    ld      c,144 / 4
+    call    CursorSetSize ; b = width, c = height
+
+    ret
+
+RoomMinimapUpdateCursor:
+
+    ld      a,[minimap_menu_active]
+    and     a,a
+    jr      nz,.skip_animation ; If the menu is active the cursor is hidden
+
+        call    CursorAnimate
+        call    CursorRefresh
+
+.skip_animation:
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomMinimap::
 
     call    SetPalettesAllBlack
@@ -331,6 +396,8 @@ RoomMinimap::
     call    RoomMinimapLoadBG
 
     call    LoadTextPalette
+
+    call    RoomMinimapSetupCursor
 
     ld      a,[simulation_disaster_mode]
     and     a,a
@@ -355,6 +422,8 @@ RoomMinimap::
 
 .end_start_selection:
 
+    call    RoomMinimapShowCursor
+
     xor     a,a
     ld      [minimap_room_exit],a
 
@@ -365,11 +434,15 @@ RoomMinimap::
     call    scan_keys
     call    KeyAutorepeatHandle
 
+    call    RoomMinimapUpdateCursor
+
     call    InputHandleMinimap
 
     ld      a,[minimap_room_exit]
     and     a,a
     jr      z,.loop
+
+    call    RoomMinimapHideCursor
 
     call    SetDefaultVBLHandler
 
