@@ -41,7 +41,7 @@ CursorTileX::       DS  1 ; Coordinates relative to the screen (in tiles)
 CursorTileY::       DS  1
 CursorX::           DS  1 ; Coordinates relative to the screen (in pixels)
 CursorY::           DS  1
-CursorSizeX::       DS  1 ; Size in tiles
+CursorSizeX::       DS  1 ; Size in pixels
 CursorSizeY::       DS  1
 
 CURSOR_ANIMATION_TICKS  EQU 10
@@ -95,7 +95,7 @@ CursorLoad::
     ld      a,0
     ld      [CursorFrame],a
 
-    ld      a,1
+    ld      a,8
     ld      [CursorSizeX],a
     ld      [CursorSizeY],a
 
@@ -153,9 +153,12 @@ CursorHide::
     ret
 
 CursorShow::
+
     ld      a,1
     ld      [CursorNeedsRefresh],a
+
     call    CursorRefresh
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -168,8 +171,6 @@ CursorRefresh::
 
     xor     a,a
     ld      [CursorNeedsRefresh],a ; flag as updated
-
-    call    CursorRefreshCoordFromTile
 
     ; Top Left
         ld      hl,CursorFrame
@@ -204,9 +205,6 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeY]
-        add     a,a
-        add     a,a
-        add     a,a ; * 8
         add     a,d
         ld      c,a
 
@@ -228,9 +226,6 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeX]
-        add     a,a
-        add     a,a
-        add     a,a ; * 8
         add     a,d
         ld      c,a
         ld      b,a
@@ -257,9 +252,6 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeX]
-        add     a,a
-        add     a,a
-        add     a,a ; * 8
         add     a,d
         ld      c,a
         ld      b,a
@@ -268,9 +260,6 @@ CursorRefresh::
         add     a,[hl]
         ld      d,a
         ld      a,[CursorSizeY]
-        add     a,a
-        add     a,a
-        add     a,a ; * 8
         add     a,d
         ld      c,a
 
@@ -289,7 +278,7 @@ CursorRefresh::
 
 ;-------------------------------------------------------------------------------
 
-CursorAnimate:
+CursorAnimate::
 
     ld      hl,CursorAnimCount
     ld      a,[hl]
@@ -327,6 +316,7 @@ CursorMovePAD_hor: ; returns PAD_RIGHT and similar flags ORed if it has moved
         dec     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
+        call    CursorRefreshCoordFromTile
         ld      e,PAD_LEFT
 .left_end:
 
@@ -336,12 +326,16 @@ CursorMovePAD_hor: ; returns PAD_RIGHT and similar flags ORed if it has moved
     jr      z,.right_end
     ld      b,[hl]
     ld      a,[CursorSizeX]
+    sra     a
+    sra     a
+    sra     a ; to tiles
     add     a,b
     cp      a,BOARD_COLUMNS
     jr      z,.right_end
         inc     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
+        call    CursorRefreshCoordFromTile
         ld      a,e
         or      a,PAD_RIGHT
         ld      e,a
@@ -367,6 +361,7 @@ CursorMovePAD_ver: ; returns PAD_RIGHT and similar flags ORed if it has moved
         dec     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
+        call    CursorRefreshCoordFromTile
         ld      e,PAD_UP
 .up_end:
 
@@ -376,12 +371,16 @@ CursorMovePAD_ver: ; returns PAD_RIGHT and similar flags ORed if it has moved
     jr      z,.down_end
     ld      b,[hl]
     ld      a,[CursorSizeY]
+    sra     a
+    sra     a
+    sra     a ; to tiles
     add     a,b
     cp      a,BOARD_ROWS
     jr      z,.down_end
         inc     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
+        call    CursorRefreshCoordFromTile
         ld      a,e
         or      a,PAD_DOWN
         ld      e,a
@@ -393,7 +392,29 @@ CursorMovePAD_ver: ; returns PAD_RIGHT and similar flags ORed if it has moved
 
 ;-------------------------------------------------------------------------------
 
-CursorSetSize:: ; b = width, c = height
+CursorSetCoordinates:: ; e = x, d = y, in pixels
+
+    ld      a,e
+    ld      [CursorX],a
+
+    ld      a,d
+    ld      [CursorY],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+CursorSetSizeTiles:: ; b = width, c = height, in tiles
+
+    sla     b
+    sla     b
+    sla     b
+
+    sla     c
+    sla     c
+    sla     c
+
+CursorSetSize:: ; b = width, c = height, in pixels
 
     ld      a,b
     ld      [CursorSizeX],a
@@ -596,7 +617,7 @@ CursorHiddenMove::
 
 ;-------------------------------------------------------------------------------
 
-CursorGetGlobalCoords:: ; returns x in e, y in d
+CursorGetGlobalCoords:: ; returns x in e, y in d (in tiles)
 
     ld      a,[CursorTileX]
     ld      b,a

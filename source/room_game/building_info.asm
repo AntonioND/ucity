@@ -158,8 +158,8 @@ ENDC
 
 BuildingUpdateCursorSize:: ; Updates cursor size to the selected building size.
 
-    call    BuildingGetSize
-    call    CursorSetSize
+    call    BuildingGetSize ; returns size in tiles
+    call    CursorSetSizeTiles
 
     ret
 
