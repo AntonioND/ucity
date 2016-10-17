@@ -492,8 +492,14 @@ PauseMenuHandleOption:
 .continue_budget:
         call    RoomBudgetMenu
 
-        ld      a,0 ; load gfx only
+        ld      a,2 ; load minimal data
         call    RoomGameLoad
+
+        ld      a,GAME_STATE_PAUSE_MENU
+        ld      [game_state],a
+
+        call    StatusBarMenuForceShow
+
         ret
 
 .not_budget:
@@ -512,8 +518,13 @@ PauseMenuHandleOption:
 .continue_minimaps:
         LONG_CALL   RoomMinimap
 
-        ld      a,0 ; load gfx only
+        ld      a,2 ; load minimal data
         call    RoomGameLoad
+
+        ld      a,GAME_STATE_PAUSE_MENU
+        ld      [game_state],a
+
+        call    StatusBarMenuForceShow
 
         ret
 
@@ -533,8 +544,13 @@ PauseMenuHandleOption:
 .continue_graphs:
         LONG_CALL   RoomGraphs
 
-        ld      a,0 ; load gfx only
+        ld      a,2 ; load minimal data
         call    RoomGameLoad
+
+        ld      a,GAME_STATE_PAUSE_MENU
+        ld      [game_state],a
+
+        call    StatusBarMenuForceShow
 
         ret
 
@@ -554,8 +570,14 @@ PauseMenuHandleOption:
 .continue_options:
         LONG_CALL   RoomOptionsMenu
 
-        ld      a,0 ; load gfx only
+        ld      a,2 ; load minimal data
         call    RoomGameLoad
+
+        ld      a,GAME_STATE_PAUSE_MENU
+        ld      [game_state],a
+
+        call    StatusBarMenuForceShow
+
         ret
 
 .not_options:
@@ -882,14 +904,23 @@ InputHandleModeWatchFastMove:
 
 InputHandleModePauseMenu:
 
-    ld      a,[joy_pressed]
-    and     a,PAD_B|PAD_START
-    jr      z,.not_b_start
+    ld      a,[joy_released]
+    and     a,PAD_B
+    jr      z,.not_b
         call    StatusBarMenuHide
         ld      a,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret
-.not_b_start:
+.not_b:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_START
+    jr      z,.not_start
+        call    StatusBarMenuHide
+        ld      a,GAME_STATE_WATCH
+        call    GameStateMachineStateSet
+        ret
+.not_start:
 
     ret
 
@@ -897,16 +928,16 @@ InputHandleModePauseMenu:
 
 InputHandleModeShowMessage:
 
-    ld      a,[joy_pressed]
-    and     a,PAD_B|PAD_START
-    jr      z,.not_b_start
+    ld      a,[joy_released]
+    and     a,PAD_B
+    jr      z,.not_b
 
         call    MessageBoxHide
 
         ld      a,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret
-.not_b_start:
+.not_b:
 
     ret
 
@@ -967,14 +998,48 @@ RoomGameVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
+; Load elements of room game
+; A = 0 Load graphics + status bar and cursor + aux
+; A = 1 Like before, but also reset city status from SRAM or others
+; A = 2 Load graphics + aux
 RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
     push    af
-    call    SetPalettesAllBlack
+
+        call    SetPalettesAllBlack
+
+        call    InitKeyAutorepeat
+
+        ld      a,$FF
+        ld      [rWX],a
+        ld      [rWY],a
+
+        xor     a,a
+        ld      [joy_held],a
+        ld      [joy_pressed],a
+        ld      [joy_released],a
+
     pop     af
 
-    and     a,a
-    jr      z,.only_gfx
+    cp      a,0
+    jr      nz,.not_zero
+
+        ; Load GFX
+
+        ld      b,0 ; bank at 8000h
+        call    LoadText
+        LONG_CALL   BuildSelectMenuLoadGfx
+        call    BuildSelectMenuReset
+        call    StatusBarMenuLoadGfx
+        call    CursorLoad
+
+        call    bg_reload_main ; refresh bg and set correct scroll
+
+        jr      .continue_zero_one
+
+.not_zero:
+    cp      a,1
+    jr      nz,.not_one
 
         ; Clear WRAMX
 
@@ -1003,8 +1068,11 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         pop     de ; (*) Restore coordinates to pass to bg_load_main
         call    bg_load_main
 
-        jr      .continue
-.only_gfx:
+        jr      .continue_zero_one
+
+.not_one:
+    cp      a,2
+    jr      nz,.not_two
 
         ; Load GFX
 
@@ -1017,14 +1085,30 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
         call    bg_reload_main ; refresh bg and set correct scroll
 
-.continue:
+;        ld      a,[game_sprites_8x16]
+;        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
+;        ld      [rLCDC],a
+
+        ld      bc,RoomGameVBLHandler
+        call    irq_set_VBL
+
+        call    CursorGetGlobalCoords
+        ld      a,e
+        ld      [last_frame_x],a
+        ld      a,d
+        ld      [last_frame_y],a
+
+        ret
+
+.not_two:
+    ld      b,b ; Panic!
+    jr      .not_two
+
+.continue_zero_one:
 
     ld      a,[game_sprites_8x16]
     or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
     ld      [rLCDC],a
-    ld      a,$FF
-    ld      [rWX],a
-    ld      [rWY],a
 
     call    CursorShow
 
@@ -1042,8 +1126,6 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ld      [last_frame_x],a
     ld      a,d
     ld      [last_frame_y],a
-
-    call    InitKeyAutorepeat
 
     ret
 

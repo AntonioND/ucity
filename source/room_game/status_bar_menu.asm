@@ -314,6 +314,8 @@ StatusBarMenuShow::
     and     a,a
     ret     nz ; return if already shown
 
+StatusBarMenuForceShow::
+
     xor     a,a
     ld      [rWY],a
     ;ld      [rSCY],a
