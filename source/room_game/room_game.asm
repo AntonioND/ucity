@@ -636,8 +636,13 @@ PauseMenuHandleOption:
         ; if the user pressed -1 or there was an error, don't save
         call    nz,CityMapSave ; if ok, save to the bank selected by the user
 
-        ld      a,0 ; load gfx only
+        ld      a,2 ; load minimal data
         call    RoomGameLoad
+
+        ld      a,GAME_STATE_PAUSE_MENU
+        ld      [game_state],a
+
+        call    StatusBarMenuForceShow
 
         ret
 
