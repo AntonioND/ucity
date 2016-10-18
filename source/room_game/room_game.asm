@@ -911,21 +911,34 @@ InputHandleModePauseMenu:
 
     ld      a,[joy_released]
     and     a,PAD_B
-    jr      z,.not_b
-        call    StatusBarMenuHide
-        ld      a,GAME_STATE_WATCH
-        call    GameStateMachineStateSet
-        ret
-.not_b:
+    jr      nz,.exit_menu
 
     ld      a,[joy_pressed]
     and     a,PAD_START
-    jr      z,.not_start
-        call    StatusBarMenuHide
-        ld      a,GAME_STATE_WATCH
-        call    GameStateMachineStateSet
-        ret
-.not_start:
+    jr      nz,.exit_menu
+
+    ret
+
+.exit_menu:
+
+    call    StatusBarMenuHide
+
+    ; Load and force the correct state to the status bar. This way the first
+    ; frame after closing the menu it won't glitch for a frame.
+
+    call    StatusBarShow
+
+    ld      a,[rLY]
+    cp      a,144 ; cy = 0 if a >= n (LY >= 144 // cy = 0 if LY = 144 ~ 154)
+    jr      nz,.in_vbl
+        call    StatusBarHandlerSTAT
+        jr      .end_lcd_check
+.in_vbl:
+        call    StatusBarHandlerVBL
+.end_lcd_check:
+
+    ld      a,GAME_STATE_WATCH
+    call    GameStateMachineStateSet
 
     ret
 
@@ -937,11 +950,28 @@ InputHandleModeShowMessage:
     and     a,PAD_B
     jr      z,.not_b
 
+        ; When pressing B, if there is another message waiting to be shown,
+        ; instead of closing the window and opening it again, replace its text.
+
+        call    MessageRequestQueueNotEmpty ; returns a = 1 if queue isn't empty
+        and     a,a
+        jr      z,.no_messages_left
+
+            call    MessageRequestGet ; returns a = message ID to show
+            and     a,a
+            jr      z,.no_messages_left
+
+                call    MessageBoxPrintMessageID ; a = message ID
+                ret
+
+.no_messages_left
+
         call    MessageBoxHide
 
         ld      a,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret
+
 .not_b:
 
     ret

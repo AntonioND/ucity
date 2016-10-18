@@ -135,7 +135,7 @@ StatusBarRefreshStatRegisters:
 
 ;-------------------------------------------------------------------------------
 
-StatusBarHandlerSTAT:
+StatusBarHandlerSTAT::
 
     ; This handler is only called if the status bar is active, no need to check.
 ;    ld      a,[status_bar_active]
