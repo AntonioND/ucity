@@ -610,6 +610,9 @@ TILESET_INFO:: ; Up to 512 elements
   T_ADD T_FIRE_1, 5, TYPE_FIRE, 0,0
   T_ADD T_FIRE_2, 5, TYPE_FIRE, 0,0
 
+  T_ADD T_RADIATION_GROUND, 2, TYPE_RADIATION, 0,0
+  T_ADD T_RADIATION_WATER,  1, TYPE_RADIATION, 0,0
+
   TILE_SET_COUNT 512 ; Fill array
 
 ;###############################################################################
