@@ -351,6 +351,13 @@ ENDC
 
     call    GameRequestCoordinateFocus ; e = x, d = y
 
+    ; Remove all traffic tiles from the map, as well as other animations
+    ; ------------------------------------------------------------------
+
+    LONG_CALL   Simulation_TrafficRemoveAnimationTiles
+
+    ; TODO : Remove trains, planes, etc
+
     ; Enable disaster mode
     ; --------------------
 
