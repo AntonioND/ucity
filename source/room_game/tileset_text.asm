@@ -104,6 +104,8 @@ str_industrial_1: STR_ADD "Light Industrial"
 str_industrial_2: STR_ADD "Medium Ind."
 str_industrial_3: STR_ADD "Dense Industrial"
 str_fire: STR_ADD "Fire"
+str_radiation_ground: STR_ADD "Radiation Ground"
+str_radiation_water:  STR_ADD "Radiation Water"
 
 ;-------------------------------------------------------------------------------
 
@@ -644,6 +646,9 @@ CITY_TILE_NAME:: ; 512 entries. LSB first
 
     T_ADD   T_FIRE_1, str_fire
     T_ADD   T_FIRE_2, str_fire
+
+    T_ADD   T_RADIATION_GROUND, str_radiation_ground
+    T_ADD   T_RADIATION_WATER,  str_radiation_water
 
     TILE_SET_COUNT 512 ; Fill array
 
