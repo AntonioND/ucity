@@ -411,7 +411,7 @@ Simulation_FireExpand: ; e = x, d = y, hl = address
 ;-------------------------------------------------------------------------------
 
 ; Output data to WRAMX bank BANK_SCRATCH_RAM
-Simulation_Fire::
+Simulation_Fire:: ; This doesn't refresh the BG
 
     ; This should only be called during disaster mode!
 

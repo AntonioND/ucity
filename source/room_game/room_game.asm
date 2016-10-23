@@ -1314,7 +1314,9 @@ RoomGameSimulateStepNormal:
 
 RoomGameSimulateStepDisaster:
 
-    LONG_CALL   Simulation_Fire
+    LONG_CALL   Simulation_Fire ; This doesn't refresh the BG
+
+    call    bg_refresh_main
 
     ret
 
