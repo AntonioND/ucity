@@ -26,6 +26,7 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "money.inc"
+    INCLUDE "room_game.inc"
     INCLUDE "text.inc"
 
 ;###############################################################################
@@ -37,8 +38,6 @@
 options_menu_selection: DS 1
 
 options_room_exit:  DS 1 ; set to 1 to exit room
-
-OPTIONS_MENU_NUMBER_ELEMENTS EQU 2
 
 OPTIONS_MENU_BLINK_FRAMES EQU 30
 options_menu_blink_status: DS 1
@@ -58,15 +57,19 @@ OPTIONS_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
-OPTIONS_DISASTERS_ENABLED EQU 0
-OPTIONS_DISASTER_CREATE   EQU 1
+OPTIONS_MENU_NUMBER_ELEMENTS EQU 3
+
+OPTIONS_DISASTERS_ENABLED         EQU 0
+OPTIONS_DISASTER_START_FIRE       EQU 1
+OPTIONS_DISASTER_NUCLEAR_MELTDOWN EQU 2
 
 ;-------------------------------------------------------------------------------
 
 CURSOR_X EQU 1
 OPTIONS_MENU_CURSOR_COORDINATE_OFFSET:
     DW 7*32+CURSOR_X+$9800 ; Disasters Enable/Disable
-    DW 9*32+CURSOR_X+$9800 ; Create
+    DW 9*32+CURSOR_X+$9800 ; Start Fire
+    DW 10*32+CURSOR_X+$9800 ; Nuclear Meltdown
 
 OptionsMenuClearCursor:
 
@@ -216,18 +219,30 @@ OptionsMenuHandleOption: ; a = selected option
         ret
 
 .not_disasters_enabled:
-    cp      a,OPTIONS_DISASTER_CREATE
-    jr      nz,.not_disaster_create
+    cp      a,OPTIONS_DISASTER_START_FIRE
+    jr      nz,.not_disaster_start_fire
 
-        ; Disasters : Create
-        ; ------------------
+        ; Disasters : Start Fire
+        ; ----------------------
 
-        ld      a,1
+        ld      a,DISASTER_TYPE_FIRE
         call    GameRequestDisaster
 
         ret
 
-.not_disaster_create:
+.not_disaster_start_fire:
+    cp      a,OPTIONS_DISASTER_NUCLEAR_MELTDOWN
+    jr      nz,.not_disaster_nuclear_meltdown
+
+        ; Disasters : Nuclear Meltdown
+        ; ----------------------------
+
+        ld      a,DISASTER_TYPE_MELTDOWN
+        call    GameRequestDisaster
+
+        ret
+
+.not_disaster_nuclear_meltdown:
 
     ld      b,b ; Panic!
     ret

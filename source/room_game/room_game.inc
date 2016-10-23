@@ -84,6 +84,12 @@ TILE_OK_MASK                EQU %00011111
 
 ;-------------------------------------------------------------------------------
 
+DISASTER_TYPE_NONE     EQU 0
+DISASTER_TYPE_FIRE     EQU 1
+DISASTER_TYPE_MELTDOWN EQU 2
+
+;-------------------------------------------------------------------------------
+
 GAME_STATE_WATCH            EQU 0
 GAME_STATE_EDIT             EQU 1
 GAME_STATE_WATCH_FAST_MOVE  EQU 2

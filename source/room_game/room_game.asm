@@ -162,17 +162,15 @@ GameCoordinateFocusApply:
 
 GameRequestDisaster:: ; a = type, 0 to disable
 
-    ld      b,a
-    ld      hl,game_requested_disaster
-    ld      [hl],0
+    ld      b,a ; save type
+    ld      hl,game_requested_disaster ; disable any request, just in case
+    ld      [hl],DISASTER_TYPE_NONE
 
     ld      a,[simulation_disaster_mode]
     and     a,a
     ret     nz ; if there is a disaster, ignore this!
 
-    ; For now, there are no types, only fire
-
-    ld      [hl],b
+    ld      [hl],b ; save type and request that disaster
 
     ret
 
@@ -181,20 +179,35 @@ GameRequestDisaster:: ; a = type, 0 to disable
 GameDisasterApply:
 
     ld      a,[game_requested_disaster]
-    and     a,a
+    cp      a,DISASTER_TYPE_NONE
     ret     z ; return if no disasters are requested
 
-    xor     a,a
+    ld      b,a ; save type!
+
+    ld      a,DISASTER_TYPE_NONE
     ld      [game_requested_disaster],a ; clear request
 
     ld      a,[simulation_disaster_disabled]
     and     a,a
     ret     nz ; if 1, disasters are disabled. return!
 
-    ; TODO - More disasters?
+    ld      a,b ; restore type
 
-    ld      b,1 ; force fire
-    LONG_CALL_ARGS   Simulation_FireTryStart ; Returns if any disaster present
+    cp      a,DISASTER_TYPE_FIRE
+    jr      nz,.not_fire
+        ld      b,1 ; force
+        LONG_CALL_ARGS   Simulation_FireTryStart
+        ret
+.not_fire:
+
+    cp      a,DISASTER_TYPE_MELTDOWN
+    jr      nz,.not_meltdown
+        ld      b,1 ; force
+        LONG_CALL_ARGS   Simulation_RadiationTryStart
+        ret
+.not_meltdown:
+
+    ld      b,b ; Panic!
 
     ret
 
@@ -1331,7 +1344,7 @@ RoomGame::
     ld      [game_requested_focus_x],a ; disable focus request
     ld      [game_requested_focus_y],a
 
-    xor     a,a
+    ld      a,DISASTER_TYPE_NONE
     ld      [game_requested_disaster],a ; disable disaster request
 
     ld      a,1 ; load everything, not only graphics
