@@ -171,6 +171,9 @@ MessageBoxIsShowing::
 
 MessageBoxClear::
 
+    xor     a,a
+    ld      [rVBK],a
+
     ld      hl,$9800 + 32*19 + 1
 
     REPT    MESSAGE_BOX_MSG_TILES_HEIGHT
@@ -203,6 +206,9 @@ MessageBoxPrint:: ; bc = pointer to string
     pop     bc ; (*) restore pointer
 
     ; Print message
+
+    xor     a,a
+    ld      [rVBK],a
 
     ld      hl,$9800 + 32*19 + 1
 
