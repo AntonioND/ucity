@@ -6,7 +6,7 @@ The open-source city building game for Game Boy Color.
 Introduction
 ------------
 
-This is an early version of BitCity. As such, a lot of the functionality is
+This is a beta version of BitCity. As such, some of the functionality is
 missing. This is not playable yet, but it's almost there.
 
 It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
@@ -18,7 +18,6 @@ you are interested please contact me at my email (antonio_nd@outlook.com).
 General to do list:
 - Simulation - Most parts are ready
   - Graphical output (trains, planes, boats...)
-  - Disasters: Nuclear explosions, earthquakes?
 - Sample cities (compressed)
 - Loans
 - Music, SFX

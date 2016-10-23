@@ -49,8 +49,8 @@ ID_MSG_PERSISTENT_NUM EQU 16 ; Multiple of 8
 
 ; Regular messages
 
-ID_MSG_FIRE_INITED       EQU 17
-ID_MSG_NUCLEAR_EXPLOSION EQU 18
+ID_MSG_FIRE_INITED      EQU 17
+ID_MSG_NUCLEAR_MELTDOWN EQU 18
 
 ; Extra
 ID_MSG_CUSTOM EQU $FF ; Can only be in the queue once! Careful with it!

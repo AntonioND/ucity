@@ -203,7 +203,7 @@ GameDisasterApply:
     cp      a,DISASTER_TYPE_MELTDOWN
     jr      nz,.not_meltdown
         ld      b,1 ; force
-        LONG_CALL_ARGS   Simulation_RadiationTryStart
+        LONG_CALL_ARGS   Simulation_MeltdownTryStart
         ret
 .not_meltdown:
 
@@ -1294,7 +1294,7 @@ RoomGameSimulateStepNormal:
 
         ld      b,0 ; don't force explosion
         ; This function Returns if any other disaster is present
-        LONG_CALL_ARGS   Simulation_RadiationTryStart
+        LONG_CALL_ARGS   Simulation_MeltdownTryStart
 
 .ignore_disasters:
 

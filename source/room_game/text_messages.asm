@@ -78,8 +78,8 @@ MSG_CLASS_CAPITAL:
 
 MSG_FIRE_INITED:
     STR_ADD "A fire has started<nl>in the city!"
-MSG_NUCLEAR_EXPLOSION:
-    STR_ADD "A nuclear power<nl>plant has had an<nl>accident!"
+MSG_NUCLEAR_MELTDOWN:
+    STR_ADD "A nuclear power<nl>plant has had a<nl>meltdown!"
 
 ;-------------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
     MSG_ADD  MSG_CLASS_CAPITAL
 
     MSG_ADD  MSG_FIRE_INITED
-    MSG_ADD  MSG_NUCLEAR_EXPLOSION
+    MSG_ADD  MSG_NUCLEAR_MELTDOWN
     ; ...
 
     MSG_ADD  MSG_CUSTOM

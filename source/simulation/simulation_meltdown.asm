@@ -31,7 +31,7 @@
 
 ;###############################################################################
 
-    SECTION "Radiation Functions",ROMX
+    SECTION "Nuclear Meltdown Functions",ROMX
 
 ;-------------------------------------------------------------------------------
 
@@ -241,7 +241,7 @@ Simulation_RadiationSpread:: ; d = y, e = x -> Spread radiation around here
 ;-------------------------------------------------------------------------------
 
 ; Call with LONG_CALL_ARGS
-Simulation_RadiationTryStart:: ; b = 1 to force disaster, 0 to make it random
+Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
 
     ld      a,[simulation_disaster_mode]
     and     a,a
@@ -329,7 +329,7 @@ ENDC
         ; that the building is a nuclear power plant.
         call    MapDeleteBuildingFire
 
-        ld      a,ID_MSG_NUCLEAR_EXPLOSION
+        ld      a,ID_MSG_NUCLEAR_MELTDOWN
         call    MessageRequestAdd
     pop     de
 
