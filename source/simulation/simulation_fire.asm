@@ -26,8 +26,8 @@
 ;-------------------------------------------------------------------------------
 
     INCLUDE "room_game.inc"
-    INCLUDE "tileset_info.inc"
     INCLUDE "text_messages.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -41,6 +41,7 @@
 initial_number_fire_stations: DS 1
 
 is_destroying_port: DS 1
+is_nuclear_power_plant: DS 1
 
 ;###############################################################################
 
@@ -54,6 +55,7 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
 
     xor     a,a
     ld      [is_destroying_port],a
+    ld      [is_nuclear_power_plant],a
 
     ; Check origin of coordinates of the building
     ; -------------------------------------------
@@ -72,6 +74,30 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
     pop     de
     ; bc = base tile
     ; de = coordinates
+
+    ; Special code for nuclear power plants
+    ; -------------------------------------
+
+IF (T_POWER_PLANT_NUCLEAR < 256) && (T_POWER_PLANT_FUSION > 256)
+    FAIL "The nuclear power plant shouldn't be split in the tileset!"
+ENDC
+
+    ld      a,T_POWER_PLANT_NUCLEAR >> 8
+    cp      a,b
+    jr      nz,.not_nuclear
+
+    ld      a,(T_POWER_PLANT_FUSION - 1) & $FF ; check if above
+    cp      a,c ; cy = 1 if c > a
+    jr      c,.not_nuclear
+
+    ld      a,(T_POWER_PLANT_NUCLEAR - 1) & $FF ; check if below
+    cp      a,c ; cy = 1 if c > a
+    jr      nc,.not_nuclear
+
+    ld      a,1 ; Prepare for spreading radiation afterwards
+    ld      [is_nuclear_power_plant],a
+
+.not_nuclear:
 
     ; Special code for sea ports
     ; --------------------------
@@ -116,6 +142,14 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
 
 .not_bridge_lr:
 
+    ; Special code for roads and train tracks
+    ; ---------------------------------------
+
+    ; They can't burn, but they can be deleted by this function when a nuclear
+    ; explosion happens. However, we want radiation to destroy roads and train
+    ; tracks in a non-nice way to show that it's actually an explosion. By not
+    ; fixing the roads around the destroyed one, the visual effect is better.
+
     ; Rest of tiles
     ; -------------
 
@@ -135,6 +169,9 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
 
     ; bc = coordinates (b = y, c = x)
     ; de = size (d = height, e = width)
+
+    push    bc
+    push    de ; save for later (***) - note that de=size, bc=coordinates
 
     ; Swap some registers (b remains unchanged)
 
@@ -174,9 +211,6 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
     pop     bc
 .skip_port:
 
-    push    bc
-    push    de ; save for later (***)
-
     ; Loop rows
 
 .height_loop:
@@ -209,14 +243,29 @@ MapDeleteBuildingFire:: ; Removes a building and replaces it with fire. Fire SFX
     dec     c ; dec height
     jr      nz,.height_loop
 
-    pop     de
-    pop     bc ; restore for next step (***)
+    pop     bc ; note that de=size, bc=coordinates when pushed, so swap order
+    pop     de ; restore for next step (***)
 
     ; Update power lines around!
     ; --------------------------
 
-    ; bc and de won't be needed after this
+    ; bc = size, not needed after this
+    push    de
     LONG_CALL_ARGS  MapUpdateBuildingSuroundingPowerLines
+    pop     de
+
+    ; Handle nuclear power plant radiation
+    ; ------------------------------------
+
+    ld      a,[is_nuclear_power_plant]
+    and     a,a
+    jr      z,.dont_spread_radiation
+
+    ; If the building is a nuclear power plant, spread radiation around it.
+    ; This can call recursively to the function we are in right now!
+    LONG_CALL_ARGS   Simulation_RadiationSpread ; d = y, e = x
+
+.dont_spread_radiation:
 
     ; Sound
     ; -----

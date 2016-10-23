@@ -1279,7 +1279,15 @@ RoomGameSimulateStepNormal:
         ; This function Returns if any other disaster is present
         LONG_CALL_ARGS   Simulation_FireTryStart
 
+        ld      b,0 ; don't force explosion
+        ; This function Returns if any other disaster is present
+        LONG_CALL_ARGS   Simulation_RadiationTryStart
+
 .ignore_disasters:
+
+    ; Remove radiation
+
+    LONG_CALL   Simulation_Radiation
 
     ; Handle historical records
 
