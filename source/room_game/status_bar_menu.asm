@@ -75,7 +75,6 @@ StatusBarRefreshStatRegisters:
 
     ; Check if on top or at the bottom
     ld      a,[CursorY]
-
     cp      a,(SCRN_Y/2)-24
     jr      nc,.dont_set_on_bottom
     ld      a,0
@@ -85,9 +84,6 @@ StatusBarRefreshStatRegisters:
 
     ld      b,a
     ld      a,[CursorSizeY]
-    rla
-    rla
-    rla ; * 8
     add     a,b
     cp      a,(SCRN_Y/2)+24+16+8
     jr      c,.dont_set_on_top
