@@ -106,6 +106,7 @@ tile_rci_population_pointer: ; Pointer to variable to add population. LSB first
     DW  population_other ; TYPE_DOCK
     DW  population_other ; TYPE_POWER_PLANT
     DW  population_other ; TYPE_FIRE - This should never be used.
+    DW  population_other ; TYPE_RADIATION
     ; End of valid types...
 
 ;-------------------------------------------------------------------------------

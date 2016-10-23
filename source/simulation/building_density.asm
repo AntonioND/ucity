@@ -312,6 +312,9 @@ CITY_TILE_DENSITY::
     T_ADD   T_FIRE_1, 0,0, 0, 0 ; 1) Pollution not simulated in disaster mode.
     T_ADD   T_FIRE_2, 0,0, 0, 0 ; 2) Fire can't catch fire!
 
+    T_ADD   T_RADIATION_GROUND, 0,0, 0, 0 ; Radiation can't catch fire!
+    T_ADD   T_RADIATION_WATER,  0,0, 0, 0
+
     T_ADD   512, 0,0,0, 0 ; Fill array
 
 ;###############################################################################

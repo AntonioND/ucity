@@ -438,6 +438,7 @@ Simulation_PollutionSetTileOkFlag::
     DB  1 ; TYPE_DOCK
     DB  1 ; TYPE_POWER_PLANT
     DB  0 ; TYPE_FIRE - Simulation should be off during fires.
+    DB  1 ; TYPE_RADIATION - Ignore pollution here
     ; End of valid types...
 
 ;###############################################################################

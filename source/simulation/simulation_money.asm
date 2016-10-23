@@ -262,6 +262,9 @@ POWER_MAINTENANCE EQU $1
     T_ADD   T_FIRE_1, 0
     T_ADD   T_FIRE_2, 0
 
+    T_ADD   T_RADIATION_GROUND, 0
+    T_ADD   T_RADIATION_WATER,  0
+
     T_ADD   512, 0 ; Fill array
 
 ;###############################################################################
@@ -288,6 +291,7 @@ tile_money_destination: ; Pointer to variable to add money. LSB first
     DW  taxes_other       ; TYPE_DOCK
     DW  taxes_other       ; TYPE_POWER_PLANT
     DW  taxes_other       ; TYPE_FIRE
+    DW  taxes_other       ; TYPE_RADIATION
     ; End of valid types...
 
 ;-------------------------------------------------------------------------------

@@ -303,6 +303,9 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
     ; ---------------------------------------------
 
     call    CursorGetGlobalCoords
+
+BuildingRemoveAtCoords:: ; d = y, e = x
+
     push    de
     call    CityMapGetType ; a = type
     pop     de ; save coordinates for the delete functions below.
@@ -331,6 +334,9 @@ BuildingRemoveAtCursor: ; Internal use, called from BuildingBuildAtCursor
     ret     z
 
     cp      a,TYPE_FIRE ; Or fire!
+    ret     z
+
+    cp      a,TYPE_RADIATION ; Or radiation!
     ret     z
 
     cp      a,TYPE_FOREST
@@ -511,6 +517,9 @@ BUILDING_INFO_STRUCTS_ARRAY::
     BUILDING_ADD Data_IndustrialS3C, 3, 3, T_INDUSTRIAL_S3_C
     BUILDING_ADD Data_IndustrialS3D, 3, 3, T_INDUSTRIAL_S3_D
 
+    BUILDING_ADD Data_RadiationGround, 1, 1, T_RADIATION_GROUND
+    BUILDING_ADD Data_RadiationWater,  1, 1, T_RADIATION_WATER
+
     BUILDING_ADD Data_End, 0, 0, $FFFF ; Empty element -> END
 
 ;-------------------------------------------------------------------------------
@@ -676,6 +685,9 @@ BUILDING_INFO_POINTERS_ARRAY:: ; Pointers to structs. Indexes are B_Xxxxxx
     BUILDING_ADD_ENTRY B_IndustrialS3C, Data_IndustrialS3C
     BUILDING_ADD_ENTRY B_IndustrialS3D, Data_IndustrialS3D
 
+    BUILDING_ADD_ENTRY B_RadiationGround, Data_RadiationGround
+    BUILDING_ADD_ENTRY B_RadiationWater,  Data_RadiationWater
+
 ;###############################################################################
 
     SECTION "Building Information Arrays Bank 0", ROM0
@@ -790,6 +802,9 @@ BUILDING_PRICE_ARRAY:
     BUILDING_SET_PRICE B_IndustrialS3B, MONEY_0
     BUILDING_SET_PRICE B_IndustrialS3C, MONEY_0
     BUILDING_SET_PRICE B_IndustrialS3D, MONEY_0
+
+    BUILDING_SET_PRICE B_RadiationGround, MONEY_0
+    BUILDING_SET_PRICE B_RadiationWater,  MONEY_0
 
     ; BUILDING_SET_PRICE B_Delete defined on BuildingSelectedGetPricePointer
 

@@ -110,6 +110,9 @@ B_IndustrialS3B EQU 63
 B_IndustrialS3C EQU 64
 B_IndustrialS3D EQU 65
 
+B_RadiationGround EQU 66
+B_RadiationWater  EQU 67
+
 B_Delete         EQU 255 ; Special type
 
 ;###############################################################################
