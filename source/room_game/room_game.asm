@@ -480,13 +480,14 @@ WaitSimulationEnds:
     DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,0999999999
 
 PAUSE_MENU_BUDGET    EQU 0
-PAUSE_MENU_MINIMAPS  EQU 1
-PAUSE_MENU_GRAPHS    EQU 2
-PAUSE_MENU_OPTIONS   EQU 3
-PAUSE_MENU_PAUSE     EQU 4
-PAUSE_MENU_HELP      EQU 5
-PAUSE_MENU_SAVE_GAME EQU 6
-PAUSE_MENU_MAIN_MENU EQU 7
+PAUSE_MENU_BANK      EQU 1
+PAUSE_MENU_MINIMAPS  EQU 2
+PAUSE_MENU_GRAPHS    EQU 3
+PAUSE_MENU_OPTIONS   EQU 4
+PAUSE_MENU_PAUSE     EQU 5
+PAUSE_MENU_HELP      EQU 6
+PAUSE_MENU_SAVE_GAME EQU 7
+PAUSE_MENU_MAIN_MENU EQU 8
 
 PauseMenuHandleOption:
 
@@ -498,7 +499,7 @@ PauseMenuHandleOption:
 
         ld      a,[simulation_running]
         and     a,a ; If budget menu room is entered while a simulation is
-        jr      z,.continue_budget  ; running, bad things may happen when.
+        jr      z,.continue_budget  ; running, bad things may happen when
         call    SFX_ErrorUI ; calculating taxes, etc.
         ret
 
@@ -516,6 +517,32 @@ PauseMenuHandleOption:
         ret
 
 .not_budget:
+    cp      a,PAUSE_MENU_BANK
+    jr      nz,.not_bank
+
+        ; Bank
+        ; ----
+
+        ld      a,[simulation_running]
+        and     a,a ; If bank is entered while a simulation is
+        jr      z,.continue_bank  ; running, bad things may happen when
+        call    SFX_ErrorUI ; calculating taxes, etc.
+        ret
+
+.continue_bank:
+        ;call    RoomBank
+
+        ld      a,2 ; load minimal data
+        call    RoomGameLoad
+
+        ld      a,GAME_STATE_PAUSE_MENU
+        ld      [game_state],a
+
+        call    StatusBarMenuForceShow
+
+        ret
+
+.not_bank:
     cp      a,PAUSE_MENU_MINIMAPS
     jr      nz,.not_minimaps
 

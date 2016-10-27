@@ -55,7 +55,7 @@ status_bar_on_top:: DS 1 ; 1 if on top, 0 if on the bottom
 status_menu_active::   DS 1 ; if 1, show menu
 status_menu_selection: DS 1
 
-MENU_NUMBER_ELEMENTS EQU 8
+MENU_NUMBER_ELEMENTS EQU 9
 
 STATUS_MENU_BLINK_FRAMES EQU 30
 status_menu_blink_status: DS 1
@@ -677,7 +677,8 @@ StatusBarUpdate::
 
 CURSOR_X EQU 4
 STATUS_BAR_CURSOR_COORDINATE_OFFSET:
-    DW 8*32+CURSOR_X+$9800 ; Budget
+    DW 7*32+CURSOR_X+$9800 ; Budget
+    DW 8*32+CURSOR_X+$9800 ; Bank
     DW 9*32+CURSOR_X+$9800 ; Minimaps
     DW 10*32+CURSOR_X+$9800 ; Graphs
     DW 11*32+CURSOR_X+$9800 ; Options
