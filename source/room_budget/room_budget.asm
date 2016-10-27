@@ -141,7 +141,7 @@ PRINT_MONEY : MACRO ; \1 = pointer to amount of money, \2 = Y coordinate
     ld      hl,sp+0
     call    PrintMoneyAmount ; [hl] = Print [de]
 
-    ld      de,$9800 + 32*(\2) + 13
+    ld      de,$9800 + 32*(\2) + 12
     ld      hl,sp+0
 
     ld      b,6
@@ -156,14 +156,18 @@ PRINT_MONEY : MACRO ; \1 = pointer to amount of money, \2 = Y coordinate
     jr      nz,.loop\@
 ENDM
 
-    PRINT_MONEY taxes_rci,   6
-    PRINT_MONEY taxes_other, 7
+    PRINT_MONEY taxes_rci,   5
+    PRINT_MONEY taxes_other, 6
 
-    PRINT_MONEY budget_police,     10
-    PRINT_MONEY budget_firemen,    11
-    PRINT_MONEY budget_healthcare, 12
-    PRINT_MONEY budget_education,  13
-    PRINT_MONEY budget_transport,  14
+    PRINT_MONEY budget_police,      9
+    PRINT_MONEY budget_firemen,    10
+    PRINT_MONEY budget_healthcare, 11
+    PRINT_MONEY budget_education,  12
+    PRINT_MONEY budget_transport,  13
+
+    ; Print loans
+
+    ; TODO
 
     ; Budget result
 
