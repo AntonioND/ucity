@@ -755,7 +755,7 @@ InputHandleSaveMenuMenu:
 
 ;-------------------------------------------------------------------------------
 
-SaveMenuCursorsBlinkHandle:
+SaveMenuCursorBlinkHandle:
 
     ld      hl,save_menu_cursor_frames
     dec     [hl]
@@ -786,7 +786,7 @@ SaveMenuHandle:
 
     call    InputHandleSaveMenuMenu
 
-    call    SaveMenuCursorsBlinkHandle
+    call    SaveMenuCursorBlinkHandle
 
     ret
 
@@ -866,6 +866,8 @@ RoomSaveMenu:: ; returns A = selected SRAM bank, -1 if error
     ld      [save_menu_exit_error],a
 
     ld      [save_menu_cursor_blink],a
+
+    ld      a,SAVE_MENU_CURSOR_BLINK_FRAMES
     ld      [save_menu_cursor_frames],a
 
     ; Load coordinates of last accesed SRAM bank instead of moving to 0,0.
