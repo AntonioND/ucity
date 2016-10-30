@@ -118,6 +118,11 @@ PredefinedMapSetupGameVariables:
     ld      a,10
     ld      [tax_percentage],a
 
+    xor     a,a
+    ld      [LOAN_REMAINING_PAYMENTS],a
+    ld      [LOAN_PAYMENTS_AMOUNT+0],a
+    ld      [LOAN_PAYMENTS_AMOUNT+1],a
+
     xor     a,a ; enable disasters by default
     ld      [simulation_disaster_disabled],a
 
@@ -408,6 +413,13 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     xor     a,a ; save 0 terminator!
     ld      [de],a
 
+    ld      a,[SAV_LOAN_REMAINING_PAYMENTS]
+    ld      [LOAN_REMAINING_PAYMENTS],a
+    ld      a,[SAV_LOAN_PAYMENTS_AMOUNT+0]
+    ld      [LOAN_PAYMENTS_AMOUNT+0],a
+    ld      a,[SAV_LOAN_PAYMENTS_AMOUNT+1]
+    ld      [LOAN_PAYMENTS_AMOUNT+1],a
+
     ; Player-set options
     ; ------------------
 
@@ -603,6 +615,13 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ld      de,SAV_CITY_NAME ; dst
     ld      hl,current_city_name ; src
     call    memcopy
+
+    ld      a,[LOAN_REMAINING_PAYMENTS]
+    ld      [SAV_LOAN_REMAINING_PAYMENTS],a
+    ld      a,[LOAN_PAYMENTS_AMOUNT+0]
+    ld      [SAV_LOAN_PAYMENTS_AMOUNT+0],a
+    ld      a,[LOAN_PAYMENTS_AMOUNT+1]
+    ld      [SAV_LOAN_PAYMENTS_AMOUNT+1],a
 
     ; Player-set options
     ; ------------------

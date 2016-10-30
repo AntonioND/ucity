@@ -34,6 +34,8 @@
 
 ;-------------------------------------------------------------------------------
 
+LOAN_REMAINING_PAYMENTS:: DS 1 ; 0 if no remaining payments (no loan)
+LOAN_PAYMENTS_AMOUNT::    DS 2 ; BCD, LSB first
 ; Set to 1 or 0 when entering the room to keep a consistent state until it is
 ; exited.
 bank_room_loan_active: DS 1

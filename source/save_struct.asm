@@ -60,6 +60,9 @@ SAV_MAP_ATTR_BASE::  DS $1000/8 ; compressed, only the bank 0/1 bit is saved
 
 SAV_OPTIONS_DISASTERS_DISABLED:: DS 1
 
+SAV_LOAN_REMAINING_PAYMENTS:: DS 1 ; 0 if no remaining payments (no loan)
+SAV_LOAN_PAYMENTS_AMOUNT::    DS 2 ; BCD, LSB first
+
 ; TODO : Reorganize every field so that it makes sense
 
 ; Historical data for graphs:
