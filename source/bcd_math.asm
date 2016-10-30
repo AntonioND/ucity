@@ -219,7 +219,7 @@ BCD_DE_NEG_HL:: ; [de] = 0 - [hl]
 
 ;-------------------------------------------------------------------------------
 
-BCD_DE_UMUL_B:: ; [de] = [de] * b
+BCD_DE_UMUL_B:: ; [de] = [de] * b (B is not in BCD!)
 
     ld      a,b
     and     a,a

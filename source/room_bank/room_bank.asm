@@ -36,6 +36,7 @@
 
 LOAN_REMAINING_PAYMENTS:: DS 1 ; 0 if no remaining payments (no loan)
 LOAN_PAYMENTS_AMOUNT::    DS 2 ; BCD, LSB first
+
 ; Set to 1 or 0 when entering the room to keep a consistent state until it is
 ; exited.
 bank_room_loan_active: DS 1
@@ -81,22 +82,46 @@ BankMenuHandleInput: ; If it returns 1, exit room. If 0, continue
         ret ; return 0
 .continue:
 
-    ld      a,[joy_pressed]
-    and     a,PAD_UP
-    jr      z,.end_up
-        call    RoomBankMenuClearCursor
-        ld      hl,bank_room_cursor
-        ld      a,1
-        xor     a,[hl]
-        ld      [hl],a
-        call    RoomBankMenuDrawCursor
-        ld      hl,bank_room_cursor_frames
-        ld      [hl],BANK_ROOM_CURSOR_BLINK_FRAMES
-.end_up:
+    ; This part is only shown in "loan select" mode
 
     ld      a,[joy_pressed]
-    and     a,PAD_DOWN
-    jr      z,.end_down
+    and     a,PAD_A
+    jr      z,.end_a ; Accept payment
+
+        ld      a,21 ; Number of payments in both cases
+        ld      [LOAN_REMAINING_PAYMENTS],a
+
+        ld      a,[bank_room_cursor]
+        and     a,a
+        jr      nz,.second_loan
+
+            ; Loan 1
+
+            ld      a,$00 ; 500
+            ld      [LOAN_PAYMENTS_AMOUNT+0],a ; BCD, LSB first
+            ld      a,$05
+            ld      [LOAN_PAYMENTS_AMOUNT+1],a
+
+            jr      .end_of_loan_check
+.second_loan:
+
+            ; Loan 2
+
+            ld      a,$00 ; 1000
+            ld      [LOAN_PAYMENTS_AMOUNT+0],a ; BCD, LSB first
+            ld      a,$10
+            ld      [LOAN_PAYMENTS_AMOUNT+1],a
+
+            jr      .end_of_loan_check
+
+.end_of_loan_check:
+        ld      a,1
+        ret ; return 1
+.end_a:
+
+    ld      a,[joy_pressed]
+    and     a,PAD_UP|PAD_DOWN
+    jr      z,.end_up_down
         call    RoomBankMenuClearCursor
         ld      hl,bank_room_cursor
         ld      a,1
@@ -105,7 +130,7 @@ BankMenuHandleInput: ; If it returns 1, exit room. If 0, continue
         call    RoomBankMenuDrawCursor
         ld      hl,bank_room_cursor_frames
         ld      [hl],BANK_ROOM_CURSOR_BLINK_FRAMES
-.end_down:
+.end_up_down:
 
     xor     a,a
     ret ; return 0
@@ -208,6 +233,143 @@ RoomBankMenuCursorBlinkHandle:
 
 ;-------------------------------------------------------------------------------
 
+WRITE_B_TO_HL_VRAM : MACRO ; Clobbers A and C
+    di ; critical section
+        xor     a,a
+        ld      [rVBK],a
+        WAIT_SCREEN_BLANK ; Clobbers registers A and C
+        ld      [hl],b
+    ei ; end of critical section
+ENDM
+
+;-------------------------------------------------------------------------------
+
+RoomBankPresentLoanInfoPrint:
+
+    ld      a,[bank_room_loan_active]
+    and     a,a
+    ret     z ; return if loan not present
+
+    xor     a,a
+    ld      [rVBK],a
+
+    ; Print number of payments left
+
+    ld      a,[LOAN_REMAINING_PAYMENTS]
+    ld      l,a
+    ld      h,0
+    add     hl,hl
+    ld      de,BINARY_TO_BCD
+    add     hl,de
+    ld      a,[hl]
+
+    ld      d,a ; save value
+
+    ld      b,O_SPACE
+
+    swap    a
+    and     a,$0F
+    and     a,a
+    jr      z,.empty_digit
+        BCD2Tile
+        ld      b,a
+.empty_digit:
+    ld      hl,$9800+32*11+16
+    WRITE_B_TO_HL_VRAM ; clobbers A and C
+    inc     hl
+    ld      a,d
+    and     a,$0F
+    BCD2Tile
+    ld      b,a
+    WRITE_B_TO_HL_VRAM ; clobbers A and C
+
+    ; Print amount of each payment
+
+    ld      hl,LOAN_PAYMENTS_AMOUNT ; BCD, LSB first
+    ld      e,[hl]
+    inc     hl
+    ld      d,[hl] ; de = payment, BCD
+
+    ld      hl,$9800+32*12+14
+
+    ld      b,O_SPACE
+
+    ld      a,d
+    swap    a
+    and     a,$0F
+    and     a,a
+    jr      z,.empty_digit_2
+        BCD2Tile
+        ld      b,a
+.empty_digit_2:
+    WRITE_B_TO_HL_VRAM ; clobbers A and C
+    inc     hl
+    ld      a,d
+    and     a,$0F
+    BCD2Tile
+    ld      b,a
+    WRITE_B_TO_HL_VRAM ; clobbers A and C
+    inc     hl
+    ld      a,e
+    swap    a
+    and     a,$0F
+    BCD2Tile
+    ld      b,a
+    WRITE_B_TO_HL_VRAM ; clobbers A and C
+    inc     hl
+    ld      a,e
+    and     a,$0F
+    BCD2Tile
+    ld      b,a
+    WRITE_B_TO_HL_VRAM ; clobbers A and C
+
+    ; Calculate and print total amount remaining
+
+    ; de = payment amount
+
+    add     sp,-(5+10) ; (*) BCD_NUMBER_LENGTH + space for tiles
+
+    ld      hl,sp+0
+    ld      [hl],e
+    inc     hl
+    ld      [hl],d
+    inc     hl
+    ld      a,$00
+    ld      [hl+],a
+    ld      [hl+],a
+    ld      [hl],a
+
+    ld      a,[LOAN_REMAINING_PAYMENTS]
+    ld      b,a ; number of payments
+
+    ld      hl,sp+0
+    LD_DE_HL ; de = amount of each payment
+
+    call    BCD_DE_UMUL_B ; [de] = [de] * b (B is not in BCD!)
+
+    ld      hl,sp+0
+    LD_DE_HL ; bcd value
+    ld      hl,sp+5 ; space for tiles
+    call    BCD_DE_2TILE_HL_LEADING_SPACES ; [hl] = BCD2TILE [de]
+
+    ld      hl,sp+5+5 ; start reading from the fifth digit
+
+    LD_DE_HL ; de = src
+    ld      hl,$9800+32*13+13 ; hl = dst
+    REPT    5
+    ld      a,[de]
+    inc     de
+    ld      b,a
+    WRITE_B_TO_HL_VRAM ; clobbers A and C
+    inc     hl
+    ENDR
+
+    add     sp,+(5+10) ; (*) reclaim space
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomBankMenuLoadBG:
 
     ; Load border
@@ -290,7 +452,14 @@ RoomBankMenu::
     ld      bc,BankMenuVBLHandler
     call    irq_set_VBL
 
-    ld      a,0 ; TODO
+    ld      a,[LOAN_REMAINING_PAYMENTS]
+    and     a,a
+    jr      nz,.loan_present
+        xor     a,a
+        jr      .end_loan_check
+.loan_present:
+        ld      a,1
+.end_loan_check:
     ld      [bank_room_loan_active],a
 
     xor     a,a
@@ -313,7 +482,7 @@ RoomBankMenu::
     call    RoomBankMenuLoadBG
 
     ; Update numbers
-    ; TODO
+    call    RoomBankPresentLoanInfoPrint
 
     call    LoadTextPalette
 
