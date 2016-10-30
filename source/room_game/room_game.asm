@@ -530,7 +530,7 @@ PauseMenuHandleOption:
         ret
 
 .continue_bank:
-        ;call    RoomBank
+        LONG_CALL   RoomBankMenu
 
         ld      a,2 ; load minimal data
         call    RoomGameLoad

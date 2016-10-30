@@ -574,6 +574,8 @@ ENDM
     ; Pay transport
     PAY_COST    budget_transport
 
+    ; TODO : Pay loans
+
     ; Save result
     ld      de,budget_result
     ld      hl,sp+MONEY_DEST
