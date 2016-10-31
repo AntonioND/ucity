@@ -19,8 +19,7 @@ General to do list:
 - Simulation - Most parts are ready
   - Graphical output (trains, planes, boats...)
 - Sample cities (compressed)
-- Loans
-- Music, SFX
+- Music, SFX - Allow to disable it from the options menu
 - Improve graphics
 - Cleanup code and document
 

@@ -574,7 +574,27 @@ ENDM
     ; Pay transport
     PAY_COST    budget_transport
 
-    ; TODO : Pay loans
+    ; Pay loans
+    ld      a,[LOAN_REMAINING_PAYMENTS]
+    and     a,a ; Decrement when applying budget
+    jr      z,.skip_loan ; skip if no loan active
+
+        ld      hl,sp+MONEY_TEMP
+        ld      a,[LOAN_PAYMENTS_AMOUNT+0] ; BCD, LSB first
+        ld      [hl+],a
+        ld      a,[LOAN_PAYMENTS_AMOUNT+1]
+        ld      [hl+],a
+        xor     a,a
+        REPT    3
+        ld      [hl+],a
+        ENDR
+
+        ld      hl,sp+MONEY_DEST
+        LD_DE_HL
+        ld      hl,sp+MONEY_TEMP
+        call    BCD_HL_SUB_DE ; [de] = [de] - [hl]
+
+.skip_loan:
 
     ; Save result
     ld      de,budget_result
@@ -625,6 +645,17 @@ Simulation_ApplyBudgetAndTaxes::
     ENDR
 
     add     sp,+MONEY_AMOUNT_SIZE ; (*) reclaim space
+
+    ; Reduce number of remaining loan payments
+
+    ld      a,[LOAN_REMAINING_PAYMENTS]
+    and     a,a
+    jr      z,.skip_loan ; skip if no loan active
+
+        dec     a
+        ld      [LOAN_REMAINING_PAYMENTS],a
+
+.skip_loan:
 
     ret
 

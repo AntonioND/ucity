@@ -65,6 +65,11 @@ BANK_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
+    DATA_MONEY_AMOUNT LOAN_AMOUNT_10000, 10000
+    DATA_MONEY_AMOUNT LOAN_AMOUNT_20000, 20000
+
+;-------------------------------------------------------------------------------
+
 BankMenuHandleInput: ; If it returns 1, exit room. If 0, continue
 
     ; Exit if B or START are pressed
@@ -102,6 +107,9 @@ BankMenuHandleInput: ; If it returns 1, exit room. If 0, continue
             ld      a,$05
             ld      [LOAN_PAYMENTS_AMOUNT+1],a
 
+            ld      de,LOAN_AMOUNT_10000
+            call    MoneyAdd
+
             jr      .end_of_loan_check
 .second_loan:
 
@@ -111,6 +119,9 @@ BankMenuHandleInput: ; If it returns 1, exit room. If 0, continue
             ld      [LOAN_PAYMENTS_AMOUNT+0],a ; BCD, LSB first
             ld      a,$10
             ld      [LOAN_PAYMENTS_AMOUNT+1],a
+
+            ld      de,LOAN_AMOUNT_20000
+            call    MoneyAdd
 
             jr      .end_of_loan_check
 

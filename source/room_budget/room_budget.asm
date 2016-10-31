@@ -167,7 +167,45 @@ ENDM
 
     ; Print loans
 
-    ; TODO
+    add     sp,-5 ; (***) space for a BCD number
+
+        ld      hl,sp+0
+        xor     a,a
+        REPT    5
+        ld      [hl+],a
+        ENDR
+
+        ld      a,[LOAN_REMAINING_PAYMENTS]
+        and     a,a
+        jr      z,.no_loan
+
+            ld      hl,sp+0
+            ld      a,[LOAN_PAYMENTS_AMOUNT+0] ; BCD, LSB first
+            ld      [hl+],a
+            ld      a,[LOAN_PAYMENTS_AMOUNT+1]
+            ld      [hl],a
+.no_loan:
+
+        ld      hl,sp+0
+        LD_DE_HL
+        ld      hl,sp+5
+        call    PrintMoneyAmount ; [hl] = Print [de]
+
+        ld      de,$9800 + 32*14 + 13
+        ld      hl,sp+5
+
+        ld      b,6
+.loop_loan:
+        di
+        WAIT_SCREEN_BLANK ; Clobbers registers A and C
+        ld      a,[hl+]
+        ld      [de],a
+        inc     de
+        ei
+        dec     b
+        jr      nz,.loop_loan
+
+    add     sp,+5 ; (***) reclaim space
 
     ; Budget result
 
