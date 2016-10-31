@@ -141,7 +141,7 @@ PRINT_MONEY : MACRO ; \1 = pointer to amount of money, \2 = Y coordinate
     ld      hl,sp+0
     call    PrintMoneyAmount ; [hl] = Print [de]
 
-    ld      de,$9800 + 32*(\2) + 12
+    ld      de,$9800 + 32*(\2) + 13
     ld      hl,sp+0
 
     ld      b,6
@@ -209,7 +209,7 @@ BudgetMenuPrintTaxPercent:
     ld      a,[hl] ; Tax percentage goes from 0 to 20, no need to get MSB!
 
     ; Coordinates of tax percent on the screen: 15, 5
-    ld      de,$9800 + 32*5 + 15
+    ld      de,$9800 + 32*4 + 15
 
     ld      b,a ; (*) save
 
