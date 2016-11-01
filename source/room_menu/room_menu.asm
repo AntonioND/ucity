@@ -85,6 +85,12 @@ MenuNewCity: ; returns 1 if loaded correctly, 0 if not
 
 MenuScenario: ; returns 1 if loaded correctly, 0 if not
 
+    LONG_CALL_ARGS   RoomScenarioSelect ; Rets A = 1 if loaded correctly else 0
+    and     a,a
+    ret     z ; return 0 if not loaded and do nothing else
+
+;   ld      a,[scenario_select_map_selection]
+
     ; TODO : Scenarios should set the city map to a positive value instead of
     ; just 0!
 
@@ -143,7 +149,7 @@ InputHandleMenu:
             ld      [menu_exit],a
             ret
 .not_loaded_a:
-        call    RoomMenuLoadBG
+        call    RoomMenuLoadGraphics
         ret
 .not_a:
 
@@ -158,7 +164,7 @@ InputHandleMenu:
             ld      [menu_exit],a
             ret
 .not_loaded_start:
-        call    RoomMenuLoadBG
+        call    RoomMenuLoadGraphics
         ret
 .not_start:
 
@@ -173,7 +179,7 @@ InputHandleMenu:
             ld      [menu_exit],a
             ret
 .not_loaded_b:
-        call    RoomMenuLoadBG
+        call    RoomMenuLoadGraphics
         ret
 .not_b:
 
@@ -248,16 +254,7 @@ RoomMenuLoadBG:
 
 ;-------------------------------------------------------------------------------
 
-RoomMenu::
-
-    xor     a,a
-    ld      [menu_selection],a
-    ld      [menu_exit],a
-
-    call    SetPalettesAllBlack
-
-    ld      bc,RoomMenuVBLHandler
-    call    irq_set_VBL
+RoomMenuLoadGraphics:
 
     call    RoomMenuLoadBG
 
@@ -278,6 +275,23 @@ RoomMenu::
     call    LoadTextPalette
 
     ei ; End of critical section
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomMenu::
+
+    xor     a,a
+    ld      [menu_selection],a
+    ld      [menu_exit],a
+
+    call    SetPalettesAllBlack
+
+    ld      bc,RoomMenuVBLHandler
+    call    irq_set_VBL
+
+    call    RoomMenuLoadGraphics
 
 .loop:
 
