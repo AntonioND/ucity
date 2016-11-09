@@ -186,7 +186,7 @@ MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
         and     a,PAD_A|PAD_LEFT|PAD_RIGHT
         ret     z ; return 0
 
-        call    RoomMinimapHideCursor
+        LONG_CALL   RoomMinimapHideCursor
         call    MinimapMenuShow
         xor     a,a
         ret ; return 0
@@ -201,7 +201,7 @@ MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
     jr      z,.end_b
         ; Deactivate
         call    MinimapMenuHide
-        call    RoomMinimapShowCursor
+        LONG_CALL   RoomMinimapShowCursor
         xor     a,a
         ret ; return 0
 .end_b:
@@ -211,7 +211,7 @@ MinimapMenuHandleInput:: ; If it returns 1, exit room. If 0, continue
     jr      z,.end_a
         ; Deactivate and load next map
         call    MinimapMenuHide
-        call    RoomMinimapShowCursor
+        LONG_CALL   RoomMinimapShowCursor
         ld      a,[minimap_menu_selection]
         ld      b,a
         LONG_CALL_ARGS  MinimapSelectMap

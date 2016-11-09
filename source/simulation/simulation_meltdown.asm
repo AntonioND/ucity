@@ -327,7 +327,7 @@ ENDC
     push    de
         ; This will spread radiation around the power plant when it detects
         ; that the building is a nuclear power plant.
-        call    MapDeleteBuildingFire
+        LONG_CALL_ARGS  MapDeleteBuildingFire ; de = coordinates
 
         ld      a,ID_MSG_NUCLEAR_MELTDOWN
         call    MessageRequestAdd

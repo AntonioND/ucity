@@ -101,7 +101,7 @@ RoomGraphs::
 
     call    SetPalettesAllBlack
 
-    call    GraphsMenuReset
+    LONG_CALL   GraphsMenuReset
 
     ld      bc,RoomGraphsVBLHandler
     call    irq_set_VBL
