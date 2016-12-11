@@ -268,9 +268,9 @@ MapDrawBuilding:: ; Puts a building at the cursor. Check money and terrain.
     call    MoneyIsThereEnough
     and     a,a
     jr      nz,.enough_money
-    call    SFX_BuildError
-    ld      a,1 ; return error
-    ret
+        call    SFX_BuildError
+        ld      b,1 ; return error
+        ret
 .enough_money:
 
     ; Check if we can build here!
