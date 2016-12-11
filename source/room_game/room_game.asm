@@ -29,6 +29,7 @@
     INCLUDE "building_info.inc"
     INCLUDE "text.inc"
     INCLUDE "money.inc"
+    INCLUDE "text_messages.inc"
     INCLUDE "tileset_info.inc"
 
 ;###############################################################################
@@ -888,6 +889,24 @@ InputHandleModeSelectBuilding:
     and     a,PAD_A
     jr      z,.not_a
         LONG_CALL   BuildSelectMenuHide
+
+        ; Check if we can build this building or not. If not, just enter watch
+        ; mode and show a message with an error message.
+
+        call    BuildingTypeGet ; returns type in a
+        ld      b,a
+        LONG_CALL_ARGS      Technology_IsBuildingAvailable
+        ld      a,b
+        and     a,a
+        jr      nz,.enough_technology
+            ld      a,ID_MSG_TECH_INSUFFICIENT
+            call    MessageRequestAdd
+            ld      a,GAME_STATE_WATCH
+            call    GameStateMachineStateSet
+            ld      a,1
+            ret
+.enough_technology:
+
         LONG_CALL   BuildSelectMenuSelectBuildingUpdateCursor
         ld      a,GAME_STATE_EDIT
         call    GameStateMachineStateSet
@@ -1284,28 +1303,39 @@ RoomGameSimulateStepNormal:
     LONG_CALL   Simulation_CalculateRCIDemand
 
     ; Update date, apply budget, etc.
-    ; Note: Only if this is not the first iteration step!
+    ; Note: Only if this is not the first iteration step! The first iteration
+    ; is considered a refresh of the previous state when loading the city.
 
     ld      a,[first_simulation_iteration]
     and     a,a
     jr      z,.not_first_iteration
-
         xor     a,a ; flag as not first iteration for the next one
         ld      [first_simulation_iteration],a
-        jr      .skip_budget
-
+        jr      .skip_first_iteration
 .not_first_iteration:
-    call    DateStep
 
-    ld      a,[date_month]
-    cp      a,0 ; Check if january
-    jr      nz,.skip_budget
+        ; Advance date
 
-        ; Calculate and apply budget when a year starts (Dec -> Jan)
-        LONG_CALL   Simulation_CalculateBudgetAndTaxes
-        LONG_CALL   Simulation_ApplyBudgetAndTaxes
+        call    DateStep
 
-.skip_budget:
+        ld      a,[date_month]
+        cp      a,0 ; Check if january
+        jr      nz,.not_start_of_year
+
+            ; Handle events that only happen once per year (when Dec -> Jan)
+
+            ; Increment technology level
+
+            LONG_CALL   Simulation_AdvanceTechnology
+
+            ; Calculate and apply budget
+
+            LONG_CALL   Simulation_CalculateBudgetAndTaxes
+            LONG_CALL   Simulation_ApplyBudgetAndTaxes
+
+.not_start_of_year: ; End of handlers of yearly events
+
+.skip_first_iteration: ; End of handlers skiped the first iteration
 
     ; Start disasters
 

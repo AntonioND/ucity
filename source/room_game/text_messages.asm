@@ -76,29 +76,42 @@ MSG_CLASS_METROPOLIS:
 MSG_CLASS_CAPITAL:
     STR_ADD "Your metropolis is<nl>now a capital!"
 
+MSG_TECH_NUCLEAR:
+    STR_ADD "Scientists have<nl>invented nuclear<nl>power plants!"
+MSG_TECH_FUSION:
+    STR_ADD "Scientists have<nl>invented fusion<nl>power plants!"
+
 MSG_FIRE_INITED:
     STR_ADD "A fire has started<nl>in the city!"
 MSG_NUCLEAR_MELTDOWN:
     STR_ADD "A nuclear power<nl>plant has had a<nl>meltdown!"
 
+MSG_TECH_INSUFFICIENT:
+    STR_ADD "Technology isn't<nl>advanced enough<nl>to build that!"
+
 ;-------------------------------------------------------------------------------
 
 MSG_POINTERS: ; Array of pointer to messages. LSB first
-    MSG_ADD  MSG_EMPTY
+    MSG_ADD MSG_EMPTY
 
-    MSG_ADD  MSG_POLLUTION_HIGH
-    MSG_ADD  MSG_TRAFFIC_HIGH
+    MSG_ADD MSG_POLLUTION_HIGH
+    MSG_ADD MSG_TRAFFIC_HIGH
 
-    MSG_ADD  MSG_CLASS_TOWN
-    MSG_ADD  MSG_CLASS_CITY
-    MSG_ADD  MSG_CLASS_METROPOLIS
-    MSG_ADD  MSG_CLASS_CAPITAL
+    MSG_ADD MSG_CLASS_TOWN
+    MSG_ADD MSG_CLASS_CITY
+    MSG_ADD MSG_CLASS_METROPOLIS
+    MSG_ADD MSG_CLASS_CAPITAL
 
-    MSG_ADD  MSG_FIRE_INITED
-    MSG_ADD  MSG_NUCLEAR_MELTDOWN
+    MSG_ADD MSG_TECH_NUCLEAR
+    MSG_ADD MSG_TECH_FUSION
+
+    MSG_ADD MSG_FIRE_INITED
+    MSG_ADD MSG_NUCLEAR_MELTDOWN
+
+    MSG_ADD MSG_TECH_INSUFFICIENT
     ; ...
 
-    MSG_ADD  MSG_CUSTOM
+    MSG_ADD MSG_CUSTOM
 
 ;###############################################################################
 

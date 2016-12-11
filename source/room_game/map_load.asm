@@ -123,6 +123,9 @@ PredefinedMapSetupGameVariables:
     ld      [LOAN_PAYMENTS_AMOUNT+0],a
     ld      [LOAN_PAYMENTS_AMOUNT+1],a
 
+    xor     a,a
+    ld      [technology_level],a
+
     xor     a,a ; enable disasters by default
     ld      [simulation_disaster_disabled],a
 
@@ -420,6 +423,9 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
     ld      a,[SAV_LOAN_PAYMENTS_AMOUNT+1]
     ld      [LOAN_PAYMENTS_AMOUNT+1],a
 
+    ld      a,[SAV_TECHNOLOGY_LEVEL]
+    ld      [technology_level],a
+
     ; Player-set options
     ; ------------------
 
@@ -622,6 +628,9 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
     ld      [SAV_LOAN_PAYMENTS_AMOUNT+0],a
     ld      a,[LOAN_PAYMENTS_AMOUNT+1]
     ld      [SAV_LOAN_PAYMENTS_AMOUNT+1],a
+
+    ld      a,[technology_level]
+    ld      [SAV_TECHNOLOGY_LEVEL],a
 
     ; Player-set options
     ; ------------------
