@@ -1221,6 +1221,27 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ld      a,d
     ld      [last_frame_y],a
 
+    ; Once the map is loaded some other things that aren't saved in the SRAM
+    call    RoomGameInitialStatusRefresh
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomGameInitialStatusRefresh:
+
+    ; Calculate total population and other statistics
+
+    LONG_CALL   Simulation_CalculateStatistics
+
+    ; Calculate RCI graph
+
+    LONG_CALL   Simulation_CalculateRCIDemand
+
+    ; TODO - Reload other things? Calculate the number of building of each type
+    ; The number of buildings has to be refreshed right after each time edit
+    ; mode is exited.
+
     ret
 
 ;-------------------------------------------------------------------------------
