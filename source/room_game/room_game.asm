@@ -1053,19 +1053,20 @@ RoomGameVBLHandler:
     ld      a,b
     ld      [game_sprites_8x16],a
 
-
+    ; Make sure that the following code isn't executed twice even if it doesn't
+    ; finish in one frame.
     ld      a,[vbl_handler_working]
     and     a,a
     ret     nz ; already working
+
+    ld      a,1
+    ld      [vbl_handler_working],a ; flag as working
 
     ld      a,[rSVBK]
     ld      b,a
     ld      a,[rVBK]
     ld      c,a
     push    bc
-
-    ld      a,1
-    ld      [vbl_handler_working],a ; flag as working
 
     ; Allow another VBL (or STAT) interrupt to happen and update graphics. Since
     ; vbl_handler_working is set to 1, they will only update graphics and return
