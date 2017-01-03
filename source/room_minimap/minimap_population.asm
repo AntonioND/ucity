@@ -35,7 +35,7 @@
 
 ;-------------------------------------------------------------------------------
 
-MINIMAP_TILE_COLORS:
+MINIMAP_TILE_COLORS_POPULATION:
     DB 0,0,0,0
     DB 0,1,1,0
     DB 1,1,1,1
@@ -88,7 +88,7 @@ ENDC
             sra     a
             sra     a ; From 6 bits to 3 (63 -> 7)
 
-            ld      de,MINIMAP_TILE_COLORS
+            ld      de,MINIMAP_TILE_COLORS_POPULATION
             ld      l,a
             ld      h,0
             add     hl,hl

@@ -153,7 +153,7 @@ MinimapDrawPowerGridMap::
 
 ;-------------------------------------------------------------------------------
 
-MINIMAP_TILE_COLORS:
+MINIMAP_TILE_COLORS_POWER:
     DB 0,0,0,0
     DB 0,1,1,0
     DB 1,1,1,1
@@ -218,7 +218,7 @@ ENDC
             inc     a ; Round up
             sra     a ; From 4 bits to 3 (15 -> 7)
 
-            ld      de,MINIMAP_TILE_COLORS
+            ld      de,MINIMAP_TILE_COLORS_POWER
             ld      l,a
             ld      h,0
             add     hl,hl

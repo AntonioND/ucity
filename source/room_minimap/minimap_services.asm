@@ -35,7 +35,7 @@
 
 ;-------------------------------------------------------------------------------
 
-MINIMAP_TILE_COLORS: ; Common to all services
+MINIMAP_TILE_COLORS_SERVICES: ; Common to all services
     DB 0,0,0,0
     DB 0,1,1,0
     DB 1,1,1,1
@@ -69,7 +69,7 @@ MinimapServicesCommonDrawMap:
             rlca ; Overflow from top bits
             and     a,7 ; Reduce from 8 to 3 bits
 
-            ld      de,MINIMAP_TILE_COLORS
+            ld      de,MINIMAP_TILE_COLORS_SERVICES
             ld      l,a
             ld      h,0
             add     hl,hl
