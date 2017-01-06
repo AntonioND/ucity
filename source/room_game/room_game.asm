@@ -770,7 +770,6 @@ InputHandleModeWatch:
     ld      b,[hl] ; get old y
     ld      [hl],d ; save new y
 
-
     ; Check if we have been asked to show the tile information
 
     ld      a,[joy_pressed]
@@ -959,9 +958,11 @@ InputHandleModeWatchFastMove:
 
     call    CursorHiddenMove ; returns a = 1 if bg has scrolled
     and     a,a
-    ret     z
+    jr      z,.dont_delay_anim
     xor     a,a ; if bg has scrolled, delay animation
     ld      [animation_countdown],a
+.dont_delay_anim:
+
     ret
 
 ;-------------------------------------------------------------------------------
