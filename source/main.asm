@@ -181,7 +181,7 @@ Main:
 
 .main_loop:
     LONG_CALL   RoomMenu
-    call    RoomGame
+    LONG_CALL   RoomGame
     jr      .main_loop
 
 ;-------------------------------------------------------------------------------
