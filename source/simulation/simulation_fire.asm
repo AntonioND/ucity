@@ -585,6 +585,8 @@ Simulation_Fire:: ; This doesn't refresh the BG
     xor     a,a
     ld      [simulation_disaster_mode],a
 
+    LONG_CALL   Simulation_TransportAnimsShow
+
 .found_fire:
 
     ; Done
@@ -798,7 +800,7 @@ ENDC
 
     LONG_CALL   Simulation_TrafficRemoveAnimationTiles
 
-    ; TODO : Remove trains, planes, etc
+    LONG_CALL   Simulation_TransportAnimsHide
 
     ; Enable disaster mode
     ; --------------------

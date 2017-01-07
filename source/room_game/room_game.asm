@@ -59,9 +59,14 @@ simulation_running::  DS 1
 simulation_disaster_mode:: DS 1
 simulation_disaster_disabled:: DS 1 ; 0 if disasters are enabled, 1 if not
 
-ANIMATION_COUNT_FRAMES_NORMAL   EQU 60
-ANIMATION_COUNT_FRAMES_DISASTER EQU 15
-animation_countdown: DS 1 ; This goes from 0 to the desired value
+; Must be a power of 2
+ANIMATION_TRANSPORT_COUNT_FRAMES EQU 4
+; Must be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES
+ANIMATION_COUNT_FRAMES_NORMAL    EQU 60
+; Doesn't need to be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES
+ANIMATION_COUNT_FRAMES_DISASTER  EQU 15
+
+animation_countdown: DS 1 ; This goes from 0 to ANIMATION_COUNT_FRAMES_xxxxx
 
 ; If 1 the game is paused, if 0 it is unpaused. Setting it to 1 won't
 ; immediately pause the simulation, it will wait until the current step ends.
@@ -219,10 +224,21 @@ GameAnimateMap:
     ; Reasons for not animating: Some of the direction pad keys are pressed
     ; or the map is still moving after releasing a key.
 
-
     ld      a,[simulation_disaster_mode]
     and     a,a
     jr      nz,.disaster_mode
+
+        ; Update every ANIMATION_TRANSPORT_COUNT_FRAMES frames
+
+        ld      hl,animation_countdown
+        ld      a,[hl]
+        and     a,ANIMATION_TRANSPORT_COUNT_FRAMES-1
+        cp      a,ANIMATION_TRANSPORT_COUNT_FRAMES-1
+        jr      nz,.skip
+        LONG_CALL   Simulation_TransportAnimsHandle
+.skip:
+
+        ; Update once every X frames
 
         ld      hl,animation_countdown
         ld      a,[hl]
@@ -231,7 +247,6 @@ GameAnimateMap:
             inc     [hl] ; increment and exit
             ret
 .animate_normal:
-
         xor     a,a
         ld      [animation_countdown],a
 
@@ -241,6 +256,8 @@ GameAnimateMap:
         jr      .end_animation
 
 .disaster_mode:
+
+        ; Update once every X frames
 
         ld      hl,animation_countdown
         ld      a,[hl]
@@ -394,6 +411,8 @@ GameStateMachineStateSet:: ; a = new state
 
         call    CursorShow
 
+        LONG_CALL   Simulation_TransportAnimsShow
+
         call    CPUBusyIconHide
 
         ret
@@ -419,6 +438,8 @@ GameStateMachineStateSet:: ; a = new state
         call    StatusBarHide
         call    CursorHide
 
+        LONG_CALL   Simulation_TransportAnimsShow
+
 ;        xor     a,a ; not needed, we can only enter this mode from watch mode,
 ;        ld      [animation_countdown],a ; that should have done it already.
 
@@ -434,6 +455,8 @@ GameStateMachineStateSet:: ; a = new state
         call    CursorHide
         call    CursorMoveToOrigin
 
+        LONG_CALL   Simulation_TransportAnimsHide
+
         ret
 
 .not_select_building:
@@ -446,6 +469,8 @@ GameStateMachineStateSet:: ; a = new state
         call    StatusBarHide
         call    StatusBarMenuShow
 
+        LONG_CALL   Simulation_TransportAnimsHide
+
         call    CPUBusyIconShow
 
         ret
@@ -456,6 +481,8 @@ GameStateMachineStateSet:: ; a = new state
 
         call    StatusBarHide
         call    CursorHide
+
+        LONG_CALL   Simulation_TransportAnimsHide
 
         call    MessageBoxShow
 
@@ -757,6 +784,7 @@ InputHandleModeWatch:
     xor     a,a ; if bg has scrolled, delay animation
     ld      [animation_countdown],a
 .dont_delay_anim:
+    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
 
     call    CursorGetGlobalCoords ; e = x, d = y
 
@@ -962,6 +990,7 @@ InputHandleModeWatchFastMove:
     xor     a,a ; if bg has scrolled, delay animation
     ld      [animation_countdown],a
 .dont_delay_anim:
+    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
 
     ret
 
@@ -1225,6 +1254,9 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
     ; Once the map is loaded some other things that aren't saved in the SRAM
     call    RoomGameInitialStatusRefresh
+
+    LONG_CALL   Simulation_TransportAnimsInit
+    LONG_CALL   Simulation_TransportAnimsShow
 
     ret
 

@@ -356,7 +356,7 @@ ENDC
 
     LONG_CALL   Simulation_TrafficRemoveAnimationTiles
 
-    ; TODO : Remove trains, planes, etc
+    LONG_CALL   Simulation_TransportAnimsHide
 
     ; Enable disaster mode
     ; --------------------
