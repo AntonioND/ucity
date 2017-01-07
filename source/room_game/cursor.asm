@@ -543,6 +543,15 @@ CursorHandle::
 
 ;-------------------------------------------------------------------------------
 
+CursorDrift:
+
+    call    bg_main_drift_scroll_hor
+    call    bg_main_drift_scroll_ver
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Returns a = 1 bg it has scrolled, 0 otherwise
 CursorHiddenMove::
 

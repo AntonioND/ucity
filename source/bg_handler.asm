@@ -633,14 +633,31 @@ bg_reload::
     ret
 
 ;-------------------------------------------------------------------------------
-;- bg_scroll_in_tile()    returns 1 in a if scroll is between tiles            -
+;- bg_scroll_scrolling()    returns 1 in a if scrolling                        -
 ;-------------------------------------------------------------------------------
 
-bg_scroll_in_tile::
+bg_scroll_scrolling::
 
     ld      a,[going_x]
     ld      b,a
     ld      a,[going_y]
+    or      a,b ; Set z flag
+
+    ld      a,0 ; Don't change to xor a,a
+    ret     z ; Return 0
+
+    inc     a
+    ret ; Return 1
+
+;-------------------------------------------------------------------------------
+;- bg_scroll_in_tile()    returns 1 in a if scroll is in the middle of a tile  -
+;-------------------------------------------------------------------------------
+
+bg_scroll_in_tile::
+
+    ld      a,[bg_x_in_tile]
+    ld      b,a
+    ld      a,[bg_y_in_tile]
     or      a,b ; Set z flag
 
     ld      a,0 ; Don't change to xor a,a
