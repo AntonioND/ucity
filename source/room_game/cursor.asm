@@ -439,26 +439,28 @@ CursorCheckDragBg_hor:
 
         bit     PAD_BIT_RIGHT,a
         jr      z,.not_right
-        push    af
-        REPT    2
-        call    bg_main_scroll_right
-        ENDR
-        pop     af
 
-        ld      a,1
+        call    bg_main_scroll_right
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_right
+        pop     bc
+        or      a,b
+
         ret
 
 .not_right:
 
         bit     PAD_BIT_LEFT,a
         jr      z,.not_left
-        push    af
-        REPT    2
-        call    bg_main_scroll_left
-        ENDR
-        pop     af
 
-        ld      a,1
+        call    bg_main_scroll_left
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_left
+        pop     bc
+        or      a,b
+
         ret
 
 .not_left:
@@ -476,26 +478,28 @@ CursorCheckDragBg_ver:
 
         bit     PAD_BIT_UP,a
         jr      z,.not_up
-        push    af
-        REPT    2
-        call    bg_main_scroll_up
-        ENDR
-        pop     af
 
-        ld      a,1
+        call    bg_main_scroll_up
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_up
+        pop     bc
+        or      a,b
+
         ret
 
 .not_up:
 
         bit     PAD_BIT_DOWN,a
         jr      z,.not_down
-        push    af
-        REPT    2
-        call    bg_main_scroll_down
-        ENDR
-        pop     af
 
-        ld      a,1
+        call    bg_main_scroll_down
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_down
+        pop     bc
+        or      a,b
+
         ret
 
 .not_down:
@@ -550,29 +554,37 @@ CursorHiddenMove::
     jr      nz,.skip_movement_hor
 
         ld      a,[joy_held]
-
         bit     PAD_BIT_RIGHT,a
         jr      z,.not_right
-            push    af
-            REPT    2
+
             call    bg_main_scroll_right
-            ENDR
-            pop     af
-            ld      b,1 ; has scrolled = 1
-            ; The only way this register is modified is if any of the
-            ; bg_main_scroll_xxxx functions is called, and in that case it is
-            ; going to be set to 1 after it anyway. There's no need to push/pop
+            ld      b,a
+
+            push    bc
+            call    bg_main_scroll_right
+            pop     bc
+            or      a,b
+            ld      b,a ; b = 1 if it has scrolled
+
             jr      .skip_movement_hor
 .not_right:
 
+        ld      a,[joy_held]
         bit     PAD_BIT_LEFT,a
         jr      z,.not_left
-            push    af
-            REPT    2
+
+            push    bc
             call    bg_main_scroll_left
-            ENDR
-            pop     af
-            ld      b,1 ; has scrolled = 1
+            pop     bc
+            or      a,b
+            ld      b,a
+
+            push    bc
+            call    bg_main_scroll_left
+            pop     bc
+            or      a,b
+            ld      b,a ; b = 1 if it has scrolled
+
             ;jr      .skip_movement_hor
 .not_left:
 
@@ -587,26 +599,37 @@ CursorHiddenMove::
     jr      nz,.skip_movement_ver
 
         ld      a,[joy_held]
-
         bit     PAD_BIT_UP,a
         jr      z,.not_up
-            push    af
-            REPT    2
+
             call    bg_main_scroll_up
-            ENDR
-            pop     af
-            ld      b,1 ; has scrolled = 1
+            ld      b,a
+
+            push    bc
+            call    bg_main_scroll_up
+            pop     bc
+            or      a,b
+            ld      b,a ; b = 1 if it has scrolled
+
             jr      .skip_movement_ver
 .not_up:
 
+        ld      a,[joy_held]
         bit     PAD_BIT_DOWN,a
         jr      z,.not_down
-            push    af
-            REPT    2
+
+            push    bc
             call    bg_main_scroll_down
-            ENDR
-            pop     af
-            ld      b,1 ; has scrolled = 1
+            pop     bc
+            or      a,b
+            ld      b,a
+
+            push    bc
+            call    bg_main_scroll_down
+            pop     bc
+            or      a,b
+            ld      b,a ; b = 1 if it has scrolled
+
             ;jr      .skip_movement_ver
 .not_down:
 

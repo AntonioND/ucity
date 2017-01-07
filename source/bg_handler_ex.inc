@@ -871,52 +871,72 @@ bg_main_scroll_up::
 
 bg_main_drift_scroll_hor::
 
-    ld      e,0
-
     ld      a,[going_x]
     cp      a,1
     jr      nz,.not_right
-    REPT    2
-    call    bg_main_scroll_right
-    ENDR
-    ld      e,1
+
+        call    bg_main_scroll_right
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_right
+        pop     bc
+        or      a,b
+
+        ret
+
 .not_right:
 
     ld      a,[going_x]
     cp      a,-1
     jr      nz,.not_left
-    REPT    2
-    call    bg_main_scroll_left
-    ENDR
-    ld      e,1
+
+        call    bg_main_scroll_left
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_left
+        pop     bc
+        or      a,b
+
+        ret
+
 .not_left:
 
-    ld      a,e
+    xor     a,a
     ret
 
 bg_main_drift_scroll_ver::
 
-    ld      e,0
-
     ld      a,[going_y]
     cp      a,1
     jr      nz,.not_down
-    REPT    2
-    call    bg_main_scroll_down
-    ENDR
-    ld      e,1
+
+        call    bg_main_scroll_down
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_down
+        pop     bc
+        or      a,b
+
+        ret
+
 .not_down:
 
     ld      a,[going_y]
     cp      a,-1
     jr      nz,.not_up
-    REPT    2
-    call    bg_main_scroll_up
-    ENDR
-    ld      e,1
+
+        call    bg_main_scroll_up
+        ld      b,a
+        push    bc
+        call    bg_main_scroll_up
+        pop     bc
+        or      a,b
+
+        ret
+
 .not_up:
 
-    ld      a,e
+    xor     a,a
     ret
 
 ;-------------------------------------------------------------------------------
