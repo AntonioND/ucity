@@ -310,11 +310,8 @@ bg_reload_map_main::
     xor     a,a
     ld      [going_x],a
     ld      [going_y],a
-
-    ld      a,d
-    ld      [bg_x],a
-    ld      a,e
-    ld      [bg_y],a
+    ld      [bg_x_in_tile],a
+    ld      [bg_y_in_tile],a
 
     ; LOAD MAP
 
