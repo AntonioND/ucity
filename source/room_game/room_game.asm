@@ -795,7 +795,6 @@ InputHandleModeWatch:
     xor     a,a ; if bg has scrolled, delay animation
     ld      [animation_countdown],a
 .dont_delay_anim:
-    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
 
     call    CursorGetGlobalCoords ; e = x, d = y
 
@@ -1012,7 +1011,6 @@ InputHandleModeWatchFastMove:
     xor     a,a ; if bg has scrolled, delay animation
     ld      [animation_countdown],a
 .dont_delay_anim:
-    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
 
     ret
 
@@ -1139,6 +1137,7 @@ RoomGameVBLHandler:
 
     call    GameStateMachineHandle
 
+    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
     pop     bc
     ld      a,b
     ld      [rSVBK],a
