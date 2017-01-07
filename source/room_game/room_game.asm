@@ -1073,6 +1073,13 @@ RoomGameVBLHandler:
     call    refresh_OAM ; update OAM after moving sprites
     call    bg_update_scroll_registers
 
+    ; Assert that the LCD is still in VBL mode!
+    ld      a,[rLY]
+    cp      a,144 ; cy = 1 if n > a
+    jr      nc,.ok
+    ld      b,b ; Breakpoint
+.ok:
+
     ; Set 8x16 or 8x8 sprites
     ld      b,LCDCF_OBJ8
     ld      a,[game_state]
