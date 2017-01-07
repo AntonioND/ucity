@@ -602,7 +602,10 @@ CursorHiddenMove::
         bit     PAD_BIT_UP,a
         jr      z,.not_up
 
+            push    bc
             call    bg_main_scroll_up
+            pop     bc
+            or      a,b
             ld      b,a
 
             push    bc
