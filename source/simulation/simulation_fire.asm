@@ -585,6 +585,9 @@ Simulation_Fire:: ; This doesn't refresh the BG
     xor     a,a
     ld      [simulation_disaster_mode],a
 
+    ; A fire may have destroyed buildings, we need to refresh the counts
+    LONG_CALL   Simulation_CountBuildings
+
     LONG_CALL   Simulation_TransportAnimsShow
 
 .found_fire:
@@ -646,51 +649,11 @@ Simulation_FireTryStart:: ; b = 1 to force fire, 0 to make it random
 
     push    bc ; (*) preserve B
 
-    ; Count number of fire stations and save it
-    ; -----------------------------------------
+    ; Save initial number of fire stations
+    ; ------------------------------------
 
-    xor     a,a ; reset count
+    ld      a,[COUNT_FIRE_STATIONS]
     ld      [initial_number_fire_stations],a
-
-    ld      hl,CITY_MAP_TILES ; Map base
-
-    ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
-
-.loop_count:
-
-        ld      a,[hl] ; Get LSB of tile
-        cp      a,T_FIRE_DEPT & $FF
-        jr      nz,.skip_count
-
-            ld      a,BANK_CITY_MAP_ATTR
-            ld      [rSVBK],a
-
-            ld      a,[hl] ; Get attrs of tile (MSB)
-            bit     3,a ; MSB of tile number
-IF T_FIRE_DEPT > 255
-            jr      z,.skip_count_restore
-ELSE
-            jr      nz,.skip_count_restore
-ENDC
-
-                ld      a,[initial_number_fire_stations]
-                cp      a,30 ; saturate to 30
-                jr      z,.skip_count_restore
-                    inc     a
-                    ld      [initial_number_fire_stations],a
-
-.skip_count_restore:
-
-        ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a
-
-.skip_count:
-
-    inc     hl
-
-    bit     5,h ; Up to E000
-    jr      z,.loop_count
 
     ; Check if a fire has to start or not
     ; -----------------------------------

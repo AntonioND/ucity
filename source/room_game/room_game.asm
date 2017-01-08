@@ -842,6 +842,8 @@ InputHandleModeEdit:
     jr      z,.not_b
         LONG_CALL   BuildSelectMenuHide
         call    BuildOverlayIconHide
+        ; Update building count after building or demolishing!
+        LONG_CALL   Simulation_CountBuildings
         ld      a,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret
@@ -1304,9 +1306,13 @@ RoomGameInitialStatusRefresh:
 
     LONG_CALL   Simulation_CalculateRCIDemand
 
-    ; TODO - Reload other things? Calculate the number of building of each type
-    ; The number of buildings has to be refreshed right after each time edit
-    ; mode is exited.
+    ; Calculate the number of building of each type. This has to be refreshed
+    ; right after each time edit mode is exited, after a fire is extinguished,
+    ; etc.
+
+    LONG_CALL   Simulation_CountBuildings
+
+    ; TODO - Reload other things?
 
     ret
 
