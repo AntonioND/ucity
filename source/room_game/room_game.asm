@@ -295,6 +295,8 @@ GameStateMachineHandle::
 
         call    StatusBarUpdate ; Update status bar text
 
+        LONG_CALL   Simulation_TransportAnimsShow
+
         call    GameAnimateMap
 
         call    CPUBusyIconHide
@@ -312,6 +314,8 @@ GameStateMachineHandle::
 
         call    StatusBarUpdate ; Update status bar text
 
+        LONG_CALL   Simulation_TransportAnimsHide
+
         ; Not simulating, update busy icon, but show if it isn't showing
         call    CPUBusyIconShowAndHandle
 
@@ -322,6 +326,8 @@ GameStateMachineHandle::
     jr      nz,.not_watch_fast_move ; GAME_STATE_WATCH_FAST_MOVE
 
         call    InputHandleModeWatchFastMove
+
+        LONG_CALL   Simulation_TransportAnimsShow
 
         call    GameAnimateMap
 
@@ -335,6 +341,8 @@ GameStateMachineHandle::
 .not_watch_fast_move:
     cp      a,GAME_STATE_SELECT_BUILDING
     jr      nz,.not_select_building ; GAME_STATE_SELECT_BUILDING
+
+        LONG_CALL   Simulation_TransportAnimsHide
 
         ; If this returns a=1, don't refresh GFX
         call    InputHandleModeSelectBuilding
@@ -353,6 +361,8 @@ GameStateMachineHandle::
 
         call    InputHandleModePauseMenu
 
+        LONG_CALL   Simulation_TransportAnimsHide
+
         call    StatusBarMenuHandle
         cp      a,$FF
         call    nz,PauseMenuHandleOption ; $FF = user didn't press A
@@ -370,6 +380,8 @@ GameStateMachineHandle::
     jr      nz,.not_show_message ; GAME_STATE_SHOW_MESSAGE
 
         call    InputHandleModeShowMessage
+
+        LONG_CALL   Simulation_TransportAnimsHide
 
         ret
 
@@ -411,9 +423,9 @@ GameStateMachineStateSet:: ; a = new state
 
         call    CursorShow
 
-        LONG_CALL   Simulation_TransportAnimsShow
-
         call    CPUBusyIconHide
+
+        LONG_CALL   Simulation_TransportAnimsShow
 
         ret
 
@@ -449,13 +461,13 @@ GameStateMachineStateSet:: ; a = new state
     cp      a,GAME_STATE_SELECT_BUILDING
     jr      nz,.not_select_building ; GAME_STATE_SELECT_BUILDING
 
+        LONG_CALL   Simulation_TransportAnimsHide
+
         ; Don't refresh sprites, it will be done the first frame after this one
         LONG_CALL   BuildSelectMenuShow
 
         call    CursorHide
         call    CursorMoveToOrigin
-
-        LONG_CALL   Simulation_TransportAnimsHide
 
         ret
 
@@ -463,13 +475,13 @@ GameStateMachineStateSet:: ; a = new state
     cp      a,GAME_STATE_PAUSE_MENU
     jr      nz,.not_pause_menu ; GAME_STATE_PAUSE_MENU
 
+        LONG_CALL   Simulation_TransportAnimsHide
+
         call    CursorHide
         call    CursorMoveToOrigin
 
         call    StatusBarHide
         call    StatusBarMenuShow
-
-        LONG_CALL   Simulation_TransportAnimsHide
 
         call    CPUBusyIconShow
 
@@ -840,10 +852,15 @@ InputHandleModeEdit:
     ld      a,[joy_pressed]
     and     a,PAD_B
     jr      z,.not_b
+
         LONG_CALL   BuildSelectMenuHide
         call    BuildOverlayIconHide
+
         ; Update building count after building or demolishing!
         LONG_CALL   Simulation_CountBuildings
+        ; Update the number of objects of transportation
+        LONG_CALL   Simulation_TransportAnimsInit
+
         ld      a,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret
@@ -1285,8 +1302,9 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ; Once the map is loaded some other things that aren't saved in the SRAM
     call    RoomGameInitialStatusRefresh
 
+    ; This has to be called after reloading the number of buildings, which is
+    ; done inside of RoomGameInitialStatusRefresh()
     LONG_CALL   Simulation_TransportAnimsInit
-    LONG_CALL   Simulation_TransportAnimsShow
 
     ret
 

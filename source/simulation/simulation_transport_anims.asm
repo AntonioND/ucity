@@ -123,6 +123,10 @@ Simulation_TransportAnimsInit::
 ; supposed to be visible after the jump.
 Simulation_TransportAnimsShow::
 
+    ld      a,[SIMULATION_SPRITES_SHOWN]
+    and     a,a
+    ret     nz ; return if they are shown
+
     ld      a,[simulation_disaster_mode]
     and     a,a
     ret     nz ; don't enable sprites in disaster mode...
@@ -212,6 +216,10 @@ Simulation_TransportAnimsScroll::
 
 ; This hides all sprites, but doesn't refresh the OAM.
 Simulation_TransportAnimsHide::
+
+    ld      a,[SIMULATION_SPRITES_SHOWN]
+    and     a,a
+    ret     z ; return if they are hidden
 
     xor     a,a
     ld      [SIMULATION_SPRITES_SHOWN],a
