@@ -416,6 +416,9 @@ GameStateMachineStateSet:: ; a = new state
         ld      [game_sprites_8x16],a
 
         xor     a,a
+        ld      [status_bar_overlay_sprites_active],a
+
+        xor     a,a
         ld      [animation_countdown],a
 
         call    StatusBarShow
@@ -437,6 +440,9 @@ GameStateMachineStateSet:: ; a = new state
         call    StatusBarUpdate
         call    BuildOverlayIconShow
 
+        ld      a,LCDCF_OBJON
+        ld      [status_bar_overlay_sprites_active],a
+
         call    CursorShow
 
         call    CPUBusyIconShow
@@ -450,6 +456,9 @@ GameStateMachineStateSet:: ; a = new state
         call    StatusBarHide
         call    CursorHide
 
+        xor     a,a
+        ld      [status_bar_overlay_sprites_active],a
+
         LONG_CALL   Simulation_TransportAnimsShow
 
 ;        xor     a,a ; not needed, we can only enter this mode from watch mode,
@@ -462,6 +471,9 @@ GameStateMachineStateSet:: ; a = new state
     jr      nz,.not_select_building ; GAME_STATE_SELECT_BUILDING
 
         LONG_CALL   Simulation_TransportAnimsHide
+
+        xor     a,a
+        ld      [status_bar_overlay_sprites_active],a
 
         ; Don't refresh sprites, it will be done the first frame after this one
         LONG_CALL   BuildSelectMenuShow
@@ -480,6 +492,9 @@ GameStateMachineStateSet:: ; a = new state
         call    CursorHide
         call    CursorMoveToOrigin
 
+        xor     a,a
+        ld      [status_bar_overlay_sprites_active],a
+
         call    StatusBarHide
         call    StatusBarMenuShow
 
@@ -490,6 +505,9 @@ GameStateMachineStateSet:: ; a = new state
 .not_pause_menu:
     cp      a,GAME_STATE_SHOW_MESSAGE
     jr      nz,.not_show_message ; GAME_STATE_SHOW_MESSAGE
+
+        xor     a,a
+        ld      [status_bar_overlay_sprites_active],a
 
         call    StatusBarHide
         call    CursorHide

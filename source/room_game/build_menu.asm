@@ -50,8 +50,6 @@ menu_active:    DS 1
 
 build_overlay_icon_active: DS 1
 
-menu_overlay_sprites_active:: DS 1 ; LCDCF_OBJON or 0
-
 cpu_busy_icon_active: DS 1
 
 ;###############################################################################
@@ -601,9 +599,6 @@ BuildSelectMenuShow::
     ld      a,MENU_CURSOR_MOVEMENT_SPEED
     ld      [menu_cursor_countdown],a
 
-    xor     a,a
-    ld      [menu_overlay_sprites_active],a
-
     ret
 
 ;-------------------------------------------------------------------------------
@@ -625,9 +620,6 @@ BuildSelectMenuHide::
 
     xor     a,a
     ld      [menu_active],a
-
-    ld      a,LCDCF_OBJON
-    ld      [menu_overlay_sprites_active],a
 
     ret
 

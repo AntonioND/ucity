@@ -61,6 +61,8 @@ STATUS_MENU_BLINK_FRAMES EQU 30
 status_menu_blink_status: DS 1
 status_menu_blink_frames: DS 1 ; frames left to change status
 
+status_bar_overlay_sprites_active:: DS 1 ; LCDCF_OBJON or 0
+
 ;###############################################################################
 
     SECTION "Status Bar Functions Bank 0",ROM0
@@ -150,7 +152,7 @@ StatusBarHandlerSTAT::
 
         WAIT_SCREEN_BLANK
 
-        ld      a,[menu_overlay_sprites_active]
+        ld      a,[status_bar_overlay_sprites_active]
         ld      b,a
         ld      a,[game_sprites_8x16]
         or      a,b
@@ -204,7 +206,7 @@ StatusBarHandlerVBL::
 .on_top:
 
         ; On top
-        ld      a,[menu_overlay_sprites_active]
+        ld      a,[status_bar_overlay_sprites_active]
         ld      b,a
         ld      a,[game_sprites_8x16]
         or      a,b
