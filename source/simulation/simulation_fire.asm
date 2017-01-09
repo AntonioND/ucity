@@ -588,6 +588,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
     ; A fire may have destroyed buildings, we need to refresh the counts
     LONG_CALL   Simulation_CountBuildings
 
+    LONG_CALL   Simulation_TransportAnimsInit
     LONG_CALL   Simulation_TransportAnimsShow
 
 .found_fire:
