@@ -220,47 +220,21 @@ PlanesReset:
     ; Count the number of airports. The total number of planes is equal to the
     ; number of airports * 2 up to a max of SIMULATION_MAX_PLANES.
 
-    ld      c,0 ; number of airports
+    ld      a,[COUNT_AIRPORTS]
+    sla     a
+    cp      a,SIMULATION_MAX_PLANES ; cy = 1 if n > a
+    jr      c,.not_max
+    ld      a,SIMULATION_MAX_PLANES
+.not_max:
 
-    ld      hl,CITY_MAP_TILES
-
-.loop:
-    push    hl
-
-        ; Returns: - Tile -> Register DE
-        call    CityMapGetTileAtAddress ; Arg: hl = address. Preserves BC, HL
-
-        ld      a,(T_AIRPORT+0)&$FF
-        cp      a,e
-        jr      nz,.next
-        ld      a,(T_AIRPORT+0)>>8
-        cp      a,d
-        jr      nz,.next
-
-            inc     c
-            inc     c
-            ld      a,SIMULATION_MAX_PLANES
-            cp      a,c
-            jr      nz,.next
-                pop     hl
-                jr      .endloop
-.next:
-
-    pop     hl
-
-    inc     hl
-
-    bit     5,h ; Up to E000
-    jr      z,.loop
-
-.endloop: ; C holds the number of airports (up to SIMULATION_MAX_PLANES)
+    ; A holds the number of airports (up to SIMULATION_MAX_PLANES)
 
     ; Initialize planes to any point in the map
 
-    ld      a,c
     and     a,a
-    ret     z ; check if c = 0
+    ret     z ; check if number = 0
 
+    ld      c,a
 .add_plane:
     dec     c
     push    bc
