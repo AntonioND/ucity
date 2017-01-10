@@ -50,6 +50,7 @@ COUNT_FIRE_STATIONS::   DS 1
     ; or simply when the map is loaded.
 Simulation_CountBuildings::
 
+    xor     a,a
     ld      [COUNT_AIRPORTS],a
     ld      [COUNT_FIRE_STATIONS],a
 
