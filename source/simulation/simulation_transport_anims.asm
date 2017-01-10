@@ -62,6 +62,8 @@ PLANE_SPRITE_TILE_START EQU (147-128)
 
 PLANE_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
 
+OLD_NUM_AIRPORTS: DS 1
+
 ; Coordinates in tiles of the plane. 0 is actually -1, there is one extra row
 ; and column at each border.
 PLANE_X_TILE:    DS SIMULATION_MAX_PLANES
@@ -95,12 +97,17 @@ TRAIN_SPR_OAM_BASE EQU PLANE_SPR_OAM_BASE+SIMULATION_MAX_PLANES
 ; Initialize objects to random locations. It doesn't refresh the sprites.
 ; It must be called after initializing the BG and its scroll as this function
 ; sets the initial reference.
-Simulation_TransportAnimsInit::
+; Forcing a reset will reposition all sprites in the map, not forcing it will
+; only move the newly visible ones.
+Simulation_TransportAnimsInit:: ; b = 1 force reset, b = 0 don't force
 
     xor     a,a
     ld      [SIMULATION_SPRITES_SHOWN],a
 
+    ld      a,b ; force or not
+    push    af
     call    PlanesReset
+    pop     af
 
     call    TrainsReset
 

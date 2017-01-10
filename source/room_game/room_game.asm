@@ -877,7 +877,8 @@ InputHandleModeEdit:
         ; Update building count after building or demolishing!
         LONG_CALL   Simulation_CountBuildings
         ; Update the number of objects of transportation
-        LONG_CALL   Simulation_TransportAnimsInit
+        ld      b,0 ; don't force reset
+        LONG_CALL_ARGS  Simulation_TransportAnimsInit
 
         ld      a,GAME_STATE_WATCH
         call    GameStateMachineStateSet
@@ -1322,7 +1323,8 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
     ; This has to be called after reloading the number of buildings, which is
     ; done inside of RoomGameInitialStatusRefresh()
-    LONG_CALL   Simulation_TransportAnimsInit
+    ld      b,1 ; force reset
+    LONG_CALL_ARGS  Simulation_TransportAnimsInit
 
     ret
 

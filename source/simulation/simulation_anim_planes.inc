@@ -208,19 +208,37 @@ PlanesMovementStep:
 ;-------------------------------------------------------------------------------
 
 ; Initialize sprites, find starting coordinates for trains, etc.
-PlanesReset:
+PlanesReset: ; a = 1 to force reset, a = 0 reset only if num of planes changes
 
-    ; Disable all planes
+    and     a,a
+    jr      nz,.force_reset
+
+    ; if number of airports is the same, return
+    ld      a,[COUNT_AIRPORTS]
+    ld      hl,OLD_NUM_AIRPORTS
+    cp      a,[hl]
+    ret     z
+
+    ; Skip reset of all planes, only the planes that are enabled now are reseted
+    jr      .reset_common
+
+.force_reset:
+
+    ; Disable all planes so that all visible planes will be reseted
 
     ld      a,-1
     ld      hl,PLANE_DIRECTION
     ld      b,SIMULATION_MAX_PLANES
     call    memset_fast ; a = value    hl = start address    b = size
 
+.reset_common:
+
     ; Count the number of airports. The total number of planes is equal to the
     ; number of airports * 2 up to a max of SIMULATION_MAX_PLANES.
 
     ld      a,[COUNT_AIRPORTS]
+    ld      [OLD_NUM_AIRPORTS],a ; update saved number of airports
+
     sla     a
     cp      a,SIMULATION_MAX_PLANES ; cy = 1 if n > a
     jr      c,.not_max
@@ -231,18 +249,43 @@ PlanesReset:
 
     ; Initialize planes to any point in the map
 
-    and     a,a
-    ret     z ; check if number = 0
+    ld      bc,0 ; c = counter variable for the next two loops
 
-    ld      c,a
-.add_plane:
-    dec     c
-    push    bc
-    call    PlaneSpawnAllMap
-    pop     bc
-    ld      a,c
     and     a,a
-    jr      nz,.add_plane
+    jr      z,.skip_all_spawn ; check if number = 0
+
+.spawn_plane:
+    push    af ; save top num
+        ld      hl,PLANE_DIRECTION
+        add     hl,bc
+        ld      a,[hl]
+        cp      a,-1 ; If disabled, enable
+        jr      nz,.skip_spawn
+            push    bc
+            call    PlaneSpawnAllMap
+            pop     bc
+.skip_spawn:
+    pop     af
+    inc     c
+    cp      a,c
+    jr      nz,.spawn_plane
+
+.skip_all_spawn:
+    ; Disable the rest of the planes
+
+    cp      a,SIMULATION_MAX_PLANES
+    ret     z
+
+    ; bc is still the counter variable
+    ld      d,-1 ; disable value
+    ld      a,SIMULATION_MAX_PLANES ; limit
+.disable_plane:
+    ld      hl,PLANE_DIRECTION
+    add     hl,bc
+    ld      [hl],d
+    inc     c
+    cp      a,c
+    jr      nz,.disable_plane
 
     ret
 
