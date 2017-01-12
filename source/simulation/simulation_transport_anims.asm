@@ -64,10 +64,10 @@ PLANE_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
 
 OLD_NUM_AIRPORTS: DS 1
 
-; Coordinates in tiles of the plane. 0 is actually -1, there is one extra row
-; and column at each border.
-PLANE_X_TILE:    DS SIMULATION_MAX_PLANES
-PLANE_Y_TILE:    DS SIMULATION_MAX_PLANES
+; Coordinates in tiles of the plane. There is one extra row and column at each
+; border.
+PLANE_X_TILE:    DS SIMULATION_MAX_PLANES ; -1 to CITY_MAP_WIDTH
+PLANE_Y_TILE:    DS SIMULATION_MAX_PLANES ; -1 to CITY_MAP_HEIGHT
 ; (0 - 7) Coordinates inside the tile, to be added to PLANE_X/Y_TILE.
 PLANE_X_IN_TILE: DS SIMULATION_MAX_PLANES
 PLANE_Y_IN_TILE: DS SIMULATION_MAX_PLANES

@@ -47,16 +47,6 @@ PlaneSpawnAllMap: ; c = index of the plane
     add     hl,bc
     ld      [hl],d
 
-PlaneSpawnCommon: ; bc = index of the plane
-
-    call    GetRandom ; bc, de preserved
-    and     a,PLANE_NUM_DIRECTIONS-1
-    ld      hl,PLANE_DIRECTION
-    add     hl,bc
-    ld      [hl],a ; By setting a direction the plane is enabled as well.
-
-    ; Clear variables...
-
     xor     a,a
 
     ld      hl,PLANE_X_IN_TILE
@@ -67,13 +57,23 @@ PlaneSpawnCommon: ; bc = index of the plane
     add     hl,bc
     ld      [hl],a
 
+    call    GetRandom ; bc, de preserved
+    and     a,PLANE_NUM_DIRECTIONS-1
+    ld      hl,PLANE_DIRECTION
+    add     hl,bc
+    ld      [hl],a ; By setting a direction the plane is enabled as well.
+
+PlaneSpawnCommon: ; bc = index of the plane
+
+    ; Clear variables...
+
+    xor     a,a
+
     ld      hl,PLANE_VISIBLE
-    add     hl,bc ; set as invisible so that the OAM coordinates are refreshed
-    ld      [hl],0 ; later
+    add     hl,bc  ; Set as invisible so that the OAM coordinates are refreshed
+    ld      [hl],0 ; later.
 
-    call    PlaneRefreshSpriteCoordinates ; bc = index
-
-    ret
+    jp      PlaneRefreshSpriteCoordinates ; bc = index, return from there
 
 ;-------------------------------------------------------------------------------
 
@@ -81,11 +81,179 @@ PlaneSpawnCommon: ; bc = index of the plane
 ; another plane disappears)
 PlaneSpawnBorderOrAirport: ; c = index of the plane
 
-    jr      PlaneSpawnAllMap ; TODO - Remove
+    call    GetRandom ; bc, de preserved
+    bit     2,a ; leave 2 bits for spawn at border calculations
+    jp      z,.spawn_airport
+
+        ; Spawn at border
+        ; ---------------
+
+        ld      b,0
+        push    bc ; (*) preserve bc = index
+
+        ; Calculate index of the border to spawn the plane at
+        and     a,3
+        ld      b,a ; b = 2-bit random value (index of border)
+
+        ; This code assumes that the city width is the same as the height so
+        ; that this random value can be used for X or Y.
+IF CITY_MAP_WIDTH != CITY_MAP_HEIGHT
+    ERROR "Fix this!"
+ENDC
+
+        ; Calculate random coordinate, the other one is 0 or CITY_MAP_HEIGHT
+        call    GetRandom ; bc, de preserved
+        and     a,CITY_MAP_WIDTH-1 ; Same as CITY_MAP_HEIGHT-1
+        inc     a
+        ld      e,a ; e = random value from 1 to city dimension
+        ; This way row/column 0 is skipped and the last one as well. They are
+        ; hidden so this is the correct thing to do.
+
+        ; Calculate num from 0 to 2, both included
+.loop_rand_012:
+        call    GetRandom ; bc, de preserved
+        and     a,3
+        cp      a,3
+        jr      z,.loop_rand_012
+        ld      d,a ; d = num from 0 to 2 to calculate direction
+
+        ld      a,b ; prepare to compare border
+
+        pop     bc ; (*) restore bc = index
+
+        ; a = border
+        ; bc = plane index
+        ; d = direction offset
+        ; e = random coordinate
+
+        cp      a,0
+        jr      nz,.not_top
+
+            ; Top
+
+            ld      a,3 ; bottom right ~ bottom left
+            add     a,d
+            and     a,PLANE_NUM_DIRECTIONS-1
+            ld      hl,PLANE_DIRECTION
+            add     hl,bc
+            ld      [hl],a ; Set direction and enable
+
+            ld      hl,PLANE_X_TILE
+            add     hl,bc
+            ld      [hl],e ; PLANE_X_TILE[bc] = e
+
+            ld      hl,PLANE_Y_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            ld      hl,PLANE_X_IN_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            ld      hl,PLANE_Y_IN_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            jp      PlaneSpawnCommon ; return from there
+.not_top:
+        cp      a,1
+        jr      nz,.not_right
+
+            ; Right
+
+            ld      a,5 ; bottom left ~ top left
+            add     a,d
+            and     a,PLANE_NUM_DIRECTIONS-1
+            ld      hl,PLANE_DIRECTION
+            add     hl,bc
+            ld      [hl],a ; Set direction and enable
+
+            ld      hl,PLANE_X_TILE
+            add     hl,bc
+            ld      [hl],CITY_MAP_WIDTH
+
+            ld      hl,PLANE_Y_TILE
+            add     hl,bc
+            ld      [hl],e
+
+            ld      hl,PLANE_X_IN_TILE
+            add     hl,bc
+            ld      [hl],6 ; max offset in tile (scroll is done by 2 px)
+
+            ld      hl,PLANE_Y_IN_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            jp      PlaneSpawnCommon ; return from there
+.not_right:
+        cp      a,2
+        jr      nz,.not_bottom
+
+            ; Bottom
+
+            ld      a,7 ; top left ~ top right
+            add     a,d
+            and     a,PLANE_NUM_DIRECTIONS-1
+            ld      hl,PLANE_DIRECTION
+            add     hl,bc
+            ld      [hl],a ; Set direction and enable
+
+            ld      hl,PLANE_X_TILE
+            add     hl,bc
+            ld      [hl],e ; PLANE_X_TILE[bc] = e
+
+            ld      hl,PLANE_Y_TILE
+            add     hl,bc
+            ld      [hl],CITY_MAP_HEIGHT
+
+            ld      hl,PLANE_X_IN_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            ld      hl,PLANE_Y_IN_TILE
+            add     hl,bc
+            ld      [hl],6 ; max offset in tile (scroll is done by 2 px)
+
+            jp      PlaneSpawnCommon ; return from there
+.not_bottom:
+
+            ; Left
+
+            ld      a,1 ; top right ~ bottom right
+            add     a,d
+            and     a,PLANE_NUM_DIRECTIONS-1
+            ld      hl,PLANE_DIRECTION
+            add     hl,bc
+            ld      [hl],a ; Set direction and enable
+
+            ld      hl,PLANE_X_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            ld      hl,PLANE_Y_TILE
+            add     hl,bc
+            ld      [hl],e
+
+            ld      hl,PLANE_X_IN_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            ld      hl,PLANE_Y_IN_TILE
+            add     hl,bc
+            ld      [hl],0
+
+            jp      PlaneSpawnCommon ; return from there
+
+.spawn_airport:
+
+    ; Spawn at airport
+    ; ----------------
+
+    jp      PlaneSpawnAllMap ; TODO - Remove
 
     ; TODO - Coordinates
 
-    jr      PlaneSpawnCommon ; return from there
+    jp      PlaneSpawnCommon ; return from there
 
 ;-------------------------------------------------------------------------------
 
