@@ -1249,6 +1249,14 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         call    CityMapLoad ; Returns starting coordinates in d = x and e = y
         push    de ; (*) Save coordinates to pass to bg_load_main
 
+        ; Once the map is loaded some other things that aren't saved in the SRAM
+        call    RoomGameInitialStatusRefresh
+
+        ; This has to be called after reloading the number of buildings, which
+        ; is done inside of RoomGameInitialStatusRefresh()
+        ld      b,1 ; force reset
+        LONG_CALL_ARGS  Simulation_TransportAnimsInit
+
         ld      b,0 ; bank at 8000h
         call    LoadText
         LONG_CALL   BuildSelectMenuLoadGfx
@@ -1317,14 +1325,6 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
     ld      [last_frame_x],a
     ld      a,d
     ld      [last_frame_y],a
-
-    ; Once the map is loaded some other things that aren't saved in the SRAM
-    call    RoomGameInitialStatusRefresh
-
-    ; This has to be called after reloading the number of buildings, which is
-    ; done inside of RoomGameInitialStatusRefresh()
-    ld      b,1 ; force reset
-    LONG_CALL_ARGS  Simulation_TransportAnimsInit
 
     ret
 
