@@ -154,6 +154,7 @@ ENDC
             add     hl,bc
             ld      [hl],0
 
+            ; bc = index
             jp      PlaneSpawnCommon ; return from there
 .not_top:
         cp      a,1
@@ -184,6 +185,7 @@ ENDC
             add     hl,bc
             ld      [hl],0
 
+            ; bc = index
             jp      PlaneSpawnCommon ; return from there
 .not_right:
         cp      a,2
@@ -214,6 +216,7 @@ ENDC
             add     hl,bc
             ld      [hl],6 ; max offset in tile (scroll is done by 2 px)
 
+            ; bc = index
             jp      PlaneSpawnCommon ; return from there
 .not_bottom:
 
@@ -242,6 +245,7 @@ ENDC
             add     hl,bc
             ld      [hl],0
 
+            ; bc = index
             jp      PlaneSpawnCommon ; return from there
 
 .spawn_airport:
@@ -249,9 +253,93 @@ ENDC
     ; Spawn at airport
     ; ----------------
 
-    jp      PlaneSpawnAllMap ; TODO - Remove
+    ; Generate a random number between 0 and the number of airports (which is
+    ; clamped to 255, why whould anyone build more than 251 airports anyway?).
 
-    ; TODO - Coordinates
+    ld      a,[COUNT_AIRPORTS]
+    and     a,a
+    ret     z ; return if there are no airports
+
+    push    bc ; (*12) preserve index
+
+    ld      b,a ; b = number of airports
+
+    ld      d,a
+    REPT 7
+    sra     d
+    or      a,d
+    ENDR
+    ld      d,a ; d = (first power of 2 > number of airports) - 1
+
+    ; generate num between 0 and b (b not included)
+.loop_rand:
+    call    GetRandom ; bc, de preserved
+    and     a,d ; reduce the number to make this easier
+    cp      a,b ; cy = 1 if b > a
+    jr      nc,.loop_rand
+
+    ld      c,a
+    ; c = number of the airport to spawn the airport at
+
+    ; Look for the correct airport
+
+    ld      hl,CITY_MAP_TILES
+
+.loop:
+        ; Returns: - Tile -> Register DE
+        call    CityMapGetTileAtAddress ; Arg: hl = address. Preserves BC, HL
+
+        ld      a,(T_AIRPORT_RUNWAY)&$FF
+        cp      a,e
+        jr      nz,.end
+        ld      a,(T_AIRPORT_RUNWAY)>>8
+        cp      a,d
+        jr      nz,.end
+            ld      a,c
+            and     a,a
+            jr      z,.spawn
+            dec     c
+.end:
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ; Aiport not found! This means that the number of airports in the cached
+    ; count variable is outdated...
+    ld      b,b
+    pop     bc ; (*1) restore index
+    ret
+
+.spawn:
+
+    call    CityMapAddrToCoords ; address = hl, returns d = y, e = x
+    inc     d ; Add the extra rows and columns used in the sprite coordinate
+    inc     e ; system.
+
+    pop     bc ; (*2) restore index
+
+    ld      a,PLANE_TAKEOFF_DIRECTION
+    ld      hl,PLANE_DIRECTION
+    add     hl,bc
+    ld      [hl],a ; Set direction and enable
+
+    ld      hl,PLANE_X_TILE
+    add     hl,bc
+    ld      [hl],e
+
+    ld      hl,PLANE_Y_TILE
+    add     hl,bc
+    ld      [hl],d
+
+    ld      hl,PLANE_X_IN_TILE
+    add     hl,bc
+    ld      [hl],0
+
+    ld      hl,PLANE_Y_IN_TILE
+    add     hl,bc
+    ld      [hl],0
 
     jp      PlaneSpawnCommon ; return from there
 
