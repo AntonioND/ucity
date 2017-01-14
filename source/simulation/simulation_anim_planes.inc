@@ -73,6 +73,13 @@ PlaneSpawnCommon: ; bc = index of the plane
     add     hl,bc  ; Set as invisible so that the OAM coordinates are refreshed
     ld      [hl],0 ; later.
 
+    call    GetRandom ; bc, de preserved
+    and     a,PLANE_CHANGE_DIR_RANGE-1
+    add     a,PLANE_CHANGE_DIR_MIN
+    ld      hl,PLANE_DIRECTION_CHANGE_COUNTDOWN
+    add     hl,bc
+    ld      [hl],a
+
     jp      PlaneRefreshSpriteCoordinates ; bc = index, return from there
 
 ;-------------------------------------------------------------------------------
@@ -428,6 +435,46 @@ PlanesMovementStep:
         cp      a,-1 ; disabled
         jr      z,.skip
 
+        ld      hl,PLANE_DIRECTION_CHANGE_COUNTDOWN
+        add     hl,bc
+        dec     [hl]
+        jr      nz,.end_change_dir
+            call    GetRandom ; bc, de preserved
+            ld      e,a
+
+            ld      a,PLANE_CHANGE_DIR_RANGE-1
+            and     a,e
+            add     a,PLANE_CHANGE_DIR_MIN
+            ld      hl,PLANE_DIRECTION_CHANGE_COUNTDOWN
+            add     hl,bc
+            ld      [hl],a
+
+            call    GetRandom ; bc, de preserved
+            bit     6,a
+            jr      z,.end_change_dir ; don't change this time
+
+            bit     7,a ; rotate right or left?
+            jr      z,.inc_dir
+                ld      hl,PLANE_DIRECTION
+                add     hl,bc
+                ld      a,[hl]
+                dec     a
+                and     a,PLANE_NUM_DIRECTIONS-1
+                ld      [hl],a
+                jr      .end_change_dir
+.inc_dir
+                ld      hl,PLANE_DIRECTION
+                add     hl,bc
+                ld      a,[hl]
+                inc     a
+                and     a,PLANE_NUM_DIRECTIONS-1
+                ld      [hl],a
+
+.end_change_dir:
+
+        ld      hl,PLANE_DIRECTION
+        add     hl,bc
+        ld      a,[hl]
         ld      l,a
         ld      h,0 ; hl = dir
 

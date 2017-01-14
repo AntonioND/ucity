@@ -76,9 +76,15 @@ PLANE_X_SPR:     DS SIMULATION_MAX_PLANES
 PLANE_Y_SPR:     DS SIMULATION_MAX_PLANES
 ; Clockwise, 0 is up, 1 up right, etc. -1 = Plane is disabled
 PLANE_DIRECTION: DS SIMULATION_MAX_PLANES
+PLANE_DIRECTION_CHANGE_COUNTDOWN: DS SIMULATION_MAX_PLANES
 PLANE_VISIBLE:   DS SIMULATION_MAX_PLANES ; 1 = Visible on screen
 
 PLANE_TAKEOFF_DIRECTION EQU 2 ; Right
+
+; Number of movement steps to change direction. The minimum should be the lenght
+; of the runway of the airport for simplicity.
+PLANE_CHANGE_DIR_RANGE EQU 128 ; Power of 2
+PLANE_CHANGE_DIR_MIN   EQU 60 ; Not needed to be a power of 2
 
 TRAIN_SPR_OAM_BASE EQU PLANE_SPR_OAM_BASE+SIMULATION_MAX_PLANES
 
