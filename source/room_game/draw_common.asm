@@ -85,6 +85,23 @@ CityMapDraw::
 
 ;-------------------------------------------------------------------------------
 
+CityMapAddrToCoords:: ; Address = hl, Returns: e = x , d = y
+
+    ld      a,l
+    and     a,CITY_MAP_WIDTH-1
+    ld      e,a ; X
+
+    add     hl,hl
+    add     hl,hl ; hl << 2
+    ld      a,h ; a = (hl << 2) >> 8 = hl >> 6
+
+    and     a,CITY_MAP_HEIGHT-1
+    ld      d,a ; Y
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 CityMapRefreshTypeMap::
 
     GLOBAL  TILESET_INFO
