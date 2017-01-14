@@ -66,6 +66,8 @@ ANIMATION_COUNT_FRAMES_NORMAL    EQU 60
 ; Doesn't need to be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES
 ANIMATION_COUNT_FRAMES_DISASTER  EQU 15
 
+animation_has_to_update_transport:  DS 1
+animation_has_to_update_map:        DS 1
 animation_countdown: DS 1 ; This goes from 0 to ANIMATION_COUNT_FRAMES_xxxxx
 
 ; If 1 the game is paused, if 0 it is unpaused. Setting it to 1 won't
@@ -219,7 +221,7 @@ GameDisasterApply:
 
 ;-------------------------------------------------------------------------------
 
-GameAnimateMap:
+GameAnimateMapVBLFastHandle:
 
     ; Reasons for not animating: Some of the direction pad keys are pressed
     ; or the map is still moving after releasing a key.
@@ -228,15 +230,24 @@ GameAnimateMap:
     and     a,a
     jr      nz,.disaster_mode
 
+        ; Normal mode
+        ; -----------
+
         ; Update every ANIMATION_TRANSPORT_COUNT_FRAMES frames
 
         ld      hl,animation_countdown
         ld      a,[hl]
         and     a,ANIMATION_TRANSPORT_COUNT_FRAMES-1
         cp      a,ANIMATION_TRANSPORT_COUNT_FRAMES-1
-        jr      nz,.skip
-        LONG_CALL   Simulation_TransportAnimsHandle
-.skip:
+        jr      nz,.skip_transport_anim
+            ; This doesn't refresh the OAM, but the shadow OAM.
+            ; It does a fast update of the position of all sprites, it doesn't
+            ; handle creation or destruction of objects.
+            LONG_CALL   Simulation_TransportAnimsVBLHandle
+
+            ld      a,1
+            ld      [animation_has_to_update_transport],a
+.skip_transport_anim:
 
         ; Update once every X frames
 
@@ -250,12 +261,15 @@ GameAnimateMap:
         xor     a,a
         ld      [animation_countdown],a
 
-        ; This doesn't refresh tile map!
-        LONG_CALL   Simulation_TrafficAnimate
+        ld      a,1
+        ld      [animation_has_to_update_map],a
 
-        jr      .end_animation
+        ret
 
 .disaster_mode:
+
+        ; Disaster mode
+        ; -------------
 
         ; Update once every X frames
 
@@ -270,15 +284,61 @@ GameAnimateMap:
         xor     a,a
         ld      [animation_countdown],a
 
-        ; This doesn't refresh tile map!
-        LONG_CALL   Simulation_FireAnimate
+        ld      a,1
+        ld      [animation_has_to_update_map],a
+
+        ret
+
+;-------------------------------------------------------------------------------
+
+GameAnimateMap:
+
+    ld      a,[simulation_disaster_mode]
+    and     a,a
+    jr      nz,.disaster_mode
+
+        ; Normal mode
+        ; -----------
+
+        ld      a,[animation_has_to_update_transport]
+        and     a,a
+        jr      z,.skip_anim_transport
+            ; This doesn't refresh the OAM, but the shadow OAM
+            LONG_CALL   Simulation_TransportAnimsHandle
+.skip_anim_transport:
+
+        ld      a,[animation_has_to_update_map]
+        and     a,a
+        jr      z,.skip_anim_map_normal
+            ; This doesn't refresh tile map!
+            LONG_CALL   Simulation_TrafficAnimate
+
+            ; Refresh tile map
+            call    bg_refresh_main
+.skip_anim_map_normal:
+
+        jr      .end_animation
+.disaster_mode:
+
+        ; Disaster mode
+        ; -------------
+
+        ld      a,[animation_has_to_update_map]
+        and     a,a
+        jr      z,.skip_anim_map_disaster
+            ; This doesn't refresh tile map!
+            LONG_CALL   Simulation_FireAnimate
+
+            ; Refresh tile map
+            call    bg_refresh_main
+.skip_anim_map_disaster:
 
         ;jr      .end_animation
-
 .end_animation:
 
-    ; Refresh tile map
-    call    bg_refresh_main
+    xor     a,a
+    ld      [animation_has_to_update_transport],a
+    ld      [animation_has_to_update_map],a
 
     ret
 
@@ -1148,6 +1208,10 @@ RoomGameVBLHandler:
     ld      a,b
     ld      [game_sprites_8x16],a
 
+    ; Fast movement of sprites, just the bare minimum so that the user doesn't
+    ; notice any irregularities in their movement.
+    LONG_CALL   GameAnimateMapVBLFastHandle
+
     ; Make sure that the following code isn't executed twice even if it doesn't
     ; finish in one frame.
     ld      a,[vbl_handler_working]
@@ -1533,6 +1597,11 @@ RoomGame::
     ld      a,$FF
     ld      [game_requested_focus_x],a ; disable focus request
     ld      [game_requested_focus_y],a
+
+    xor     a,a
+    ld      [animation_countdown],a
+    ld      [animation_has_to_update_transport],a
+    ld      [animation_has_to_update_map],a
 
     ld      a,DISASTER_TYPE_NONE
     ld      [game_requested_disaster],a ; disable disaster request

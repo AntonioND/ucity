@@ -158,11 +158,28 @@ Simulation_TransportAnimsShow::
 ;-------------------------------------------------------------------------------
 
 ; Move objects according to the movement of each transport means, to be called
-; once per animation step. It hides objects when they leave the screen and
-; shows them when they reach the screen area again.
-Simulation_TransportAnimsHandle::
+; once per VBL. This should be really fast! It hides objects when they leave the
+; screen and shows them when they reach the screen area again. It doesn't create
+; or destroy objects when they leave the map.
+Simulation_TransportAnimsVBLHandle::
 
     ; Check if sprites are hidden or not (for example, during disasters)
+
+    ld      a,[SIMULATION_SPRITES_SHOWN]
+    and     a,a ; if they aren't visible, do nothing, they will have to be
+    ret     z ; refreshed when the disaster ends, for example...
+
+    call    PlanesVBLHandle
+
+    ; TODO
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Handle objects that leave the map and destroy them, create new objects, etc.
+; Called once per animation step. This can take all the time it needs.
+Simulation_TransportAnimsHandle::
 
     ld      a,[SIMULATION_SPRITES_SHOWN]
     and     a,a ; if they aren't visible, do nothing, they will have to be

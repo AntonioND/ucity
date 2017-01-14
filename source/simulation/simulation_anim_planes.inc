@@ -846,7 +846,7 @@ INDEX SET INDEX+1
 
 ;-------------------------------------------------------------------------------
 
-PlanesHandle:
+PlanesVBLHandle:
 
     ; For each plane, move it.
 
@@ -855,6 +855,12 @@ PlanesHandle:
     ; After moving, if it is not visible, flag as invisible.
 
     call    PlanesUpdateVisibility
+
+    jp      PlanesWriteOAM ; Return from there
+
+;-------------------------------------------------------------------------------
+
+PlanesHandle:
 
     ; When it leaves the map it should reappear either at the airport or the
     ; edge of the map. If there are no airports then, don't make it reappear.
