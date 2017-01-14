@@ -145,10 +145,11 @@ KeyAutorepeatHandle::
 
 ;-------------------------------------------------------------------------------
 
-NotGBC: ; TODO : Error screen
-    halt
+NotGBC:
+
+    LONG_CALL   RoomOnlyForGBC
+
     jr  NotGBC
-    ret
 
 ;-------------------------------------------------------------------------------
 ;- Main()                                                                      -
