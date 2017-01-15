@@ -24,12 +24,272 @@
 
 ;###############################################################################
 
-TrainGetValidRandomDirection: ; hl = address, returns dir in a
+TrainGetValidRandomDirection: ; d=y,e=x, b=prohibited dir (or -1), returns a=dir
 
-    call    GetRandom
-    and     a,3
+    ; Convert direction into flag
+
+    ld      a,b
+    cp      a,-1
+    jr      nz,.skipminus1
+        ld      b,0
+        jr      .end_convert_dir
+.skipminus1:
+    cp      a,0
+    jr      nz,.skip0
+        ld      b,PAD_UP
+        jr      .end_convert_dir
+.skip0:
+    cp      a,1
+    jr      nz,.skip1
+        ld      b,PAD_RIGHT
+        jr      .end_convert_dir
+.skip1:
+    cp      a,2
+    jr      nz,.skip2
+        ld      b,PAD_DOWN
+        jr      .end_convert_dir
+.skip2:
+    cp      a,3
+    jr      nz,.skip3
+        ld      b,PAD_LEFT
+        jr      .end_convert_dir
+.skip3:
+
+.end_convert_dir:
+
+    ; Get allowed directions
+
+    push    bc
+    call    CityMapGetTile ; Arguments: e = x , d = y, returns tile in de
+    pop     bc
+
+    ld      a,e
+    sub     a,T_TRAIN_TB ; Base of the array
+    ld      e,a
+    ; Assert that this is a valid train tile!
+    cp      a,T_TRAIN_LR_BRIDGE-T_TRAIN_TB+1 ; cy = 1 if n > a
+    ld      a,0
+    ret     nc
+    ld      hl,.allowed_directions
+    add     hl,de
+    ld      c,[hl] ; c = possible dirs
+    ; b = user-prohibited dirs
+
+    ld      a,b
+    cpl ; a = user-allowed dirs
+    and     a,c
+    ld      b,a ; b = possible dirs - prohibited dirs
+
+    ; Try to get just one direction
+
+.loop_rand:
+    ; b = possible dirs
+    call    GetRandom ; bc, de preserved
+    and     a,b ; a = random flags, let's check if there is one or more
+
+    ld      d,a ; d = flags, to preserve them
+
+    ld      c,0
+
+    bit     0,a
+    jr      z,.not_0
+    inc     c
+.not_0:
+    bit     1,a
+    jr      z,.not_1
+    inc     c
+.not_1:
+    bit     2,a
+    jr      z,.not_2
+    inc     c
+.not_2:
+    bit     3,a
+    jr      z,.not_3
+    inc     c
+.not_3:
+
+    ld      a,c
+    cp      a,1
+    jr      nz,.loop_rand
+
+    ld      a,d ; a = result flag
+
+    ; Convert flag into train direction
+
+    cp      a,PAD_UP
+    jr      nz,.not_up
+        ld      a,0
+        ret
+.not_up:
+    cp      a,PAD_RIGHT
+    jr      nz,.not_right
+        ld      a,1
+        ret
+.not_right:
+    cp      a,PAD_DOWN
+    jr      nz,.not_down
+        ld      a,2
+        ret
+.not_down:
+    ;cp      a,PAD_LEFT
+    ;jr      nz,.not_left
+        ld      a,3
+        ret
+;.not_left:
+;    ret
+
+.allowed_directions:
+    DB  PAD_UP|PAD_DOWN     ; T_TRAIN_TB
+    DB  PAD_LEFT|PAD_RIGHT  ; T_TRAIN_LR
+    DB  PAD_RIGHT|PAD_DOWN  ; T_TRAIN_RB
+    DB  PAD_LEFT|PAD_DOWN   ; T_TRAIN_LB
+    DB  PAD_UP|PAD_RIGHT    ; T_TRAIN_TR
+    DB  PAD_UP|PAD_LEFT     ; T_TRAIN_TL
+    DB  PAD_UP|PAD_RIGHT|PAD_DOWN   ; T_TRAIN_TRB
+    DB  PAD_LEFT|PAD_RIGHT|PAD_DOWN ; T_TRAIN_LRB
+    DB  PAD_UP|PAD_LEFT|PAD_DOWN    ; T_TRAIN_TLB
+    DB  PAD_UP|PAD_RIGHT|PAD_LEFT   ; T_TRAIN_TLR
+    DB  PAD_UP|PAD_RIGHT|PAD_DOWN|PAD_LEFT  ; T_TRAIN_TLRB
+    DB  PAD_LEFT|PAD_RIGHT  ; T_TRAIN_LR_ROAD
+    DB  PAD_UP|PAD_DOWN     ; T_TRAIN_TB_ROAD
+    DB  PAD_UP|PAD_DOWN     ; T_TRAIN_TB_POWER_LINES
+    DB  PAD_LEFT|PAD_RIGHT  ; T_TRAIN_LR_POWER_LINES
+    DB  PAD_UP|PAD_DOWN     ; T_TRAIN_TB_BRIDGE
+    DB  PAD_LEFT|PAD_RIGHT  ; T_TRAIN_LR_BRIDGE
+
+;-------------------------------------------------------------------------------
+
+TrainIsCenteredInTile: ; bc = train index, returns a=1 if centered, 0 if not
+
+    ld      hl,TRAIN_X_IN_TILE
+    add     hl,bc
+    ld      a,[hl]
+
+    ld      hl,TRAIN_Y_IN_TILE
+    add     hl,bc
+    ld      b,[hl]
+
+    or      a,b
+    jr      z,.centered
+    xor     a,a
+    ret
+
+.centered:
+    ld      a,1
+    ret
+
+;-------------------------------------------------------------------------------
+
+TrainHasNextTileTrack: ; bc = train index, returns a = 1 if it has train else 0
+
+    ld      hl,TRAIN_X_TILE
+    add     hl,bc
+    ld      e,[hl]
+
+    ld      hl,TRAIN_Y_TILE
+    add     hl,bc
+    ld      d,[hl]
+
+    ld      hl,TRAIN_DIRECTION
+    add     hl,bc
+    ld      c,[hl]
+    ld      b,0
+    ld      hl,.dir_increment
+    add     hl,bc
+    add     hl,bc
+
+    ld      a,[hl+]
+    add     a,e
+    ld      e,a
+    ld      a,[hl]
+    add     a,d
+    ld      d,a
+
+    call    CityMapGetType ; Arguments: e = x , d = y, returns type in a
+    and     a,TYPE_HAS_TRAIN
+    ret     z
+
+    ld      a,1
+    ret
+
+.dir_increment: ; x inc, y inc
+    DB  0, -1 ; 0 - Top
+    DB  1,  0 ; 1 - Right
+    DB  0,  1 ; 2 - Down
+    DB -1,  0 ; 3 - Left
+
+;-------------------------------------------------------------------------------
+
+TrainHasThisTileTrack: ; bc = train index, returns a = 1 if it has train else 0
+
+    ld      hl,TRAIN_X_TILE
+    add     hl,bc
+    ld      e,[hl]
+
+    ld      hl,TRAIN_Y_TILE
+    add     hl,bc
+    ld      d,[hl]
+
+    call    CityMapGetType ; Arguments: e = x , d = y, returns type in a
+    and     a,TYPE_HAS_TRAIN
+    ret     z
+
+    ld      a,1
+    ret
+
+.dir_increment: ; x inc, y inc
+    DB  0, -1 ; 0 - Top
+    DB  1,  0 ; 1 - Right
+    DB  0,  1 ; 2 - Down
+    DB -1,  0 ; 3 - Left
+
+;-------------------------------------------------------------------------------
+
+TrainCurrentTrackNumDirections: ; bc = train index. returns a = number
+
+    ld      hl,TRAIN_X_TILE
+    add     hl,bc
+    ld      e,[hl]
+
+    ld      hl,TRAIN_Y_TILE
+    add     hl,bc
+    ld      d,[hl]
+
+    call    CityMapGetTile ; Arguments: e = x , d = y, returns tile in de
+
+    ld      a,e
+    sub     a,T_TRAIN_TB ; Base of the array
+    ; Assert that this is a valid train tile!
+    cp      a,T_TRAIN_LR_BRIDGE-T_TRAIN_TB+1 ; cy = 1 if n > a
+    jr      c,.ok
+    ld      a,0
+    ret
+.ok:
+    ld      e,a
+    ld      hl,.num_allowed_directions
+    add     hl,de
+    ld      a,[hl] ; a = num possible dirs
 
     ret
+
+.num_allowed_directions:
+    DB  2 ; T_TRAIN_TB
+    DB  2 ; T_TRAIN_LR
+    DB  2 ; T_TRAIN_RB
+    DB  2 ; T_TRAIN_LB
+    DB  2 ; T_TRAIN_TR
+    DB  2 ; T_TRAIN_TL
+    DB  3 ; T_TRAIN_TRB
+    DB  3 ; T_TRAIN_LRB
+    DB  3 ; T_TRAIN_TLB
+    DB  3 ; T_TRAIN_TLR
+    DB  4 ; T_TRAIN_TLRB
+    DB  2 ; T_TRAIN_LR_ROAD
+    DB  2 ; T_TRAIN_TB_ROAD
+    DB  2 ; T_TRAIN_TB_POWER_LINES
+    DB  2 ; T_TRAIN_LR_POWER_LINES
+    DB  2 ; T_TRAIN_TB_BRIDGE
+    DB  2 ; T_TRAIN_LR_BRIDGE
 
 ;-------------------------------------------------------------------------------
 
@@ -133,12 +393,12 @@ TrainSpawn: ; c = index of the plane
 
 .spawn:
 
-    push    hl
     call    CityMapAddrToCoords ; address = hl, returns d = y, e = x
-    pop     hl
 
     push    de
-    call    TrainGetValidRandomDirection ; hl = address, returns dir in a
+    ; d=y,e=x, b=prohibited dir (or -1), returns a=dir
+    ld      b,-1
+    call    TrainGetValidRandomDirection
     pop     de
 
     pop     bc ; (*2) restore index
@@ -286,9 +546,9 @@ TrainsMovementStep:
 
 .dir_increment: ; x inc, y inc
     DB  0, -1 ; 0 - Top
-    DB  1,  0 ; 2 - Right
-    DB  0,  1 ; 4 - Down
-    DB -1,  0 ; 6 - Left
+    DB  1,  0 ; 1 - Right
+    DB  0,  1 ; 2 - Down
+    DB -1,  0 ; 3 - Left
 
 ;-------------------------------------------------------------------------------
 
@@ -305,8 +565,7 @@ TrainsReset: ; a = 1 to force reset, a = 0 reset only if num of trains changes
 
     add     hl,hl
     add     hl,hl
-    add     hl,hl
-    ld      a,h ; a = (count << 3) >> 8 = count >> 5 = count / 32
+    ld      a,h ; a = (count << 2) >> 8 = count >> 6 = count / 64
     cp      a,SIMULATION_MAX_TRAINS ; cy = 1 if n > a
     jr      c,.not_max
     ld      a,SIMULATION_MAX_TRAINS
@@ -455,8 +714,8 @@ INDEX SET INDEX+1
 .tile_attr_data:
     DB  TRAIN_SPRITE_TILE_START+1, 1
     DB  TRAIN_SPRITE_TILE_START+0, 1
-    DB  TRAIN_SPRITE_TILE_START+1, 1|OAMF_XFLIP
-    DB  TRAIN_SPRITE_TILE_START+0, 1|OAMF_YFLIP
+    DB  TRAIN_SPRITE_TILE_START+1, 1|OAMF_YFLIP
+    DB  TRAIN_SPRITE_TILE_START+0, 1|OAMF_XFLIP
 
 ;-------------------------------------------------------------------------------
 
@@ -476,13 +735,11 @@ INDEX SET 0
     ld      a,[TRAIN_X_TILE+INDEX]
     ld      hl,bg_x ; bg scroll in tiles
     sub     a,[hl] ; a = delta x tiles
-    ;dec     a ; TODO CHECK
     ld      e,a ; e = delta x tiles
 
     ld      a,[TRAIN_Y_TILE+INDEX]
     ld      hl,bg_y ; bg scroll in tiles
     sub     a,[hl] ; a = delta y tiles
-    ;dec     a ; TODO CHECK
     ld      d,a ; d = delta y tiles
 
     ; If the sprite is inside the screen (or just next to it) make it visible.
@@ -609,6 +866,11 @@ INDEX SET 0
     cp      a,-1 ; disabled
     jr      z,.next\@
 
+    ld      bc,INDEX
+    call    TrainHasThisTileTrack ; bc = index, returns a = 1 if it has train
+    and     a,a
+    jr      z,.outside\@
+
     ld      a,[TRAIN_X_TILE+INDEX]
     cp      a,64 ; cy = 1 if n > a
     jr      nc,.outside\@
@@ -617,12 +879,53 @@ INDEX SET 0
     cp      a,64 ; cy = 1 if n > a
     jr      nc,.outside\@
 
-        jr      .next\@
+    jr      .inside\@
 
 .outside\@:
 
         ld      bc,INDEX
         call    TrainSpawn ; c = index of the train
+        jr      .next\@
+
+.inside\@:
+
+    ld      bc,INDEX
+    call    TrainIsCenteredInTile ; bc = index, returns a=1 if centered else 0
+    and     a,a
+    jr      z,.dont_change_dir\@
+
+        ; Try to change direction
+
+        ld      bc,INDEX
+        call    TrainHasNextTileTrack ; bc = index, returns a = 1 if it has
+        and     a,a
+        jr      z,.change_dir\@
+
+        ld      bc,INDEX
+        call    TrainCurrentTrackNumDirections ; bc = index. returns a = number
+        cp      a,2
+        jr      z,.dont_change_dir\@
+        cp      a,0
+        jr      z,.dont_change_dir\@
+
+.change_dir\@:
+
+        ld      a,[TRAIN_DIRECTION+INDEX]
+        add     a,2
+        and     a,TRAIN_NUM_DIRECTIONS-1
+        ld      b,a ; get opposite direction
+        ld      a,[TRAIN_X_TILE+INDEX]
+        ld      e,a
+        ld      a,[TRAIN_Y_TILE+INDEX]
+        ld      d,a
+        ; d=y,e=x, b=prohibited dir (or -1), returns a=dir
+        call    TrainGetValidRandomDirection
+        ld      [TRAIN_DIRECTION+INDEX],a
+
+        ld      bc,INDEX
+        call    TrainRefreshSpriteCoordinates ; bc = index
+
+.dont_change_dir\@:
 
 .next\@:
 
@@ -653,6 +956,11 @@ TrainsHandle:
     ; to respawn somewhere else. If there are tracks, move and change directions
     ; if needed. This means that, in practice, trains are only removed when the
     ; tracks under them are demolished.
+
+    ; This function may be called after a few updates of the coordinates of the
+    ; trains. If that happens, it may be possible that a train doesn't turn at
+    ; a corner and leaves the train tracks. This is ok, it will just dissapear
+    ; and appear somewhere else.
 
     call    TrainsCheckOutOfTrack
 
