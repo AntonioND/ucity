@@ -543,7 +543,7 @@ CursorHandle::
 
 ;-------------------------------------------------------------------------------
 
-CursorDrift:
+CursorDrift::
 
     call    bg_main_drift_scroll_hor
     call    bg_main_drift_scroll_ver

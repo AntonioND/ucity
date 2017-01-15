@@ -31,8 +31,8 @@
 
 ; IO registers mirror, used by scroll code and writen to the actual registers
 ; during VBL to avoid glitches
-bg_scx: DS 1
-bg_scy: DS 1
+bg_scx:: DS 1
+bg_scy:: DS 1
 
 ;-------------------------------------------------------------------------------
 
