@@ -38,6 +38,7 @@
 
 COUNT_AIRPORTS::        DS 1
 COUNT_FIRE_STATIONS::   DS 1
+COUNT_TRAIN_TRACKS::    DS 2 ; LSB first
 
 ;###############################################################################
 
@@ -54,14 +55,11 @@ Simulation_CountBuildings::
     ld      [COUNT_AIRPORTS],a
     ld      [COUNT_FIRE_STATIONS],a
 
-    ; Count the number of airports. The total number of planes is equal to the
-    ; number of airports * 2 up to a max of SIMULATION_MAX_PLANES.
-
-    ld      c,0 ; number of airports
+    ; Count the number of airports and fire stations
 
     ld      hl,CITY_MAP_TILES
 
-.loop:
+.loop1:
     push    hl
 
         ; Returns: - Tile -> Register DE
@@ -86,14 +84,36 @@ ENDM
         CHECK_TILE  T_AIRPORT, COUNT_AIRPORTS
         CHECK_TILE  T_FIRE_DEPT, COUNT_FIRE_STATIONS
 
-        ; TODO - Count train tracks
-
     pop     hl
 
     inc     hl
 
     bit     5,h ; Up to E000
-    jr      z,.loop
+    jr      z,.loop1
+
+    ; Count the number of train tracks
+
+    ld      de,0 ; Number of tracks
+    ld      hl,CITY_MAP_TILES
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+.loop2:
+
+        ld      a,[hl+]
+        and     a,TYPE_HAS_TRAIN
+        jr      z,.skip_train
+        inc     de
+.skip_train:
+
+    bit     5,h ; Up to E000
+    jr      z,.loop2
+
+    ld      a,e
+    ld      [COUNT_TRAIN_TRACKS+0],a ; LSB first
+    ld      a,d
+    ld      [COUNT_TRAIN_TRACKS+1],a
 
     ret
 
