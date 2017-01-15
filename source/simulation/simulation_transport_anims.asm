@@ -41,7 +41,7 @@
 ;-------------------------------------------------------------------------------
 
 SIMULATION_MAX_PLANES   EQU 6
-SIMULATION_MAX_TRAINS   EQU 2
+SIMULATION_MAX_TRAINS   EQU 4
 
 SIMULATION_OBJECTS_OAM_BASE EQU 20 ; First OAM index to use for transportation
 
@@ -55,6 +55,9 @@ simulation_scx_old: DS 1
 simulation_scy_old: DS 1
 
 ;-------------------------------------------------------------------------------
+
+; Planes
+; ------
 
 PLANE_SPR_OAM_BASE EQU SIMULATION_OBJECTS_OAM_BASE
 
@@ -86,7 +89,36 @@ PLANE_TAKEOFF_DIRECTION EQU 2 ; Right
 PLANE_CHANGE_DIR_RANGE EQU 128 ; Power of 2
 PLANE_CHANGE_DIR_MIN   EQU 60 ; Not needed to be a power of 2
 
+; Trains
+; ------
+
 TRAIN_SPR_OAM_BASE EQU PLANE_SPR_OAM_BASE+SIMULATION_MAX_PLANES
+
+TRAIN_SPRITE_TILE_START EQU (150-128)
+
+TRAIN_NUM_DIRECTIONS EQU 4
+
+OLD_NUM_TRAINS: DS 1
+
+; Coordinates in tiles of the train
+TRAIN_X_TILE:    DS SIMULATION_MAX_TRAINS ; 0 to CITY_MAP_WIDTH-1
+TRAIN_Y_TILE:    DS SIMULATION_MAX_TRAINS ; 0 to CITY_MAP_HEIGHT-1
+; (0 - 7) Coordinates inside the tile, to be added to TRAIN_X/Y_TILE.
+TRAIN_X_IN_TILE: DS SIMULATION_MAX_TRAINS
+TRAIN_Y_IN_TILE: DS SIMULATION_MAX_TRAINS
+; Coordinates of the sprite (in px)
+TRAIN_X_SPR:     DS SIMULATION_MAX_TRAINS
+TRAIN_Y_SPR:     DS SIMULATION_MAX_TRAINS
+; Clockwise, 0 is up, 1 right, etc. -1 = Train is disabled
+TRAIN_DIRECTION: DS SIMULATION_MAX_TRAINS
+TRAIN_VISIBLE:   DS SIMULATION_MAX_TRAINS ; 1 = Visible on screen
+
+; Check for overflows
+; -------------------
+
+IF TRAIN_SPR_OAM_BASE+SIMULATION_MAX_TRAINS > 40
+    FAIL "Too many transportation objects."
+ENDC
 
 ;###############################################################################
 
@@ -148,7 +180,7 @@ Simulation_TransportAnimsShow::
 
     call    PlanesShow
 
-    ; TODO
+    call    TrainsShow
 
     ld      a,1
     ld      [SIMULATION_SPRITES_SHOWN],a
@@ -171,7 +203,7 @@ Simulation_TransportAnimsVBLHandle::
 
     call    PlanesVBLHandle
 
-    ; TODO
+    call    TrainsVBLHandle
 
     ret
 
@@ -240,7 +272,7 @@ Simulation_TransportAnimsScroll::
     call    PlanesHandleScroll ; d = value to add to y, e = value to add to x
     pop     de
 
-    ; TODO
+    call    TrainsHandleScroll ; d = value to add to y, e = value to add to x
 
     ret
 
@@ -258,7 +290,7 @@ Simulation_TransportAnimsHide::
 
     call    PlanesHide
 
-    ; TODO
+    call    TrainsHide
 
     ret
 

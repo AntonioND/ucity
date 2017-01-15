@@ -822,7 +822,7 @@ INDEX SET 0
     cp      a,-1 ; disabled
     jr      z,.next\@
 
-    ld      a,[PLANE_X_TILE+INDEX]
+    ld      a,[PLANE_X_TILE+INDEX] ; 64 rows/columns + 2 extra
     cp      a,66 ; cy = 1 if n > a
     jr      nc,.outside\@
 
