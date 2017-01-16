@@ -25,6 +25,7 @@
 
 ;-------------------------------------------------------------------------------
 
+    INCLUDE "room_game.inc"
     INCLUDE "text.inc"
 
 ;###############################################################################
@@ -45,6 +46,8 @@ CursorSizeX::       DS  1 ; Size in pixels
 CursorSizeY::       DS  1
 
 CURSOR_ANIMATION_TICKS  EQU 10
+
+CURSOR_SCROLL_MARGIN    EQU 4
 
 ;###############################################################################
 
@@ -304,15 +307,27 @@ CursorMovePAD_hor: ; returns PAD_RIGHT and similar flags ORed if it has moved
 
     ld      e,0 ; set flags here
 
-    ; Move
+    ; Left
+    ; ----
 
     ld      hl,CursorTileX
     ld      a,[joy_pressed]
     and     a,PAD_LEFT
-    jr      z,.left_end
-    ld      a,[hl]
-    and     a,a
-    jr      z,.left_end
+    jr      z,.left_end ; If not pressed, skip
+        ld      a,[bg_x]
+        cp      a,0
+        jr      z,.left_scroll_max
+            ld      b,CURSOR_SCROLL_MARGIN+1
+            ld      a,[hl]
+            cp      a,b ; cy = 1 if b > a
+            jr      c,.left_end
+            jr      .left_scroll
+.left_scroll_max:
+            ld      a,[hl]
+            cp      a,0
+            jr      z,.left_end
+            ;jr      .left_scroll
+.left_scroll:
         dec     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
@@ -320,18 +335,35 @@ CursorMovePAD_hor: ; returns PAD_RIGHT and similar flags ORed if it has moved
         ld      e,PAD_LEFT
 .left_end:
 
+    ; Right
+    ; ----
+
     ld      hl,CursorTileX
     ld      a,[joy_pressed]
     and     a,PAD_RIGHT
-    jr      z,.right_end
-    ld      b,[hl]
-    ld      a,[CursorSizeX]
-    sra     a
-    sra     a
-    sra     a ; to tiles
-    add     a,b
-    cp      a,SCREEN_COLUMNS
-    jr      z,.right_end
+    jr      z,.right_end ; If not pressed, skip
+        ld      b,[hl]
+        ld      a,[CursorSizeX]
+        sra     a
+        sra     a
+        sra     a ; to tiles
+        add     a,b
+        ld      c,a ; c = cursor x
+        ld      a,[bg_x]
+        cp      a,CITY_MAP_WIDTH-SCREEN_COLUMNS
+        jr      z,.right_scroll_max
+            ld      b,SCREEN_COLUMNS-CURSOR_SCROLL_MARGIN
+            ld      a,c
+            cp      a,b ; cy = 1 if b > a
+            jr      nc,.right_end
+            jr      .right_scroll
+.right_scroll_max:
+            ld      a,c
+            cp      a,SCREEN_COLUMNS
+            jr      z,.right_end
+            ;jr      .right_scroll
+.right_scroll:
+        jr      z,.right_end
         inc     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
@@ -341,23 +373,40 @@ CursorMovePAD_hor: ; returns PAD_RIGHT and similar flags ORed if it has moved
         ld      e,a
 .right_end:
 
+    ; End
+    ; ---
+
     ld      a,e ; return flags if moved
 
     ret
+
+;-------------------------------------------------------------------------------
 
 CursorMovePAD_ver: ; returns PAD_RIGHT and similar flags ORed if it has moved
 
     ld      e,0 ; set flags here
 
-    ; Move
+    ; Up
+    ; --
 
     ld      hl,CursorTileY
     ld      a,[joy_pressed]
     and     a,PAD_UP
-    jr      z,.up_end
-    ld      a,[hl]
-    and     a,a
-    jr      z,.up_end
+    jr      z,.up_end ; If not pressed, skip
+        ld      a,[bg_y]
+        cp      a,0
+        jr      z,.up_scroll_max
+            ld      b,CURSOR_SCROLL_MARGIN+1
+            ld      a,[hl]
+            cp      a,b ; cy = 1 if b > a
+            jr      c,.up_end
+            jr      .up_scroll
+.up_scroll_max:
+            ld      a,[hl]
+            cp      a,0
+            jr      z,.up_end
+            ;jr      .up_scroll
+.up_scroll:
         dec     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
@@ -365,18 +414,35 @@ CursorMovePAD_ver: ; returns PAD_RIGHT and similar flags ORed if it has moved
         ld      e,PAD_UP
 .up_end:
 
+    ; Down
+    ; ----
+
     ld      hl,CursorTileY
     ld      a,[joy_pressed]
     and     a,PAD_DOWN
-    jr      z,.down_end
-    ld      b,[hl]
-    ld      a,[CursorSizeY]
-    sra     a
-    sra     a
-    sra     a ; to tiles
-    add     a,b
-    cp      a,SCREEN_ROWS
-    jr      z,.down_end
+    jr      z,.down_end ; If not pressed, skip
+        ld      b,[hl]
+        ld      a,[CursorSizeY]
+        sra     a
+        sra     a
+        sra     a ; to tiles
+        add     a,b
+        ld      c,a ; c = cursor y
+        ld      a,[bg_y]
+        cp      a,CITY_MAP_HEIGHT-SCREEN_ROWS
+        jr      z,.down_scroll_max
+            ld      b,SCREEN_ROWS-CURSOR_SCROLL_MARGIN
+            ld      a,c
+            cp      a,b ; cy = 1 if b > a
+            jr      nc,.down_end
+            jr      .down_scroll
+.down_scroll_max:
+            ld      a,c
+            cp      a,SCREEN_ROWS
+            jr      z,.down_end
+            ;jr      .down_scroll
+.down_scroll:
+        jr      z,.down_end
         inc     [hl]
         ld      a,1
         ld      [CursorNeedsRefresh],a
@@ -385,6 +451,9 @@ CursorMovePAD_ver: ; returns PAD_RIGHT and similar flags ORed if it has moved
         or      a,PAD_DOWN
         ld      e,a
 .down_end:
+
+    ; End
+    ; ---
 
     ld      a,e ; return flags if moved
 
