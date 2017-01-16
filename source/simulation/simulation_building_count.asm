@@ -37,8 +37,11 @@
 ; The values are clamped to 255
 
 COUNT_AIRPORTS::        DS 1
+COUNT_PORTS::           DS 1
 COUNT_FIRE_STATIONS::   DS 1
+COUNT_NUCLEAR_POWER_PLANTS:: DS 1
 COUNT_TRAIN_TRACKS::    DS 2 ; LSB first
+COUNT_WATER_TILES::     DS 2 ; LSB first
 
 ;###############################################################################
 
@@ -53,7 +56,13 @@ Simulation_CountBuildings::
 
     xor     a,a
     ld      [COUNT_AIRPORTS],a
+    ld      [COUNT_PORTS],a
     ld      [COUNT_FIRE_STATIONS],a
+    ld      [COUNT_NUCLEAR_POWER_PLANTS],a
+    ld      [COUNT_TRAIN_TRACKS+0],a
+    ld      [COUNT_TRAIN_TRACKS+1],a
+    ld      [COUNT_WATER_TILES+0],a
+    ld      [COUNT_WATER_TILES+1],a
 
     ; Count the number of airports and fire stations
 
@@ -75,14 +84,34 @@ CHECK_TILE : MACRO ; 1 = Tile number, 2 = Variable to increase
         jr      nz,.end\@
             ld      a,[\2]
             inc     a
-            jr      z,.end\@ ; skip store if it overflows
+            jr      z,.end\@ ; skip store if it overflows (clamp to 255)
                 ld      [\2],a
 .end\@:
-
 ENDM
 
-        CHECK_TILE  T_AIRPORT, COUNT_AIRPORTS
+        CHECK_TILE  T_AIRPORT,   COUNT_AIRPORTS
         CHECK_TILE  T_FIRE_DEPT, COUNT_FIRE_STATIONS
+        CHECK_TILE  T_PORT,      COUNT_PORTS
+        CHECK_TILE  T_POWER_PLANT_NUCLEAR, COUNT_NUCLEAR_POWER_PLANTS
+
+CHECK_TILE_16 : MACRO ; 1 = Tile number, 2 = Variable to increase
+
+        ld      a,(\1)&$FF
+        cp      a,e
+        jr      nz,.end_16\@
+        ld      a,(\1)>>8
+        cp      a,d
+        jr      nz,.end_16\@
+            ld      hl,\2 ; LSB first
+            inc     [hl]
+            jr      nz,.end_16\@
+                inc     hl
+                inc     [hl]
+.end_16\@:
+ENDM
+
+        CHECK_TILE_16   T_WATER,       COUNT_WATER_TILES
+        CHECK_TILE_16   T_WATER_EXTRA, COUNT_WATER_TILES
 
     pop     hl
 
@@ -93,7 +122,7 @@ ENDM
 
     ; Count the number of train tracks
 
-    ld      de,0 ; Number of tracks
+    ld      de,0 ; Number of train tracks
     ld      hl,CITY_MAP_TILES
 
     ld      a,BANK_CITY_MAP_TYPE
@@ -104,7 +133,7 @@ ENDM
         ld      a,[hl+]
         and     a,TYPE_HAS_TRAIN
         jr      z,.skip_train
-        inc     de
+            inc     de
 .skip_train:
 
     bit     5,h ; Up to E000
