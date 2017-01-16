@@ -64,8 +64,8 @@ CURSOR_OAM_BASE    EQU 0
 ;-------------------------------------------------------------------------------
 ; Don't modify any constant of this group!
 
-BOARD_COLUMNS   EQU 20
-BOARD_ROWS      EQU 18
+SCREEN_COLUMNS   EQU 20
+SCREEN_ROWS      EQU 18
 
 cursor_palette:
     DW  $0000,$7FFF,$3DEF,$0000
@@ -130,9 +130,9 @@ CursorRefreshCoordFromTile:
 
 CursorMoveToOrigin::
 
-    ld      a,(BOARD_COLUMNS-1) / 2
+    ld      a,(SCREEN_COLUMNS-1) / 2
     ld      [CursorTileX],a
-    ld      a,(BOARD_ROWS-1) / 2
+    ld      a,(SCREEN_ROWS-1) / 2
     ld      [CursorTileY],a
 
     call    CursorRefreshCoordFromTile
@@ -330,7 +330,7 @@ CursorMovePAD_hor: ; returns PAD_RIGHT and similar flags ORed if it has moved
     sra     a
     sra     a ; to tiles
     add     a,b
-    cp      a,BOARD_COLUMNS
+    cp      a,SCREEN_COLUMNS
     jr      z,.right_end
         inc     [hl]
         ld      a,1
@@ -375,7 +375,7 @@ CursorMovePAD_ver: ; returns PAD_RIGHT and similar flags ORed if it has moved
     sra     a
     sra     a ; to tiles
     add     a,b
-    cp      a,BOARD_ROWS
+    cp      a,SCREEN_ROWS
     jr      z,.down_end
         inc     [hl]
         ld      a,1
