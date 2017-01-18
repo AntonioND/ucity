@@ -167,40 +167,22 @@ Simulation_AdvanceTechnology::
     ; Increment technology level for each university
     ; ----------------------------------------------
 
-    ld      hl,CITY_MAP_TILES
+    ld      a,[COUNT_UNIVERSITIES]
+    and     a,a
+    ret     z ; don't enter loop if there are no universities
 
-.loop:
-    push    hl
+    ld      b,a
+.loop_increment:
+    push    bc
+    call    Technology_TryIncrement
+    pop     bc
 
-        ; Returns: - Tile -> Register DE
-        call    CityMapGetTileAtAddress ; Arg: hl = address. Preserves BC, HL
+    ld      a,[technology_level]
+    cp      a,TECH_LEVEL_MAX ; cy = 1 if n > a
+    ret     nc ; Has the max level been reached? If so, return.
 
-        ld      a,(T_UNIVERSITY+0)&$FF
-        cp      a,e
-        jr      nz,.next
-        ld      a,(T_UNIVERSITY+0)>>8
-        cp      a,d
-        jr      nz,.next
-
-            call    Technology_TryIncrement
-
-            ld      a,[technology_level]
-            cp      a,TECH_LEVEL_MAX ; cy = 1 if n > a
-            jr      nc,.next ; Has the max level been reached? If so, return.
-
-                ; Technology level has been maxed out, stop!
-                pop     hl
-                jr      .end_count
-.next:
-
-    pop     hl
-
-    inc     hl
-
-    bit     5,h ; Up to E000
-    jr      z,.loop
-
-.end_count:
+    dec     b
+    jr      nz,.loop_increment
 
     ret
 

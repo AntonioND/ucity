@@ -40,6 +40,7 @@ COUNT_AIRPORTS::        DS 1
 COUNT_PORTS::           DS 1
 COUNT_FIRE_STATIONS::   DS 1
 COUNT_NUCLEAR_POWER_PLANTS:: DS 1
+COUNT_UNIVERSITIES::    DS 1
 COUNT_TRAIN_TRACKS::    DS 2 ; LSB first
 COUNT_WATER_TILES::     DS 2 ; LSB first
 
@@ -59,6 +60,7 @@ Simulation_CountBuildings::
     ld      [COUNT_PORTS],a
     ld      [COUNT_FIRE_STATIONS],a
     ld      [COUNT_NUCLEAR_POWER_PLANTS],a
+    ld      [COUNT_UNIVERSITIES],a
     ld      [COUNT_TRAIN_TRACKS+0],a
     ld      [COUNT_TRAIN_TRACKS+1],a
     ld      [COUNT_WATER_TILES+0],a
@@ -93,6 +95,7 @@ ENDM
         CHECK_TILE  T_FIRE_DEPT, COUNT_FIRE_STATIONS
         CHECK_TILE  T_PORT,      COUNT_PORTS
         CHECK_TILE  T_POWER_PLANT_NUCLEAR, COUNT_NUCLEAR_POWER_PLANTS
+        CHECK_TILE  T_UNIVERSITY,   COUNT_UNIVERSITIES
 
 CHECK_TILE_16 : MACRO ; 1 = Tile number, 2 = Variable to increase
 
@@ -118,7 +121,7 @@ ENDM
     inc     hl
 
     bit     5,h ; Up to E000
-    jr      z,.loop1
+    jp      z,.loop1
 
     ; Count the number of train tracks
 
