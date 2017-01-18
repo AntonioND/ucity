@@ -247,14 +247,42 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
     and     a,a
     ret     nz ; Don't start a disaster if there is already a disaster
 
-    ld      e,b ; save in E the value to force or not
+    ; If there are no nucler power plants, return
 
-    ; Look for a nuclear power plant. If there is any, try to make it explode.
-    ; If it explodes, force a fire there and start disaster mode. When a nuclear
-    ; plant is burned down, it generates radiactivity, and that's enough for us.
+    ld      a,[COUNT_NUCLEAR_POWER_PLANTS]
+    and     a,a
+    ret     z ; There are no nuclear power plants, return.
 
-    ; For every power plant, check. If any of them explode, exit loop
-    ; ---------------------------------------------------------------
+    ; For each nucler power plant, check if it explodes. If it does, search the
+    ; map for its position and make it explode, force a fire there and start
+    ; disaster mode. When a nuclear plant is burned down, it generates
+    ; radiactivity, so it doesn't have to be done here.
+
+    ld      d,a ; d = num of nuclear power plants
+    ld      e,0 ; loop counter
+
+    ld      a,b
+    and     a,a
+    jr      nz,.explode ; force explosion at the first plant!
+
+.loop_rand:
+    call    GetRandom ; de, bc preserved
+    and     a,a
+    jr      z,.explode
+    inc     e
+    ld      a,d
+    cp      a,e
+    jr      nz,.loop_rand
+
+    ; No explosion!
+    ret
+
+.explode:
+
+    ; e = index of power plant that exploded
+
+    ; Look for the power plant that generated the explosion
+    ; -----------------------------------------------------
 
     ld      bc,CITY_MAP_TILES ; Map base
 
@@ -278,12 +306,9 @@ ELSE
             jr      nz,.skip_check_restore
 ENDC
                 ld      a,e
-                and     a,a ; Check if forced disaster. If so, make the first
-                jr      nz,.explode_plant ; found plant explode.
-
-                call    GetRandom ; de, bc preserved, hl destroyed
-                and     a,a
+                and     a,a ; is this the plant to explode?
                 jr      z,.explode_plant
+                dec     e
 
 .skip_check_restore:
 
@@ -297,7 +322,8 @@ ENDC
     bit     5,b ; Up to E000
     jr      z,.loop_check
 
-    ; If we got to this point, no power plant exploded
+    ; If we got to this point, no power plant exploded, but it should have!
+    ld      b,b ; Breakpoint
 
     ret
 
