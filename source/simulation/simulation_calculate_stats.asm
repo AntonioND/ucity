@@ -339,7 +339,48 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
+; The precalculated building count should be available when calling this
+; function!
 Simulation_CalculateStatistics::
+
+    ; Set city flags
+    ; --------------
+
+    ld      b,0 ; reset
+
+    ld      a,[COUNT_AIRPORTS]
+    and     a,a
+    jr      z,.not_airport
+    set     CITY_HAS_AIRPORT_BIT,b
+.not_airport:
+    ld      a,[COUNT_PORTS]
+    and     a,a
+    jr      z,.not_port
+    set     CITY_HAS_PORT_BIT,b
+.not_port:
+    ld      a,[COUNT_STADIUMS]
+    and     a,a
+    jr      z,.not_stadium
+    set     CITY_HAS_STADIUM_BIT,b
+.not_stadium:
+    ld      a,[COUNT_UNIVERSITIES]
+    and     a,a
+    jr      z,.not_university
+    set     CITY_HAS_UNIVERSITY_BIT,b
+.not_university:
+    ld      a,[COUNT_MUSEUMS]
+    and     a,a
+    jr      z,.not_museum
+    set     CITY_HAS_MUSEUM_BIT,b
+.not_museum:
+    ld      a,[COUNT_LIBRARIES]
+    and     a,a
+    jr      z,.not_library
+    set     CITY_HAS_LIBRARY_BIT,b
+.not_library:
+
+    ld      a,b
+    ld      [city_services_flags],a ; save
 
     ; First, add up population (total population and separated by types)
     ; ------------------------------------------------------------------
@@ -373,9 +414,6 @@ Simulation_CalculateStatistics::
     ld      [hl+],a
     ENDR
 
-    xor     a,a
-    ld      [city_services_flags],a ; reset city flags
-
     ; Calculate
 
     ld      hl,CITY_MAP_TILES
@@ -397,40 +435,6 @@ Simulation_CalculateStatistics::
         jp      z,.skip
         cp      a,TYPE_DOCK
         jp      z,.skip
-
-        ; Don't skip if the type is one of the following ones, but set the
-        ; corresponding city flag
-
-        LD_DE_HL ; (*) save HL in DE
-
-        ld      hl,city_services_flags
-
-        cp      a,TYPE_STADIUM
-        jr      nz,.not_stadium
-        set     CITY_HAS_STADIUM_BIT,[hl]
-.not_stadium:
-        cp      a,TYPE_UNIVERSITY
-        jr      nz,.not_university
-        set     CITY_HAS_UNIVERSITY_BIT,[hl]
-.not_university:
-        cp      a,TYPE_MUSEUM
-        jr      nz,.not_museum
-        set     CITY_HAS_MUSEUM_BIT,[hl]
-.not_museum:
-        cp      a,TYPE_LIBRARY
-        jr      nz,.not_library
-        set     CITY_HAS_LIBRARY_BIT,[hl]
-.not_library:
-        cp      a,TYPE_AIRPORT
-        jr      nz,.not_airport
-        set     CITY_HAS_AIRPORT_BIT,[hl]
-.not_airport:
-        cp      a,TYPE_PORT
-        jr      nz,.not_port
-        set     CITY_HAS_PORT_BIT,[hl]
-.not_port:
-
-        LD_HL_DE ; (*) restore HL
 
         ld      b,a
         push    bc ; (*) b = type

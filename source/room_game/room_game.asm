@@ -1400,6 +1400,12 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
 
 RoomGameInitialStatusRefresh:
 
+    ; Calculate the number of building of each type. This has to be refreshed
+    ; right after each time edit mode is exited, after a fire is extinguished,
+    ; etc.
+
+    LONG_CALL   Simulation_CountBuildings
+
     ; Calculate total population and other statistics
 
     LONG_CALL   Simulation_CalculateStatistics
@@ -1407,12 +1413,6 @@ RoomGameInitialStatusRefresh:
     ; Calculate RCI graph
 
     LONG_CALL   Simulation_CalculateRCIDemand
-
-    ; Calculate the number of building of each type. This has to be refreshed
-    ; right after each time edit mode is exited, after a fire is extinguished,
-    ; etc.
-
-    LONG_CALL   Simulation_CountBuildings
 
     ; TODO - Reload other things?
 

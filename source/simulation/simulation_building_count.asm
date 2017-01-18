@@ -41,6 +41,10 @@ COUNT_PORTS::           DS 1
 COUNT_FIRE_STATIONS::   DS 1
 COUNT_NUCLEAR_POWER_PLANTS:: DS 1
 COUNT_UNIVERSITIES::    DS 1
+COUNT_STADIUMS::        DS 1
+COUNT_MUSEUMS::         DS 1
+COUNT_LIBRARIES::       DS 1
+
 COUNT_TRAIN_TRACKS::    DS 2 ; LSB first
 COUNT_WATER_TILES::     DS 2 ; LSB first
 
@@ -52,15 +56,20 @@ COUNT_WATER_TILES::     DS 2 ; LSB first
 
 ; Call this function whenever a building is built or demolished. For example, it
 ; has to be called after exiting edit mode, after a fire is finally extinguished
-    ; or simply when the map is loaded.
+; or simply when the map is loaded.
 Simulation_CountBuildings::
 
     xor     a,a
+
     ld      [COUNT_AIRPORTS],a
     ld      [COUNT_PORTS],a
     ld      [COUNT_FIRE_STATIONS],a
     ld      [COUNT_NUCLEAR_POWER_PLANTS],a
     ld      [COUNT_UNIVERSITIES],a
+    ld      [COUNT_STADIUMS],a
+    ld      [COUNT_MUSEUMS],a
+    ld      [COUNT_LIBRARIES],a
+
     ld      [COUNT_TRAIN_TRACKS+0],a
     ld      [COUNT_TRAIN_TRACKS+1],a
     ld      [COUNT_WATER_TILES+0],a
@@ -78,7 +87,7 @@ Simulation_CountBuildings::
 
 CHECK_TILE : MACRO ; 1 = Tile number, 2 = Variable to increase
 
-        ld      a,(\1)&$FF
+        ld      a,(\1)&$FF ; Check low byte first because it changes more often
         cp      a,e
         jr      nz,.end\@
         ld      a,(\1)>>8
@@ -91,15 +100,18 @@ CHECK_TILE : MACRO ; 1 = Tile number, 2 = Variable to increase
 .end\@:
 ENDM
 
-        CHECK_TILE  T_AIRPORT,   COUNT_AIRPORTS
-        CHECK_TILE  T_FIRE_DEPT, COUNT_FIRE_STATIONS
-        CHECK_TILE  T_PORT,      COUNT_PORTS
+        CHECK_TILE  T_AIRPORT,      COUNT_AIRPORTS
+        CHECK_TILE  T_FIRE_DEPT,    COUNT_FIRE_STATIONS
+        CHECK_TILE  T_PORT,         COUNT_PORTS
         CHECK_TILE  T_POWER_PLANT_NUCLEAR, COUNT_NUCLEAR_POWER_PLANTS
         CHECK_TILE  T_UNIVERSITY,   COUNT_UNIVERSITIES
+        CHECK_TILE  T_STADIUM,      COUNT_STADIUMS
+        CHECK_TILE  T_MUSEUM,       COUNT_MUSEUMS
+        CHECK_TILE  T_LIBRARY,      COUNT_LIBRARIES
 
 CHECK_TILE_16 : MACRO ; 1 = Tile number, 2 = Variable to increase
 
-        ld      a,(\1)&$FF
+        ld      a,(\1)&$FF ; Check low byte first because it changes more often
         cp      a,e
         jr      nz,.end_16\@
         ld      a,(\1)>>8
