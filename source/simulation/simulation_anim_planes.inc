@@ -276,7 +276,7 @@ ENDC
     sra     d
     or      a,d
     ENDR
-    ld      d,a ; d = (first power of 2 > number of airports) - 1
+    ld      d,a ; d = (first power of 2 greater than number of airports) - 1
 
     ; generate num between 0 and b (b not included)
 .loop_rand:
@@ -286,7 +286,7 @@ ENDC
     jr      nc,.loop_rand
 
     ld      c,a
-    ; c = number of the airport to spawn the airport at
+    ; c = number of the airport to spawn the plane at
 
     ; Look for the correct airport
 
@@ -542,13 +542,13 @@ PlanesReset: ; a = 1 to force reset, a = 0 reset only if num of planes changes
     ld      a,[COUNT_AIRPORTS]
     ld      [OLD_NUM_AIRPORTS],a ; update saved number of airports
 
-    sla     a
+    add     a,a ; sla     a
     cp      a,SIMULATION_MAX_PLANES ; cy = 1 if n > a
     jr      c,.not_max
     ld      a,SIMULATION_MAX_PLANES
 .not_max:
 
-    ; A holds the number of airports (up to SIMULATION_MAX_PLANES)
+    ; A holds the number of planes (up to SIMULATION_MAX_PLANES)
 
     ; Initialize planes to any point in the map
 
@@ -755,7 +755,7 @@ PlaneRefreshSpriteCoordinates: ; bc = index
     ld      a,[hl]
     ld      hl,bg_x ; bg scroll in tiles
     sub     a,[hl] ; a = delta x tiles
-    dec     a
+    dec     a ; extra row
 
     sla     a
     sla     a
@@ -773,7 +773,7 @@ PlaneRefreshSpriteCoordinates: ; bc = index
     ld      a,[hl]
     ld      hl,bg_y ; bg scroll in tiles
     sub     a,[hl] ; a = delta y tiles
-    dec     a
+    dec     a ; extra column
 
     sla     a
     sla     a

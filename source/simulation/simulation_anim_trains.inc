@@ -293,7 +293,7 @@ TrainCurrentTrackNumDirections: ; bc = train index. returns a = number
 
 ;-------------------------------------------------------------------------------
 
-TrainSpawn: ; c = index of the plane
+TrainSpawn: ; c = index of the train
 
     ; Generate a random number between 0 and the number of train tracks
 
@@ -323,7 +323,7 @@ TrainSpawn: ; c = index of the plane
         sra     e
         or      a,d
         ENDR
-        ld      d,a ; d = (first power of 2 > number of tracks) - 1
+        ld      d,a ; d = (first power of 2 greater than number of tracks) - 1
 
 .loop_rand1:
         call    GetRandom ; bc, de preserved
@@ -728,7 +728,7 @@ INDEX SET 0
     cp      a,-1 ; disabled
     jr      z,.invisible\@
 
-    ; Calculate tile where the plane is located on the screen.
+    ; Calculate tile where the train is located on the screen.
 
     ; Sprite screen tile = Train tile coords - Top left bg coords (= scroll)
 
