@@ -46,7 +46,6 @@ COUNT_MUSEUMS::         DS 1
 COUNT_LIBRARIES::       DS 1
 
 COUNT_TRAIN_TRACKS::    DS 2 ; LSB first
-COUNT_WATER_TILES::     DS 2 ; LSB first
 
 ;###############################################################################
 
@@ -72,8 +71,6 @@ Simulation_CountBuildings::
 
     ld      [COUNT_TRAIN_TRACKS+0],a
     ld      [COUNT_TRAIN_TRACKS+1],a
-    ld      [COUNT_WATER_TILES+0],a
-    ld      [COUNT_WATER_TILES+1],a
 
     ; Count the number of airports and fire stations
 
@@ -108,25 +105,6 @@ ENDM
         CHECK_TILE  T_STADIUM,      COUNT_STADIUMS
         CHECK_TILE  T_MUSEUM,       COUNT_MUSEUMS
         CHECK_TILE  T_LIBRARY,      COUNT_LIBRARIES
-
-CHECK_TILE_16 : MACRO ; 1 = Tile number, 2 = Variable to increase
-
-        ld      a,(\1)&$FF ; Check low byte first because it changes more often
-        cp      a,e
-        jr      nz,.end_16\@
-        ld      a,(\1)>>8
-        cp      a,d
-        jr      nz,.end_16\@
-            ld      hl,\2 ; LSB first
-            inc     [hl]
-            jr      nz,.end_16\@
-                inc     hl
-                inc     [hl]
-.end_16\@:
-ENDM
-
-        CHECK_TILE_16   T_WATER,       COUNT_WATER_TILES
-        CHECK_TILE_16   T_WATER_EXTRA, COUNT_WATER_TILES
 
     pop     hl
 
