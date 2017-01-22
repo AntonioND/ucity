@@ -42,6 +42,7 @@
 
 SIMULATION_MAX_PLANES   EQU 6
 SIMULATION_MAX_TRAINS   EQU 6
+SIMULATION_MAX_BOATS    EQU 4
 
 SIMULATION_OBJECTS_OAM_BASE EQU 20 ; First OAM index to use for transportation
 
@@ -113,10 +114,36 @@ TRAIN_Y_SPR:     DS SIMULATION_MAX_TRAINS
 TRAIN_DIRECTION: DS SIMULATION_MAX_TRAINS
 TRAIN_VISIBLE:   DS SIMULATION_MAX_TRAINS ; 1 = Visible on screen
 
+; Boats
+; -----
+
+BOAT_SPR_OAM_BASE EQU TRAIN_SPR_OAM_BASE+SIMULATION_MAX_TRAINS
+
+BOAT_SPRITE_TILE_START EQU (152-128)
+
+BOAT_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
+
+OLD_NUM_DOCKS: DS 1
+
+; Coordinates in tiles of the plane. There is one extra row and column at each
+; border.
+BOAT_X_TILE:    DS SIMULATION_MAX_BOATS ; -1 to CITY_MAP_WIDTH
+BOAT_Y_TILE:    DS SIMULATION_MAX_BOATS ; -1 to CITY_MAP_HEIGHT
+; (0 - 7) Coordinates inside the tile, to be added to BOAT_X/Y_TILE.
+BOAT_X_IN_TILE: DS SIMULATION_MAX_BOATS
+BOAT_Y_IN_TILE: DS SIMULATION_MAX_BOATS
+; Coordinates of the sprite (in px)
+BOAT_X_SPR:     DS SIMULATION_MAX_BOATS
+BOAT_Y_SPR:     DS SIMULATION_MAX_BOATS
+; Clockwise, 0 is up, 1 up right, etc. -1 = Plane is disabled
+BOAT_DIRECTION: DS SIMULATION_MAX_BOATS
+BOAT_DIRECTION_STEPS_LEFT: DS SIMULATION_MAX_BOATS
+BOAT_VISIBLE:   DS SIMULATION_MAX_BOATS ; 1 = Visible on screen
+
 ; Check for overflows
 ; -------------------
 
-IF TRAIN_SPR_OAM_BASE+SIMULATION_MAX_TRAINS > 40
+IF BOAT_SPR_OAM_BASE+SIMULATION_MAX_BOATS > 40
     FAIL "Too many transportation objects."
 ENDC
 
@@ -131,6 +158,10 @@ ENDC
 ;-------------------------------------------------------------------------------
 
     INCLUDE "simulation_anim_trains.inc"
+
+;-------------------------------------------------------------------------------
+
+    INCLUDE "simulation_anim_boats.inc"
 
 ;###############################################################################
 
@@ -149,7 +180,11 @@ Simulation_TransportAnimsInit:: ; b = 1 force reset, b = 0 don't force
     call    PlanesReset
     pop     af
 
+    push    af
     call    TrainsReset
+    pop     af
+
+    call    BoatsReset
 
     ; Set scroll reference
 
@@ -182,6 +217,8 @@ Simulation_TransportAnimsShow::
 
     call    TrainsShow
 
+    call    BoatsShow
+
     ld      a,1
     ld      [SIMULATION_SPRITES_SHOWN],a
 
@@ -205,6 +242,8 @@ Simulation_TransportAnimsVBLHandle::
 
     call    TrainsVBLHandle
 
+    call    BoatsVBLHandle
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -220,6 +259,8 @@ Simulation_TransportAnimsHandle::
     call    PlanesHandle
 
     call    TrainsHandle
+
+    call    BoatsHandle
 
     ret
 
@@ -272,7 +313,11 @@ Simulation_TransportAnimsScroll::
     call    PlanesHandleScroll ; d = value to add to y, e = value to add to x
     pop     de
 
+    push    de
     call    TrainsHandleScroll ; d = value to add to y, e = value to add to x
+    pop     de
+
+    call    BoatsHandleScroll ; d = value to add to y, e = value to add to x
 
     ret
 
@@ -291,6 +336,8 @@ Simulation_TransportAnimsHide::
     call    PlanesHide
 
     call    TrainsHide
+
+    call    BoatsHide
 
     ret
 

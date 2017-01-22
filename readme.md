@@ -17,7 +17,7 @@ you are interested please contact me at my email (antonio_nd@outlook.com).
 
 General to do list:
 - Simulation - Most parts are ready
-  - Graphical output (boats, wind power plants?...)
+  - Graphical output (wind power plants?...)
 - Sample cities (compressed?)
 - Music, SFX - Allow to disable it from the options menu
 - Improve graphics

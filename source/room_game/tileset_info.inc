@@ -154,8 +154,8 @@ T_LIBRARY            EQU 194
 T_AIRPORT           EQU 200
 T_AIRPORT_RUNWAY    EQU T_AIRPORT+10 ; 10=5+5+0 (5x3 building)
 T_PORT              EQU 215
-T_PORT_WATER_L      EQU 224
-T_PORT_WATER_R      EQU 225
+T_PORT_WATER_L      EQU 224 ; Make sure that the docks are all in the same 256
+T_PORT_WATER_R      EQU 225 ; tile bank.
 T_PORT_WATER_D      EQU 226
 T_PORT_WATER_U      EQU 227
 
