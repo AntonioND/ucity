@@ -192,10 +192,13 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
     and     a,a
     jp      z,.movement_failed ; Exit if there are no valid directions
 
+    ; b = allowed directions
+
 .loop_rand:
 
         call    GetRandom ; bc, de preserved
-        and     a,b
+
+        and     a,b ; remove a few random directions
 
 CHECK_DIR : MACRO ; \1 = dir
     cp      a,1 << (\1)
@@ -213,6 +216,17 @@ ENDM
         CHECK_DIR   5
         CHECK_DIR   6
         CHECK_DIR   7
+
+        ; There were too many directions allowed so it couldn't only get one,
+        ; set the remaining directions as the allowed ones to speed up the next
+        ; iteration.
+
+        ; However, it may have happened that the result after and'ing the random
+        ; value and the allowed directions is 0. In that case, skip this step.
+        and     a,a
+        jr      .loop_rand
+
+        ld      b,a
 
     jr      .loop_rand
 
