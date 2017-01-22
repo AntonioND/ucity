@@ -293,6 +293,78 @@ TrainCurrentTrackNumDirections: ; bc = train index. returns a = number
 
 ;-------------------------------------------------------------------------------
 
+TrainGenRandomMax16: ; de = max number (excluded), must be greater than 0
+
+    ; The idea is to generate random numbers until one of them is lower than
+    ; the provided value. To speed up things, a mask is created to clamp the
+    ; generated numbers. This way, the worst case is that half of the generated
+    ; numbers have to be discarded. If not, a number like $100 would take
+    ; forever because there's only 1 chance in 256 to generate a smaller number
+    ; in the high byte.
+
+    LD_BC_DE
+    LD_HL_DE
+
+    ; bc = shift register
+    ; hl = register to generate bitmask at
+    REPT    16
+    ; bc = bc | (bc >> 1)
+    sra     b
+    rr      c ; bc >>= 1
+    ; bc |= hl
+    ld      a,h
+    or      a,b
+    ld      h,a
+    ld      a,l
+    or      a,c
+    ld      l,a
+    ENDR
+    LD_BC_HL
+
+    ; bc = first (power of 2 - 1) greater or equal than de
+    ; de = max number
+.loop_rand:
+
+    call    GetRandom ; bc, de preserved
+    push    af
+    call    GetRandom ; bc, de preserved
+    ld      l,a
+    pop     af
+    ld      h,a ; hl = random number
+
+    ; hl = rand & mask
+    ld      a,b
+    and     a,h
+    ld      h,a
+
+    ld      a,c
+    and     a,l
+    ld      l,a
+
+    ; if hl < de (rand < max) return hl
+
+    ld      a,h
+    cp      a,d ; cy = 1 if d > a
+    jr      z,.check_low_byte
+    jr      nc,.loop_rand
+    jr      .loop_rand_end
+
+.check_low_byte:
+    ; Top 8 bit are equal, check lower 8 bit
+
+    ld      a,l
+    cp      a,e ; cy = 1 if e > a
+    jr      nc,.loop_rand
+    ;jr      .loop_rand_end
+
+.loop_rand_end:
+
+    LD_DE_HL
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 TrainSpawn: ; c = index of the train
 
     ; Generate a random number between 0 and the number of train tracks
@@ -310,56 +382,8 @@ TrainSpawn: ; c = index of the train
     ; Generate num between 0 and de (de not included)
     ; -----------------------------------------------
 
-    ld      a,d
-    and     a,a
-    jr      .lower_than_256
-
-        ; Higher or equal than 256
-
-        ld      b,d ; b = top num
-
-        ld      a,d
-        REPT 7
-        sra     e
-        or      a,d
-        ENDR
-        ld      d,a ; d = (first power of 2 greater than number of tracks) - 1
-
-.loop_rand1:
-        call    GetRandom ; bc, de preserved
-        and     a,d ; reduce the number to make this easier
-        cp      a,b ; cy = 1 if b > a
-        jr      nc,.loop_rand1
-
-        ld      d,a
-        call    GetRandom ; bc, de preserved
-        ld      e,a
-
-        jr      .end_rand_gen
-
-.lower_than_256:
-
-        ; Lower than 256
-
-        ld      b,e ; b = top num
-
-        ld      a,e
-        REPT 7
-        sra     e
-        or      a,e
-        ENDR
-        ld      e,a ; e = (first power of 2 > number of tracks) - 1
-
-.loop_rand2:
-        call    GetRandom ; bc, de preserved
-        and     a,e ; reduce the number to make this easier
-        cp      a,b ; cy = 1 if b > a
-        jr      nc,.loop_rand2
-
-        ld      e,a
-        ld      d,0
-
-.end_rand_gen:
+    ; Get a random number in de
+    call    TrainGenRandomMax16 ; de = max number (excluded), must be > 0
 
     ; de = number of the train track to spawn the train at
 
