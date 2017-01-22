@@ -123,8 +123,6 @@ BOAT_SPRITE_TILE_START EQU (152-128)
 
 BOAT_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
 
-OLD_NUM_DOCKS: DS 1
-
 ; Coordinates in tiles of the plane. There is one extra row and column at each
 ; border.
 BOAT_X_TILE:    DS SIMULATION_MAX_BOATS ; -1 to CITY_MAP_WIDTH
@@ -135,10 +133,11 @@ BOAT_Y_IN_TILE: DS SIMULATION_MAX_BOATS
 ; Coordinates of the sprite (in px)
 BOAT_X_SPR:     DS SIMULATION_MAX_BOATS
 BOAT_Y_SPR:     DS SIMULATION_MAX_BOATS
-; Clockwise, 0 is up, 1 up right, etc. -1 = Plane is disabled
+; Clockwise, 0 is up, 1 up right, etc. -1 = Plane hasn't spawned
 BOAT_DIRECTION: DS SIMULATION_MAX_BOATS
 BOAT_DIRECTION_STEPS_LEFT: DS SIMULATION_MAX_BOATS
 BOAT_VISIBLE:   DS SIMULATION_MAX_BOATS ; 1 = Visible on screen
+BOAT_ENABLED:   DS SIMULATION_MAX_BOATS ; 1 = Enabled
 
 ; Check for overflows
 ; -------------------

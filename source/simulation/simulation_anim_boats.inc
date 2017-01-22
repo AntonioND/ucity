@@ -378,9 +378,7 @@ BoatIsInWater: ; bc = boat index, ret a = 1 if there is water under it else 0
 
     dec     e ; extra row and column
     dec     d
-    call    BoatIsWaterTile ; Arguments: e = x , d = y, returns a = 1 if water
-
-    ret
+    jp      BoatIsWaterTile ; Arguments: e = x , d = y, returns a = 1 if water
 
 ;-------------------------------------------------------------------------------
 
@@ -626,10 +624,16 @@ BoatsMovementStep:
     ld      bc,SIMULATION_MAX_BOATS-1
 .loop:
 
+        ld      hl,BOAT_ENABLED
+        add     hl,bc
+        ld      a,[hl]
+        and     a,a ; disabled
+        jr      z,.skip
+
         ld      hl,BOAT_DIRECTION
         add     hl,bc
         ld      a,[hl]
-        cp      a,-1 ; disabled
+        cp      a,-1 ; not spawned
         jr      z,.skip
 
         ; Check if number of steps is 0
@@ -686,81 +690,67 @@ BoatsMovementStep:
 BoatsReset: ; a = 1 to force reset, a = 0 reset only if num of boats changes
 
     and     a,a
-    jr      nz,.force_reset
+    jr      z,.dont_force_reset
 
-    ; if number of docks is the same, return
-    ld      a,[COUNT_DOCKS]
-    ld      hl,OLD_NUM_DOCKS
-    cp      a,[hl]
-    ret     z
-
-    ; Skip reset of all boats, only the boats that are enabled now are reseted
-    jr      .reset_common
-
-.force_reset:
-
-    ; Disable all boats so that all visible boats will be reseted
+    ; Force reset, unspawn all boats
 
     ld      a,-1
     ld      hl,BOAT_DIRECTION
     ld      b,SIMULATION_MAX_BOATS
     call    memset_fast ; a = value    hl = start address    b = size
 
-.reset_common:
+.dont_force_reset:
+
+    ; Now, enable only the number of planes desired and unspawn the rest
+
+    xor     a,a ; Disable all
+    ld      hl,BOAT_ENABLED
+    ld      b,SIMULATION_MAX_BOATS
+    call    memset_fast ; a = value    hl = start address    b = size
 
     ; Count the number of docks. The total number of boats is equal to the
     ; number of docks / 2 up to a max of SIMULATION_MAX_BOATS.
 
     ld      a,[COUNT_DOCKS]
-    ld      [OLD_NUM_DOCKS],a ; update saved number of docks
-
     sra     a
     cp      a,SIMULATION_MAX_BOATS ; cy = 1 if n > a
     jr      c,.not_max
     ld      a,SIMULATION_MAX_BOATS
 .not_max:
 
-    ; A holds the number of boats (up to SIMULATION_MAX_BOATS)
-
-    ; Initialize boats to tiles next to ports
-
-    ld      bc,0 ; c = counter variable for the next two loops
+    ; a = number of boats
 
     and     a,a
-    jr      z,.skip_all_spawn ; check if number = 0
+    jr      z,.skip_enable ; check if number = 0
 
-.spawn_boat:
-    push    af ; save top num
-        ld      hl,BOAT_DIRECTION
-        add     hl,bc
-        ld      a,[hl]
-        cp      a,-1 ; If disabled, enable
-        jr      nz,.skip_spawn
-            push    bc
-            call    BoatSpawnDock ; c = index of the boat
-            pop     bc
-.skip_spawn:
-    pop     af
-    inc     c
-    cp      a,c
-    jr      nz,.spawn_boat
+    push    af ; (**) preserve num of boats
 
-.skip_all_spawn:
-    ; Disable the rest of the boats
+        ld      hl,BOAT_ENABLED
+        ld      b,a ; b = number of boats enabled
+        ld      a,1
+        call    memset_fast ; a = value    hl = start address    b = size
 
-    cp      a,SIMULATION_MAX_BOATS
-    ret     z
+    pop     af ; (**) restore num of boats
 
-    ; bc is still the counter variable
-    ld      d,-1 ; disable value
-    ld      a,SIMULATION_MAX_BOATS ; limit
-.disable_boat:
+.skip_enable:
+
+    ld      b,a
+    ld      a,SIMULATION_MAX_BOATS
+    sub     a,b ; a = num of disabled boats
+    ; b = num of enabled boats
+
+    ld      c,b
+    ld      b,0 ; bc = num of enabled boats
+    ; a = num of disabled boats
+
+    and     a,a
+    ret     z ; no disabled boats, so don't unspawn any of them
+
     ld      hl,BOAT_DIRECTION
     add     hl,bc
-    ld      [hl],d
-    inc     c
-    cp      a,c
-    jr      nz,.disable_boat
+    ld      b,a ; num of disabled boats
+    ld      a,-1 ; unspawn
+    call    memset_fast ; a = value    hl = start address    b = size
 
     ret
 
@@ -776,8 +766,12 @@ BoatsWriteOAM:
 INDEX SET 0
     REPT    SIMULATION_MAX_BOATS
 
+    ld      a,[BOAT_ENABLED+INDEX]
+    and     a,a ; disabled
+    jr      z,.invisible\@
+
     ld      a,[BOAT_DIRECTION+INDEX]
-    cp      a,-1 ; disabled
+    cp      a,-1 ; not spawned
     jr      z,.invisible\@
 
     ld      a,[BOAT_VISIBLE+INDEX]
@@ -848,8 +842,12 @@ BoatsUpdateVisibility:
 INDEX SET 0
     REPT    SIMULATION_MAX_BOATS
 
-    ld      a,[BOAT_DIRECTION+INDEX]
+    ld      a,[BOAT_ENABLED+INDEX]
     cp      a,-1 ; disabled
+    jr      z,.invisible\@
+
+    ld      a,[BOAT_DIRECTION+INDEX]
+    cp      a,-1 ; not spawned
     jr      z,.invisible\@
 
     ; Calculate tile where the boat is located on the screen.
@@ -990,8 +988,12 @@ BoatsCheckOutOfWater:
 INDEX SET 0
     REPT    SIMULATION_MAX_BOATS
 
+    ld      a,[BOAT_ENABLED+INDEX]
+    and     a,a ; disabled
+    jr      z,.next\@
+
     ld      a,[BOAT_DIRECTION+INDEX]
-    cp      a,-1 ; disabled
+    cp      a,-1 ; not spawned
     jr      z,.next\@
 
     ld      bc,INDEX
@@ -1026,9 +1028,26 @@ INDEX SET INDEX+1
 
 ;-------------------------------------------------------------------------------
 
-BoatsSpawnIfDisabled:
+BoatsSpawnIfEnabled: ; spawn boats that are enabled but not spawned
 
-    ; TODO
+INDEX SET 0
+    REPT    SIMULATION_MAX_BOATS
+
+    ld      a,[BOAT_ENABLED+INDEX]
+    and     a,a ; disabled
+    jr      z,.next\@
+
+    ld      a,[BOAT_DIRECTION+INDEX]
+    cp      a,-1 ; don't spawn if it has already spawned
+    jr      Nz,.next\@
+
+    ld      bc,INDEX
+    call    BoatSpawnDock
+
+.next\@:
+
+INDEX SET INDEX+1
+    ENDR
 
     ret
 
@@ -1039,8 +1058,12 @@ BoatsRestartMovement:
 INDEX SET 0
     REPT    SIMULATION_MAX_BOATS
 
+    ld      a,[BOAT_ENABLED+INDEX]
+    and     a,a ; disabled
+    jr      z,.next\@
+
     ld      a,[BOAT_DIRECTION+INDEX]
-    cp      a,-1 ; disabled
+    cp      a,-1 ; not spawned
     jr      z,.next\@
 
     ld      a,[BOAT_DIRECTION_STEPS_LEFT+INDEX]
@@ -1084,7 +1107,7 @@ BoatsHandle:
     ; Sometimes, when reseting the boats, some of them may not find a valid
     ; starting point. Try to enable all disabled boats here.
 
-    call    BoatsSpawnIfDisabled
+    call    BoatsSpawnIfEnabled
 
     ; When a boat realizes that there is no water under it, unspawn and try to
     ; respawn somewhere else. If there is water, move and change directions if
