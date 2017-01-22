@@ -40,8 +40,8 @@
 
 ;-------------------------------------------------------------------------------
 
-SIMULATION_MAX_PLANES   EQU 6
-SIMULATION_MAX_TRAINS   EQU 6
+SIMULATION_MAX_PLANES   EQU 4 ; They all must be greater than 0
+SIMULATION_MAX_TRAINS   EQU 5
 SIMULATION_MAX_BOATS    EQU 4
 
 SIMULATION_OBJECTS_OAM_BASE EQU 20 ; First OAM index to use for transportation
