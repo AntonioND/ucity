@@ -183,6 +183,17 @@ InputHandleMenu:
         ret
 .not_b:
 
+    ld      a,[joy_pressed]
+    and     a,PAD_SELECT
+    jr      z,.not_select
+
+        LONG_CALL_ARGS    RoomCredits
+
+        call    RoomMenuLoadGraphics
+
+        ret
+.not_select:
+
     ret
 
 ;-------------------------------------------------------------------------------
