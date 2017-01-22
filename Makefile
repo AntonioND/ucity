@@ -17,32 +17,31 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ################################################################################
-##                                ROM NAME                                    ##
+##                                ROM name                                    ##
 
 NAME = bitcity
 EXT  = gbc
 
-##                                                                            ##
 ################################################################################
+##                         Path to RGBDS binaries                             ##
+
+RGBDS   = ..
 
 ################################################################################
-##                         PATH TO RGBDS BINARIES                             ##
+##                       Command to run an emulator                           ##
 
-RGBASM  = ../rgbasm
-RGBLINK = ../rgblink
-RGBFIX  = ../rgbfix
 EMULATOR = wine ./tools/bgb.exe
-
-##                                                                            ##
-################################################################################
 
 ################################################################################
 ##              Source and include folders - includes subfolders              ##
 
-SOURCE = ./source ./data
+SOURCE = source data
 
-##                                                                            ##
 ################################################################################
+
+RGBASM  = $(RGBDS)/rgbasm
+RGBLINK = $(RGBDS)/rgblink
+RGBFIX  = $(RGBDS)/rgbfix
 
 BIN := $(NAME).$(EXT)
 
