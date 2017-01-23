@@ -90,13 +90,13 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 
     ; Each bit in register [sp+0] represents one neighbour tile (1 = water)
 
-    ; 0 1 2
-    ; 3   4
-    ; 5 6 7
+    ; Direction
+    ;   7 0 1
+    ;   6   2
+    ;   5 4 3
 
     push    de
     dec     d
-    dec     e
     call    BoatIsWaterTile ; Arguments: e = x , d = y, returns a = 1 if water
     pop     de
     and     a,a
@@ -107,6 +107,7 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 
     push    de
     dec     d
+    inc     e
     call    BoatIsWaterTile
     pop     de
     and     a,a
@@ -116,7 +117,6 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 .not_1:
 
     push    de
-    dec     d
     inc     e
     call    BoatIsWaterTile
     pop     de
@@ -127,7 +127,8 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 .not_2:
 
     push    de
-    dec     e
+    inc     e
+    inc     d
     call    BoatIsWaterTile
     pop     de
     and     a,a
@@ -137,7 +138,7 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 .not_3:
 
     push    de
-    inc     e
+    inc     d
     call    BoatIsWaterTile
     pop     de
     and     a,a
@@ -158,7 +159,7 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 .not_5:
 
     push    de
-    inc     d
+    dec     e
     call    BoatIsWaterTile
     pop     de
     and     a,a
@@ -168,8 +169,8 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 .not_6:
 
     push    de
-    inc     d
-    inc     e
+    dec     d
+    dec     e
     call    BoatIsWaterTile
     pop     de
     and     a,a
