@@ -126,8 +126,10 @@ PredefinedMapSetupGameVariables:
     xor     a,a
     ld      [technology_level],a
 
-    xor     a,a ; enable disasters by default
+    xor     a,a ; enable disasters, animations and music by default
     ld      [simulation_disaster_disabled],a
+    ld      [game_animations_disabled],a
+    ld      [game_music_disabled],a
 
     ; TODO : Allow predefined maps to start with some historical data?
     LONG_CALL   GraphsClearRecords
@@ -431,6 +433,10 @@ SRAMMapLoad: ; a = index to load from. This function doesn't check bank limits.
 
     ld      a,[SAV_OPTIONS_DISASTERS_DISABLED]
     ld      [simulation_disaster_disabled],a
+    ld      a,[SAV_OPTIONS_ANIMATIONS_DISABLED]
+    ld      [game_animations_disabled],a
+    ld      a,[SAV_OPTIONS_MUSIC_DISABLED]
+    ld      [game_music_disabled],a
 
     ; Historical data
     ; ---------------
@@ -637,6 +643,10 @@ CityMapSave:: ; a = index to save data to. Doesn't check bank limits
 
     ld      a,[simulation_disaster_disabled]
     ld      [SAV_OPTIONS_DISASTERS_DISABLED],a
+    ld      a,[game_animations_disabled]
+    ld      [SAV_OPTIONS_ANIMATIONS_DISABLED],a
+    ld      a,[game_music_disabled]
+    ld      [SAV_OPTIONS_MUSIC_DISABLED],a
 
     ; Historical data
     ; ---------------

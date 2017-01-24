@@ -59,6 +59,9 @@ simulation_running::  DS 1
 simulation_disaster_mode:: DS 1
 simulation_disaster_disabled:: DS 1 ; 0 if disasters are enabled, 1 if not
 
+game_animations_disabled:: DS 1 ; 0 if animations are enabled, 1 if not
+game_music_disabled:: DS 1 ; 0 if music is enabled, 1 if not
+
 ; Must be a power of 2
 ANIMATION_TRANSPORT_COUNT_FRAMES EQU 4
 ; Must be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES

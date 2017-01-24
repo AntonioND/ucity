@@ -219,7 +219,8 @@ OptionsMenuHandleOption: ; a = selected option
         ld      a,[hl]
         xor     a,1
         ld      [hl],a
-        call    OptionsMenuDrawDisastersEnabledState
+        ld      de,5*32+CURSOR_X+2+$9800
+        call    OptionsMenuDrawEnabledStateAt ; hl = flag, de = VRAM ptr
         ret
 
 .not_disasters_enabled:
@@ -253,7 +254,15 @@ OptionsMenuHandleOption: ; a = selected option
         ; Animations : Enable / Disable
         ; ----------------------------
 
-        ; TODO
+        ld      hl,game_animations_disabled
+        ld      a,[hl]
+        xor     a,1
+        ld      [hl],a
+        ld      de,12*32+CURSOR_X+2+$9800
+        call    OptionsMenuDrawEnabledStateAt ; hl = flag, de = VRAM ptr
+
+        ; TODO - Remove sprites if, when leaving the room, animations have
+        ; been changed from enabled to disabled
 
         ret
 
@@ -264,7 +273,14 @@ OptionsMenuHandleOption: ; a = selected option
         ; Music : Enable / Disable
         ; ----------------------------
 
-        ; TODO
+        ld      hl,game_music_disabled
+        ld      a,[hl]
+        xor     a,1
+        ld      [hl],a
+        ld      de,16*32+CURSOR_X+2+$9800
+        call    OptionsMenuDrawEnabledStateAt ; hl = flag, de = VRAM ptr
+
+        ; TODO - Enable or disable music here
 
         ret
 
@@ -275,12 +291,12 @@ OptionsMenuHandleOption: ; a = selected option
 
 ;-------------------------------------------------------------------------------
 
-OptionsMenuDrawDisastersEnabledState:
+OptionsMenuDrawEnabledStateAt: ; hl = ptr to flag, de = ptr to VRAM destination
 
     xor     a,a
     ld      [rVBK],a
 
-    ld      a,[simulation_disaster_disabled]
+    ld      a,[hl]
     and     a,a
     jr      nz,.not_enabled
         ; Enabled
@@ -291,7 +307,6 @@ OptionsMenuDrawDisastersEnabledState:
         ld      hl,.str_disabled
 .print:
     ld      b,8
-    ld      de,5*32+CURSOR_X+2+$9800 ; Enabled/Disabled
     call    vram_copy_fast ; b = size - hl = source address - de = dest
 
     ret
@@ -397,7 +412,19 @@ RoomOptionsMenu::
 
     call    RoomOptionsMenuLoadBG
 
-    call    OptionsMenuDrawDisastersEnabledState
+    ; Print default values
+
+    ld      hl,simulation_disaster_disabled
+    ld      de,5*32+CURSOR_X+2+$9800
+    call    OptionsMenuDrawEnabledStateAt ; hl = flag, de = VRAM ptr
+    ld      hl,game_animations_disabled
+    ld      de,12*32+CURSOR_X+2+$9800
+    call    OptionsMenuDrawEnabledStateAt
+    ld      hl,game_music_disabled
+    ld      de,16*32+CURSOR_X+2+$9800
+    call    OptionsMenuDrawEnabledStateAt
+
+    ; End of default values
 
     call    LoadTextPalette
 
