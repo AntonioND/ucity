@@ -226,6 +226,10 @@ GameDisasterApply:
 
 GameAnimateMapVBLFastHandle:
 
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz ; return if animations are disabled
+
     ; Reasons for not animating: Some of the direction pad keys are pressed
     ; or the map is still moving after releasing a key.
 
@@ -295,6 +299,10 @@ GameAnimateMapVBLFastHandle:
 ;-------------------------------------------------------------------------------
 
 GameAnimateMap:
+
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz ; return if animations are disabled
 
     ld      a,[simulation_disaster_mode]
     and     a,a

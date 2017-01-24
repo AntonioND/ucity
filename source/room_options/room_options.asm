@@ -35,6 +35,8 @@
 
 ;-------------------------------------------------------------------------------
 
+options_menu_old_animation_disabled: DS 1
+
 options_menu_selection: DS 1
 
 options_room_exit:  DS 1 ; set to 1 to exit room
@@ -261,9 +263,6 @@ OptionsMenuHandleOption: ; a = selected option
         ld      de,12*32+CURSOR_X+2+$9800
         call    OptionsMenuDrawEnabledStateAt ; hl = flag, de = VRAM ptr
 
-        ; TODO - Remove sprites if, when leaving the room, animations have
-        ; been changed from enabled to disabled
-
         ret
 
 .not_animations_enabled:
@@ -424,6 +423,9 @@ RoomOptionsMenu::
     ld      de,16*32+CURSOR_X+2+$9800
     call    OptionsMenuDrawEnabledStateAt
 
+    ld      a,[game_animations_disabled]
+    ld      [options_menu_old_animation_disabled],a
+
     ; End of default values
 
     call    LoadTextPalette
@@ -447,6 +449,24 @@ RoomOptionsMenu::
     call    SetDefaultVBLHandler
 
     call    SetPalettesAllBlack
+
+    ; Update animation state if needed
+
+    ld      a,[options_menu_old_animation_disabled]
+    ld      b,a
+    ld      a,[game_animations_disabled]
+    cp      a,b ; b = old, a = new
+    jr      z,.animation_check_end ; if they are the same, skip this
+
+        ; If animations are re-enabled, reset sprites
+
+        and     a,a
+        jr      nz,.animation_check_end ; skip if disabled
+
+            ld      b,1 ; force reset
+            LONG_CALL_ARGS  Simulation_TransportAnimsInit
+
+.animation_check_end:
 
     ret
 

@@ -171,6 +171,10 @@ ENDC
 ; only move the newly visible ones.
 Simulation_TransportAnimsInit:: ; b = 1 force reset, b = 0 don't force
 
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz
+
     xor     a,a
     ld      [SIMULATION_SPRITES_SHOWN],a
 
@@ -204,6 +208,10 @@ Simulation_TransportAnimsInit:: ; b = 1 force reset, b = 0 don't force
 ; supposed to be visible after the jump.
 Simulation_TransportAnimsShow::
 
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz
+
     ld      a,[SIMULATION_SPRITES_SHOWN]
     and     a,a
     ret     nz ; return if they are shown
@@ -231,6 +239,10 @@ Simulation_TransportAnimsShow::
 ; or destroy objects when they leave the map.
 Simulation_TransportAnimsVBLHandle::
 
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz
+
     ; Check if sprites are hidden or not (for example, during disasters)
 
     ld      a,[SIMULATION_SPRITES_SHOWN]
@@ -251,6 +263,10 @@ Simulation_TransportAnimsVBLHandle::
 ; Called once per animation step. This can take all the time it needs.
 Simulation_TransportAnimsHandle::
 
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz
+
     ld      a,[SIMULATION_SPRITES_SHOWN]
     and     a,a ; if they aren't visible, do nothing, they will have to be
     ret     z ; refreshed when the disaster ends, for example...
@@ -270,6 +286,10 @@ Simulation_TransportAnimsHandle::
 ; displacements, in case of a jump to another part of the map, this function
 ; isn't enough (a refresh is needed).
 Simulation_TransportAnimsScroll::
+
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz
 
     ; Check if sprites are hidden or not (for example, during disasters)
 
@@ -324,6 +344,10 @@ Simulation_TransportAnimsScroll::
 
 ; This hides all sprites, but doesn't refresh the OAM.
 Simulation_TransportAnimsHide::
+
+    ld      a,[game_animations_disabled]
+    and     a,a
+    ret     nz
 
     ld      a,[SIMULATION_SPRITES_SHOWN]
     and     a,a
