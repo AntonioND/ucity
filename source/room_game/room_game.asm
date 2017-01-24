@@ -332,6 +332,9 @@ GameAnimateMap:
             ; This doesn't refresh tile map!
             LONG_CALL   Simulation_FireAnimate
 
+            ; This doesn't refresh tile map!
+            LONG_CALL   Simulation_WaterAnimate
+
             ; Refresh tile map
             call    bg_refresh_main
 .skip_anim_map_disaster:
