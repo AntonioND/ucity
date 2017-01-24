@@ -57,19 +57,23 @@ OPTIONS_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
-OPTIONS_MENU_NUMBER_ELEMENTS EQU 3
+OPTIONS_MENU_NUMBER_ELEMENTS EQU 5
 
 OPTIONS_DISASTERS_ENABLED         EQU 0
 OPTIONS_DISASTER_START_FIRE       EQU 1
 OPTIONS_DISASTER_NUCLEAR_MELTDOWN EQU 2
+OPTIONS_ANIMATIONS_ENABLED        EQU 3
+OPTIONS_MUSIC_ENABLED             EQU 4
 
 ;-------------------------------------------------------------------------------
 
 CURSOR_X EQU 1
 OPTIONS_MENU_CURSOR_COORDINATE_OFFSET:
-    DW 7*32+CURSOR_X+$9800 ; Disasters Enable/Disable
-    DW 9*32+CURSOR_X+$9800 ; Start Fire
-    DW 10*32+CURSOR_X+$9800 ; Nuclear Meltdown
+    DW 5*32+CURSOR_X+$9800 ; Disasters Enable/Disable
+    DW 7*32+CURSOR_X+$9800 ; Start Fire
+    DW 8*32+CURSOR_X+$9800 ; Nuclear Meltdown
+    DW 12*32+CURSOR_X+$9800 ; Animations Enable/Disable
+    DW 16*32+CURSOR_X+$9800 ; Music Enable/Disable
 
 OptionsMenuClearCursor:
 
@@ -243,6 +247,28 @@ OptionsMenuHandleOption: ; a = selected option
         ret
 
 .not_disaster_nuclear_meltdown:
+    cp      a,OPTIONS_ANIMATIONS_ENABLED
+    jr      nz,.not_animations_enabled
+
+        ; Animations : Enable / Disable
+        ; ----------------------------
+
+        ; TODO
+
+        ret
+
+.not_animations_enabled:
+    cp      a,OPTIONS_MUSIC_ENABLED
+    jr      nz,.not_music_enabled
+
+        ; Music : Enable / Disable
+        ; ----------------------------
+
+        ; TODO
+
+        ret
+
+.not_music_enabled:
 
     ld      b,b ; Panic!
     ret
@@ -265,7 +291,7 @@ OptionsMenuDrawDisastersEnabledState:
         ld      hl,.str_disabled
 .print:
     ld      b,8
-    ld      de,7*32+CURSOR_X+2+$9800 ; Enabled/Disabled
+    ld      de,5*32+CURSOR_X+2+$9800 ; Enabled/Disabled
     call    vram_copy_fast ; b = size - hl = source address - de = dest
 
     ret
