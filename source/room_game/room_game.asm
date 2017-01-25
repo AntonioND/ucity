@@ -361,115 +361,6 @@ GameAnimateMap:
 
 ;-------------------------------------------------------------------------------
 
-GameStateMachineHandle::
-
-    ld      a,[game_state]
-
-    cp      a,GAME_STATE_WATCH
-    jr      nz,.not_watch ; GAME_STATE_WATCH
-
-        call    InputHandleModeWatch
-
-        call    StatusBarUpdate ; Update status bar text
-
-        LONG_CALL   Simulation_TransportAnimsShow
-
-        call    GameAnimateMap
-
-        call    CPUBusyIconHide
-
-        ld      a,1
-        ld      [simulation_running],a ; Always simulate in watch mode
-
-        ret
-
-.not_watch:
-    cp      a,GAME_STATE_EDIT
-    jr      nz,.not_edit ; GAME_STATE_EDIT
-
-        call    InputHandleModeEdit
-
-        call    StatusBarUpdate ; Update status bar text
-
-        LONG_CALL   Simulation_TransportAnimsHide
-
-        ; Not simulating, update busy icon, but show if it isn't showing
-        call    CPUBusyIconShowAndHandle
-
-        ret
-
-.not_edit:
-    cp      a,GAME_STATE_WATCH_FAST_MOVE
-    jr      nz,.not_watch_fast_move ; GAME_STATE_WATCH_FAST_MOVE
-
-        call    InputHandleModeWatchFastMove
-
-        LONG_CALL   Simulation_TransportAnimsShow
-
-        call    GameAnimateMap
-
-        call    CPUBusyIconHide
-
-        ld      a,1
-        ld      [simulation_running],a ; Always simulate in fast move mode
-
-        ret
-
-.not_watch_fast_move:
-    cp      a,GAME_STATE_SELECT_BUILDING
-    jr      nz,.not_select_building ; GAME_STATE_SELECT_BUILDING
-
-        LONG_CALL   Simulation_TransportAnimsHide
-
-        ; If this returns a=1, don't refresh GFX
-        call    InputHandleModeSelectBuilding
-        and     a,a
-        jr      nz,.going_to_exit
-        LONG_CALL   BuildSelectMenuRefreshSprites
-
-        call    StatusBarUpdate ; Update status bar text
-.going_to_exit:
-
-        ret
-
-.not_select_building:
-    cp      a,GAME_STATE_PAUSE_MENU
-    jr      nz,.not_pause_menu ; GAME_STATE_PAUSE_MENU
-
-        call    InputHandleModePauseMenu
-
-        LONG_CALL   Simulation_TransportAnimsHide
-
-        call    StatusBarMenuHandle
-        cp      a,$FF
-        call    nz,PauseMenuHandleOption ; $FF = user didn't press A
-
-        ; The menu is an extended status bar, so...
-        call    StatusBarUpdate ; Update status bar text
-
-        ; Not simulating, update busy icon, but show if it isn't showing
-        call    CPUBusyIconShowAndHandle
-
-        ret
-
-.not_pause_menu:
-    cp      a,GAME_STATE_SHOW_MESSAGE
-    jr      nz,.not_show_message ; GAME_STATE_SHOW_MESSAGE
-
-        call    InputHandleModeShowMessage
-
-        LONG_CALL   Simulation_TransportAnimsHide
-
-        ret
-
-.not_show_message:
-
-    ; Panic!
-    ld      b,b ; Breakpoint
-    ret
-
-;-------------------------------------------------------------------------------
-
 GameStateMachineStateGet:: ; return a = state
 
     ld      a,[game_state]
@@ -478,8 +369,231 @@ GameStateMachineStateGet:: ; return a = state
 
 ;-------------------------------------------------------------------------------
 
-GameStateMachineStateSet:: ; a = new state
+WaitSimulationEnds:
+    ld      a,[simulation_running]
+    and     a,a
+    ret     z
+    call    wait_vbl
+    jr      WaitSimulationEnds
 
+;-------------------------------------------------------------------------------
+
+RoomGameVBLHandler:
+
+    call    StatusBarHandlerVBL ; Update position and registers (bg+spr)
+    call    refresh_OAM ; update OAM after moving sprites
+    call    bg_update_scroll_registers
+
+    ; Assert that the LCD is still in VBL mode!
+    ld      a,[rLY]
+    cp      a,144 ; cy = 1 if n > a
+    jr      nc,.ok
+    ld      b,b ; Breakpoint
+.ok:
+
+    ; Set 8x16 or 8x8 sprites
+    ld      b,LCDCF_OBJ8
+    ld      a,[game_state]
+    cp      a,GAME_STATE_SELECT_BUILDING
+    jr      nz,.not_16
+    ld      b,LCDCF_OBJ16
+.not_16:
+    ld      a,b
+    ld      [game_sprites_8x16],a
+
+    ; Fast movement of sprites, just the bare minimum so that the user doesn't
+    ; notice any irregularities in their movement.
+    LONG_CALL   GameAnimateMapVBLFastHandle
+
+    ; Make sure that the following code isn't executed twice even if it doesn't
+    ; finish in one frame.
+    ld      a,[vbl_handler_working]
+    and     a,a
+    ret     nz ; already working
+
+    ld      a,1
+    ld      [vbl_handler_working],a ; flag as working
+
+    ld      a,[rSVBK]
+    ld      b,a
+    ld      a,[rVBK]
+    ld      c,a
+    push    bc
+
+    ; Allow another VBL (or STAT) interrupt to happen and update graphics. Since
+    ; vbl_handler_working is set to 1, they will only update graphics and return
+    ; before handling user input.
+    ei
+
+    call    GameCoordinateFocusApply
+
+    call    scan_keys
+    call    KeyAutorepeatHandle
+
+    LONG_CALL   GameStateMachineHandle
+
+    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
+    pop     bc
+    ld      a,b
+    ld      [rSVBK],a
+    ld      a,c
+    ld      [rVBK],a
+
+    xor     a,a
+    ld      [vbl_handler_working],a ; flag as finished working
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Load elements of room game
+; A = 0 Load graphics + status bar and cursor + aux
+; A = 1 Like before, but also reset city status from SRAM or others
+; A = 2 Load graphics + aux
+RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
+
+    push    af
+
+        call    SetPalettesAllBlack
+
+        call    InitKeyAutorepeat
+
+        ld      a,$FF
+        ld      [rWX],a
+        ld      [rWY],a
+
+        xor     a,a
+        ld      [joy_held],a
+        ld      [joy_pressed],a
+        ld      [joy_released],a
+
+    pop     af
+
+    cp      a,0
+    jr      nz,.not_zero
+
+        ; Load GFX
+
+        ld      b,0 ; bank at 8000h
+        call    LoadText
+        LONG_CALL   BuildSelectMenuLoadGfx
+        call    BuildSelectMenuReset
+        call    StatusBarMenuLoadGfx
+        call    CursorLoad
+
+        call    bg_reload_main ; refresh bg and set correct scroll
+
+        jr      .continue_zero_one
+
+.not_zero:
+    cp      a,1
+    jr      nz,.not_one
+
+        ; Clear WRAMX
+
+        ld      a,3 ; Do not clear tile and attribute map, they may contain
+.clear_wramx_loop:  ; a randomly generated map.
+        ld      [rSVBK],a
+        push    af
+        call    ClearWRAMX
+        pop     af
+        inc     a
+        cp      a,8
+        jr      nz,.clear_wramx_loop
+
+        ; Load map and city data. Load GFX
+
+        call    CityMapLoad ; Returns starting coordinates in d = x and e = y
+        push    de ; (*) Save coordinates to pass to bg_load_main
+
+        ; Once the map is loaded some other things that aren't saved in the SRAM
+        LONG_CALL   RoomGameInitialStatusRefresh
+
+        ; This has to be called after reloading the number of buildings, which
+        ; is done inside of RoomGameInitialStatusRefresh()
+        ld      b,1 ; force reset
+        LONG_CALL_ARGS  Simulation_TransportAnimsInit
+
+        ld      b,0 ; bank at 8000h
+        call    LoadText
+        LONG_CALL   BuildSelectMenuLoadGfx
+        call    BuildSelectMenuReset
+        call    StatusBarMenuLoadGfx
+        call    CursorLoad
+
+        pop     de ; (*) Restore coordinates to pass to bg_load_main
+        call    bg_load_main
+
+        jr      .continue_zero_one
+
+.not_one:
+    cp      a,2
+    jr      nz,.not_two
+
+        ; Load GFX
+
+        ld      b,0 ; bank at 8000h
+        call    LoadText
+        LONG_CALL   BuildSelectMenuLoadGfx
+        call    BuildSelectMenuReset
+        call    StatusBarMenuLoadGfx
+        call    CursorLoad
+
+        call    bg_reload_main ; refresh bg and set correct scroll
+
+;        ld      a,[game_sprites_8x16]
+;        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
+;        ld      [rLCDC],a
+
+        ld      bc,RoomGameVBLHandler
+        call    irq_set_VBL
+
+        call    CursorGetGlobalCoords
+        ld      a,e
+        ld      [last_frame_x],a
+        ld      a,d
+        ld      [last_frame_y],a
+
+        ret
+
+.not_two:
+    ld      b,b ; Panic!
+    jr      .not_two
+
+.continue_zero_one:
+
+    ld      a,[game_sprites_8x16]
+    or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
+    ld      [rLCDC],a
+
+    call    CursorShow
+
+    ld      bc,RoomGameVBLHandler
+    call    irq_set_VBL
+
+    xor     a,a
+    ld      [rIF],a
+
+    ld      b,GAME_STATE_WATCH
+    LONG_CALL_ARGS  GameStateMachineStateSet ; After loading gfx
+
+    call    CursorGetGlobalCoords
+    ld      a,e
+    ld      [last_frame_x],a
+    ld      a,d
+    ld      [last_frame_y],a
+
+    ret
+
+;###############################################################################
+
+    SECTION "Room Game Code Data",ROMX
+
+;-------------------------------------------------------------------------------
+
+GameStateMachineStateSet:: ; b = new state
+
+    ld      a,b
     ld      [game_state],a
 
     cp      a,GAME_STATE_WATCH
@@ -603,12 +717,112 @@ GameStateMachineStateSet:: ; a = new state
 
 ;-------------------------------------------------------------------------------
 
-WaitSimulationEnds:
-    ld      a,[simulation_running]
-    and     a,a
-    ret     z
-    call    wait_vbl
-    jr      WaitSimulationEnds
+GameStateMachineHandle::
+
+    ld      a,[game_state]
+
+    cp      a,GAME_STATE_WATCH
+    jr      nz,.not_watch ; GAME_STATE_WATCH
+
+        call    InputHandleModeWatch
+
+        call    StatusBarUpdate ; Update status bar text
+
+        LONG_CALL   Simulation_TransportAnimsShow
+
+        call    GameAnimateMap
+
+        call    CPUBusyIconHide
+
+        ld      a,1
+        ld      [simulation_running],a ; Always simulate in watch mode
+
+        ret
+
+.not_watch:
+    cp      a,GAME_STATE_EDIT
+    jr      nz,.not_edit ; GAME_STATE_EDIT
+
+        call    InputHandleModeEdit
+
+        call    StatusBarUpdate ; Update status bar text
+
+        LONG_CALL   Simulation_TransportAnimsHide
+
+        ; Not simulating, update busy icon, but show if it isn't showing
+        call    CPUBusyIconShowAndHandle
+
+        ret
+
+.not_edit:
+    cp      a,GAME_STATE_WATCH_FAST_MOVE
+    jr      nz,.not_watch_fast_move ; GAME_STATE_WATCH_FAST_MOVE
+
+        call    InputHandleModeWatchFastMove
+
+        LONG_CALL   Simulation_TransportAnimsShow
+
+        call    GameAnimateMap
+
+        call    CPUBusyIconHide
+
+        ld      a,1
+        ld      [simulation_running],a ; Always simulate in fast move mode
+
+        ret
+
+.not_watch_fast_move:
+    cp      a,GAME_STATE_SELECT_BUILDING
+    jr      nz,.not_select_building ; GAME_STATE_SELECT_BUILDING
+
+        LONG_CALL   Simulation_TransportAnimsHide
+
+        ; If this returns a=1, don't refresh GFX
+        call    InputHandleModeSelectBuilding
+        and     a,a
+        jr      nz,.going_to_exit
+        LONG_CALL   BuildSelectMenuRefreshSprites
+
+        call    StatusBarUpdate ; Update status bar text
+.going_to_exit:
+
+        ret
+
+.not_select_building:
+    cp      a,GAME_STATE_PAUSE_MENU
+    jr      nz,.not_pause_menu ; GAME_STATE_PAUSE_MENU
+
+        call    InputHandleModePauseMenu
+
+        LONG_CALL   Simulation_TransportAnimsHide
+
+        call    StatusBarMenuHandle
+        cp      a,$FF
+        call    nz,PauseMenuHandleOption ; $FF = user didn't press A
+
+        ; The menu is an extended status bar, so...
+        call    StatusBarUpdate ; Update status bar text
+
+        ; Not simulating, update busy icon, but show if it isn't showing
+        call    CPUBusyIconShowAndHandle
+
+        ret
+
+.not_pause_menu:
+    cp      a,GAME_STATE_SHOW_MESSAGE
+    jr      nz,.not_show_message ; GAME_STATE_SHOW_MESSAGE
+
+        call    InputHandleModeShowMessage
+
+        LONG_CALL   Simulation_TransportAnimsHide
+
+        ret
+
+.not_show_message:
+
+    ; Panic!
+    ld      b,b ; Breakpoint
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -851,7 +1065,7 @@ InputHandleModeWatch:
     jr      z,.no_messages_left
 
         call    MessageBoxPrintMessageID ; a = message ID
-        ld      a,GAME_STATE_SHOW_MESSAGE
+        ld      b,GAME_STATE_SHOW_MESSAGE
         call    GameStateMachineStateSet
 
         ret ; Ignore user input for the rest of the frame
@@ -868,7 +1082,7 @@ InputHandleModeWatch:
         and     a,a
         jr      nz,.skip_change_state_b
 
-            ld      a,GAME_STATE_WATCH_FAST_MOVE
+            ld      b,GAME_STATE_WATCH_FAST_MOVE
             call    GameStateMachineStateSet
             ret
 
@@ -883,7 +1097,7 @@ InputHandleModeWatch:
     and     a,PAD_START
     jr      z,.not_start
 
-        ld      a,GAME_STATE_PAUSE_MENU
+        ld      b,GAME_STATE_PAUSE_MENU
         call    GameStateMachineStateSet
         ret
 .not_start:
@@ -891,7 +1105,7 @@ InputHandleModeWatch:
     ld      a,[joy_pressed]
     and     a,PAD_SELECT
     jr      z,.not_select
-        ld      a,GAME_STATE_SELECT_BUILDING
+        ld      b,GAME_STATE_SELECT_BUILDING
         call    GameStateMachineStateSet
         ret
 .not_select:
@@ -957,7 +1171,7 @@ InputHandleModeEdit:
         ld      b,0 ; don't force reset
         LONG_CALL_ARGS  Simulation_TransportAnimsInit
 
-        ld      a,GAME_STATE_WATCH
+        ld      b,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret
 .not_b:
@@ -966,7 +1180,7 @@ InputHandleModeEdit:
 ;    and     a,PAD_START
 ;    jr      z,.not_start
 ;        call    BuildOverlayIconHide
-;        ld      a,GAME_STATE_PAUSE_MENU
+;        ld      b,GAME_STATE_PAUSE_MENU
 ;        call    GameStateMachineStateSet
 ;        ret
 ;.not_start:
@@ -975,7 +1189,7 @@ InputHandleModeEdit:
     and     a,PAD_SELECT
     jr      z,.not_select
         call    BuildOverlayIconHide
-        ld      a,GAME_STATE_SELECT_BUILDING
+        ld      b,GAME_STATE_SELECT_BUILDING
         call    GameStateMachineStateSet
         ret
 .not_select:
@@ -1053,14 +1267,14 @@ InputHandleModeSelectBuilding:
         jr      nz,.enough_technology
             ld      a,ID_MSG_TECH_INSUFFICIENT
             call    MessageRequestAdd
-            ld      a,GAME_STATE_WATCH
+            ld      b,GAME_STATE_WATCH
             call    GameStateMachineStateSet
             ld      a,1
             ret
 .enough_technology:
 
         LONG_CALL   BuildSelectMenuSelectBuildingUpdateCursor
-        ld      a,GAME_STATE_EDIT
+        ld      b,GAME_STATE_EDIT
         call    GameStateMachineStateSet
         ld      a,1
         ret
@@ -1070,7 +1284,7 @@ InputHandleModeSelectBuilding:
     and     a,PAD_B|PAD_SELECT
     jr      z,.not_b_or_select
         LONG_CALL   BuildSelectMenuHide
-        ld      a,GAME_STATE_WATCH
+        ld      b,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ld      a,1
         ret
@@ -1092,7 +1306,7 @@ InputHandleModeWatchFastMove:
     jr      z,.no_messages_left
 
         call    MessageBoxPrintMessageID ; a = message ID
-        ld      a,GAME_STATE_SHOW_MESSAGE
+        ld      b,GAME_STATE_SHOW_MESSAGE
         call    GameStateMachineStateSet
 
         ret ; Ignore user input for the rest of the frame
@@ -1109,7 +1323,7 @@ InputHandleModeWatchFastMove:
         and     a,a
         jr      nz,.skip_change_state_b
 
-            ld      a,GAME_STATE_WATCH
+            ld      b,GAME_STATE_WATCH
             call    GameStateMachineStateSet
             ret
 
@@ -1161,7 +1375,7 @@ InputHandleModePauseMenu:
         call    StatusBarHandlerVBL
 .end_lcd_check:
 
-    ld      a,GAME_STATE_WATCH
+    ld      b,GAME_STATE_WATCH
     call    GameStateMachineStateSet
 
     ret
@@ -1192,226 +1406,13 @@ InputHandleModeShowMessage:
 
         call    MessageBoxHide
 
-        ld      a,GAME_STATE_WATCH
+        ld      b,GAME_STATE_WATCH
         call    GameStateMachineStateSet
         ret
 
 .not_b:
 
     ret
-
-;-------------------------------------------------------------------------------
-
-RoomGameVBLHandler:
-
-    call    StatusBarHandlerVBL ; Update position and registers (bg+spr)
-    call    refresh_OAM ; update OAM after moving sprites
-    call    bg_update_scroll_registers
-
-    ; Assert that the LCD is still in VBL mode!
-    ld      a,[rLY]
-    cp      a,144 ; cy = 1 if n > a
-    jr      nc,.ok
-    ld      b,b ; Breakpoint
-.ok:
-
-    ; Set 8x16 or 8x8 sprites
-    ld      b,LCDCF_OBJ8
-    ld      a,[game_state]
-    cp      a,GAME_STATE_SELECT_BUILDING
-    jr      nz,.not_16
-    ld      b,LCDCF_OBJ16
-.not_16:
-    ld      a,b
-    ld      [game_sprites_8x16],a
-
-    ; Fast movement of sprites, just the bare minimum so that the user doesn't
-    ; notice any irregularities in their movement.
-    LONG_CALL   GameAnimateMapVBLFastHandle
-
-    ; Make sure that the following code isn't executed twice even if it doesn't
-    ; finish in one frame.
-    ld      a,[vbl_handler_working]
-    and     a,a
-    ret     nz ; already working
-
-    ld      a,1
-    ld      [vbl_handler_working],a ; flag as working
-
-    ld      a,[rSVBK]
-    ld      b,a
-    ld      a,[rVBK]
-    ld      c,a
-    push    bc
-
-    ; Allow another VBL (or STAT) interrupt to happen and update graphics. Since
-    ; vbl_handler_working is set to 1, they will only update graphics and return
-    ; before handling user input.
-    ei
-
-    call    GameCoordinateFocusApply
-
-    call    scan_keys
-    call    KeyAutorepeatHandle
-
-    call    GameStateMachineHandle
-
-    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
-    pop     bc
-    ld      a,b
-    ld      [rSVBK],a
-    ld      a,c
-    ld      [rVBK],a
-
-    xor     a,a
-    ld      [vbl_handler_working],a ; flag as finished working
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-; Load elements of room game
-; A = 0 Load graphics + status bar and cursor + aux
-; A = 1 Like before, but also reset city status from SRAM or others
-; A = 2 Load graphics + aux
-RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
-
-    push    af
-
-        call    SetPalettesAllBlack
-
-        call    InitKeyAutorepeat
-
-        ld      a,$FF
-        ld      [rWX],a
-        ld      [rWY],a
-
-        xor     a,a
-        ld      [joy_held],a
-        ld      [joy_pressed],a
-        ld      [joy_released],a
-
-    pop     af
-
-    cp      a,0
-    jr      nz,.not_zero
-
-        ; Load GFX
-
-        ld      b,0 ; bank at 8000h
-        call    LoadText
-        LONG_CALL   BuildSelectMenuLoadGfx
-        call    BuildSelectMenuReset
-        call    StatusBarMenuLoadGfx
-        call    CursorLoad
-
-        call    bg_reload_main ; refresh bg and set correct scroll
-
-        jr      .continue_zero_one
-
-.not_zero:
-    cp      a,1
-    jr      nz,.not_one
-
-        ; Clear WRAMX
-
-        ld      a,3 ; Do not clear tile and attribute map, they may contain
-.clear_wramx_loop:  ; a randomly generated map.
-        ld      [rSVBK],a
-        push    af
-        call    ClearWRAMX
-        pop     af
-        inc     a
-        cp      a,8
-        jr      nz,.clear_wramx_loop
-
-        ; Load map and city data. Load GFX
-
-        call    CityMapLoad ; Returns starting coordinates in d = x and e = y
-        push    de ; (*) Save coordinates to pass to bg_load_main
-
-        ; Once the map is loaded some other things that aren't saved in the SRAM
-        call    RoomGameInitialStatusRefresh
-
-        ; This has to be called after reloading the number of buildings, which
-        ; is done inside of RoomGameInitialStatusRefresh()
-        ld      b,1 ; force reset
-        LONG_CALL_ARGS  Simulation_TransportAnimsInit
-
-        ld      b,0 ; bank at 8000h
-        call    LoadText
-        LONG_CALL   BuildSelectMenuLoadGfx
-        call    BuildSelectMenuReset
-        call    StatusBarMenuLoadGfx
-        call    CursorLoad
-
-        pop     de ; (*) Restore coordinates to pass to bg_load_main
-        call    bg_load_main
-
-        jr      .continue_zero_one
-
-.not_one:
-    cp      a,2
-    jr      nz,.not_two
-
-        ; Load GFX
-
-        ld      b,0 ; bank at 8000h
-        call    LoadText
-        LONG_CALL   BuildSelectMenuLoadGfx
-        call    BuildSelectMenuReset
-        call    StatusBarMenuLoadGfx
-        call    CursorLoad
-
-        call    bg_reload_main ; refresh bg and set correct scroll
-
-;        ld      a,[game_sprites_8x16]
-;        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
-;        ld      [rLCDC],a
-
-        ld      bc,RoomGameVBLHandler
-        call    irq_set_VBL
-
-        call    CursorGetGlobalCoords
-        ld      a,e
-        ld      [last_frame_x],a
-        ld      a,d
-        ld      [last_frame_y],a
-
-        ret
-
-.not_two:
-    ld      b,b ; Panic!
-    jr      .not_two
-
-.continue_zero_one:
-
-    ld      a,[game_sprites_8x16]
-    or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
-    ld      [rLCDC],a
-
-    call    CursorShow
-
-    ld      bc,RoomGameVBLHandler
-    call    irq_set_VBL
-
-    xor     a,a
-    ld      [rIF],a
-
-    ld      a,GAME_STATE_WATCH
-    call    GameStateMachineStateSet ; After loading gfx
-
-    call    CursorGetGlobalCoords
-    ld      a,e
-    ld      [last_frame_x],a
-    ld      a,d
-    ld      [last_frame_y],a
-
-    ret
-
-;###############################################################################
-
-    SECTION "Room Game Code Data",ROMX
 
 ;-------------------------------------------------------------------------------
 
