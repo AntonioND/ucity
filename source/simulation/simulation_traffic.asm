@@ -448,8 +448,6 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
     bit     5,h ; Up to E000
     jr      z,.loop
 
-    ; TODO : Animate trains, planes, etc?
-
     ret
 
 ;###############################################################################
