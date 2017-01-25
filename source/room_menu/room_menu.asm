@@ -89,15 +89,11 @@ MenuScenario: ; returns 1 if loaded correctly, 0 if not
     and     a,a
     ret     z ; return 0 if not loaded and do nothing else
 
-;   ld      a,[scenario_select_map_selection]
+    ; Scenarios should set the city map to a positive value (or zero) that
+    ; corresponds to that map.
 
-    ; TODO : Scenarios should set the city map to a positive value instead of
-    ; just 0!
-
-    ld      a,0
+    ld      a,[scenario_select_map_selection]
     call    CityMapSet
-
-    ; TODO : Actually load something!
 
     ld      a,1
     ret

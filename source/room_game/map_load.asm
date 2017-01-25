@@ -91,6 +91,9 @@ PREDEFINED_MAP_INFO:
 
 PredefinedMapGetStartCoordinates: ; a = number, returns de = xy
 
+    ; TODO : Divide this into 2 functions, one for scenarios and other one
+    ; for random maps.
+
     ld      hl,PREDEFINED_MAP_INFO
     ld      e,a
     ld      d,0
@@ -506,13 +509,16 @@ CityMapLoad:: ; returns de = xy start coordinates
 
         ld      a,[selected_map]
         and     a,CITY_MAP_NUMBER_MASK
-        push    af
+        ; TODO - Check if value is within limits (min and max values)
+        ld      [selected_map],a
+
         call    PredefinedMapGetMapPointer ; a = number
         call    PredefinedMapLoad
-        pop     af
-        push    af
+
+        ld      a,[selected_map]
         call    PredefinedMapSetupGameVariables
-        pop     af
+
+        ld      a,[selected_map]
         call    PredefinedMapGetStartCoordinates ;  returns de = xy
 
         jr      .end_map_load
