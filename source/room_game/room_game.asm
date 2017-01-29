@@ -1023,7 +1023,10 @@ PauseMenuHandleOption:
         LONG_CALL_ARGS    RoomSaveMenu ; returns A = SRAM bank, -1 if error
         cp      a,$FF
         ; if the user pressed -1 or there was an error, don't save
-        call    nz,CityMapSave ; if ok, save to the bank selected by the user
+        jr      z,.skip_save
+            ld      b,a
+            LONG_CALL_ARGS  CityMapSave ; ok, save to bank selected by the user
+.skip_save:
 
         ld      a,2 ; load minimal data
         call    RoomGameLoad

@@ -164,10 +164,8 @@ SRAM_CheckIntegrity::
     push    bc
     push    hl
 
-        ld      a,b
-
         ; Returns A = 1 if bank is ok, 0 if not
-        call    SRAMCheckBank ; A = bank to check. This doesn't check limits.
+        LONG_CALL_ARGS  SRAMCheckBank ; B = bank to check. doesn't check limits.
 
         and     a,a
         jr      nz,.sram_bank_ok
