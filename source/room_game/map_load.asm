@@ -44,17 +44,16 @@ selected_map: DS 1
 
 ;###############################################################################
 
-    SECTION "Predefined Map 0",ROMX
+; Create a new section in ROMX for each map
 
-PREDEFINED_MAP_0:
-    INCBIN  "predefined_map_0.bin"
+ADD_SCENARIO_MAP : MACRO ; \1 = label, \2 = file name
+    SECTION "\1",ROMX
+\1:
+    INCBIN  \2
+ENDM
 
-;-------------------------------------------------------------------------------
-
-    SECTION "Predefined Map 1",ROMX
-
-PREDEFINED_MAP_1:
-    INCBIN  "predefined_map_1.bin"
+    ADD_SCENARIO_MAP    SCENARIO_MAP_0, "predefined_map_0.bin"
+    ADD_SCENARIO_MAP    SCENARIO_MAP_1, "predefined_map_1.bin"
 
 ;###############################################################################
 
@@ -62,28 +61,82 @@ PREDEFINED_MAP_1:
 
 ;-------------------------------------------------------------------------------
 
-; Note that MAGIC_STRING_LEN is 4
-MAGIC_STRING: DB 66,84,67,89 ; BTCY - Prevent charmap from modifying it
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_20000, 20000
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_15000, 15000
+
+    STR_ADD "Scenario", SCEN_NAME
+    STR_ADD "New Map", NEWMAP_NAME
 
 ;-------------------------------------------------------------------------------
 
-PREDEFINED_MAP_LIST:
-    DB  BANK(PREDEFINED_MAP_0)
-    DW  PREDEFINED_MAP_0
-    DB  BANK(PREDEFINED_MAP_1)
-    DW  PREDEFINED_MAP_1
+SCEN_INFO_1 : MACRO ; \1 = map, \2 = start x, \3 = start y
+    DB  \2, \3 ; X, Y
+    DB  BANK(\1)
+    DW  \1 ; LSB first
+ENDM ; 5 bytes in total
 
-PredefinedMapGetMapPointer: ; a = number
+; All of the information in this struct should be placed in ROM bank 0
+SCEN_INFO_2 : MACRO ; \1=Name, \2=Name length, \3=Year, \4=Month, \5=Money
+    DW  \1 ; LSB first
+    DB  \2
+    DW  \3
+    DB  \4
+    DW  \5
+ENDM ; 8 bytes in total
 
-    ld      hl,PREDEFINED_MAP_LIST
-    ld      e,a
-    ld      d,0
+SCEN_INFO_3 : MACRO ; \1=Technology level
+    DB  \1
+ENDM ; 1 byte in total
+
+SCENARIO_MAP_INFO:
+    SCEN_INFO_1 SCENARIO_MAP_0, (CITY_MAP_WIDTH-20)/2, (CITY_MAP_HEIGHT-18)/2
+    SCEN_INFO_2 SCEN_NAME, SCEN_NAME_LEN, $1950,0, MONEY_AMOUNT_START_20000
+    SCEN_INFO_3 0
+
+    SCEN_INFO_1 SCENARIO_MAP_1, CITY_MAP_WIDTH-20, CITY_MAP_HEIGHT-18
+    SCEN_INFO_2 NEWMAP_NAME, NEWMAP_NAME_LEN, $1975,3, MONEY_AMOUNT_START_15000
+    SCEN_INFO_3 10
+
+;-------------------------------------------------------------------------------
+
+SCENARIO_MAP_INFO_GET_INDEX : MACRO ; a = index, returns hl = pointer to info
+    ld      l,a
+    ld      h,0
+    LD_DE_HL
+    add     hl,hl
+    add     hl,hl
+    add     hl,hl ; hl = index * 8
+
     add     hl,de
     add     hl,de
     add     hl,de
+    add     hl,de
+    add     hl,de
+    add     hl,de ; hl = index * 14
+
+    ld      de,SCENARIO_MAP_INFO
+    add     hl,de
+ENDM
+
+;-------------------------------------------------------------------------------
+
+; returns de = xy, b = bank of map, hl = pointer to map
+ScenarioGetMapPointerAndStartCoordinates: ; a = number
+
+    SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
+
+    ; Load coordinates
+
+    ld      e,[hl]
+    inc     hl
+    ld      d,[hl]
+    inc     hl
+
+    ; Load pointer and bank
 
     ld      b,[hl]
     inc     hl
+
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
@@ -92,43 +145,93 @@ PredefinedMapGetMapPointer: ; a = number
 
 ;-------------------------------------------------------------------------------
 
-PREDEFINED_MAP_INFO:
-    DB  (CITY_MAP_WIDTH-20)/2, (CITY_MAP_HEIGHT-18)/2
-    DB  CITY_MAP_WIDTH-20, CITY_MAP_HEIGHT-18
+; returns bc = name, a = length (in bank 0)
+ScenarioGetMapName: ; a = number
 
-PredefinedMapGetStartCoordinates: ; a = number, returns de = xy
+    SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
+    ld      de,5
+    add     hl,de ; hl = ptr to info
 
-    ; This function returns the start coordinates of scenarios, random maps are
-    ; always shown at the centre of the screen, it is not done here.
-
-    ld      hl,PREDEFINED_MAP_INFO
-    ld      e,a
-    ld      d,0
-    add     hl,de
-    add     hl,de
-
-    ld      d,[hl]
+    ld      c,[hl] ; bc = name
     inc     hl
-    ld      e,[hl]
+    ld      b,[hl]
+    inc     hl
+
+    ld      a,[hl] ; a = length
 
     ret
 
 ;-------------------------------------------------------------------------------
 
-    ; TODO - Different amounts of money and names per city
+; returns de = year, a = month, bc = money (in bank 0)
+ScenarioGetMapMoneyDate: ; a = number
 
-    STR_ADD "Scenario", PREDEFINED_STR_CITY_NAME
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_SCENARIO,20000
+    SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
+    ld      de,8
+    add     hl,de ; hl = ptr to info
+
+    ld      e,[hl] ; de = year
+    inc     hl
+    ld      d,[hl]
+    inc     hl
+
+    ld      a,[hl+] ; a = month
+
+    ld      c,[hl] ; bc = money
+    inc     hl
+    ld      b,[hl]
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+; returns a = tecnology
+ScenarioGetTechnology: ; a = number
+
+    SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
+    ld      de,13
+    add     hl,de ; hl = ptr to info
+
+    ld      a,[hl]
+
+    ret
+
+;-------------------------------------------------------------------------------
 
 ; Setup all variables. Coordinates and map must be handled in other functions.
-PredefinedMapSetupGameVariables:
+ScenarioSetupGameVariables: ; a = index
 
     ; Setup map variables for a scenario
 
-    ld      de,MONEY_AMOUNT_START_SCENARIO
-    call    MoneySet ; de = ptr to the amount of money to set
+    push    af
 
-    call    DateReset
+        ; returns bc = name, a = length (everything in bank 0)
+        call    ScenarioGetMapName ; a = number
+
+        LD_HL_BC
+        ld      c,a
+        ld      b,0
+        ld      de,current_city_name
+        call    memcopy ; bc = size    hl = source address    de = dest address
+
+    pop     af
+    push    af
+        ; returns de = year, a = month, bc = money (everything in bank 0)
+        call    ScenarioGetMapMoneyDate ; a = number
+        push    bc
+
+            ld      c,a
+            call    DateSet ; de = year, c = month
+
+        pop     de
+        call    MoneySet ; de = ptr to the amount of money to set
+
+    pop     af
+
+    call    ScenarioGetTechnology ; a = number
+    ld      [technology_level],a
+
+    ; TODO - Make all of this parametrizable?
 
     ld      a,10
     ld      [tax_percentage],a
@@ -137,65 +240,16 @@ PredefinedMapSetupGameVariables:
     ld      [LOAN_REMAINING_PAYMENTS],a
     ld      [LOAN_PAYMENTS_AMOUNT+0],a
     ld      [LOAN_PAYMENTS_AMOUNT+1],a
-
-    xor     a,a
-    ld      [technology_level],a
-
-    xor     a,a ; enable disasters, animations and music by default
-    ld      [simulation_disaster_disabled],a
-    ld      [game_animations_disabled],a
-    ld      [game_music_disabled],a
 
     ; TODO : Allow predefined maps to start with some historical data?
+
     LONG_CALL   GraphsClearRecords
-
-    ; TODO - Allow to change the name instead of using the default one?
-
-    ld      hl,PREDEFINED_STR_CITY_NAME
-    ld      de,current_city_name
-    ld      bc,PREDEFINED_STR_CITY_NAME_LEN
-    call    memcopy ; bc = size    hl = source address    de = dest address
 
     ret
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_RANDOM_MAP,20000
-
-RandomMapSetupGameVariables:
-
-    ; Setup variables of random maps
-
-    ld      de,MONEY_AMOUNT_START_RANDOM_MAP
-    call    MoneySet ; de = ptr to the amount of money to set
-
-    call    DateReset
-
-    ld      a,10
-    ld      [tax_percentage],a
-
-    xor     a,a
-    ld      [LOAN_REMAINING_PAYMENTS],a
-    ld      [LOAN_PAYMENTS_AMOUNT+0],a
-    ld      [LOAN_PAYMENTS_AMOUNT+1],a
-
-    xor     a,a
-    ld      [technology_level],a
-
-    xor     a,a ; enable disasters, animations and music by default
-    ld      [simulation_disaster_disabled],a
-    ld      [game_animations_disabled],a
-    ld      [game_music_disabled],a
-
-    LONG_CALL   GraphsClearRecords
-
-    ; If random map, the name has been specified before, don't change name here
-
-    ret
-
-;-------------------------------------------------------------------------------
-
-PredefinedMapLoad: ; b = bank, hl = tiles
+ScenarioLoadMapData: ; b = bank, hl = tiles
 
     ; Load city from ROM into WRAM
 
@@ -223,6 +277,48 @@ PredefinedMapLoad: ; b = bank, hl = tiles
 
 ;-------------------------------------------------------------------------------
 
+RandomMapSetupGameVariables:
+
+    ; Setup variables of random maps
+
+    ld      de,MONEY_AMOUNT_START_RANDOM_MAP
+    call    MoneySet ; de = ptr to the amount of money to set
+
+    call    DateReset ; January 1950
+
+    ld      a,10
+    ld      [tax_percentage],a
+
+    xor     a,a
+    ld      [LOAN_REMAINING_PAYMENTS],a
+    ld      [LOAN_PAYMENTS_AMOUNT+0],a
+    ld      [LOAN_PAYMENTS_AMOUNT+1],a
+
+    xor     a,a
+    ld      [technology_level],a
+
+    LONG_CALL   GraphsClearRecords
+
+    ; If random map, the name has been specified before, don't change name here
+    ; TODO - Allow the player to change it?
+
+    ret
+
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_RANDOM_MAP,20000
+
+;-------------------------------------------------------------------------------
+
+ScenarioAndRandomGameOptionsDefault:
+
+    xor     a,a ; enable disasters, animations and music by default
+    ld      [simulation_disaster_disabled],a
+    ld      [game_animations_disabled],a
+    ld      [game_music_disabled],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 CityMapSet::
 
     ld      [selected_map],a
@@ -231,6 +327,7 @@ CityMapSet::
 
 ;-------------------------------------------------------------------------------
 
+; Load all data and variables for a map specified in selected_map
 CityMapLoad:: ; returns de = xy start coordinates
 
     ld      a,[selected_map]
@@ -241,6 +338,8 @@ CityMapLoad:: ; returns de = xy start coordinates
         ; ----------
 
         call    RandomMapSetupGameVariables
+
+        call    ScenarioAndRandomGameOptionsDefault
 
         ld      d,(CITY_MAP_WIDTH-20)/2 ; X
         ld      e,(CITY_MAP_HEIGHT-18)/2 ; Y
@@ -264,22 +363,25 @@ CityMapLoad:: ; returns de = xy start coordinates
 
 .not_sram:
 
-        ; Predefined map
-        ; --------------
+        ; Scenarios
+        ; ---------
 
         ld      a,[selected_map]
         and     a,CITY_MAP_NUMBER_MASK
         ; TODO - Check if value is within limits (min and max values)
         ld      [selected_map],a
 
-        call    PredefinedMapGetMapPointer ; a = number
-        call    PredefinedMapLoad
+        ; returns de = xy, b = bank of map, hl = pointer to map
+        call    ScenarioGetMapPointerAndStartCoordinates
+        push    de ; (***) save coordinates
+        call    ScenarioLoadMapData
 
         ld      a,[selected_map]
-        call    PredefinedMapSetupGameVariables
+        call    ScenarioSetupGameVariables
 
-        ld      a,[selected_map]
-        call    PredefinedMapGetStartCoordinates ;  returns de = xy
+        call    ScenarioAndRandomGameOptionsDefault
+
+        pop     de ; (***) restore coordinates
 
         jr      .end_map_load
 
