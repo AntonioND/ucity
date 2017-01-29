@@ -16,8 +16,8 @@ NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
 you are interested please contact me at my email (antonio_nd@outlook.com).
 
 General to do list:
-- Simulation - Most parts are ready
-  - Graphical output (wind power plants?...)
+- Simulation
+  - Graphical output (wind power plants?)
 - Sample cities (compressed?)
 - Music, SFX - Allow to disable it from the options menu
 - Improve graphics
@@ -66,9 +66,9 @@ console and type `make rebuild`. This should work on Linux, MinGW, Cygwin, etc.
 License
 -------
 
-This game is licensed under the GPL v3 license. You may have received the source
-code of this game along with the ROM file. If not, the source code is freely
-available at the following address:
+This game is licensed under the GPL v3 license. You should have received the
+source code of this game along with the ROM file. If not, the source code is
+freely available at the following address:
 
     https://github.com/AntonioND/bitcity
 
@@ -79,8 +79,8 @@ terms (for example, GBT Player is licensed under the 2-clause BSD license).
 The media files (graphics and music) are licensed under a Creative Commons
 license (CC BY-SA 4.0).
 
-GPL v3
-------
+GNU General Public License version 3
+------------------------------------
 
     BitCity - City building game for Game Boy Color.
     Copyright (C) 2016-2017 Antonio Nino Diaz (AntonioND/SkyLyrac)
