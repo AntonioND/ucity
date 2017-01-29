@@ -35,6 +35,8 @@
 
 scenario_select_room_exit: DS 1 ; set to 1 to exit room
 
+SCENARIO_NUMBER EQU 2
+
 scenario_select_map_selection: DS 1 ; $FF for invalid value
 
 ;###############################################################################
@@ -56,12 +58,20 @@ InputHandleScenarioSelect:
     ld      a,[joy_pressed]
     and     a,PAD_RIGHT
     jr      z,.end_right
-
+        ld      a,[scenario_select_map_selection]
+        inc     a
+        cp      a,SCENARIO_NUMBER
+        jr      z,.end_right
+            ld      [scenario_select_map_selection],a
 .end_right:
     ld      a,[joy_pressed]
     and     a,PAD_LEFT
     jr      z,.end_left
-
+        ld      a,[scenario_select_map_selection]
+        dec     a
+        cp      a,-1
+        jr      z,.end_left
+            ld      [scenario_select_map_selection],a
 .end_left:
 
     ld      a,[joy_pressed]

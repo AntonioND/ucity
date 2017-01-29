@@ -47,10 +47,15 @@ selected_map: DS 1
 
     SECTION "Predefined Map 0",ROMX
 
+PREDEFINED_MAP_0:
+    INCBIN  "predefined_map_0.bin"
+
 ;-------------------------------------------------------------------------------
 
-PREDEFINED_MAP_0:
-    INCBIN  "data/predefined_map_0.bin"
+    SECTION "Predefined Map 1",ROMX
+
+PREDEFINED_MAP_1:
+    INCBIN  "predefined_map_1.bin"
 
 ;###############################################################################
 
@@ -66,6 +71,8 @@ MAGIC_STRING: DB 66,84,67,89 ; BTCY - Prevent charmap from modifying it
 PREDEFINED_MAP_LIST:
     DB  BANK(PREDEFINED_MAP_0)
     DW  PREDEFINED_MAP_0
+    DB  BANK(PREDEFINED_MAP_1)
+    DW  PREDEFINED_MAP_1
 
 PredefinedMapGetMapPointer: ; a = number
 
@@ -88,11 +95,12 @@ PredefinedMapGetMapPointer: ; a = number
 
 PREDEFINED_MAP_INFO:
     DB  (CITY_MAP_WIDTH-20)/2, (CITY_MAP_HEIGHT-18)/2
+    DB  CITY_MAP_WIDTH-20, CITY_MAP_HEIGHT-18
 
 PredefinedMapGetStartCoordinates: ; a = number, returns de = xy
 
-    ; TODO : Divide this into 2 functions, one for scenarios and other one
-    ; for random maps.
+    ; This function returns the start coordinates of scenarios, random maps are
+    ; always shown at the centre of the screen, it is not done here.
 
     ld      hl,PREDEFINED_MAP_INFO
     ld      e,a
@@ -106,14 +114,19 @@ PredefinedMapGetStartCoordinates: ; a = number, returns de = xy
 
     ret
 
-    STR_ADD "Scenario", PREDEFINED_STR_CITY_NAME
+;-------------------------------------------------------------------------------
 
+    ; TODO - Different amounts of money and names per city
+
+    STR_ADD "Scenario", PREDEFINED_STR_CITY_NAME
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_SCENARIO,20000
+
+; Setup all variables. Coordinates and map must be handled in other functions.
 PredefinedMapSetupGameVariables:
 
-    ; TODO : Divide this into 2 functions, one for scenarios and other one
-    ; for random maps.
+    ; Setup map variables for a scenario
 
-    ld      de,MONEY_AMOUNT_START
+    ld      de,MONEY_AMOUNT_START_SCENARIO
     call    MoneySet ; de = ptr to the amount of money to set
 
     call    DateReset
@@ -137,9 +150,7 @@ PredefinedMapSetupGameVariables:
     ; TODO : Allow predefined maps to start with some historical data?
     LONG_CALL   GraphsClearRecords
 
-    ld      a,[selected_map]
-    cp      a,CITY_MAP_GENERATE_RANDOM
-    ret     z ; if random map, the name has been specified before
+    ; TODO - Allow to change the name instead of using the default one?
 
     ld      hl,PREDEFINED_STR_CITY_NAME
     ld      de,current_city_name
@@ -150,7 +161,38 @@ PredefinedMapSetupGameVariables:
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_START,20000
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_RANDOM_MAP,20000
+
+RandomMapSetupGameVariables:
+
+    ; Setup variables of random maps
+
+    ld      de,MONEY_AMOUNT_START_RANDOM_MAP
+    call    MoneySet ; de = ptr to the amount of money to set
+
+    call    DateReset
+
+    ld      a,10
+    ld      [tax_percentage],a
+
+    xor     a,a
+    ld      [LOAN_REMAINING_PAYMENTS],a
+    ld      [LOAN_PAYMENTS_AMOUNT+0],a
+    ld      [LOAN_PAYMENTS_AMOUNT+1],a
+
+    xor     a,a
+    ld      [technology_level],a
+
+    xor     a,a ; enable disasters, animations and music by default
+    ld      [simulation_disaster_disabled],a
+    ld      [game_animations_disabled],a
+    ld      [game_music_disabled],a
+
+    LONG_CALL   GraphsClearRecords
+
+    ; If random map, the name has been specified before, don't change name here
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -481,7 +523,7 @@ CityMapLoad:: ; returns de = xy start coordinates
         ; Random map
         ; ----------
 
-        call    PredefinedMapSetupGameVariables
+        call    RandomMapSetupGameVariables
 
         ld      d,(CITY_MAP_WIDTH-20)/2 ; X
         ld      e,(CITY_MAP_HEIGHT-18)/2 ; Y
