@@ -69,7 +69,9 @@ MenuNewCity: ; returns 1 if loaded correctly, 0 if not
 
     add     sp,+STR_CITY_NAME_LEN
 
-    LONG_CALL   RoomTextInput
+    LONG_CALL_ARGS  RoomTextInput
+    and     a,a
+    ret     z ; return 0 if text string is empty
 
     ld      hl,text_input_buffer
     ld      de,current_city_name
