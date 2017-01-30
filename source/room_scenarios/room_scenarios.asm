@@ -25,8 +25,10 @@
 
 ;-------------------------------------------------------------------------------
 
+    INCLUDE "room_game.inc"
     INCLUDE "room_text_input.inc"
     INCLUDE "text.inc"
+    INCLUDE "tileset_info.inc"
 
 ;###############################################################################
 
@@ -51,6 +53,15 @@ SCENARIO_SELECT_BG_MAP:
 
 SCENARIO_SELECT_WIDTH  EQU 20
 SCENARIO_SELECT_HEIGHT EQU 18
+
+;-------------------------------------------------------------------------------
+
+RoomScenarioSelectRefresh:
+
+    call    RoomScenarioSelectRefreshMinimap
+    call    RoomScenarioSelectRefreshText
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -142,7 +153,7 @@ InputHandleScenarioSelect:
             xor     a,a
 .skip_right_reset:
         ld      [scenario_select_map_selection],a
-        call    RoomScenarioSelectRefreshText
+        call    RoomScenarioSelectRefresh
 .end_right:
 
     ld      a,[joy_pressed]
@@ -155,7 +166,7 @@ InputHandleScenarioSelect:
             ld      a,SCENARIO_NUMBER-1
 .skip_left_reset:
         ld      [scenario_select_map_selection],a
-        call    RoomScenarioSelectRefreshText
+        call    RoomScenarioSelectRefresh
 .end_left:
 
     ld      a,[joy_pressed]
@@ -247,6 +258,15 @@ RoomScenarioSelectLoadBG:
 
     call    rom_bank_pop
 
+    ; Clear minimap
+
+    ld      hl,MINIMAP_PALETTE_BLACK
+    call    APA_LoadPalette
+
+    LONG_CALL   APA_BufferClear
+
+    call    APA_BufferUpdate
+
     ret
 
 ;-------------------------------------------------------------------------------
@@ -276,7 +296,7 @@ RoomScenarioSelect::
     xor     a,a
     ld      [scenario_select_room_exit],a
 
-    call    RoomScenarioSelectRefreshText
+    call    RoomScenarioSelectRefresh
 
     call    LoadTextPalette
 
@@ -318,6 +338,128 @@ RoomScenarioSelect::
 ScenarioSelectMenuVBLHandler:
 
     call    refresh_OAM
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+C_GREY EQU 0
+C_GREEN EQU 1
+C_BLUE  EQU 2
+C_WHITE EQU 3
+
+MINIMAP_PALETTE_BLACK:
+    DW  0, 0, 0, 0
+
+MINIMAP_PALETTE: ; GREY, GREEN, BLUE, WHITE
+    DW  (10<<10)|(10<<5)|10, 31<<5, 31<<10, (31<<10)|(31<<5)|31
+
+MINIMAP_TYPE_COLOR_ARRAY:
+    DB C_WHITE ; TYPE_FIELD
+    DB C_GREEN ; TYPE_FOREST
+    DB C_BLUE  ; TYPE_WATER
+    DB C_GREY  ; TYPE_RESIDENTIAL
+    DB C_GREY  ; TYPE_INDUSTRIAL
+    DB C_GREY  ; TYPE_COMMERCIAL
+    DB C_GREY  ; TYPE_POLICE_DEPT
+    DB C_GREY  ; TYPE_FIRE_DEPT
+    DB C_GREY  ; TYPE_HOSPITAL
+    DB C_GREEN ; TYPE_PARK
+    DB C_GREY  ; TYPE_STADIUM
+    DB C_GREY  ; TYPE_SCHOOL
+    DB C_GREY  ; TYPE_HIGH_SCHOOL
+    DB C_GREY  ; TYPE_UNIVERSITY
+    DB C_GREY  ; TYPE_MUSEUM
+    DB C_GREY  ; TYPE_LIBRARY
+    DB C_GREY  ; TYPE_AIRPORT
+    DB C_GREY  ; TYPE_PORT
+    DB C_GREY  ; TYPE_DOCK
+    DB C_GREY  ; TYPE_POWER_PLANT
+    DB C_GREY  ; TYPE_FIRE - Placeholder, never used.
+    DB C_GREY  ; TYPE_RADIATION
+
+RoomScenarioSelectRefreshMinimap:
+
+    call    rom_bank_push ; (*) preserve bank
+
+    LONG_CALL   APA_BufferClear
+    LONG_CALL   APA_PixelStreamStart
+
+    ld      a,[scenario_select_map_selection]
+    call    ScenarioGetMapPointerAndStartCoordinates ; a = number
+    ; returns b = bank of map, hl = pointer to map
+
+    ld      de,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
+
+.loop:
+
+    push    bc
+    push    de
+    push    hl
+
+        ; Get tile
+
+        LD_DE_HL
+        call    rom_bank_set ; preserves de
+        LD_HL_DE
+
+        ld      d,0
+        ld      e,[hl]
+
+        ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
+        add     hl,bc
+
+        bit     3,[hl]
+        jr      z,.dont_set
+        inc     d ; get bank bit
+.dont_set:
+
+        ; Get tile type
+
+IF TILESET_INFO_ELEMENT_SIZE != 4
+    FAIL "room_scenarios.asm: Fix this!"
+ENDC
+
+        ld      b,BANK(TILESET_INFO)
+        call    rom_bank_set ; preserves de
+
+        ld      hl,TILESET_INFO + 1 ; point to attributes
+        add     hl,de ; Use full 9 bit tile number to access the array.
+        add     hl,de ; hl points to the palette + bank1 bit
+        add     hl,de ; Tile number * 4
+        add     hl,de
+
+        ld      a,[hl]
+        and     a,TYPE_MASK
+        ld      e,a
+        ld      d,0 ; de = type
+
+        ; Get color assigned for that type
+
+        ld      hl,MINIMAP_TYPE_COLOR_ARRAY
+        add     hl,de
+
+        ld      a,[hl]
+        call    APA_SetColor0
+
+        LONG_CALL   APA_64x64PixelStreamPlot
+
+    pop     hl
+    pop     de
+    pop     bc
+
+    inc     hl
+    dec     de
+    ld      a,d
+    or      a,e
+    jr      nz,.loop
+
+    call    APA_BufferUpdate
+
+    ld      hl,MINIMAP_PALETTE
+    call    APA_LoadPalette
+
+    call    rom_bank_pop ; (*) restore bank
 
     ret
 
