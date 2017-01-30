@@ -25,6 +25,7 @@
 
 ;-------------------------------------------------------------------------------
 
+    INCLUDE "room_text_input.inc"
     INCLUDE "text.inc"
 
 ;###############################################################################
@@ -53,6 +54,82 @@ SCENARIO_SELECT_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
+RoomScenarioSelectRefreshText:
+
+    xor     a,a
+    ld      [rVBK],a
+
+    ; Print name of the city
+    ; ----------------------
+
+    ; Clear
+
+    ld      bc,TEXT_INPUT_LENGTH
+    ld      d,O_SPACE
+    ld      hl,$9800+32*3+9
+    call    vram_memset ; bc = size    d = value    hl = dest address
+
+    ; Print
+
+    ld      a,[scenario_select_map_selection]
+    call    ScenarioGetMapName ; a = number
+    ; returns bc = name, a = length (in bank 0)
+
+    push    af
+    ld      d,a
+    ld      a,TEXT_INPUT_LENGTH+1
+    sub     a,d
+    ld      e,a
+    ld      d,0
+    ld      hl,$9800+3*32+9
+    add     hl,de
+    LD_DE_HL ; dest
+    LD_HL_BC ; src
+    pop     af
+    ld      b,a
+    dec     b
+    call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+    ; Print money and date
+    ; --------------------
+
+    ld      a,[scenario_select_map_selection]
+    call    ScenarioGetMapMoneyDate ; a = number
+    ; returns de = year, a = month, bc = money (in bank 0)
+
+    add     sp,-10 ; (*) allocate space for the converted string
+
+        push    af
+        push    de
+
+            LD_DE_BC
+            ld      hl,sp+4
+            call    BCD_DE_2TILE_HL_LEADING_SPACES
+
+            ld      b,10
+            ld      de,$9800+4*32+9
+            ld      hl,sp+4
+            call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+        pop     de
+        pop     af
+
+        LD_BC_DE
+        ld      hl,sp+0
+        LD_DE_HL
+        call    DatePrint ; bc = year, a = month, de = destination
+
+        ld      b,8
+        ld      hl,sp+0
+        ld      de,$9800+5*32+11
+        call    vram_copy_fast ; b = size - hl = source address - de = dest
+
+    add     sp,+10 ; (*) reclaim space
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 InputHandleScenarioSelect:
 
     ld      a,[joy_pressed]
@@ -61,17 +138,24 @@ InputHandleScenarioSelect:
         ld      a,[scenario_select_map_selection]
         inc     a
         cp      a,SCENARIO_NUMBER
-        jr      z,.end_right
-            ld      [scenario_select_map_selection],a
+        jr      nz,.skip_right_reset
+            xor     a,a
+.skip_right_reset:
+        ld      [scenario_select_map_selection],a
+        call    RoomScenarioSelectRefreshText
 .end_right:
+
     ld      a,[joy_pressed]
     and     a,PAD_LEFT
     jr      z,.end_left
         ld      a,[scenario_select_map_selection]
         dec     a
         cp      a,-1
-        jr      z,.end_left
-            ld      [scenario_select_map_selection],a
+        jr      nz,.skip_left_reset
+            ld      a,SCENARIO_NUMBER-1
+.skip_left_reset:
+        ld      [scenario_select_map_selection],a
+        call    RoomScenarioSelectRefreshText
 .end_left:
 
     ld      a,[joy_pressed]
@@ -189,10 +273,12 @@ RoomScenarioSelect::
 
     call    RoomScenarioSelectLoadBG
 
-    call    LoadTextPalette
-
     xor     a,a
     ld      [scenario_select_room_exit],a
+
+    call    RoomScenarioSelectRefreshText
+
+    call    LoadTextPalette
 
 .loop:
 

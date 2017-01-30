@@ -62,7 +62,7 @@ ENDM
 ;-------------------------------------------------------------------------------
 
     DATA_MONEY_AMOUNT MONEY_AMOUNT_START_20000, 20000
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_15000, 15000
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_15000,  9000
 
     STR_ADD "Scenario", SCEN_NAME
     STR_ADD "New Map", NEWMAP_NAME
