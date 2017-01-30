@@ -314,6 +314,13 @@ InputHandleTextInputMenu:
     ld      a,[joy_pressed]
     and     a,PAD_B
     jr      z,.not_b
+        ld      a,[text_input_ptr]
+        and     a,a
+        jr      nz,.not_empty
+            ld      a,1 ; if empty, exit
+            ld      [text_input_exit],a
+            ret
+.not_empty:
         call    TextClearChar
         ret
 .not_b:
@@ -467,7 +474,7 @@ TextPutChar: ; A = char to draw
 
 ;-------------------------------------------------------------------------------
 
-RoomTextInput::
+RoomTextInput:: ; returns a = 0 if empty, not 0 if valid text
 
     xor     a,a
     ld      [text_input_exit],a
@@ -528,6 +535,7 @@ RoomTextInput::
 
     call    SetDefaultVBLHandler
 
+    ld      a,[text_input_ptr] ; return 0 if empty, not 0 if valid text
     ret
 
 ;-------------------------------------------------------------------------------
