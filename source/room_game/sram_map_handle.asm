@@ -297,7 +297,7 @@ CityMapSave:: ; b = SRAM BANK to save the data to, doesn't check limits
 ;-------------------------------------------------------------------------------
 
 ; Returns de = xy start coordinates
-SRAMMapLoad: ; b = index to load from. This function doesn't check bank limits.
+SRAMMapLoad:: ; b = index to load from. This function doesn't check bank limits.
 
     ; Check save data integrity
     ; -------------------------

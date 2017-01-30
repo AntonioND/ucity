@@ -121,7 +121,7 @@ ENDM
 ;-------------------------------------------------------------------------------
 
 ; returns de = xy, b = bank of map, hl = pointer to map
-ScenarioGetMapPointerAndStartCoordinates: ; a = number
+ScenarioGetMapPointerAndStartCoordinates:: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
 
@@ -146,7 +146,7 @@ ScenarioGetMapPointerAndStartCoordinates: ; a = number
 ;-------------------------------------------------------------------------------
 
 ; returns bc = name, a = length (in bank 0)
-ScenarioGetMapName: ; a = number
+ScenarioGetMapName:: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
     ld      de,5
@@ -164,7 +164,7 @@ ScenarioGetMapName: ; a = number
 ;-------------------------------------------------------------------------------
 
 ; returns de = year, a = month, bc = money (in bank 0)
-ScenarioGetMapMoneyDate: ; a = number
+ScenarioGetMapMoneyDate:: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
     ld      de,8
