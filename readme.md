@@ -1,24 +1,25 @@
-BitCity
-=======
+µCity
+=====
 
 The open-source city building game for Game Boy Color.
 
 Introduction
 ------------
 
-This is a beta version of BitCity. As such, some of the functionality is
-missing. This is not playable yet, but it's almost there.
+This is a beta version of µCity (uCity). As such, some of the functionality is
+missing. This is not playable yet, but it's almost there. This game was
+previously called BitCity.
 
 It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
 every once in a while.
 
 NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
-you are interested please contact me at my email (antonio_nd@outlook.com).
+you are interested please contact me at my email: antonio_nd at outlook dot com
 
 General to do list:
 - Simulation
   - Graphical output (wind power plants?)
-- Sample cities (compressed?)
+- Sample cities
 - Music, SFX - Allow to disable it from the options menu
 - Improve graphics
 - Cleanup code and document
@@ -70,7 +71,7 @@ This game is licensed under the GPL v3 license. You should have received the
 source code of this game along with the ROM file. If not, the source code is
 freely available at the following address:
 
-    https://github.com/AntonioND/bitcity
+    https://github.com/AntonioND/ucity
 
 Not all source code files are licensed under the GPL v3, though, only the ones
 with the GPL header are. There other source files are licensed under different
@@ -82,8 +83,8 @@ license (CC BY-SA 4.0).
 GNU General Public License version 3
 ------------------------------------
 
-    BitCity - City building game for Game Boy Color.
-    Copyright (C) 2016-2017 Antonio Nino Diaz (AntonioND/SkyLyrac)
+    uCity - City building game for Game Boy Color.
+    Copyright (C) 2017 Antonio Nino Diaz (AntonioND/SkyLyrac)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
