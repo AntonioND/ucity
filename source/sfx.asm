@@ -1,7 +1,7 @@
 ;###############################################################################
 ;
-;    BitCity - City building game for Game Boy Color.
-;    Copyright (C) 2016-2017 Antonio Nino Diaz (AntonioND/SkyLyrac)
+;    uCity - City building game for Game Boy Color.
+;    Copyright (C) 2017 Antonio Nino Diaz (AntonioND/SkyLyrac)
 ;
 ;    This program is free software: you can redistribute it and/or modify
 ;    it under the terms of the GNU General Public License as published by
