@@ -66,18 +66,25 @@ SRAM_ClearBank:: ; B = bank to clear
 ; Check number of available SRAM banks
 SRAM_PowerOnCheck::
 
+    ; TODO - Even though this code is really fast, there's still the possibility
+    ; of the GBC being turned off during the SRAM manipulation code. Maybe the
+    ; checksums should be checked first, as they only require reading data from
+    ; the cartridge.
+
     add     sp,-SRAM_BANK_NUM_MAX
 
     ld      a,CART_RAM_ENABLE
     ld      [rRAMG],a
 
-    ; Backup data before performing check
+    ; Backup data before performing check. Modify the last byte in each SRAM
+    ; bank to minimize the risk of corrupting useful data while the check is
+    ; in progress.
     ld      hl,sp+0
     ld      a,0
 .save_loop:
     ld      [rRAMB],a
     ld      b,a
-        ld      a,[_SRAM+0]
+        ld      a,[_SRAM+$2000-1]
         ld      [hl+],a
     ld      a,b
     inc     a
@@ -90,7 +97,7 @@ SRAM_PowerOnCheck::
     ld      [rRAMB],a
     ld      b,a
         or      a,$C0
-        ld      [_SRAM+0],a
+        ld      [_SRAM+$2000-1],a
     ld      a,b
     dec     a
     jr      nz,.write_loop
@@ -99,7 +106,7 @@ SRAM_PowerOnCheck::
     ; wrap around and get the actual bank.
     ld      a,SRAM_BANK_NUM_MAX-1
     ld      [rRAMB],a
-    ld      a,[_SRAM+0]
+    ld      a,[_SRAM+$2000-1]
     ld      b,a
     and     a,$F0
     cp      a,$C0
@@ -122,7 +129,7 @@ SRAM_PowerOnCheck::
     ld      [rRAMB],a
     ld      b,a
         ld      a,[hl-]
-        ld      [_SRAM+0],a
+        ld      [_SRAM+$2000-1],a
     ld      a,b
     dec     a
     jr      nz,.restore_loop
