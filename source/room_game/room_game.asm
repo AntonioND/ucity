@@ -1045,6 +1045,12 @@ PauseMenuHandleOption:
         ; Main Menu
         ; ---------
 
+        ld      a,[simulation_running]
+        and     a,a ; If the simulation step hasn't finished, ignore press and
+        jr      z,.continue_main_menu ; warn the player to wait.
+        call    SFX_ErrorUI
+        ret
+.continue_main_menu:
         ld      a,1
         ld      [game_loop_end_requested],a
 
