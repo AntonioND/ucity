@@ -1,17 +1,18 @@
-µCity
-=====
+µCity 0.4 beta
+==============
 
 The open-source city building game for Game Boy Color.
 
 Introduction
 ------------
 
-This is a beta version of µCity (uCity). As such, some of the functionality is
-missing. This is not playable yet, but it's almost there. This game was
-previously called BitCity.
+This is a beta version of µCity (also spelled 'uCity', pronounced 'micro-city').
+Some of the functionality is missing, but most of the game is completed.
 
 It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
 every once in a while.
+
+This game was previously called BitCity.
 
 NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
 you are interested please contact me at my email: antonio_nd at outlook dot com
@@ -19,6 +20,7 @@ you are interested please contact me at my email: antonio_nd at outlook dot com
 General to do list:
 - Simulation
   - Graphical output (wind power plants?)
+  - Adjust simulation parameters
 - Sample cities
 - Music, SFX - Allow to disable it from the options menu
 - Improve graphics
@@ -62,7 +64,7 @@ Compiling
 ---------
 
 The Makefile has to be edited to point the RGBDS binaries. Then, open the
-console and type `make rebuild`. This should work on Linux, MinGW, Cygwin, etc.
+console and type `make`. This should work on Linux, MinGW, Cygwin, etc.
 
 License
 -------
