@@ -31,6 +31,7 @@ TEXT_INC SET 1
 ;###############################################################################
 
 ; Offsets
+O_MICRO         EQU 35
 O_PERCENT       EQU 39
 O_DASH          EQU 40
 O_CURSOR        EQU 41
@@ -126,6 +127,7 @@ ENDM
     CHARMAP "y",O_A_LOWERCASE+24
     CHARMAP "z",O_A_LOWERCASE+25
 
+    CHARMAP "<u>",O_MICRO
     CHARMAP "%",O_PERCENT
     CHARMAP "-",O_DASH
     CHARMAP " ",O_SPACE
