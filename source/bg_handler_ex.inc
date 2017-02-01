@@ -338,7 +338,7 @@ bg_set_scroll_main:: ; set scroll and refresh the screen
 ;- bg_load_main()    d = up left x    e = y                                    -
 ;-------------------------------------------------------------------------------
 
-bg_load_main::
+bg_load_main:: ; This doesn't load palettes
 
     ld      a,d
     ld      [bg_x],a
@@ -381,8 +381,23 @@ TILE_SIZE EQU (8*8/4)
     ld      hl,CITY_TILESET+TILE_SIZE*(HALF_TILES_ONE_BANK*3)
     call    vram_copy_tiles
 
-    ; LOAD PALETTES - Must be done within a VBL period because the will be shown
-    ; as soon as it ends - CRITICAL!
+    ; FINISHED!
+
+    call    rom_bank_pop
+
+    ret
+
+;-------------------------------------------------------------------------------
+;- bg_load_main_palettes()                                                     -
+;-------------------------------------------------------------------------------
+
+bg_load_main_palettes::
+
+    ; This must be done within a VBL period because the will be shown as soon as
+    ; it ends.
+
+    ld      b,BANK(CITY_TILESET)
+    call    rom_bank_push_set
 
     ; Wait until VBL
 
@@ -411,8 +426,6 @@ TILE_SIZE EQU (8*8/4)
     call    bg_set_palette
 
     ei ; End of critical section
-
-    ; FINISHED!
 
     call    rom_bank_pop
 

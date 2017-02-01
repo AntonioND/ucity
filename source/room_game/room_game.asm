@@ -482,6 +482,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         call    CursorLoad
 
         call    bg_reload_main ; refresh bg and set correct scroll
+        call    bg_load_main_palettes
 
         jr      .continue_zero_one
 
@@ -504,15 +505,11 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         ; Load map and city data. Load GFX
 
         call    CityMapLoad ; Returns starting coordinates in d = x and e = y
+
         push    de ; (*) Save coordinates to pass to bg_load_main
 
         ; Once the map is loaded some other things that aren't saved in the SRAM
         LONG_CALL   RoomGameInitialStatusRefresh
-
-        ; This has to be called after reloading the number of buildings, which
-        ; is done inside of RoomGameInitialStatusRefresh()
-        ld      b,1 ; force reset
-        LONG_CALL_ARGS  Simulation_TransportAnimsInit
 
         ld      b,0 ; bank at 8000h
         call    LoadText
@@ -522,7 +519,23 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         call    CursorLoad
 
         pop     de ; (*) Restore coordinates to pass to bg_load_main
+
         call    bg_load_main
+
+        ; This has to be called after reloading the number of buildings, which
+        ; is done inside of RoomGameInitialStatusRefresh(), and after loading
+        ; the bg so that the scroll registers are correctly set. The coordinates
+        ; are needed to place the objects in the correct position of the screen.
+        ld      b,1 ; force reset
+        LONG_CALL_ARGS  Simulation_TransportAnimsInit
+
+        ; Loading sprites takes a while, it's better to load palettes here so
+        ; that the sprites are shown more or less at the same time than the bg.
+        ; Sprite palettes are loaded when loading the information of the
+        ; building selection menu, but they aren't actually shown until the VBL
+        ; interrupt is triggered, which will happen after loading the bg
+        ; palettes, since it is a critical code that blocks interrupts.
+        call    bg_load_main_palettes
 
         jr      .continue_zero_one
 
@@ -540,6 +553,7 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         call    CursorLoad
 
         call    bg_reload_main ; refresh bg and set correct scroll
+        call    bg_load_main_palettes
 
 ;        ld      a,[game_sprites_8x16]
 ;        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
