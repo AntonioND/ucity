@@ -30,6 +30,7 @@
     INCLUDE "room_game.inc"
     INCLUDE "save_struct.inc"
     INCLUDE "text.inc"
+    INCLUDE "text_messages.inc"
     INCLUDE "room_text_input.inc"
 
 ;###############################################################################
@@ -88,14 +89,25 @@ SCEN_INFO_3 : MACRO ; \1=Technology level
     DB  \1
 ENDM ; 1 byte in total
 
+SCEN_INFO_4 : MACRO ; \1=Flags of permanent msg ID to disable, \2=Same
+    DB  (\1)>>1
+    DB  (\2)>>(8+1)
+ENDM ; 2 bytes in total
+
+IF BYTES_SAVE_PERSISTENT_MSG != 2
+    FAIL "map_load.asm: Fix this."
+ENDC
+
 SCENARIO_MAP_INFO:
     SCEN_INFO_1 SCENARIO_MAP_0, (CITY_MAP_WIDTH-20)/2, (CITY_MAP_HEIGHT-18)/2
     SCEN_INFO_2 SCEN_NAME, SCEN_NAME_LEN, $1950,0, MONEY_AMOUNT_START_20000
     SCEN_INFO_3 0
+    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
     SCEN_INFO_1 SCENARIO_MAP_1, CITY_MAP_WIDTH-20, CITY_MAP_HEIGHT-18
     SCEN_INFO_2 NEWMAP_NAME, NEWMAP_NAME_LEN, $1975,3, MONEY_AMOUNT_START_15000
     SCEN_INFO_3 10
+    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
 ;-------------------------------------------------------------------------------
 
@@ -105,14 +117,8 @@ SCENARIO_MAP_INFO_GET_INDEX : MACRO ; a = index, returns hl = pointer to info
     LD_DE_HL
     add     hl,hl
     add     hl,hl
-    add     hl,hl ; hl = index * 8
-
-    add     hl,de
-    add     hl,de
-    add     hl,de
-    add     hl,de
-    add     hl,de
-    add     hl,de ; hl = index * 14
+    add     hl,hl
+    add     hl,hl ; hl = index * 16
 
     ld      de,SCENARIO_MAP_INFO
     add     hl,de
@@ -198,10 +204,26 @@ ScenarioGetTechnology: ; a = number
 
 ;-------------------------------------------------------------------------------
 
+; returns a = first byte of flags, b = second byte
+ScenarioGetMessageFlags: ; a = number
+
+    SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
+    ld      de,14
+    add     hl,de ; hl = ptr to info
+
+    ld      a,[hl+]
+    ld      b,[hl]
+
+    ret
+
+;-------------------------------------------------------------------------------
 ; Setup all variables. Coordinates and map must be handled in other functions.
 ScenarioSetupGameVariables: ; a = index
 
     ; Setup map variables for a scenario
+    ; ----------------------------------
+
+    ; Load name
 
     push    af
 
@@ -215,6 +237,9 @@ ScenarioSetupGameVariables: ; a = index
         call    memcopy ; bc = size    hl = source address    de = dest address
 
     pop     af
+
+    ; Load date and money
+
     push    af
         ; returns de = year, a = month, bc = money (everything in bank 0)
         call    ScenarioGetMapMoneyDate ; a = number
@@ -228,8 +253,22 @@ ScenarioSetupGameVariables: ; a = index
 
     pop     af
 
-    call    ScenarioGetTechnology ; a = number
-    ld      [technology_level],a
+    ; Load technology level
+
+    push    af
+
+        call    ScenarioGetTechnology ; a = number
+        ld      [technology_level],a
+
+    pop     af
+
+    ; Load persistent message flags
+
+    call    ScenarioGetMessageFlags ; a = number
+    ; returns a = first byte of flags, b = second byte
+    ld      [persistent_msg_flags+0],a
+    ld      a,b
+    ld      [persistent_msg_flags+1],a
 
     ; TODO - Make all of this parametrizable?
 
