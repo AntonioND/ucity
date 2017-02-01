@@ -180,9 +180,16 @@ Main:
     ld      hl,rIE
     set     0,[hl] ; IEF_VBLANK
 
+    ; Start game
+
+    LONG_CALL   RoomTitle
+
 .main_loop:
-    LONG_CALL   RoomMenu
-    LONG_CALL   RoomGame
+
+        LONG_CALL   RoomMenu
+
+        LONG_CALL   RoomGame
+
     jr      .main_loop
 
 ;-------------------------------------------------------------------------------
