@@ -44,6 +44,14 @@ SCROLL_COUNTDOWN_TICKS  EQU 2
 
 ;-------------------------------------------------------------------------------
 
+TITLE_SCREEN_TILES:
+    INCBIN "title_screen_tiles.bin"
+
+TITLE_SCREEN_MAP:
+    INCBIN "tilte_screen_map.bin"
+
+;-------------------------------------------------------------------------------
+
 InputHandleTitle:
 
     ld      a,[joy_pressed]
@@ -170,13 +178,48 @@ RoomTitleLoadGraphics:
     ; Load sprites
     ; ------------
 
-    ; TODO
+    xor     a,a
+    ld      [rVBK],a
+
+    ld      bc,40*2
+    ld      de,0
+    ld      hl,TITLE_SCREEN_TILES
+    call    vram_copy_tiles ; bc = tiles    de = start index    hl = source
+
+    ld      l,0
+    call    sprite_get_base_pointer ; l = sprite    return = hl    destroys de
+
+    ld      de,TITLE_SCREEN_MAP
+
+SPR_X_BASE EQU (160-10*8)/2
+SPR_Y_BASE EQU (144-4*16)/2
+
+SPR_Y SET 0
+    REPT    4
+SPR_X SET 0
+        REPT    10
+           ld       a,SPR_Y*16 + SPR_Y_BASE + 16
+           ld       [hl+],a
+           ld       a,SPR_X*8 + SPR_X_BASE + 8
+           ld       [hl+],a
+           ld       a,( SPR_X + SPR_Y * 10 ) * 2
+           ld       [hl+],a
+           ld       a,[de]
+           inc      de
+           ld       [hl+],a
+SPR_X SET SPR_X + 1
+        ENDR
+SPR_Y SET SPR_Y + 1
+    ENDR
 
     ; Load palettes of bg and sprites
     ; -------------------------------
 
     call    bg_load_main_palettes
-    ; TODO - Load sprite palettes
+
+    xor     a,a
+    ld      hl,.sprite_palettes
+    call    spr_set_palette ; a = palette number    hl = pointer to data
 
     ; Show screen
     ; -----------
@@ -184,10 +227,13 @@ RoomTitleLoadGraphics:
     xor     a,a
     ld      [rIF],a
 
-    ld      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
+    ld      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_BG8800|LCDCF_OBJ16|LCDCF_ON
     ld      [rLCDC],a
 
     ret
+
+.sprite_palettes:
+    DW      0, (15<<10)|(15<<5)|15, (10<<10)|(10<<5)|10, 0
 
 ;-------------------------------------------------------------------------------
 
@@ -219,6 +265,18 @@ RoomTitle::
     ld      a,[title_exit]
     and     a,a
     jr      z,.loop
+
+    ; Clear sprites
+
+    ld      l,0
+    call    sprite_get_base_pointer ; l = sprite    return = hl    destroys de
+    xor     a,a
+    ld      b,40*4
+    call    memset_fast ; a = value    hl = start address    b = size
+
+    call    wait_vbl
+
+    ; Prepare to exit
 
     call    SetDefaultVBLHandler
 
