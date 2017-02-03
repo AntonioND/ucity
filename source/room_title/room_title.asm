@@ -38,6 +38,11 @@ title_scroll_countdown: DS  1
 
 SCROLL_COUNTDOWN_TICKS  EQU 2
 
+title_blink_countdown:  DS  1
+title_blink_state:      DS  1
+
+TITLE_BLINK_COUNTDOWN_TICKS EQU 45
+
 ;###############################################################################
 
     SECTION "Room Title Code Data",ROMX
@@ -181,7 +186,7 @@ RoomTitleLoadGraphics:
     xor     a,a
     ld      [rVBK],a
 
-    ld      bc,40*2
+    ld      bc,40*2 ; 40 sprites * 2 tiles per sprites
     ld      de,0
     ld      hl,TITLE_SCREEN_TILES
     call    vram_copy_tiles ; bc = tiles    de = start index    hl = source
@@ -249,12 +254,60 @@ SPR_Y SET SPR_Y + 1
 
 ;-------------------------------------------------------------------------------
 
+TitleBlinkInit:
+
+    ld      a,TITLE_BLINK_COUNTDOWN_TICKS
+    ld      [title_blink_countdown],a
+    ld      a,1
+    ld      [title_blink_state],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+TitleBlinkHandle:
+
+    ld      hl,title_blink_countdown
+    dec     [hl]
+    ret     nz
+    ld      [hl],TITLE_BLINK_COUNTDOWN_TICKS
+
+    ld      a,[title_blink_state]
+    xor     a,1
+    ld      [title_blink_state],a
+
+    ld      l,30
+    call    sprite_get_base_pointer ; l = sprite    return = hl    destroys de
+
+    ld      a,[title_blink_state]
+    and     a,a
+    jp      z,.disable_spr
+        ld      a,3*16 + SPR_Y_BASE + 16
+        jr      .end_disable_enable_spr
+.disable_spr:
+        xor     a,a
+.end_disable_enable_spr:
+
+    ld      de,4
+
+SPR_X SET 0
+    REPT    10
+    ld      [hl],a
+    add     hl,de
+SPR_X SET SPR_X + 1
+    ENDR
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomTitle::
 
     xor     a,a
     ld      [title_exit],a
 
     call    TitleScrollInit
+    call    TitleBlinkInit
 
     call    SetPalettesAllBlack
 
@@ -273,6 +326,7 @@ RoomTitle::
     call    InputHandleTitle
 
     call    TitleScrollHandle
+    call    TitleBlinkHandle
 
     ld      a,[title_exit]
     and     a,a
