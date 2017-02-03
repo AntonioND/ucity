@@ -217,9 +217,17 @@ SPR_Y SET SPR_Y + 1
 
     call    bg_load_main_palettes
 
-    xor     a,a
     ld      hl,.sprite_palettes
+    xor     a,a
     call    spr_set_palette ; a = palette number    hl = pointer to data
+    ld      a,1
+    call    spr_set_palette
+    ld      a,2
+    call    spr_set_palette
+    ld      a,3
+    call    spr_set_palette
+    ld      a,4
+    call    spr_set_palette
 
     ; Show screen
     ; -----------
@@ -233,7 +241,11 @@ SPR_Y SET SPR_Y + 1
     ret
 
 .sprite_palettes:
-    DW      0, (15<<10)|(15<<5)|15, (10<<10)|(10<<5)|10, 0
+    DW  0, (21<<10)|(21<<5)|21, (10<<10)|(10<<5)|10, 0
+    DW  0, 31, 15, 0
+    DW  0, (25<<10)|15, (13<<10)|8, 0
+    DW  0, 31<<10, 15<<10, 0
+    DW  0, (15<<5)|25, (8<<5)|13, 0
 
 ;-------------------------------------------------------------------------------
 
