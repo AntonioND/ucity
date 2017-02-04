@@ -405,10 +405,9 @@ CityMapLoad:: ; returns de = xy start coordinates
         ; Scenarios
         ; ---------
 
+        ; This value is set in the room that selects scenarios, so it is
+        ; supposed to be within valid bounds
         ld      a,[selected_map]
-        and     a,CITY_MAP_NUMBER_MASK
-        ; TODO - Check if value is within limits (min and max values)
-        ld      [selected_map],a
 
         ; returns de = xy, b = bank of map, hl = pointer to map
         call    ScenarioGetMapPointerAndStartCoordinates
