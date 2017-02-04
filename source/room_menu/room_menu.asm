@@ -33,8 +33,13 @@
 
     SECTION "Room Menu Variables",WRAM0
 
+MENU_NUMBER_ELEMENTS EQU 4
 menu_selection: DS 1
 menu_exit:      DS 1
+
+MENU_CURSOR_BLINK_FRAMES EQU 30
+menu_cursor_blink:  DS 1
+menu_cursor_frames: DS 1 ; number of frames left before switching blink
 
 ;###############################################################################
 
@@ -134,63 +139,245 @@ MenuLoadCitySRAM: ; returns 1 if loaded correctly, 0 if not
 
 ;-------------------------------------------------------------------------------
 
+WRITE_B_TO_HL_VRAM : MACRO ; Clobbers A and C
+    di ; critical section
+        xor     a,a
+        ld      [rVBK],a
+        WAIT_SCREEN_BLANK ; Clobbers registers A and C
+        ld      [hl],b
+    ei ; end of critical section
+ENDM
+
+;-------------------------------------------------------------------------------
+
+CURSOR_X EQU 4
+MENU_CURSOR_COORDINATE_OFFSET:
+    DW 6*32+CURSOR_X+$9800 ; Budget
+    DW 8*32+CURSOR_X+$9800 ; Bank
+    DW 10*32+CURSOR_X+$9800 ; Minimaps
+    DW 12*32+CURSOR_X+$9800 ; Graphs
+
+; A = slot of the screen to get the base coordinates to. The coordinates are
+; the ones corresponding to the arrow cursor
+MenuGetMapPointer: ; returns hl = pointer to VRAM to selected tile
+
+    ld      a,[menu_selection]
+    ld      l,a
+    ld      h,0
+    add     hl,hl
+
+    ld      de,MENU_CURSOR_COORDINATE_OFFSET
+    add     hl,de
+    ld      e,[hl]
+    inc     hl
+    ld      d,[hl]
+
+    LD_HL_DE
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MenuDrawCursor:
+
+    ld      a,[menu_selection]
+    call    MenuGetMapPointer
+
+    di ; critical section
+
+        xor     a,a
+        ld      [rVBK],a
+
+        WAIT_SCREEN_BLANK ; Clobbers registers A and C
+
+        ld      [hl],O_ARROW
+
+    reti ; end of critical section and return
+
+;-------------------------------------------------------------------------------
+
+MenuClearCursor:
+
+    ld      a,[menu_selection]
+    call    MenuGetMapPointer
+
+    di ; critical section
+
+        xor     a,a
+        ld      [rVBK],a
+
+        WAIT_SCREEN_BLANK ; Clobbers registers A and C
+
+        ld      [hl],O_SPACE
+
+    reti ; end of critical section and return
+
+;-------------------------------------------------------------------------------
+
+MenuCursorMoveDown:
+
+    call    MenuClearCursor
+
+    ld      a,[menu_selection]
+    inc     a
+    cp      a,MENU_NUMBER_ELEMENTS
+    ret     z
+
+    ld      [menu_selection],a
+
+    ld      a,MENU_CURSOR_BLINK_FRAMES
+    ld      [menu_cursor_frames],a
+    ld      a,1
+    ld      [menu_cursor_blink],a
+
+    call    MenuDrawCursor
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MenuCursorMoveUp:
+
+    call    MenuClearCursor
+
+    ld      a,[menu_selection]
+    dec     a
+    cp      a,-1
+    ret     z
+
+    ld      [menu_selection],a
+
+    ld      a,MENU_CURSOR_BLINK_FRAMES
+    ld      [menu_cursor_frames],a
+    ld      a,1
+    ld      [menu_cursor_blink],a
+
+    call    MenuDrawCursor
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+MenuCursorBlinkHandle:
+
+    ld      hl,menu_cursor_frames
+    dec     [hl]
+    jr      nz,.end_cursor_blink
+
+        ld      [hl],MENU_CURSOR_BLINK_FRAMES
+
+        ld      hl,menu_cursor_blink
+        ld      a,1
+        xor     a,[hl]
+        ld      [hl],a
+
+        and     a,a
+        jr      z,.cleared_cursor
+            call    MenuDrawCursor
+            jr      .end_cursor_blink
+.cleared_cursor:
+            call    MenuClearCursor
+            jr      .end_cursor_blink
+
+.end_cursor_blink:
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 InputHandleMenu:
 
     ld      a,[joy_pressed]
     and     a,PAD_A
     jr      z,.not_a
 
-        call    MenuNewCity ; returns 1 if loaded correctly, 0 if not
-        and     a,a
-        jr      z,.not_loaded_a
-            ld      a,1
-            ld      [menu_exit],a
+        ld      a,[menu_selection]
+
+        ; Load Game
+        ; ---------
+
+        cp      a,0
+        jr      nz,.not_pressed_load_game
+
+            call    MenuLoadCitySRAM ; returns 1 if loaded correctly, 0 if not
+            and     a,a
+            jr      z,.not_loaded_game
+                ld      a,1
+                ld      [menu_exit],a
+                ret
+.not_loaded_game:
+            call    RoomMenuLoadGraphics
             ret
-.not_loaded_a:
-        call    RoomMenuLoadGraphics
-        ret
+
+.not_pressed_load_game:
+
+        ; Random Map
+        ; ----------
+
+        cp      a,1
+        jr      nz,.not_pressed_random_map
+
+            call    MenuNewCity ; returns 1 if loaded correctly, 0 if not
+            and     a,a
+            jr      z,.not_random_map
+                ld      a,1
+                ld      [menu_exit],a
+                ret
+.not_random_map:
+            call    RoomMenuLoadGraphics
+            ret
+
+.not_pressed_random_map:
+
+        ; Scenario
+        ; --------
+
+        cp      a,2
+        jr      nz,.not_pressed_scenario
+
+            call    MenuScenario ; returns 1 if loaded correctly, 0 if not
+            and     a,a
+            jr      z,.not_scenario
+                ld      a,1
+                ld      [menu_exit],a
+                ret
+.not_scenario:
+            call    RoomMenuLoadGraphics
+            ret
+
+.not_pressed_scenario:
+
+        ; Credits
+        ; -------
+
+        cp      a,3
+        jr      nz,.not_pressed_credits
+
+            LONG_CALL_ARGS    RoomCredits
+            call    RoomMenuLoadGraphics
+            ret
+
+.not_pressed_credits:
+
 .not_a:
 
-    ld      a,[joy_pressed]
-    and     a,PAD_START
-    jr      z,.not_start
-
-        call    MenuScenario ; returns 1 if loaded correctly, 0 if not
-        and     a,a
-        jr      z,.not_loaded_start
-            ld      a,1
-            ld      [menu_exit],a
-            ret
-.not_loaded_start:
-        call    RoomMenuLoadGraphics
-        ret
-.not_start:
+    ; Handle cursor
 
     ld      a,[joy_pressed]
-    and     a,PAD_B
-    jr      z,.not_b
-
-        call    MenuLoadCitySRAM ; returns 1 if loaded correctly, 0 if not
-        and     a,a
-        jr      z,.not_loaded_b
-            ld      a,1
-            ld      [menu_exit],a
-            ret
-.not_loaded_b:
-        call    RoomMenuLoadGraphics
-        ret
-.not_b:
-
+    and     a,PAD_UP
+    jr      z,.not_up
+        call    MenuClearCursor
+        call    MenuCursorMoveUp
+        call    MenuDrawCursor
+        jr      .end_up_down
+.not_up:
     ld      a,[joy_pressed]
-    and     a,PAD_SELECT
-    jr      z,.not_select
-
-        LONG_CALL_ARGS    RoomCredits
-
-        call    RoomMenuLoadGraphics
-
-        ret
-.not_select:
+    and     a,PAD_DOWN
+    jr      z,.end_up_down
+        call    MenuClearCursor
+        call    MenuCursorMoveDown
+        call    MenuDrawCursor
+.end_up_down:
 
     ret
 
@@ -263,6 +450,18 @@ RoomMenuLoadBG:
 
 ;-------------------------------------------------------------------------------
 
+MenuCursorReset:
+
+    xor     a,a
+    ld      [menu_cursor_blink],a
+
+    ld      a,MENU_CURSOR_BLINK_FRAMES
+    ld      [menu_cursor_frames],a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomMenuLoadGraphics:
 
     call    RoomMenuLoadBG
@@ -284,6 +483,9 @@ RoomMenuLoadGraphics:
     call    LoadTextPalette
 
     ei ; End of critical section
+
+    call    MenuCursorReset
+    call    MenuDrawCursor
 
     ret
 
@@ -310,6 +512,8 @@ RoomMenu::
     call    KeyAutorepeatHandle
 
     call    InputHandleMenu
+
+    call    MenuCursorBlinkHandle
 
     ld      a,[menu_exit]
     and     a,a
