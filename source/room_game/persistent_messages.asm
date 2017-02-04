@@ -33,7 +33,7 @@
 
 ;-------------------------------------------------------------------------------
 
-persistent_msg_flags: DS BYTES_SAVE_PERSISTENT_MSG
+persistent_msg_flags:: DS BYTES_SAVE_PERSISTENT_MSG
 
 ;###############################################################################
 
