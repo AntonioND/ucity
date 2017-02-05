@@ -161,8 +161,7 @@ RoomCredits::
 
     call    SetPalettesAllBlack
 
-    ld      bc,CreditsMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     xor     a,a
     ld      [credits_map_selection],a
@@ -197,20 +196,8 @@ RoomCredits::
     and     a,a
     jr      z,.loop
 
-    call    SetDefaultVBLHandler
-
     call    SetPalettesAllBlack
 
     ret
-
-;###############################################################################
-
-    SECTION "Room Credits Code Bank 0",ROM0
-
-;-------------------------------------------------------------------------------
-
-CreditsMenuVBLHandler:
-
-    jp      refresh_OAM
 
 ;###############################################################################

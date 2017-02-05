@@ -796,8 +796,7 @@ RoomSaveMenuError: ; always returns -1!
 
     call    SetPalettesAllBlack
 
-    ld      bc,RoomSaveMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     call    RoomSaveMenuLoadErrorBG
 
@@ -829,8 +828,6 @@ RoomSaveMenuError: ; always returns -1!
     ld      a,[joy_pressed]
     and     a,PAD_A
     jr      z,.loop
-
-    call    SetDefaultVBLHandler
 
     ld      a,$FF ; always returns error!
     ret
@@ -879,8 +876,7 @@ RoomSaveMenu:: ; returns A = selected SRAM bank, -1 if error
 
     call    SetPalettesAllBlack
 
-    ld      bc,RoomSaveMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     call    RoomSaveMenuLoadBG
 
@@ -916,8 +912,6 @@ RoomSaveMenu:: ; returns A = selected SRAM bank, -1 if error
     ld      a,[save_menu_exit]
     and     a,a
     jr      z,.loop
-
-    call    SetDefaultVBLHandler
 
     ; Return A = bank, -1 if error
 
@@ -1102,18 +1096,6 @@ RoomSaveMenuLoadBG:
     ld      [rVBK],a
 
     call    rom_bank_pop
-
-    ret
-
-;###############################################################################
-
-    SECTION "Room Save Menu Code Data",ROM0
-
-;-------------------------------------------------------------------------------
-
-RoomSaveMenuVBLHandler:
-
-    call    refresh_OAM
 
     ret
 

@@ -499,8 +499,7 @@ RoomMenu::
 
     call    SetPalettesAllBlack
 
-    ld      bc,RoomMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     call    RoomMenuLoadGraphics
 
@@ -518,20 +517,6 @@ RoomMenu::
     ld      a,[menu_exit]
     and     a,a
     jr      z,.loop
-
-    call    SetDefaultVBLHandler
-
-    ret
-
-;###############################################################################
-
-    SECTION "Room Menu Code ROM0",ROM0
-
-;-------------------------------------------------------------------------------
-
-RoomMenuVBLHandler:
-
-    call    refresh_OAM
 
     ret
 

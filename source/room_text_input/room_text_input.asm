@@ -495,8 +495,7 @@ RoomTextInput:: ; returns a = 0 if empty, not 0 if valid text
 
     call    SetPalettesAllBlack
 
-    ld      bc,RoomTextInputVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     call    RoomTextInputLoadBG
 
@@ -532,8 +531,6 @@ RoomTextInput:: ; returns a = 0 if empty, not 0 if valid text
     ld      a,[text_input_exit]
     and     a,a
     jr      z,.loop
-
-    call    SetDefaultVBLHandler
 
     ld      a,[text_input_ptr] ; return 0 if empty, not 0 if valid text
     ret
@@ -574,14 +571,6 @@ RoomTextInputSetPrompt:: ; de = pointer to string
 ;###############################################################################
 
     SECTION "Room Text Input Code Data",ROM0
-
-;-------------------------------------------------------------------------------
-
-RoomTextInputVBLHandler:
-
-    call    refresh_OAM
-
-    ret
 
 ;-------------------------------------------------------------------------------
 

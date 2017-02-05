@@ -396,8 +396,7 @@ RoomOptionsMenu::
     ld      a,1
     ld      [options_menu_blink_status],a
 
-    ld      bc,OptionsMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     xor     a,a
     ld      [rSCX],a
@@ -446,8 +445,6 @@ RoomOptionsMenu::
     and     a,a
     jr      z,.loop
 
-    call    SetDefaultVBLHandler
-
     call    SetPalettesAllBlack
 
     ; Update animation state if needed
@@ -467,18 +464,6 @@ RoomOptionsMenu::
             LONG_CALL_ARGS  Simulation_TransportAnimsInit
 
 .animation_check_end:
-
-    ret
-
-;###############################################################################
-
-    SECTION "Room Options Code Bank 0",ROM0
-
-;-------------------------------------------------------------------------------
-
-OptionsMenuVBLHandler:
-
-    call    refresh_OAM
 
     ret
 

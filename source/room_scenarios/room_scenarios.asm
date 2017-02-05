@@ -275,8 +275,7 @@ RoomScenarioSelect::
 
     call    SetPalettesAllBlack
 
-    ld      bc,ScenarioSelectMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     xor     a,a
     ld      [scenario_select_map_selection],a
@@ -313,8 +312,6 @@ RoomScenarioSelect::
     and     a,a
     jr      z,.loop
 
-    call    SetDefaultVBLHandler
-
     call    SetPalettesAllBlack
 
     ld      a,[scenario_select_map_selection]
@@ -332,14 +329,6 @@ RoomScenarioSelect::
 ;###############################################################################
 
     SECTION "Room Scenarios Code Bank 0",ROM0
-
-;-------------------------------------------------------------------------------
-
-ScenarioSelectMenuVBLHandler:
-
-    call    refresh_OAM
-
-    ret
 
 ;-------------------------------------------------------------------------------
 

@@ -293,8 +293,7 @@ RoomGenerateMap::
     ld      a,GEN_MAP_SELECT_WATER
     ld      [gen_map_selection],a
 
-    ld      bc,GenMapMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     xor     a,a
     ld      [rSCX],a
@@ -326,23 +325,9 @@ RoomGenerateMap::
     and     a,a
     jr      z,.loop
 
-    call    SetDefaultVBLHandler
-
     call    SetPalettesAllBlack
 
     LONG_CALL   map_tilemap_to_real_tiles
-
-    ret
-
-;###############################################################################
-
-    SECTION "Room Gen Map Code Bank 0",ROM0
-
-;-------------------------------------------------------------------------------
-
-GenMapMenuVBLHandler:
-
-    call    refresh_OAM
 
     ret
 

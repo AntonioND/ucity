@@ -198,6 +198,10 @@ Main:
 
 DefaultVBLHandler:
 
+    call    refresh_OAM
+
+    call    SFX_Handler
+
     ; TODO Update music here and in the rest of the VBL handlers
 
     ret

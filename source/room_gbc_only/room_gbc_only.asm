@@ -84,8 +84,7 @@ RoomOnlyForGBC::
     xor     a,a ; White screen
     ld      [rBGP],a
 
-    ld      bc,OnlyForGBCVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     xor     a,a
     ld      [rSCX],a
@@ -105,17 +104,5 @@ RoomOnlyForGBC::
 .loop:
     halt
     jr      .loop
-
-;###############################################################################
-
-    SECTION "Room Only For GBC Data Bank 0",ROM0
-
-;-------------------------------------------------------------------------------
-
-OnlyForGBCVBLHandler:
-
-    call    refresh_OAM
-
-    ret
 
 ;###############################################################################

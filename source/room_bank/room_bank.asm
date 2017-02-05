@@ -460,8 +460,7 @@ RoomBankMenu::
 
     call    SetPalettesAllBlack
 
-    ld      bc,BankMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     ld      a,[LOAN_REMAINING_PAYMENTS]
     and     a,a
@@ -513,21 +512,7 @@ RoomBankMenu::
     and     a,a
     jr      z,.loop
 
-    call    SetDefaultVBLHandler
-
     call    SetPalettesAllBlack
-
-    ret
-
-;###############################################################################
-
-    SECTION "Room Bank Data Bank 0",ROM0
-
-;-------------------------------------------------------------------------------
-
-BankMenuVBLHandler:
-
-    call    refresh_OAM
 
     ret
 

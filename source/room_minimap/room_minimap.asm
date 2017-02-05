@@ -462,6 +462,8 @@ RoomMinimapVBLHandler:
 
     call    refresh_OAM
 
+    call    SFX_Handler
+
     ret
 
 ;-------------------------------------------------------------------------------

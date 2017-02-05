@@ -299,14 +299,6 @@ InputHandleBudgetMenu:
 
 ;-------------------------------------------------------------------------------
 
-BudgetMenuVBLHandler:
-
-    call    refresh_OAM
-
-    ret
-
-;-------------------------------------------------------------------------------
-
 RoomBudgetMenuLoadBG:
 
     ; Load border
@@ -377,8 +369,7 @@ RoomBudgetMenu::
 
     call    SetPalettesAllBlack
 
-    ld      bc,BudgetMenuVBLHandler
-    call    irq_set_VBL
+    call    SetDefaultVBLHandler
 
     ; Get prediction of the budget of this year
     LONG_CALL   Simulation_CalculateBudgetAndTaxes
@@ -416,8 +407,6 @@ RoomBudgetMenu::
     ld      a,[budget_room_exit]
     and     a,a
     jr      z,.loop
-
-    call    SetDefaultVBLHandler
 
     call    SetPalettesAllBlack
 
