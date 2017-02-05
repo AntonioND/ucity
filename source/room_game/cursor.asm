@@ -56,7 +56,7 @@ CURSOR_SCROLL_MARGIN    EQU 4
 ;-------------------------------------------------------------------------------
 
 CursorTilesData:
-    INCBIN  "data/cursor_tiles.bin"
+    INCBIN  "cursor_tiles.bin"
 
 CursorTilesNumber  EQU 1
 CURSOR_CORNER_TILE    EQU O_CURSOR

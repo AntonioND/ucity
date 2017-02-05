@@ -38,7 +38,7 @@
 
 STATUS_BAR_MAP:
 .s:
-    INCBIN "data/info_bar_game_map.bin"
+    INCBIN "info_bar_game_map.bin"
 .e:
 
 STATUS_BAR_MAP_ROWS EQU (((.e-.s)/20)/2)

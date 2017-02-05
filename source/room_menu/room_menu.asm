@@ -48,7 +48,7 @@ menu_cursor_frames: DS 1 ; number of frames left before switching blink
 ;-------------------------------------------------------------------------------
 
 MAIN_MENU_BG_MAP::
-    INCBIN "data/main_menu_bg_map.bin"
+    INCBIN "main_menu_bg_map.bin"
 
 ;-------------------------------------------------------------------------------
 
