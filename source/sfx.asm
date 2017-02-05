@@ -73,6 +73,8 @@ SFX_EndSound:
         ld      [rNR14],a
 
 .not_0:
+
+IF 0
     bit     1,[hl]
     jr      z,.not_1
 
@@ -91,6 +93,8 @@ SFX_EndSound:
         ld      [rNR34],a
 
 .not_2:
+ENDC
+
     bit     3,[hl]
     jr      z,.not_3
 
@@ -173,6 +177,35 @@ SFX_END_NO_CALLBACK : MACRO
     ld      [sfx_active],a
 ENDM
 
+SFX_CHANNEL_1 : MACRO ; \1=sweep, \2=duty, \3=volume, \4=freq
+    ld      a,\1
+    ld      b,(\2)<<6
+    ld      c,(\3)<<4
+    ld      hl,\4
+    call    SFX_Channel1 ; b = duty, lenght, c = volume, hl = freq
+ENDM
+
+SFX_Channel1: ; a = sweep, b = duty, lenght, c = volume, hl = freq
+
+    ld      [rNR10],a ; sweep
+
+    ld      a,b ; duty, lenght (unused)
+    ld      [rNR11],a
+    ld      a,c ; 50% volume, no envelope
+    ld      [rNR12],a
+
+    ld      a,l
+    ld      [rNR13],a
+    ld      a,h
+    or      a,$80 ; start
+    ld      [rNR14],a
+
+    ld      hl,sfx_used_channels
+    set     0,[hl]
+
+    ret
+
+IF 0
 SFX_CHANNEL_2 : MACRO ; \1=duty, \2=volume, \3=freq
     ld      b,(\1)<<6
     ld      c,(\2)<<4
@@ -197,6 +230,7 @@ SFX_Channel2: ; b = duty, lenght, c = volume, hl = freq
     set     1,[hl]
 
     ret
+ENDC
 
 SFX_CHANNEL_4 : MACRO ; \1=instrument, \2=volume
     ld      b,\1
@@ -234,7 +268,8 @@ SFX_Build:: ; Building built
 
 SFX_BuildError:: ; Can't build or demolish
     SFX_INIT
-    SFX_CHANNEL_2   1, 7, 1379
+    ; sweep : time, subtract, 7 sweeps
+    SFX_CHANNEL_1   (1<<4) | (1<<3) | 7, 1, 7, 1379
     SFX_TIME    5
     SFX_END_NO_CALLBACK
     ret
@@ -255,13 +290,13 @@ SFX_Clear:: ; Remove destroyed tile or forest
 
 SFX_ErrorUI:: ; Invalid option in menu, etc
     SFX_INIT
-    SFX_CHANNEL_2   1, 7, 1046
+    SFX_CHANNEL_1   0, 1, 7, 1046
     SFX_TIME    4
     SFX_END_WITH_CALLBACK SFX_ErrorUI2
     ret
 SFX_ErrorUI2:
     SFX_INIT
-    SFX_CHANNEL_2   1, 7, 854
+    SFX_CHANNEL_1   0,1, 7, 854
     SFX_TIME    4
     SFX_END_NO_CALLBACK
     ret
