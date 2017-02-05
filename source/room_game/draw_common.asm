@@ -613,9 +613,11 @@ CityMapCheckBuildBridge:: ; e = x, d = y, c = flag type (road, train, electr)
 
     ; Play sound
 
+    push    bc
     push    hl
     call    SFX_Build
     pop     hl
+    pop     bc
 
     ; End inside the map and solid ground. Conditions are met.
     ; Return length in a
