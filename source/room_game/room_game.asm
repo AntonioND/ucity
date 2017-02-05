@@ -403,6 +403,10 @@ RoomGameVBLHandler:
 
     call    SFX_Handler
 
+    call    rom_bank_push
+    call    gbt_update
+    call    rom_bank_pop
+
     ; Fast movement of sprites, just the bare minimum so that the user doesn't
     ; notice any irregularities in their movement.
     LONG_CALL   GameAnimateMapVBLFastHandle

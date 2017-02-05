@@ -165,6 +165,10 @@ RoomGraphsVBLHandler:
 
     call    SFX_Handler
 
+    call    rom_bank_push
+    call    gbt_update
+    call    rom_bank_pop
+
     ret
 
 ;###############################################################################

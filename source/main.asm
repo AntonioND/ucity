@@ -202,7 +202,9 @@ DefaultVBLHandler:
 
     call    SFX_Handler
 
-    ; TODO Update music here and in the rest of the VBL handlers
+    call    rom_bank_push
+    call    gbt_update
+    call    rom_bank_pop
 
     ret
 
