@@ -33,7 +33,7 @@ RGBDS   = ..
 EMULATOR = wine ./tools/bgb.exe
 
 ################################################################################
-##              Source and include folders - includes subfolders              ##
+##           Source, data and include folders - includes subfolders           ##
 
 SOURCE = source data
 
