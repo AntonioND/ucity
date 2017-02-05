@@ -401,6 +401,8 @@ RoomGameVBLHandler:
     ld      b,b ; Breakpoint
 .ok:
 
+    call    SFX_Handler
+
     ; Fast movement of sprites, just the bare minimum so that the user doesn't
     ; notice any irregularities in their movement.
     LONG_CALL   GameAnimateMapVBLFastHandle

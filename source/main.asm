@@ -172,6 +172,8 @@ Main:
 
     LONG_CALL   SRAM_PowerOnCheck
 
+    call    SFX_InitSystem
+
     ld      a,LCDCF_ON
     ld      [rLCDC],a
 

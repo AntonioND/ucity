@@ -22,7 +22,7 @@ General to do list:
   - Graphical output (wind power plants?)
   - Adjust simulation parameters
 - Sample cities
-- Music, SFX - Allow to disable it from the options menu
+- Music - Allow to disable it from the options menu
 - Improve graphics
 - Cleanup code and document
 
