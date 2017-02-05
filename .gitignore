@@ -3,3 +3,4 @@ ucity.gbc
 ucity.sym
 ucity.map
 *.obj
+tools/mod2gbt/mod2gbt
