@@ -1570,12 +1570,29 @@ RoomGameSimulateStepNormal:
 
             LONG_CALL   Simulation_AdvanceTechnology
 
+.not_start_of_year: ; End of handlers of yearly events
+
+        ld      a,[date_month]
+        cp      a,0 ; Check if january
+        jr      z,.start_of_quarter
+        cp      a,3 ;       or april
+        jr      z,.start_of_quarter
+        cp      a,6 ;       or july
+        jr      z,.start_of_quarter
+        cp      a,9 ;       or october
+        jr      nz,.not_start_of_quarter
+
+.start_of_quarter:
+
+            ; Handle events that only happen once per quarter
+            ; (when Dec -> Jan, Mar -> Apr, Jun -> Jul, Sep -> Oct)
+
             ; Calculate and apply budget
 
             LONG_CALL   Simulation_CalculateBudgetAndTaxes
             LONG_CALL   Simulation_ApplyBudgetAndTaxes
 
-.not_start_of_year: ; End of handlers of yearly events
+.not_start_of_quarter: ; End of handlers of quarterly events
 
 .skip_first_iteration: ; End of handlers skiped the first iteration
 
