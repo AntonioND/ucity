@@ -613,38 +613,10 @@ ENDM
 
 Simulation_ApplyBudgetAndTaxes::
 
-    add     sp,-MONEY_AMOUNT_SIZE ; (*) save space for temporary money amount
+    ; Add temp variable to original amount of money
 
-    ; Add original amount of money to temp variable
-
-    scf
-    ccf ; clear carry
-
-    ld      hl,sp+0
-    LD_BC_HL
-    ld      de,MoneyWRAM
-    ld      hl,budget_result
-    REPT    MONEY_AMOUNT_SIZE
-        ld      a,[de]
-        adc     a,[hl]
-        daa
-        ld      [bc],a
-        inc     bc
-        inc     de
-        inc     hl
-    ENDR
-
-    ; Save result back
-
-    ld      de,MoneyWRAM
-    ld      hl,sp+0
-    REPT    MONEY_AMOUNT_SIZE
-        ld      a,[hl+]
-        ld      [de],a
-        inc     de
-    ENDR
-
-    add     sp,+MONEY_AMOUNT_SIZE ; (*) reclaim space
+    ld      de,budget_result
+    call    MoneyAdd ; de = ptr to the amount of money to add.
 
     ; Reduce number of remaining loan payments
 
