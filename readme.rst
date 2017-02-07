@@ -1,10 +1,11 @@
+==============
 µCity 0.4 beta
 ==============
 
 The open-source city building game for Game Boy Color.
 
 Introduction
-------------
+============
 
 This is a beta version of µCity (also spelled 'uCity', pronounced 'micro-city').
 Some of the functionality is missing, but most of the game is completed.
@@ -18,56 +19,76 @@ NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
 you are interested please contact me at my email: antonio_nd at outlook dot com
 
 General to do list:
+
 - Simulation
+
   - Graphical output (wind power plants?)
   - Adjust simulation parameters
+
 - Sample cities
 - Music - Allow to disable it from the options menu
 - Improve graphics
 - Cleanup code and document
 
-![](screenshot.png)
+.. image:: screenshot.png
 
 Controls
---------
+========
 
 - Start: Open pause menu.
 - Select: Open building select menu.
 - B: If held, fast scroll.
 
 Credits
--------
+=======
 
 Game made by AntonioND/SkyLyrac (Antonio Niño Díaz)
 
-Email: antonio_nd@outlook.com / antonionidi@gmail.com
+Email:
+
+    antonio_nd@outlook.com / antonionidi@gmail.com
 
 Web:
-- http://antoniond_blog.drunkencoders.com/
-- http://antoniond.drunkencoders.com/
 
-GitHub: https://github.com/AntonioND
+    https://github.com/AntonioND
+
+    http://antoniond_blog.drunkencoders.com/
+
+    http://antoniond.drunkencoders.com/
 
 Dependencies:
-- RGBDS: https://github.com/bentley/rgbds/
 
-It uses GBT Player, my music player library. It is not needed to install it as
-it comes with the game code, but it can be found here if you want to use it
-for your projects:
-- https://github.com/AntonioND/gbt-player
+- RGBDS
+
+      https://github.com/bentley/rgbds/
+
+- GBT Player
+
+  It uses GBT Player, my music player library. It is not needed to install it as
+  it comes with the game code, but it can be found here if you want to use it
+  for your projects:
+
+      https://github.com/AntonioND/gbt-player
+
 
 Tools (for Windows, but they run on Wine):
-- GBMB (Game Boy Map Builder): http://www.devrs.com/gb/hmgd/gbmb.html
-- GBTD (Game Boy Tile Designer): http://www.devrs.com/gb/hmgd/gbtd.html
+
+- GBMB (Game Boy Map Builder)
+
+    http://www.devrs.com/gb/hmgd/gbmb.html
+
+- GBTD (Game Boy Tile Designer)
+
+    http://www.devrs.com/gb/hmgd/gbtd.html
 
 Compiling
----------
+=========
 
 The Makefile has to be edited to point the RGBDS binaries. Then, open the
-console and type `make`. This should work on Linux, MinGW, Cygwin, etc.
+console and type :code:`make`. This should work on Linux, MinGW, Cygwin, etc.
 
 License
--------
+=======
 
 This game is licensed under the GPL v3 license. You should have received the
 source code of this game along with the ROM file. If not, the source code is
@@ -83,7 +104,7 @@ The media files (graphics and music) are licensed under a Creative Commons
 license (CC BY-SA 4.0).
 
 GNU General Public License version 3
-------------------------------------
+====================================
 
     uCity - City building game for Game Boy Color.
     Copyright (C) 2017 Antonio Nino Diaz (AntonioND/SkyLyrac)
