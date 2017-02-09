@@ -504,7 +504,7 @@ RoomBankMenu::
     call    wait_vbl
 
     call    scan_keys
-    call    KeyAutorepeatHandle
+    ; Autorepeat makes it difficult to select a specific loan
 
     call    InputHandleBankMenu
 
@@ -515,6 +515,8 @@ RoomBankMenu::
     call    WaitReleasedAllKeys
 
     call    SetPalettesAllBlack
+
+    call    InitKeyAutorepeat
 
     ret
 
