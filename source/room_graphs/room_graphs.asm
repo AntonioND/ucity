@@ -147,6 +147,8 @@ RoomGraphs::
 
     call    SetDefaultVBLHandler
 
+    call    WaitReleasedAllKeys
+
     call    SetPalettesAllBlack
 
     ret

@@ -532,6 +532,10 @@ RoomTextInput:: ; returns a = 0 if empty, not 0 if valid text
     and     a,a
     jr      z,.loop
 
+    call    WaitReleasedAllKeys
+
+    call    SetPalettesAllBlack
+
     ld      a,[text_input_ptr] ; return 0 if empty, not 0 if valid text
     ret
 

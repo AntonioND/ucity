@@ -408,6 +408,8 @@ RoomBudgetMenu::
     and     a,a
     jr      z,.loop
 
+    call    WaitReleasedAllKeys
+
     call    SetPalettesAllBlack
 
     ret

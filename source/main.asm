@@ -210,6 +210,26 @@ DefaultVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
+WaitReleasedAllKeys::
+
+    call    wait_vbl
+
+    call    scan_keys
+
+    ld      a,[joy_held]
+    ld      b,a
+    ld      a,[joy_released]
+    or      a,b
+    ld      a,[joy_pressed]
+    or      a,b
+    jr      nz,WaitReleasedAllKeys
+
+    call    InitKeyAutorepeat
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 SetDefaultVBLHandler::
 
     ld      bc,DefaultVBLHandler

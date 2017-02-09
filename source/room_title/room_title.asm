@@ -346,6 +346,8 @@ RoomTitle::
 
     call    SetDefaultVBLHandler
 
+    call    SetPalettesAllBlack
+
     ret
 
 ;###############################################################################

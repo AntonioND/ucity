@@ -445,6 +445,8 @@ RoomOptionsMenu::
     and     a,a
     jr      z,.loop
 
+    call    WaitReleasedAllKeys
+
     call    SetPalettesAllBlack
 
     ; Update animation state if needed

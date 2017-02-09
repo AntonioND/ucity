@@ -444,6 +444,8 @@ RoomMinimap::
 
     call    RoomMinimapHideCursor
 
+    call    WaitReleasedAllKeys
+
     call    SetDefaultVBLHandler
 
     call    SetPalettesAllBlack

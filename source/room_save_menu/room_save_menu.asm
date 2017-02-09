@@ -913,6 +913,10 @@ RoomSaveMenu:: ; returns A = selected SRAM bank, -1 if error
     and     a,a
     jr      z,.loop
 
+    call    WaitReleasedAllKeys
+
+    call    SetPalettesAllBlack
+
     ; Return A = bank, -1 if error
 
     ld      a,[save_menu_cursor_x]

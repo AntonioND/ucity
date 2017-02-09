@@ -312,6 +312,8 @@ RoomScenarioSelect::
     and     a,a
     jr      z,.loop
 
+    call    WaitReleasedAllKeys
+
     call    SetPalettesAllBlack
 
     ld      a,[scenario_select_map_selection]

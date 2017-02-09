@@ -1739,6 +1739,8 @@ RoomGame::
 
     call    SetDefaultVBLHandler
 
+    call    WaitReleasedAllKeys
+
     ret
 
 ;###############################################################################
