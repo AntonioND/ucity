@@ -603,6 +603,7 @@ map_normalize: ; normalizes bank 2
     adc     a,0
     ld      b,a ; bc = -average
 
+    ; Add 128 to the result so instead of 0 being the average value, use 128
     ld      hl,128
 
     add     hl,bc
@@ -620,7 +621,8 @@ map_normalize: ; normalizes bank 2
 
         ; Clamp HL to 0,255
 
-        ; The only possibilities are negative numbers or 0-510
+        ; The only possibilities after the addition are negative numbers or
+        ; positive values in the range 0-510
 
         bit     7,h
         jr      z,.not_negative
