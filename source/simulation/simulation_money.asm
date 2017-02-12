@@ -27,6 +27,7 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "money.inc"
+    INCLUDE "text_messages.inc"
     INCLUDE "tileset_info.inc"
 
 ;###############################################################################
@@ -626,8 +627,20 @@ Simulation_ApplyBudgetAndTaxes::
 
         dec     a
         ld      [LOAN_REMAINING_PAYMENTS],a
+        jr      nz,.skip_loan
+            ld      a,ID_MSG_FINISHED_LOAN
+            call    MessageRequestAdd
 
 .skip_loan:
+
+    ; Check if money is negative to warn the user
+
+    ld      de,MoneyWRAM
+    call    BCD_DE_LW_ZERO ; Returns a = 1 if [de] < 0, preserves bc, de
+    jr      z,.skip_msg
+        ld      a,ID_MSG_MONEY_NEGATIVE
+        call    PersistentMessageShow
+.skip_msg:
 
     ret
 

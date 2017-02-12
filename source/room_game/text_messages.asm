@@ -66,6 +66,8 @@ MSG_POLLUTION_HIGH:
     STR_ADD "Pollution is too<nl>high!"
 MSG_TRAFFIC_HIGH:
     STR_ADD "Traffic is too<nl>high!"
+MSG_MONEY_NEGATIVE:
+    STR_ADD "You have run out<nl>of money. Consider<nl>getting a loan."
 
 MSG_CLASS_TOWN:
     STR_ADD "Your village is<nl>now a town!"
@@ -88,6 +90,8 @@ MSG_NUCLEAR_MELTDOWN:
 
 MSG_TECH_INSUFFICIENT:
     STR_ADD "Technology isn't<nl>advanced enough<nl>to build that!"
+MSG_FINISHED_LOAN:
+    STR_ADD "You have finished<nl>repaying your<nl>loan."
 
 ;-------------------------------------------------------------------------------
 
@@ -96,6 +100,7 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
 
     MSG_ADD MSG_POLLUTION_HIGH
     MSG_ADD MSG_TRAFFIC_HIGH
+    MSG_ADD MSG_MONEY_NEGATIVE
 
     MSG_ADD MSG_CLASS_TOWN
     MSG_ADD MSG_CLASS_CITY
@@ -109,7 +114,7 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
     MSG_ADD MSG_NUCLEAR_MELTDOWN
 
     MSG_ADD MSG_TECH_INSUFFICIENT
-    ; ...
+    MSG_ADD MSG_FINISHED_LOAN
 
     MSG_ADD MSG_CUSTOM
 
