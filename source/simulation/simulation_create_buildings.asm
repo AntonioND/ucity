@@ -515,14 +515,14 @@ ENDM
 ; Higher number = Higher probability (0-255)
 
 CreateBuildingProbability: ; 0 to 20% taxes - 21 values
-    DB  $FF ; no taxes = everyone wants to come!
-    DB  $F8,$F0,$E8,$E0,$D8,$D0,$C8,$C0,$B8,$B0
-    DB  $A0,$90,$80,$70,$60,$50,$40,$30,$20,$10
+    DB $FF ; no taxes = everyone wants to come!
+    DB $FF,$FE,$FE,$FB,$FB,$F8,$F8,$F3,$F3,$EE
+    DB $EE,$E7,$E7,$E0,$E0,$D8,$D8,$D0,$D0,$C6
 
 DemolishBuildingProbability: ; 0 to 20% taxes - 21 values
-    DB  $08 ; no taxes = nobody wants to leave!
-    DB  $0C,$10,$14,$18,$1C,$20,$24,$28,$2C,$30
-    DB  $38,$40,$48,$50,$58,$60,$68,$70,$78,$80
+    DB $04 ; no taxes = nobody wants to leave!
+    DB $04,$05,$05,$07,$07,$0A,$0A,$0F,$0F,$14
+    DB $14,$1B,$1B,$22,$22,$2A,$2A,$32,$32,$3C
 
 ;-------------------------------------------------------------------------------
 
