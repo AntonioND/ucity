@@ -192,7 +192,7 @@ POWER_MAINTENANCE EQU $1
 
     T_ADD   T_PARK_SMALL, $5 ; Cost
     T_ADD   T_PARK_BIG,   $5 ; Cost
-    T_ADD   T_STADIUM,   $30 ; Income
+    T_ADD   T_STADIUM,   $15 ; Income
 
     T_ADD   T_SCHOOL,       $5 ; Cost
     T_ADD   T_HIGH_SCHOOL, $10
@@ -200,8 +200,8 @@ POWER_MAINTENANCE EQU $1
     T_ADD   T_MUSEUM,       $7
     T_ADD   T_LIBRARY,      $6
 
-    T_ADD   T_AIRPORT,     $40 ; Income
-    T_ADD   T_PORT,        $50 ; Income
+    T_ADD   T_AIRPORT,     $25 ; Income
+    T_ADD   T_PORT,        $30 ; Income
     T_ADD   T_PORT_WATER_L, $0
     T_ADD   T_PORT_WATER_R, $0
     T_ADD   T_PORT_WATER_D, $0
