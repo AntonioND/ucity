@@ -28,12 +28,12 @@ EXT  = gbc
 RGBDS   = ..
 
 ################################################################################
-##                       Command to run an emulator                           ##
+##               Command to run resulting ROM in an emulator                  ##
 
 EMULATOR = wine ./tools/bgb.exe
 
 ################################################################################
-##           Source, data and include folders - includes subfolders           ##
+##         Source, data and include folders - subfolders are included         ##
 
 SOURCE = source data
 
@@ -45,15 +45,17 @@ RGBFIX  = $(RGBDS)/rgbfix
 
 BIN := $(NAME).$(EXT)
 
-SOURCE_ALL_DIRS_REL := $(shell find $(SOURCE) -type d -print)
-SOURCE_ALL_DIRS_ABS := $(foreach dir,$(SOURCE_ALL_DIRS_REL),$(CURDIR)/$(dir))
+# List of relative paths to all folders and subfolders with code or data.
+SOURCE_ALL_DIRS := $(shell find $(SOURCE) -type d -print)
 
-ASMFILES := $(foreach dir,$(SOURCE_ALL_DIRS_ABS),$(wildcard $(dir)/*.asm))
+# All files with extension asm are assembled.
+ASMFILES := $(foreach dir,$(SOURCE_ALL_DIRS),$(wildcard $(dir)/*.asm))
 
-# Make it include all source folders - Add a '/' at the end of the path
-INCLUDES := $(foreach dir,$(SOURCE_ALL_DIRS_REL),-i$(CURDIR)/$(dir)/)
+# List of include directories: All source and data folders.
+# A '/' is appended to the path.
+INCLUDES := $(foreach dir,$(SOURCE_ALL_DIRS),-i$(CURDIR)/$(dir)/)
 
-# Prepare object paths
+# Prepare object paths from source files.
 OBJ = $(ASMFILES:.asm=.obj)
 
 # Targets
@@ -62,8 +64,7 @@ OBJ = $(ASMFILES:.asm=.obj)
 all: $(BIN)
 
 rebuild:
-	@make clean
-	@make
+	@make -B
 	@rm -f $(OBJ)
 
 run: $(BIN)
