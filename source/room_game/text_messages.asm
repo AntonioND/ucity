@@ -66,8 +66,10 @@ MSG_POLLUTION_HIGH:
     STR_ADD "Pollution is too<nl>high!"
 MSG_TRAFFIC_HIGH:
     STR_ADD "Traffic is too<nl>high!"
-MSG_MONEY_NEGATIVE:
+MSG_MONEY_NEGATIVE_CAN_LOAN:
     STR_ADD "You have run out<nl>of money. Consider<nl>getting a loan."
+MSG_MONEY_NEGATIVE_CANT_LOAN:
+    STR_ADD "You have run out<nl>of money!"
 
 MSG_CLASS_TOWN:
     STR_ADD "Your village is<nl>now a town!"
@@ -92,6 +94,10 @@ MSG_TECH_INSUFFICIENT:
     STR_ADD "Technology isn't<nl>advanced enough<nl>to build that!"
 MSG_FINISHED_LOAN:
     STR_ADD "You have finished<nl>repaying your<nl>loan."
+MSG_GAME_OVER_1:
+    STR_ADD "The people are<nl>tired of you."
+MSG_GAME_OVER_2:
+    STR_ADD "<nl>     Game Over"
 
 ;-------------------------------------------------------------------------------
 
@@ -100,7 +106,8 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
 
     MSG_ADD MSG_POLLUTION_HIGH
     MSG_ADD MSG_TRAFFIC_HIGH
-    MSG_ADD MSG_MONEY_NEGATIVE
+    MSG_ADD MSG_MONEY_NEGATIVE_CAN_LOAN
+    MSG_ADD MSG_MONEY_NEGATIVE_CANT_LOAN
 
     MSG_ADD MSG_CLASS_TOWN
     MSG_ADD MSG_CLASS_CITY
@@ -115,6 +122,8 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
 
     MSG_ADD MSG_TECH_INSUFFICIENT
     MSG_ADD MSG_FINISHED_LOAN
+    MSG_ADD MSG_GAME_OVER_1
+    MSG_ADD MSG_GAME_OVER_2
 
     MSG_ADD MSG_CUSTOM
 

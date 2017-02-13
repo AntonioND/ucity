@@ -276,6 +276,9 @@ ScenarioSetupGameVariables: ; a = index
     ld      [tax_percentage],a
 
     xor     a,a
+    ld      [negative_budget_count],a
+
+    xor     a,a
     ld      [LOAN_REMAINING_PAYMENTS],a
     ld      [LOAN_PAYMENTS_AMOUNT+0],a
     ld      [LOAN_PAYMENTS_AMOUNT+1],a
@@ -335,6 +338,7 @@ RandomMapSetupGameVariables:
 
     xor     a,a
     ld      [technology_level],a
+    ld      [negative_budget_count],a
 
     LONG_CALL   GraphsClearRecords
 

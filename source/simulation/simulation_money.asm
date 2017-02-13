@@ -51,6 +51,9 @@ budget_result::     DS 5
 
 tax_percentage::    DS 1
 
+; Number of quarters with negative budgets and negative funds
+negative_budget_count:: DS 1
+
 ;###############################################################################
 
     SECTION "Simulation Calculate Money Functions",ROMX
@@ -637,10 +640,43 @@ Simulation_ApplyBudgetAndTaxes::
 
     ld      de,MoneyWRAM
     call    BCD_DE_LW_ZERO ; Returns a = 1 if [de] < 0, preserves bc, de
-    jr      z,.skip_msg
-        ld      a,ID_MSG_MONEY_NEGATIVE
-        call    PersistentMessageShow
-.skip_msg:
+    jr      z,.end_msg
+
+        ld      de,budget_result
+        call    BCD_DE_LW_ZERO ; Returns a = 1 if [de] < 0, preserves bc, de
+        jr      z,.not_negative
+            ld      hl,negative_budget_count
+            inc     [hl]
+            ld      a,[hl]
+            cp      a,4
+            jr      nz,.end_negative_budget_check
+                ld      a,ID_MSG_GAME_OVER_1
+                call    MessageRequestAdd
+                ld      a,ID_MSG_GAME_OVER_2
+                call    MessageRequestAdd
+                ld      a,1
+                ld      [game_over],a
+                ret
+.not_negative:
+        ld      hl,negative_budget_count
+        ld      [hl],0
+
+.end_negative_budget_check:
+
+        ld      a,[LOAN_REMAINING_PAYMENTS]
+        and     a,a
+        jr      z,.can_get_loan
+            ld      a,ID_MSG_MONEY_NEGATIVE_CANT_LOAN
+            call    PersistentMessageShow
+            ret
+.can_get_loan:
+            ld      a,ID_MSG_MONEY_NEGATIVE_CAN_LOAN
+            call    PersistentMessageShow
+            ret
+.end_msg:
+
+    ld      hl,negative_budget_count
+    ld      [hl],0
 
     ret
 

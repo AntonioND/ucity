@@ -246,6 +246,9 @@ CityMapSave:: ; b = SRAM BANK to save the data to, doesn't check limits
     ld      a,[technology_level]
     ld      [SAV_TECHNOLOGY_LEVEL],a
 
+    ld      a,[negative_budget_count]
+    ld      [SAV_NEGATIVE_BUDGET_COUNT],a
+
     ; Player-set options
     ; ------------------
 
@@ -397,6 +400,9 @@ SRAMMapLoad:: ; b = index to load from. This function doesn't check bank limits.
 
     ld      a,[SAV_TECHNOLOGY_LEVEL]
     ld      [technology_level],a
+
+    ld      a,[SAV_NEGATIVE_BUDGET_COUNT]
+    ld      [negative_budget_count],a
 
     ; Player-set options
     ; ------------------

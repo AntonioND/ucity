@@ -78,6 +78,7 @@ animation_countdown: DS 1 ; This goes from 0 to ANIMATION_COUNT_FRAMES_xxxxx
 simulation_paused:: DS 1
 
 game_loop_end_requested: DS 1 ; If 1, exit game to main menu.
+game_over:: DS 1 ; If 1, game over has been requested
 
 game_requested_focus_x:  DS 1 ; Coordinates of requested area to scroll to.
 game_requested_focus_y:  DS 1 ; $FF if nothing requested.
@@ -1657,6 +1658,7 @@ RoomGame::
     ld      [vbl_handler_working],a
     ld      [simulation_paused],a
     ld      [game_loop_end_requested],a
+    ld      [game_over],a
 
     ld      a,$FF
     ld      [game_requested_focus_x],a ; disable focus request
@@ -1710,6 +1712,10 @@ RoomGame::
 
     ld      a,[simulation_paused]
     and     a,a ; Check if the simulation is paused
+    jr      nz,.end_simulation_clear_flag
+
+    ld      a,[game_over]
+    and     a,a ; If game over requested, skip simulation
     jr      nz,.end_simulation_clear_flag
 
         call    RoomGameSimulateStep

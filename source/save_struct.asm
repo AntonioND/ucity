@@ -67,6 +67,8 @@ SAV_LOAN_PAYMENTS_AMOUNT::    DS 2 ; BCD, LSB first
 
 SAV_TECHNOLOGY_LEVEL:: DS 1
 
+SAV_NEGATIVE_BUDGET_COUNT:: DS 1
+
 ; TODO : Reorganize every field so that it makes sense
 
 ; Historical data for graphs:
