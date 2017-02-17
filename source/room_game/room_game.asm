@@ -847,15 +847,13 @@ GameStateMachineHandle::
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,0999999999
-
 PAUSE_MENU_BUDGET    EQU 0
 PAUSE_MENU_BANK      EQU 1
 PAUSE_MENU_MINIMAPS  EQU 2
 PAUSE_MENU_GRAPHS    EQU 3
 PAUSE_MENU_OPTIONS   EQU 4
 PAUSE_MENU_PAUSE     EQU 5
-PAUSE_MENU_HELP      EQU 6
+PAUSE_MENU_STATS     EQU 6
 PAUSE_MENU_SAVE_GAME EQU 7
 PAUSE_MENU_MAIN_MENU EQU 8
 
@@ -1007,19 +1005,32 @@ PauseMenuHandleOption:
         ret
 
 .not_pause:
-    cp      a,PAUSE_MENU_HELP
-    jr      nz,.not_help
+    cp      a,PAUSE_MENU_STATS
+    jr      nz,.not_stats
 
-        ; Help
-        ; ----
+        ; City Stats
+        ; ----------
 
-        ; TODO : Replace this by an actual help menu
-        ld      de,MONEY_AMOUNT_CHEAT
-        call    MoneySet ; de = ptr to the amount of money to set
+        ld      a,[simulation_running]
+        and     a,a ; If we save the city while the simulation is running we
+        jr      z,.continue_stats  ; risk saving in an intermediate state.
+        call    SFX_ErrorUI
+        ret
+
+.continue_stats:
+        LONG_CALL_ARGS  RoomCityStats
+
+        ld      a,2 ; load minimal data
+        call    RoomGameLoad
+
+        ld      a,GAME_STATE_PAUSE_MENU
+        ld      [game_state],a
+
+        call    StatusBarMenuForceShow
 
         ret
 
-.not_help:
+.not_stats:
     cp      a,PAUSE_MENU_SAVE_GAME
     jr      nz,.not_save_game
 
