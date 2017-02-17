@@ -809,7 +809,7 @@ StatusBarMenuDrawPauseState::
         ld      hl,.str_pause
 .print:
     ld      b,7
-    ld      de,12*32+CURSOR_X+2+$9800 ; Pause/Unpause
+    ld      de,13*32+CURSOR_X+2+$9800 ; Pause/Unpause
     call    vram_copy_fast ; b = size - hl = source address - de = dest
 
     ret
