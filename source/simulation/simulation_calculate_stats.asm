@@ -174,7 +174,7 @@ ENDC
             ; Empty
             ld      hl,residential_area_empty
             inc     [hl]
-            jr      nc,.end
+            jr      nz,.end
             inc     hl
             inc     [hl]
             jr      .end
@@ -182,7 +182,7 @@ ENDC
             ; Used
             ld      hl,residential_area_used
             inc     [hl]
-            jr      nc,.end
+            jr      nz,.end
             inc     hl
             inc     [hl]
             jr      .end
@@ -199,7 +199,7 @@ ENDC
             ; Empty
             ld      hl,commercial_area_empty
             inc     [hl]
-            jr      nc,.end
+            jr      nz,.end
             inc     hl
             inc     [hl]
             jr      .end
@@ -207,7 +207,7 @@ ENDC
             ; Used
             ld      hl,commercial_area_used
             inc     [hl]
-            jr      nc,.end
+            jr      nz,.end
             inc     hl
             inc     [hl]
             jr      .end
@@ -224,7 +224,7 @@ ENDC
             ; Empty
             ld      hl,industrial_area_empty
             inc     [hl]
-            jr      nc,.end
+            jr      nz,.end
             inc     hl
             inc     [hl]
             jr      .end
@@ -232,7 +232,7 @@ ENDC
             ; Used
             ld      hl,industrial_area_used
             inc     [hl]
-            jr      nc,.end
+            jr      nz,.end
             inc     hl
             inc     [hl]
             jr      .end
