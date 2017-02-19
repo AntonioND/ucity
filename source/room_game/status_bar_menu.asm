@@ -409,6 +409,7 @@ StatusBarMenuLoadGfx::
 
     call    StatusBarMenuDrawPauseState
 
+    ld      de,$9800+32*4+6 ; prepare pointer for VRAM writes
     call    StatusBarMenuDrawCityName ; only do this once!
 
     ret
@@ -586,37 +587,10 @@ StatusBarUpdate::
     ; City class
     ; ----------
 
-    ld      a,[city_class]
-    ld      e,a
-    ld      d,0
-    ld      hl,.class_strings
-    add     hl,de
-    add     hl,de
-    ld      a,[hl+]
-    ld      d,[hl]
-    ld      e,a ; get pointer to class string
-
-    ld      b,10
-    ld      hl,$9800+32*3+6
-    call    vram_nitro_copy
+    ld      de,$9800+32*3+6 ; pointer to VRAM destination
+    call    StatusBarMenuDrawCityClass
 
     ret
-
-.class_strings:
-    DW  .class_village, .class_town, .class_city
-    DW  .class_metropolis, .class_capital
-
-; The strings have to be 10 chars long
-.class_village:
-    STR_ADD "   Village"
-.class_town:
-    STR_ADD "      Town"
-.class_city:
-    STR_ADD "      City"
-.class_metropolis:
-    STR_ADD "Metropolis"
-.class_capital:
-    STR_ADD "   Capital"
 
 ;-----------------------------------
 
@@ -822,7 +796,10 @@ StatusBarMenuDrawPauseState::
 
 ;-------------------------------------------------------------------------------
 
+; DE = pointer to VRAM to draw to
 StatusBarMenuDrawCityName:: ; only do this once, when loading the map!
+
+    push    de ; (*) preserve pointer
 
     ; Align name to the right
 
@@ -848,7 +825,7 @@ StatusBarMenuDrawCityName:: ; only do this once, when loading the map!
     ld      a,TEXT_INPUT_LENGTH ; limit to the max length
     sub     a,b ; a = Number of spaces needed before name
 
-    ld      hl,$9800+32*4+6 ; prepare pointer for VRAM writes
+    pop     hl ; (*) restore pointer
 
     and     a,a
     jr      z,.skip_spaces ; if name length is the max one, don't print spaces
@@ -869,5 +846,45 @@ StatusBarMenuDrawCityName:: ; only do this once, when loading the map!
     call    vram_copy_fast ; b = size    hl = source address    de = dest
 
     ret
+
+;-------------------------------------------------------------------------------
+
+; DE = Pointer in VRAM to draw to
+StatusBarMenuDrawCityClass::
+
+    push    de ; (*) preserve pointer
+
+    ld      a,[city_class]
+    ld      e,a
+    ld      d,0
+    ld      hl,.class_strings
+    add     hl,de
+    add     hl,de
+    ld      a,[hl+]
+    ld      d,[hl]
+    ld      e,a ; get pointer to class string
+
+    pop     hl ; (*) restore pointer
+
+    ld      b,10
+    call    vram_nitro_copy
+
+    ret
+
+.class_strings:
+    DW  .class_village, .class_town, .class_city
+    DW  .class_metropolis, .class_capital
+
+; The strings have to be 10 chars long
+.class_village:
+    STR_ADD "   Village"
+.class_town:
+    STR_ADD "      Town"
+.class_city:
+    STR_ADD "      City"
+.class_metropolis:
+    STR_ADD "Metropolis"
+.class_capital:
+    STR_ADD "   Capital"
 
 ;###############################################################################
