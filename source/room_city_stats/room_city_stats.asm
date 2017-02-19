@@ -77,6 +77,81 @@ CityStatsMenuHandle:
 
 ;-------------------------------------------------------------------------------
 
+RoomCityStatsPrintInfo:
+
+    xor     a,a
+    ld      [rVBK],a
+
+    add     sp,-10 ; (*)
+
+    ; Print Name
+    ; ----------
+
+    ld      de,$9800+32*3+9 ; de = pointer in VRAM to write to
+    LONG_CALL_ARGS  StatusBarMenuDrawCityName
+
+    ; Print population
+    ; ----------------
+
+    ; Convert to tile from BCD
+    ld      de,city_population ; BCD, LSB first, LSB in lower nibbles
+    ld      hl,sp+0
+    call    BCD_DE_2TILE_HL_LEADING_SPACES
+
+    ld      b,10
+    ld      hl,sp+0
+    LD_DE_HL
+    ld      hl,$9800+32*4+9
+    call    vram_nitro_copy
+
+    ; City class
+    ; ----------
+
+    ld      de,$9800+32*5+9 ; pointer to VRAM destination
+    call    StatusBarMenuDrawCityClass
+
+    ; Print Date
+    ; ----------
+
+    ld      a,[date_year+1] ; LSB first in date_year
+    ld      b,a
+    ld      a,[date_year+0]
+    ld      c,a
+    ld      a,[date_month]
+    ld      hl,sp+0
+    LD_DE_HL ; de = pointer to destination of print (8 chars)
+    call    DatePrint
+
+    ld      b,8
+    ld      hl,sp+0
+    LD_DE_HL
+    ld      hl,$9800+32*6+11
+    call    vram_nitro_copy
+
+    ; Print money
+    ; -----------
+
+    ; Convert to tile from BCD
+    ld      de,MoneyWRAM ; BCD, LSB first, LSB in lower nibbles
+    ld      hl,sp+0
+    call    BCD_SIGNED_DE_2TILE_HL_LEADING_SPACES
+
+    ; Copy to VRAM
+    ld      b,10
+    ld      hl,sp+0
+    LD_DE_HL
+    ld      hl,$9800+32*7+9
+    call    vram_nitro_copy
+
+    ; End
+    ; ---
+
+    add     sp,+10 ; (*)
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomCityStatsMenuLoadBG:
 
     ; Load border
@@ -161,11 +236,7 @@ RoomCityStats::
 
     call    RoomCityStatsMenuLoadBG
 
-    ; Print default values
-
-    ; TODO
-
-    ; End of default values
+    call    RoomCityStatsPrintInfo
 
     call    LoadTextPalette
 
