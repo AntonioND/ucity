@@ -35,6 +35,9 @@
 
 ;-------------------------------------------------------------------------------
 
+total_land_area:       DS 2 ; Area that isn't water (in tiles, LSB first)
+developed_land_area:   DS 2 ; Area where there is something built in
+
 city_stats_room_exit:  DS 1 ; set to 1 to exit room
 
 ;###############################################################################
@@ -74,6 +77,154 @@ CityStatsMenuHandle:
     ; TODO - Remove this cheat!
 
     DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,0999999999
+
+;-------------------------------------------------------------------------------
+
+; 255 is considered an invalid value
+RoomCityStatsCalculateAproxPercent: ; a = de * 100 / hl
+
+    ld      a,h
+    or      a,l
+    jr      nz,.not_div_by_0
+        xor     a,a ; return 0
+        ret
+.not_div_by_0:
+
+    ld      c,16 ; get the top 7 bits of the values to simplify divisions
+.loop:
+        ld      a,h
+        or      a,d
+        bit     6,a ; get 7 bits only
+        jp      nz,.end_simplify_loop
+        add     hl,hl ; hl <<= 1
+        sla     e     ; de <<= 1
+        rl      d
+    dec     c
+    jr      nz,.loop
+.end_simplify_loop:
+
+    ; D = aprox DE
+    ; H = aprox HL
+
+    push    hl
+
+    ld      a,100
+    ld      c,d
+    call    mul_u8u8u16 ; hl = result    a,c = initial values    de preserved
+
+    pop     de
+
+    ld      c,d
+
+    ; HL = aprox DE * 100
+    ; C = aprox HL
+
+    call    div_u16u7u16 ; hl / c -> hl
+
+    ; HL should be less or equal than 100!
+
+    ld      a,h
+    and     a,a ; if hl >= 255
+    jr      z,.div_lower_256
+
+        ld      b,b
+        ld      a,255 ; 255 is considered an invalid value
+        ret
+
+.div_lower_256:
+
+    ld      a,l
+    cp      a,101 ; cy = 1 if n > a
+    jr      c,.div_lower_100
+
+        ld      b,b
+        ld      a,255 ; 255 is considered an invalid value
+        ret
+
+.div_lower_100:
+
+    ld      a,l ; get result
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomCityStatsCalculateAproxPercentBCD: ; hl = de * 100 / hl, result in BCD
+
+    call    RoomCityStatsCalculateAproxPercent ; a = de * 100 / hl
+
+    ld      l,a
+    ld      h,0
+    add     hl,hl ; hl = a*2
+    ld      de,BINARY_TO_BCD ; 2 bytes per entry. LSB first
+    add     hl,de
+
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomCityStatsCalculateLand:
+
+    ; Clear variables
+
+    xor     a,a
+
+    ld      hl,total_land_area
+    ld      [hl+],a
+    ld      [hl],a
+    ld      hl,developed_land_area
+    ld      [hl+],a
+    ld      [hl],a
+
+    ; Calculate areas
+
+    ld      hl,CITY_MAP_TILES
+
+    ld      a,BANK_CITY_MAP_TYPE
+    ld      [rSVBK],a
+
+.loop:
+    push    hl
+
+        ld      a,[hl] ; get complete type with flags
+        cp      a,TYPE_WATER
+        jr      z,.not_field_or_forest
+
+            ; Land
+            ld      hl,total_land_area
+            inc     [hl]
+            jr      nz,.end_increment_land
+            inc     hl
+            inc     [hl]
+.end_increment_land:
+
+            cp      a,TYPE_FIELD
+            jr      z,.not_field_or_forest
+                cp      a,TYPE_FOREST
+                jr      z,.not_field_or_forest
+
+                    ; Developed Land
+                    ld      hl,developed_land_area
+                    inc     [hl]
+                    jr      nz,.end_increment_developed_land
+                    inc     hl
+                    inc     [hl]
+.end_increment_developed_land:
+
+.not_field_or_forest:
+
+    pop     hl
+
+    inc     hl
+
+    bit     5,h ; Up to E000
+    jr      z,.loop
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
@@ -142,6 +293,132 @@ RoomCityStatsPrintInfo:
     LD_DE_HL
     ld      hl,$9800+32*7+9
     call    vram_nitro_copy
+
+    ; Print percentage helper
+
+PRINT_PERCENTAGE : MACRO ; de = parcial, hl = total, \3 = ptr to VRAM
+
+    call    RoomCityStatsCalculateAproxPercentBCD ; hl = de * 100 / hl
+
+    LD_DE_HL ; de = percentage, BCD
+
+    add     sp,-5
+
+        ld      hl,sp+0
+        ld      a,e
+        ld      [hl+],a
+        ld      a,d
+        ld      [hl+],a
+        xor     a,a
+        ld      [hl+],a
+        ld      [hl+],a
+        ld      [hl+],a
+
+        ld      hl,sp+0
+        LD_DE_HL ; de = source
+        ld      hl,sp+5 ; hl = dest
+        call    BCD_SIGNED_DE_2TILE_HL_LEADING_SPACES
+
+    add     sp,+5
+
+    ; Copy to VRAM
+    ld      b,3
+    ld      hl,sp+7
+    LD_DE_HL
+    ld      hl,\1
+    call    vram_nitro_copy
+ENDM
+
+    ; Developed land
+    ; --------------
+
+    ld      hl,developed_land_area
+    ld      a,[hl+]
+    ld      d,[hl]
+    ld      e,a ; de = developed land
+
+    ld      hl,total_land_area
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a ; hl = total land
+
+    PRINT_PERCENTAGE    $9800+32*9+15
+
+    ; Residential developed land / Total developed land
+    ; -------------------------------------------------
+
+    ld      hl,residential_area_empty
+    ld      a,[hl+]
+    ld      d,[hl]
+    ld      e,a
+
+    ld      hl,residential_area_used
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    add     hl,de
+    LD_DE_HL ; de = total residential land
+
+    ld      hl,developed_land_area
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a ; hl = developed land
+
+    PRINT_PERCENTAGE    $9800+32*10+15
+
+    ; Commercial developed land / Total developed land
+    ; ------------------------------------------------
+
+    ld      hl,commercial_area_empty
+    ld      a,[hl+]
+    ld      d,[hl]
+    ld      e,a
+
+    ld      hl,commercial_area_used
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    add     hl,de
+    LD_DE_HL ; de = total commercial land
+
+    ld      hl,developed_land_area
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a ; hl = developed land
+
+    PRINT_PERCENTAGE    $9800+32*11+15
+
+    ; Industrial developed land / Total developed land
+    ; ------------------------------------------------
+
+    ld      hl,industrial_area_empty
+    ld      a,[hl+]
+    ld      d,[hl]
+    ld      e,a
+
+    ld      hl,industrial_area_used
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    add     hl,de
+    LD_DE_HL ; de = total industrial land
+
+    ld      hl,developed_land_area
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a ; hl = developed land
+
+    PRINT_PERCENTAGE    $9800+32*12+15
+
+    ; Traffic
+    ; -------
+
+    ; TODO
+
+    ; Pollution
+    ; ---------
+
+    ; TODO
 
     ; End
     ; ---
@@ -236,6 +513,7 @@ RoomCityStats::
 
     call    RoomCityStatsMenuLoadBG
 
+    call    RoomCityStatsCalculateLand
     call    RoomCityStatsPrintInfo
 
     call    LoadTextPalette

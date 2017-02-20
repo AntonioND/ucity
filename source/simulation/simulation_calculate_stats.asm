@@ -66,12 +66,12 @@ population_industrial::  DS 4 ; binary, LSB first
 population_other::       DS 4 ; binary, LSB first
 population_total::       DS 4 ; binary, LSB first
 
-residential_area_empty: DS 2 ; LSB first. Area in tiles
-residential_area_used:  DS 2
-commercial_area_empty:  DS 2
-commercial_area_used:   DS 2
-industrial_area_empty:  DS 2
-industrial_area_used:   DS 2
+residential_area_empty:: DS 2 ; LSB first. Area in tiles
+residential_area_used::  DS 2
+commercial_area_empty::  DS 2
+commercial_area_used: :  DS 2
+industrial_area_empty::  DS 2
+industrial_area_used::   DS 2
 
 graph_value_r:: DS 1 ; 0-7 (0 = high demand, 3,4 = neutral, 7 = low demand)
 graph_value_c:: DS 1 ; They are stored with an offset of -3 to make 0 the
