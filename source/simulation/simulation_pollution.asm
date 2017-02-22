@@ -303,11 +303,11 @@ Simulation_Pollution::
         ld      [hl+],a
 
         ld      a,[hl]
-        add     a,0
+        adc     a,0
         ld      [hl+],a
 
         ld      a,[hl]
-        add     a,0
+        adc     a,0
         ld      [hl],a
 
     pop     hl
