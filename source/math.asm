@@ -98,9 +98,15 @@ CalculateAproxPercent:: ; a = de * 100 / hl
 
 ;-------------------------------------------------------------------------------
 
-CalculateAproxPercentBCD:: ; hl = de * 100 / hl, result in BCD
+CalculateAproxPercentBCD:: ; hl = de * 100 / hl, Result in BCD (H=MSB, L=LSB)
 
     call    CalculateAproxPercent ; a = de * 100 / hl
+
+    jr      Byte2BCD ; return from there
+
+;-------------------------------------------------------------------------------
+
+Byte2BCD:: ; a = byte, returns hl = BCD (H=MSB, L=LSB)
 
     ld      l,a
     ld      h,0

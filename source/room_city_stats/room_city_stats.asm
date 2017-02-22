@@ -209,9 +209,7 @@ RoomCityStatsPrintInfo:
 
     ; Print percentage helper
 
-PRINT_PERCENTAGE : MACRO ; de = parcial, hl = total, \3 = ptr to VRAM
-
-    call    CalculateAproxPercentBCD ; hl = de * 100 / hl
+PRINT_PERCENTAGE : MACRO ; hl = percentage (BCD), \3 = ptr to VRAM
 
     LD_DE_HL ; de = percentage, BCD
 
@@ -255,6 +253,7 @@ ENDM
     ld      h,[hl]
     ld      l,a ; hl = total land
 
+    call    CalculateAproxPercentBCD ; hl = de * 100 / hl
     PRINT_PERCENTAGE    $9800+32*9+15
 
     ; Residential developed land / Total developed land
@@ -277,6 +276,7 @@ ENDM
     ld      h,[hl]
     ld      l,a ; hl = developed land
 
+    call    CalculateAproxPercentBCD ; hl = de * 100 / hl
     PRINT_PERCENTAGE    $9800+32*10+15
 
     ; Commercial developed land / Total developed land
@@ -299,6 +299,7 @@ ENDM
     ld      h,[hl]
     ld      l,a ; hl = developed land
 
+    call    CalculateAproxPercentBCD ; hl = de * 100 / hl
     PRINT_PERCENTAGE    $9800+32*11+15
 
     ; Industrial developed land / Total developed land
@@ -321,12 +322,15 @@ ENDM
     ld      h,[hl]
     ld      l,a ; hl = developed land
 
+    call    CalculateAproxPercentBCD ; hl = de * 100 / hl
     PRINT_PERCENTAGE    $9800+32*12+15
 
     ; Traffic
     ; -------
 
-    ; TODO
+    ld      a,[simulation_traffic_jam_num_tiles_percent]
+    call    Byte2BCD ; a = byte, returns hl = BCD (H=MSB, L=LSB)
+    PRINT_PERCENTAGE    $9800+32*14+15
 
     ; Pollution
     ; ---------
