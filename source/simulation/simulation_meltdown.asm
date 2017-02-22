@@ -279,6 +279,10 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
 
 .explode:
 
+    call    GetRandom ; de, bc preserved
+    and     a,7
+    ret     nz ; Return 1/8 times
+
     ; e = index of power plant that exploded
 
     ; Look for the power plant that generated the explosion

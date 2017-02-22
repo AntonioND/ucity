@@ -668,7 +668,7 @@ Simulation_FireTryStart:: ; b = 1 to force fire, 0 to make it random
     ; Probabilities depend on the number of fire stations
 
     ld      a,[initial_number_fire_stations]
-    ld      b,8
+    ld      b,4
 .shift_loop: ; wait until fire stations is 0 or b is 0
     and     a,a
     jr      z,.end_shift_loop
