@@ -46,6 +46,7 @@ COUNT_STADIUMS::        DS 1
 COUNT_MUSEUMS::         DS 1
 COUNT_LIBRARIES::       DS 1
 
+COUNT_ROADS::           DS 2 ; LSB first
 COUNT_TRAIN_TRACKS::    DS 2 ; LSB first
 
 ;###############################################################################
@@ -71,6 +72,8 @@ Simulation_CountBuildings::
     ld      [COUNT_MUSEUMS],a
     ld      [COUNT_LIBRARIES],a
 
+    ld      [COUNT_ROADS+0],a
+    ld      [COUNT_ROADS+1],a
     ld      [COUNT_TRAIN_TRACKS+0],a
     ld      [COUNT_TRAIN_TRACKS+1],a
 
@@ -121,6 +124,7 @@ ENDM
 
     ; Count the number of train tracks
 
+    ld      bc,0 ; number of roads
     ld      de,0 ; Number of train tracks
     ld      hl,CITY_MAP_TILES
 
@@ -130,13 +134,27 @@ ENDM
 .loop2:
 
         ld      a,[hl+]
-        and     a,TYPE_HAS_TRAIN
+
+        bit     TYPE_HAS_ROAD_BIT,a
+        jr      z,.skip_road
+            inc     bc
+            jr      .end_iteration
+.skip_road:
+
+        bit     TYPE_HAS_TRAIN_BIT,a
         jr      z,.skip_train
             inc     de
 .skip_train:
 
+.end_iteration:
+
     bit     5,h ; Up to E000
     jr      z,.loop2
+
+    ld      a,c
+    ld      [COUNT_ROADS+0],a ; LSB first
+    ld      a,b
+    ld      [COUNT_ROADS+1],a
 
     ld      a,e
     ld      [COUNT_TRAIN_TRACKS+0],a ; LSB first

@@ -35,11 +35,13 @@
 
 ;-------------------------------------------------------------------------------
 
-; Amount of tiles with traffic jams. It will stop counting when it reaches 255.
-; Traffic is considered high when it reaches TRAFFIC_MAX_LEVEL.
-simulation_traffic_jam_num_tiles:: DS 1
+; Amount of tiles with traffic jams.
+simulation_traffic_jam_num_tiles:: DS 2 ; LSB first
 
-TRAFFIC_MAX_LEVEL EQU (256/3) ; Max level of adequate traffic
+simulation_traffic_jam_num_tiles_percent:: DS 1
+
+TRAFFIC_MAX_LEVEL     EQU (256/6) ; Max level of adequate traffic
+TRAFFIC_JAM_MAX_TILES EQU 30 ; Max percent of tiles with high traffic
 
 ;###############################################################################
 
@@ -464,7 +466,8 @@ Simulation_TrafficSetTileOkFlag::
     ;   by all people.
 
     xor     a,a
-    ld      [simulation_traffic_jam_num_tiles],a
+    ld      [simulation_traffic_jam_num_tiles+0],a
+    ld      [simulation_traffic_jam_num_tiles+1],a
 
     ld      hl,CITY_MAP_FLAGS ; Base address of the map!
 
@@ -496,13 +499,17 @@ Simulation_TrafficSetTileOkFlag::
                 ; Count the number of road/train tiles that have too much
                 ; traffic to show warning messages to the player.
 
-                ld      de,simulation_traffic_jam_num_tiles
-                ld      a,[de]
-                inc     a
+                LD_DE_HL
+
+                ld      hl,simulation_traffic_jam_num_tiles
+                inc     [hl]
                 jr      nz,.not_overflowed ; check if overflow from 255
-                dec     a ; if overflowed from 255, return to 255
+                inc     hl
+                inc     [hl]
 .not_overflowed:
-                ld      [de],a
+
+                LD_HL_DE
+
                 jr      .tile_res_flag ; set flag to not ok
 
 .not_road_or_train:
@@ -568,13 +575,30 @@ Simulation_TrafficSetTileOkFlag::
     ; Check if traffic is too high
     ; ----------------------------
 
-    ; Complain if more than 64 tiles have high traffic
-    ld      a,[simulation_traffic_jam_num_tiles]
-    cp      a,64 ; cy = 1 if n > a (threshold > current value)
-    ret     c
+    ld      hl,COUNT_ROADS ; LSB first
+    ld      a,[hl+]
+    ld      c,a
+    ld      b,[hl]
 
-    ; TODO - Use this for total city score or to make people not want to come
-    ; here?
+    ld      hl,COUNT_TRAIN_TRACKS ; LSB first
+    ld      a,[hl+]
+    ld      l,a
+    ld      h,[hl]
+
+    add     hl,bc ; hl = total roads + train tracks
+
+    ld      a,[simulation_traffic_jam_num_tiles+0] ; LSB first
+    ld      e,a
+    ld      a,[simulation_traffic_jam_num_tiles+1]
+    ld      d,a ; de = traffic jam tiles
+
+    ; 255 is considered an invalid value
+    call    CalculateAproxPercent ; a = de * 100 / hl
+
+    ld      [simulation_traffic_jam_num_tiles_percent],a
+
+    cp      a,TRAFFIC_JAM_MAX_TILES ; cy = 1 if n > a
+    ret     c ; return if percent is lower
 
     ; This message is shown only once per year
     ld      a,ID_MSG_TRAFFIC_HIGH
