@@ -353,9 +353,6 @@ Simulation_Pollution::
     cp      a,$03 ; cy = 1 if n > a (threshold > current value)
     ret     c
 
-    ; TODO - Use this for total city score or to make people not want to come
-    ; here?
-
     ; This message is shown only once per year
     ld      a,ID_MSG_POLLUTION_HIGH
     call    PersistentMessageShow

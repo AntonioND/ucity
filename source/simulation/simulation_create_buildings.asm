@@ -542,6 +542,26 @@ Simulation_CreateBuildings::
     add     sp,-2 ; (***)
 
     ld      a,[tax_percentage]
+    ld      b,a
+
+    ; Penalize if pollution is high
+    ld      a,[pollution_total+2] ; Max value = 255*64*64  = 0x0FF000
+    sra     a
+    ; a = 0 ~ F / 2 = 0 ~ 7
+    add     a,b
+    ld      b,a
+
+    ; Penalize if traffic is high
+    ld      a,[simulation_traffic_jam_num_tiles_percent]
+    swap    a
+    and     a,$0F
+    add     a,b
+
+    cp      a,20 ; cy = 1 if n > a
+    jr      c,.not_overflow
+    ld      a,20
+.not_overflow:
+
     ld      e,a
     ld      d,0
     ld      hl,CreateBuildingProbability ; 0 to 20% taxes - 21 amounts
