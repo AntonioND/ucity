@@ -335,7 +335,9 @@ ENDM
     ; Pollution
     ; ---------
 
-    ; TODO
+    ld      a,[pollution_total_percent]
+    call    Byte2BCD ; a = byte, returns hl = BCD (H=MSB, L=LSB)
+    PRINT_PERCENTAGE    $9800+32*16+15
 
     ; End
     ; ---

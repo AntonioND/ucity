@@ -36,6 +36,7 @@
 
 ; Total pollution in the city. LSB first
 pollution_total: DS 3 ; Max value = 255*64*64 (fits in 3 bytes!)
+pollution_total_percent:: DS 1 ; percentage of pollution
 
 ;###############################################################################
 
@@ -327,6 +328,25 @@ Simulation_Pollution::
 
     ; Max value = 255*64*64  = 0x0FF000
     ; Complain if pollution >= 0x030000 so that we only need to check top byte
+
+    ld      a,[pollution_total+1]
+    and     a,$F0
+    swap    a
+    ld      b,a
+    ld      a,[pollution_total+2]
+    and     a,$0F
+    swap    a
+    or      a,b ; a = top byte of the value
+
+    ld      c,100
+
+    call    mul_u8u8u16 ; hl = top byte * 100 => h = top byte * 100 / 256
+
+    ; h = percentage of pollution
+    ld      a,h
+    ld      [pollution_total_percent],a
+
+    ; Check if we need to show a message
 
     ld      hl,pollution_total+2
     ld      a,[hl]
