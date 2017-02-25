@@ -195,26 +195,26 @@ StatusBarHandlerVBL::
     jr      nz,.on_top
 
         ; At the bottom
+        ld      a,255
+        ld      [rWX],a
+
         ld      a,[game_sprites_8x16]
         or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8800
         ld      [rLCDC],a
-
-        ld      a,255
-        ld      [rWX],a
 
         jr      .end
 .on_top:
 
         ; On top
+        ld      a,7
+        ld      [rWX],a
+
         ld      a,[status_bar_overlay_sprites_active]
         ld      b,a
         ld      a,[game_sprites_8x16]
         or      a,b
         or      a,LCDCF_BG9C00|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8000
         ld      [rLCDC],a
-
-        ld      a,7
-        ld      [rWX],a
 
 .end:
 
@@ -314,6 +314,18 @@ StatusBarMenuShow::
 
 StatusBarMenuForceShow::
 
+    ld      b,143
+    call    wait_ly
+
+    di ; (*) critical section start
+
+    ld      b,144
+    call    wait_ly
+
+    ; This has to be done during VBL before the screen starts being drawn. If
+    ; not, the window hardware won't set the correct coordinates at the top left
+    ; corner and garbage will be shown during that frame. The Y coordinate of
+    ; the window seems to be refreshed at LY=0 only.
     xor     a,a
     ld      [rWY],a
     ;ld      [rSCY],a
@@ -323,6 +335,8 @@ StatusBarMenuForceShow::
 
     ld      a,LCDCF_BG8000|LCDCF_WIN9800|LCDCF_WINON|LCDCF_OBJON|LCDCF_ON
     ld      [rLCDC],a
+
+    ei ; (*) critical section end
 
     ; Clear cursor positions except for the first one
     xor     a,a
