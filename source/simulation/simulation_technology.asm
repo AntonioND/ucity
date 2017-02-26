@@ -63,14 +63,9 @@ Technology_IsBuildingAvailable:: ; b = B_xxxx define
 
         ld      a,[technology_level]
         cp      a,TECH_LEVEL_NUCLEAR ; cy = 1 if n > a
-        jr      c,.not_available_nuclear
-            ld      b,1
-            ret
-.not_available_nuclear:
-            ld      a,ID_MSG_TECH_INSUFFICIENT
-            call    MessageRequestAdd
-            ld      b,0
-            ret
+        jr      c,.not_available
+        jr      .available
+
 .not_nuclear:
 
     ; Nuclear fusion power plant
@@ -80,19 +75,19 @@ Technology_IsBuildingAvailable:: ; b = B_xxxx define
 
         ld      a,[technology_level]
         cp      a,TECH_LEVEL_FUSION ; cy = 1 if n > a
-        jr      c,.not_available_fusion
-            ld      b,1
-            ret
-.not_available_fusion:
-            ld      a,ID_MSG_TECH_INSUFFICIENT
-            call    MessageRequestAdd
-            ld      b,0
-            ret
+        jr      c,.not_available
+        jr      .available
+
 .not_fusion:
 
     ; The rest of buildings are always available
 
+.available:
     ld      b,1
+    ret
+
+.not_available:
+    ld      b,0
     ret
 
 ;-------------------------------------------------------------------------------
