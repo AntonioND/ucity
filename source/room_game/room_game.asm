@@ -1295,30 +1295,36 @@ InputHandleModeSelectBuilding:
     ld      a,[joy_released]
     and     a,PAD_A
     jr      z,.not_a
+
+        ; Close menu regardless of the result. This way, either the building
+        ; selection menu is hidden and an error message is shown, or the menu is
+        ; hidden and the player can start building.
+
         LONG_CALL   BuildSelectMenuHide
 
         ; Check if we can build this building or not. If not, just enter watch
-        ; mode and show a message with an error message.
+        ; mode and show an error message.
 
-        call    BuildingTypeGet ; returns type in a
-        ld      b,a
-        LONG_CALL_ARGS      Technology_IsBuildingAvailable
+        LONG_CALL_ARGS  BuildingIsAvailable
         ld      a,b
         and     a,a
-        jr      nz,.enough_technology
-            ld      a,ID_MSG_TECH_INSUFFICIENT
-            call    MessageRequestAdd
+        jr      nz,.available
+
+            ; Not available
             ld      b,GAME_STATE_WATCH
             call    GameStateMachineStateSet
             ld      a,1
             ret
-.enough_technology:
 
+.available:
+
+        ; Available
         LONG_CALL   BuildSelectMenuSelectBuildingUpdateCursor
         ld      b,GAME_STATE_EDIT
         call    GameStateMachineStateSet
         ld      a,1
         ret
+
 .not_a:
 
     ld      a,[joy_pressed]

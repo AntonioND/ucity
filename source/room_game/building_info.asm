@@ -28,6 +28,7 @@
     INCLUDE "tileset_info.inc"
     INCLUDE "room_game.inc"
     INCLUDE "money.inc"
+    INCLUDE "text_messages.inc"
 
 ;###############################################################################
 
@@ -42,6 +43,28 @@ building_temp_price: DS 5
 ;###############################################################################
 
     SECTION "Building Information Functions", ROM0
+
+;-------------------------------------------------------------------------------
+
+; Returns b = 1 if available, 0 if not (and shows an error message)
+BuildingIsAvailable:: ; b = B_xxxx define
+
+    ; Check technology level
+
+    call    BuildingTypeGet ; returns type in a
+    ld      b,a
+    LONG_CALL_ARGS  Technology_IsBuildingAvailable
+    ld      a,b
+    and     a,a
+    jr      nz,.enough_technology
+        ld      a,ID_MSG_TECH_INSUFFICIENT
+        call    MessageRequestAdd
+        ld      b,0
+        ret
+.enough_technology:
+
+    ld      b,1 ; return
+    ret
 
 ;-------------------------------------------------------------------------------
 
