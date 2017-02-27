@@ -1465,6 +1465,9 @@ InputHandleModeShowMessage:
 
 RoomGameInitialStatusRefresh:
 
+    ; This function refreshes the status of all maps and variables that are
+    ; needed for the simulation, like the size of the city, population, etc.
+
     ; Calculate the number of building of each type. This has to be refreshed
     ; right after each time edit mode is exited, after a fire is extinguished,
     ; etc.
@@ -1478,8 +1481,6 @@ RoomGameInitialStatusRefresh:
     ; Calculate RCI graph
 
     LONG_CALL   Simulation_CalculateRCIDemand
-
-    ; TODO - Reload other things?
 
     ret
 

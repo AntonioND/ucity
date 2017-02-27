@@ -270,7 +270,8 @@ ScenarioSetupGameVariables: ; a = index
     ld      a,b
     ld      [persistent_msg_flags+1],a
 
-    ; TODO - Make all of this parametrizable?
+    ; Non-parametrizable variables
+    ; ----------------------------
 
     ld      a,10
     ld      [tax_percentage],a
@@ -283,7 +284,7 @@ ScenarioSetupGameVariables: ; a = index
     ld      [LOAN_PAYMENTS_AMOUNT+0],a
     ld      [LOAN_PAYMENTS_AMOUNT+1],a
 
-    ; TODO : Allow predefined maps to start with some historical data?
+    ; Clear historical data
 
     LONG_CALL   GraphsClearRecords
 
