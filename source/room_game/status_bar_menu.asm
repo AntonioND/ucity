@@ -291,6 +291,15 @@ StatusBarMenuHide::
     and     a,a
     ret     z ; return if not shown
 
+
+    ld      b,143
+    call    wait_ly
+
+    di ; (*) critical section start
+
+    ld      b,144
+    call    wait_ly
+
     xor     a,a
     ld      [status_menu_active],a
 
@@ -301,6 +310,8 @@ StatusBarMenuHide::
     ld      a,255
     ld      [rWX],a
     ld      [rWY],a
+
+    ei ; (*) critical section end
 
     ret
 

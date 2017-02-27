@@ -453,11 +453,19 @@ RoomGameVBLHandler:
 
 ;-------------------------------------------------------------------------------
 
+RoomGameLoadPalettes:
+
+    call    bg_load_main_palettes
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 ; Load elements of room game
 ; A = 0 Load graphics + status bar and cursor + aux
 ; A = 1 Like before, but also reset city status from SRAM or others
-; A = 2 Load graphics + aux
-RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
+; A = 2 Load graphics + aux, but don't load palettes
+RoomGameLoad:
 
     push    af
 
@@ -560,7 +568,6 @@ RoomGameLoad:: ; a = 1 -> load data. a = 0 -> only load graphics
         call    CursorLoad
 
         call    bg_reload_main ; refresh bg and set correct scroll
-        call    bg_load_main_palettes
 
 ;        ld      a,[game_sprites_8x16]
 ;        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
@@ -881,6 +888,7 @@ PauseMenuHandleOption:
         ld      [game_state],a
 
         call    StatusBarMenuForceShow
+        call    RoomGameLoadPalettes
 
         ret
 
@@ -907,6 +915,7 @@ PauseMenuHandleOption:
         ld      [game_state],a
 
         call    StatusBarMenuForceShow
+        call    RoomGameLoadPalettes
 
         ret
 
@@ -933,6 +942,7 @@ PauseMenuHandleOption:
         ld      [game_state],a
 
         call    StatusBarMenuForceShow
+        call    RoomGameLoadPalettes
 
         ret
 
@@ -959,6 +969,7 @@ PauseMenuHandleOption:
         ld      [game_state],a
 
         call    StatusBarMenuForceShow
+        call    RoomGameLoadPalettes
 
         ret
 
@@ -985,6 +996,7 @@ PauseMenuHandleOption:
         ld      [game_state],a
 
         call    StatusBarMenuForceShow
+        call    RoomGameLoadPalettes
 
         ret
 
@@ -1011,6 +1023,7 @@ PauseMenuHandleOption:
         ld      [game_state],a
 
         call    StatusBarMenuForceShow
+        call    RoomGameLoadPalettes
 
         ret
 
@@ -1067,6 +1080,7 @@ PauseMenuHandleOption:
         ld      [game_state],a
 
         call    StatusBarMenuForceShow
+        call    RoomGameLoadPalettes
 
         ret
 
