@@ -32,7 +32,7 @@
 
 ;###############################################################################
 
-    SECTION "Save Data", SRAM[_SRAM]
+    SECTION "Save Data General", SRAM[_SRAM]
 
 ;-------------------------------------------------------------------------------
 
@@ -42,36 +42,44 @@
 SAV_MAGIC_STRING:: DS MAGIC_STRING_LEN
 SAV_CHECKSUM::     DS 2 ; LSB first
 
-SAV_CITY_NAME:: DS TEXT_INPUT_LENGTH
+; General information
 
-SAV_MONEY:: DS MONEY_AMOUNT_SIZE
+SAV_CITY_NAME:: DS TEXT_INPUT_LENGTH
 
 SAV_YEAR::  DS 2 ; LSB first
 SAV_MONTH:: DS 1
 
+SAV_LAST_SCROLL_X:: DS 1 ; Scroll when saving the game
+SAV_LAST_SCROLL_Y:: DS 1
+
+SAV_MONEY:: DS MONEY_AMOUNT_SIZE
+
 SAV_TAX_PERCENT:: DS 1
 
-SAV_LAST_SCROLL_X:: DS 1
-SAV_LAST_SCROLL_Y:: DS 1
+SAV_TECHNOLOGY_LEVEL:: DS 1
 
 SAV_PERSISTENT_MSG:: DS BYTES_SAVE_PERSISTENT_MSG
 
-SAV_MAP_ATTR_BASE::  DS $1000/8 ; compressed, only the bank 0/1 bit is saved
+SAV_LOAN_REMAINING_PAYMENTS:: DS 1 ; 0 if no remaining payments (no loan)
+SAV_LOAN_PAYMENTS_AMOUNT::    DS 2 ; BCD, LSB first
+
+SAV_NEGATIVE_BUDGET_COUNT:: DS 1
+
+;-------------------------------------------------------------------------------
+
+    SECTION "Save Data Configuration", SRAM[_SRAM+$200]
+
+;-------------------------------------------------------------------------------
 
 SAV_OPTIONS_DISASTERS_DISABLED::  DS 1
 SAV_OPTIONS_ANIMATIONS_DISABLED:: DS 1
 SAV_OPTIONS_MUSIC_DISABLED::      DS 1
 
-SAV_LOAN_REMAINING_PAYMENTS:: DS 1 ; 0 if no remaining payments (no loan)
-SAV_LOAN_PAYMENTS_AMOUNT::    DS 2 ; BCD, LSB first
+;-------------------------------------------------------------------------------
 
-SAV_TECHNOLOGY_LEVEL:: DS 1
+    SECTION "Save Data Historical Information", SRAM[_SRAM+$400]
 
-SAV_NEGATIVE_BUDGET_COUNT:: DS 1
-
-; TODO : Reorganize every field so that it makes sense
-
-; Historical data for graphs:
+;-------------------------------------------------------------------------------
 
 SAV_GRAPH_POPULATION_DATA::   DS GRAPH_SIZE
 SAV_GRAPH_POPULATION_OFFSET:: DS 1 ; Circular buffer start index
@@ -92,6 +100,14 @@ SAV_GRAPH_INDUSTRIAL_SCALE::  DS 1
 SAV_GRAPH_MONEY_DATA::   DS GRAPH_SIZE
 SAV_GRAPH_MONEY_OFFSET:: DS 1 ; Circular buffer start index
 SAV_GRAPH_MONEY_SCALE::  DS 1
+
+;-------------------------------------------------------------------------------
+
+    SECTION "Save Data Map Attr", SRAM[_SRAM+$E00]
+
+;-------------------------------------------------------------------------------
+
+SAV_MAP_ATTR_BASE::  DS $1000/8 ; compressed, only the bank 0/1 bit is saved
 
 ;-------------------------------------------------------------------------------
 
