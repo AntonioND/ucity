@@ -29,6 +29,7 @@ General to do list:
 - Music - Allow to disable it from the options menu
 - Improve graphics
 - Cleanup code and document
+- Game manual
 
 .. image:: screenshot.png
 
@@ -60,7 +61,9 @@ Dependencies:
 
 - RGBDS
 
-      https://github.com/bentley/rgbds/
+  It is needed to assemble the code. This is the only real dependency:
+
+      https://github.com/rednex/rgbds/
 
 - GBT Player
 
