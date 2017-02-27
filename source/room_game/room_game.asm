@@ -461,10 +461,10 @@ RoomGameLoadPalettes:
 
 ;-------------------------------------------------------------------------------
 
-; Load elements of room game
-; A = 0 Load graphics + status bar and cursor + aux
-; A = 1 Like before, but also reset city status from SRAM or others
-; A = 2 Load graphics + aux, but don't load palettes
+; Load elements of room game depending on the value of A.
+; A = 0 Load graphics + status bar and cursor + aux.
+;       Reset city status from SRAM or others
+; A = 1 Load graphics + aux, but don't load palettes
 RoomGameLoad:
 
     push    af
@@ -487,23 +487,6 @@ RoomGameLoad:
     cp      a,0
     jr      nz,.not_zero
 
-        ; Load GFX
-
-        ld      b,0 ; bank at 8000h
-        call    LoadText
-        LONG_CALL   BuildSelectMenuLoadGfx
-        call    BuildSelectMenuReset
-        call    StatusBarMenuLoadGfx
-        call    CursorLoad
-
-        call    bg_reload_main ; refresh bg and set correct scroll
-        call    bg_load_main_palettes
-
-        jr      .continue_zero_one
-
-.not_zero:
-    cp      a,1
-    jr      nz,.not_one
 
         ; Clear WRAMX
 
@@ -552,11 +535,33 @@ RoomGameLoad:
         ; palettes, since it is a critical code that blocks interrupts.
         call    bg_load_main_palettes
 
-        jr      .continue_zero_one
+        ld      a,[game_sprites_8x16]
+        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
+        ld      [rLCDC],a
 
-.not_one:
-    cp      a,2
-    jr      nz,.not_two
+        call    CursorShow
+
+        ld      bc,RoomGameVBLHandler
+        call    irq_set_VBL
+
+        xor     a,a
+        ld      [rIF],a
+
+        ld      b,GAME_STATE_WATCH
+        LONG_CALL_ARGS  GameStateMachineStateSet ; After loading gfx
+
+        call    CursorGetGlobalCoords
+        ld      a,e
+        ld      [last_frame_x],a
+        ld      a,d
+        ld      [last_frame_y],a
+
+        ret
+
+.not_zero:
+
+    cp      a,1
+    jr      nz,.not_one
 
         ; Load GFX
 
@@ -584,34 +589,12 @@ RoomGameLoad:
 
         ret
 
-.not_two:
+.not_one:
+
     ld      b,b ; Panic!
-    jr      .not_two
+    halt
 
-.continue_zero_one:
-
-    ld      a,[game_sprites_8x16]
-    or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
-    ld      [rLCDC],a
-
-    call    CursorShow
-
-    ld      bc,RoomGameVBLHandler
-    call    irq_set_VBL
-
-    xor     a,a
-    ld      [rIF],a
-
-    ld      b,GAME_STATE_WATCH
-    LONG_CALL_ARGS  GameStateMachineStateSet ; After loading gfx
-
-    call    CursorGetGlobalCoords
-    ld      a,e
-    ld      [last_frame_x],a
-    ld      a,d
-    ld      [last_frame_y],a
-
-    ret
+    jr      .not_one
 
 ;###############################################################################
 
@@ -881,7 +864,7 @@ PauseMenuHandleOption:
 .continue_budget:
         call    RoomBudgetMenu
 
-        ld      a,2 ; load minimal data
+        ld      a,1 ; load minimal data
         call    RoomGameLoad
 
         ld      a,GAME_STATE_PAUSE_MENU
@@ -908,7 +891,7 @@ PauseMenuHandleOption:
 .continue_bank:
         LONG_CALL   RoomBankMenu
 
-        ld      a,2 ; load minimal data
+        ld      a,1 ; load minimal data
         call    RoomGameLoad
 
         ld      a,GAME_STATE_PAUSE_MENU
@@ -935,7 +918,7 @@ PauseMenuHandleOption:
 .continue_minimaps:
         LONG_CALL   RoomMinimap
 
-        ld      a,2 ; load minimal data
+        ld      a,1 ; load minimal data
         call    RoomGameLoad
 
         ld      a,GAME_STATE_PAUSE_MENU
@@ -962,7 +945,7 @@ PauseMenuHandleOption:
 .continue_graphs:
         LONG_CALL   RoomGraphs
 
-        ld      a,2 ; load minimal data
+        ld      a,1 ; load minimal data
         call    RoomGameLoad
 
         ld      a,GAME_STATE_PAUSE_MENU
@@ -989,7 +972,7 @@ PauseMenuHandleOption:
 .continue_stats:
         LONG_CALL_ARGS  RoomCityStats
 
-        ld      a,2 ; load minimal data
+        ld      a,1 ; load minimal data
         call    RoomGameLoad
 
         ld      a,GAME_STATE_PAUSE_MENU
@@ -1016,7 +999,7 @@ PauseMenuHandleOption:
 .continue_options:
         LONG_CALL   RoomOptionsMenu
 
-        ld      a,2 ; load minimal data
+        ld      a,1 ; load minimal data
         call    RoomGameLoad
 
         ld      a,GAME_STATE_PAUSE_MENU
@@ -1073,7 +1056,7 @@ PauseMenuHandleOption:
             LONG_CALL_ARGS  CityMapSave ; ok, save to bank selected by the user
 .skip_save:
 
-        ld      a,2 ; load minimal data
+        ld      a,1 ; load minimal data
         call    RoomGameLoad
 
         ld      a,GAME_STATE_PAUSE_MENU
@@ -1704,7 +1687,7 @@ RoomGame::
     ld      a,DISASTER_TYPE_NONE
     ld      [game_requested_disaster],a ; disable disaster request
 
-    ld      a,1 ; load everything, not only graphics
+    ld      a,0 ; load everything, not only graphics
     call    RoomGameLoad
 
     ld      a,1
