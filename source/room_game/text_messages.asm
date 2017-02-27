@@ -92,6 +92,8 @@ MSG_NUCLEAR_MELTDOWN:
 
 MSG_TECH_INSUFFICIENT:
     STR_ADD "Technology isn't<nl>advanced enough<nl>to build that!"
+MSG_POPULATION_INSUFFICIENT:
+    STR_ADD "There isn't enough<nl>population to<nl>build that!"
 MSG_FINISHED_LOAN:
     STR_ADD "You have finished<nl>repaying your<nl>loan."
 MSG_GAME_OVER_1:
@@ -121,6 +123,7 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
     MSG_ADD MSG_NUCLEAR_MELTDOWN
 
     MSG_ADD MSG_TECH_INSUFFICIENT
+    MSG_ADD MSG_POPULATION_INSUFFICIENT
     MSG_ADD MSG_FINISHED_LOAN
     MSG_ADD MSG_GAME_OVER_1
     MSG_ADD MSG_GAME_OVER_2

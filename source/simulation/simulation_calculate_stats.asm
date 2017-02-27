@@ -25,6 +25,7 @@
 
 ;-------------------------------------------------------------------------------
 
+    INCLUDE "building_info.inc"
     INCLUDE "room_game.inc"
     INCLUDE "money.inc"
     INCLUDE "tileset_info.inc"
@@ -651,6 +652,43 @@ Simulation_CalculateCityType::
     ld      a,CLASS_CAPITAL
     ld      [city_class],a
 
+    ret
+
+;-------------------------------------------------------------------------------
+
+; Returns b = 1 if available (city is big enough), 0 if not
+CityStats_IsBuildingAvailable:: ; b = B_xxxx define
+
+    ld      a,b
+
+    ; Buildings that require a city
+
+    cp      a,B_Stadium
+    jr      z,.city_needed
+    cp      a,B_Port
+    jr      z,.city_needed
+    cp      a,B_Airport
+    jr      z,.city_needed
+
+    jr      .not_city_needed
+
+.city_needed:
+
+        ld      a,[city_class]
+        cp      a,CLASS_CITY ; cy = 1 if n > a
+        jr      c,.not_available
+        jr      .available
+
+.not_city_needed:
+
+    ; The rest of buildings are always available
+
+.available:
+    ld      b,1
+    ret
+
+.not_available:
+    ld      b,0
     ret
 
 ;###############################################################################

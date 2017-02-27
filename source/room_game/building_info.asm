@@ -63,6 +63,21 @@ BuildingIsAvailable:: ; b = B_xxxx define
         ret
 .enough_technology:
 
+    ; Check city size
+
+    call    BuildingTypeGet
+    ld      b,a
+    LONG_CALL_ARGS  CityStats_IsBuildingAvailable
+    ld      a,b
+    and     a,a
+    and     a,a
+    jr      nz,.enough_population
+        ld      a,ID_MSG_POPULATION_INSUFFICIENT
+        call    MessageRequestAdd
+        ld      b,0
+        ret
+.enough_population:
+
     ld      b,1 ; return
     ret
 
