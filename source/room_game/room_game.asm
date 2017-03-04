@@ -1300,7 +1300,8 @@ InputHandleModeSelectBuilding:
         LONG_CALL   BuildSelectMenuHide
 
         ; Check if we can build this building or not. If not, just enter watch
-        ; mode and show an error message.
+        ; mode and show an error message. The error message cannot be shown in
+        ; any other mode and it must be shown right now to warn the user.
 
         LONG_CALL_ARGS  BuildingIsAvailable
         ld      a,b
