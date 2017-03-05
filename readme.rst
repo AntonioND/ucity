@@ -20,13 +20,9 @@ you are interested please contact me at my email: antonio_nd at outlook dot com
 
 General to do list:
 
-- Simulation
-
-  - Graphical output (wind power plants?)
-  - Adjust simulation parameters
-
-- Sample cities
+- Adjust simulation parameters
 - Music - Allow to disable it from the options menu
+- Sample cities
 - Improve graphics
 - Cleanup code and document
 - Game manual
