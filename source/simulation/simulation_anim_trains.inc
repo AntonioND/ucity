@@ -385,7 +385,7 @@ TrainSpawn: ; c = index of the train
     ; Get a random number in de
     call    TrainGenRandomMax16 ; de = max number (excluded), must be > 0
 
-    ; de = number of the train track to spawn the train at
+    ; de = number of the train track to spawn the train at (0 to num-1)
 
     ld      hl,CITY_MAP_TILES
 
@@ -396,15 +396,15 @@ TrainSpawn: ; c = index of the train
 
         ld      a,[hl+]
         and     a,TYPE_HAS_TRAIN
-        jr      z,.skip_train
-            dec     de
-            ld      a,d
+        jr      z,.skip_tile
+            ld      a,d ; If DE is 0 this is the tile to spawn at.
             or      a,e
-            jr      nz,.skip_train
-                dec     hl
+            jr      nz,.skip_spawn
+                dec     hl ; HL was post-incremented when reading from it
                 jr      .spawn
-
-.skip_train:
+.skip_spawn:
+            dec     de ; try again
+.skip_tile:
 
     bit     5,h ; Up to E000
     jr      z,.loop2
