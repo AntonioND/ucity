@@ -1003,11 +1003,11 @@ INDEX SET 0
     jr      z,.outside\@
 
     ld      a,[BOAT_X_TILE+INDEX]
-    cp      a,64 ; cy = 1 if n > a
+    cp      a,64+1 ; cy = 1 if n > a
     jr      nc,.outside\@
 
     ld      a,[BOAT_Y_TILE+INDEX]
-    cp      a,64 ; cy = 1 if n > a
+    cp      a,64+1 ; cy = 1 if n > a
     jr      nc,.outside\@
 
     jr      .inside\@
