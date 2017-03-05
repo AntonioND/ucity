@@ -140,9 +140,9 @@ ScenarioGetMapPointerAndStartCoordinates:: ; a = number
 
     ; Load coordinates
 
-    ld      e,[hl]
+    ld      d,[hl] ; d = x
     inc     hl
-    ld      d,[hl]
+    ld      e,[hl] ; e = y
     inc     hl
 
     ; Load pointer and bank
