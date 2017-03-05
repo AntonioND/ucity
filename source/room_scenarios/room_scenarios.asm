@@ -25,6 +25,7 @@
 
 ;-------------------------------------------------------------------------------
 
+    INCLUDE "map_load.inc"
     INCLUDE "room_game.inc"
     INCLUDE "room_text_input.inc"
     INCLUDE "text.inc"
@@ -37,8 +38,6 @@
 ;-------------------------------------------------------------------------------
 
 scenario_select_room_exit: DS 1 ; set to 1 to exit room
-
-SCENARIO_NUMBER EQU 3
 
 scenario_select_map_selection:: DS 1 ; $FF for invalid value
 
@@ -148,7 +147,7 @@ InputHandleScenarioSelect:
     jr      z,.end_right
         ld      a,[scenario_select_map_selection]
         inc     a
-        cp      a,SCENARIO_NUMBER
+        cp      a,CITY_MAP_TOTAL_NUM
         jr      nz,.skip_right_reset
             xor     a,a
 .skip_right_reset:
@@ -163,7 +162,7 @@ InputHandleScenarioSelect:
         dec     a
         cp      a,-1
         jr      nz,.skip_left_reset
-            ld      a,SCENARIO_NUMBER-1
+            ld      a,CITY_MAP_TOTAL_NUM-1
 .skip_left_reset:
         ld      [scenario_select_map_selection],a
         call    RoomScenarioSelectRefresh
