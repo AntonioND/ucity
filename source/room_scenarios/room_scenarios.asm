@@ -38,7 +38,7 @@
 
 scenario_select_room_exit: DS 1 ; set to 1 to exit room
 
-SCENARIO_NUMBER EQU 2
+SCENARIO_NUMBER EQU 3
 
 scenario_select_map_selection:: DS 1 ; $FF for invalid value
 
