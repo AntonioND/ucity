@@ -54,7 +54,7 @@ ADD_SCENARIO_MAP : MACRO ; \1 = label, \2 = file name
 ENDM
 
     ADD_SCENARIO_MAP    SCENARIO_MAP_0, "predefined_map_0.bin"
-    ADD_SCENARIO_MAP    SCENARIO_MAP_1, "predefined_map_1.bin"
+    ADD_SCENARIO_MAP    SCENARIO_MAP_1_BORINGTOWN, "scenario_1_boringtown.bin"
     ADD_SCENARIO_MAP    SCENARIO_MAP_2_PORTVILLE, "scenario_2_portville.bin"
 
 ;###############################################################################
@@ -67,7 +67,7 @@ ENDM
     DATA_MONEY_AMOUNT MONEY_START_9000,  9000
 
     STR_ADD "Scenario", SCEN_NAME
-    STR_ADD "New Map", NEWMAP_NAME
+    STR_ADD "Boringtown", BORINGTOWN_NAME
     STR_ADD "Portville", PORTVILLE_NAME
 
 ;-------------------------------------------------------------------------------
@@ -106,10 +106,10 @@ SCENARIO_MAP_INFO:
     SCEN_INFO_3 0
     SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
-    SCEN_INFO_1 SCENARIO_MAP_1, CITY_MAP_WIDTH-20, CITY_MAP_HEIGHT-18
-    SCEN_INFO_2 NEWMAP_NAME, NEWMAP_NAME_LEN, $1975,3, MONEY_START_9000
+    SCEN_INFO_1 SCENARIO_MAP_1_BORINGTOWN, 24, 24
+    SCEN_INFO_2 BORINGTOWN_NAME, BORINGTOWN_NAME_LEN, $1975,3, MONEY_START_9000
     SCEN_INFO_3 10
-    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
+    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)
 
     SCEN_INFO_1 SCENARIO_MAP_2_PORTVILLE, 7, 26
     SCEN_INFO_2 PORTVILLE_NAME, PORTVILLE_NAME_LEN, $1960,0, MONEY_START_20000
