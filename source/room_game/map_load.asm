@@ -53,9 +53,10 @@ ADD_SCENARIO_MAP : MACRO ; \1 = label, \2 = file name
     INCBIN  \2
 ENDM
 
-    ADD_SCENARIO_MAP    SCENARIO_MAP_0, "predefined_map_0.bin"
+    ADD_SCENARIO_MAP    SCENARIO_MAP_0_ROCK_RIVER, "scenario_0_rock_river.bin"
     ADD_SCENARIO_MAP    SCENARIO_MAP_1_BORINGTOWN, "scenario_1_boringtown.bin"
     ADD_SCENARIO_MAP    SCENARIO_MAP_2_PORTVILLE, "scenario_2_portville.bin"
+    ADD_SCENARIO_MAP    SCENARIO_MAP_3_TEST_MAP, "scenario_3_test_map.bin"
 
 ;###############################################################################
 
@@ -66,9 +67,10 @@ ENDM
     DATA_MONEY_AMOUNT MONEY_START_20000, 20000
     DATA_MONEY_AMOUNT MONEY_START_9000,  9000
 
-    STR_ADD "Scenario", SCEN_NAME
+    STR_ADD "Rock River", ROCK_RIVER_NAME
     STR_ADD "Boringtown", BORINGTOWN_NAME
     STR_ADD "Portville", PORTVILLE_NAME
+    STR_ADD "Test Map", TEST_MAP_NAME
 
 ;-------------------------------------------------------------------------------
 
@@ -101,8 +103,8 @@ IF BYTES_SAVE_PERSISTENT_MSG != 2
 ENDC
 
 SCENARIO_MAP_INFO:
-    SCEN_INFO_1 SCENARIO_MAP_0, (CITY_MAP_WIDTH-20)/2, (CITY_MAP_HEIGHT-18)/2
-    SCEN_INFO_2 SCEN_NAME, SCEN_NAME_LEN, $1950,0, MONEY_START_20000
+    SCEN_INFO_1 SCENARIO_MAP_0_ROCK_RIVER, 22, 23
+    SCEN_INFO_2 ROCK_RIVER_NAME, ROCK_RIVER_NAME_LEN, $1950,0, MONEY_START_20000
     SCEN_INFO_3 0
     SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
@@ -114,6 +116,11 @@ SCENARIO_MAP_INFO:
     SCEN_INFO_1 SCENARIO_MAP_2_PORTVILLE, 7, 26
     SCEN_INFO_2 PORTVILLE_NAME, PORTVILLE_NAME_LEN, $1960,0, MONEY_START_20000
     SCEN_INFO_3 10
+    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
+
+    SCEN_INFO_1 SCENARIO_MAP_3_TEST_MAP, 22, 23
+    SCEN_INFO_2 TEST_MAP_NAME, TEST_MAP_NAME_LEN, $1950,0, MONEY_START_20000
+    SCEN_INFO_3 0
     SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
 ;-------------------------------------------------------------------------------

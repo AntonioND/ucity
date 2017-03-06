@@ -32,7 +32,7 @@ CITY_MAP_SRAM_FLAG       EQU %10000000
 
 CITY_MAP_NUMBER_MASK     EQU %01111111
 
-CITY_MAP_TOTAL_NUM       EQU 3
+CITY_MAP_TOTAL_NUM       EQU 4
 
 ;###############################################################################
 
