@@ -66,15 +66,17 @@ CityStatsMenuHandle:
 .end_b_start:
 
     ld      a,[joy_pressed]
-    and     a,PAD_A
-    jr      z,.end_a
-        ld      de,MONEY_AMOUNT_CHEAT
-        call    MoneySet ; de = ptr to the amount of money to set
-.end_a:
+    and     a,PAD_SELECT|PAD_UP|PAD_LEFT|PAD_A
+    jr      z,.end_cheat ; Skip if none of them were pressed right now
+        ld      a,[joy_held]
+        and     a,PAD_SELECT|PAD_UP|PAD_LEFT|PAD_A
+        cp      a,PAD_SELECT|PAD_UP|PAD_LEFT|PAD_A
+        jr      nz,.end_cheat ; Check if all of them are being held
+            ld      de,MONEY_AMOUNT_CHEAT
+            call    MoneySet ; de = ptr to the amount of money to set
+.end_cheat:
 
     ret
-
-    ; TODO - Remove this cheat!
 
     DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,0999999999
 
