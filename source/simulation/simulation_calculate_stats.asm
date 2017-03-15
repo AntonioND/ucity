@@ -80,7 +80,7 @@ graph_value_i:: DS 1 ; central value
 
 ;###############################################################################
 
-    SECTION "Simulation Calculate Statistics Functions",ROMX[$4000]
+    SECTION "Simulation Calculate Statistics Functions",ROMX,ALIGN[8]
 
 ;-------------------------------------------------------------------------------
 

@@ -59,6 +59,9 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
+; Note: This section must be at the start of the bank because of code that
+; assumes that most of the base address is made out of 0s.
+
 IF TILESET_INFO_ELEMENT_SIZE != 4
     FAIL "tileset_info.asm: Fix this!"
 ENDC

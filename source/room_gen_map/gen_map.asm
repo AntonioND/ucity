@@ -57,7 +57,7 @@ forest_threshold DS 1
 
 ;###############################################################################
 
-    SECTION "Genenerate Map Code Data",ROMX[$4000]
+    SECTION "Genenerate Map Code Data",ROMX,ALIGN[8]
 
 ;-------------------------------------------------------------------------------
 
