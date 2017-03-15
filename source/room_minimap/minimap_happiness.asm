@@ -34,17 +34,6 @@
 
 ;-------------------------------------------------------------------------------
 
-; Number of bits set to 1 in a byte. Table alligned to $100
-TABLE_BIT_COUNT: ; Byte values from 0 to TILE_OK_MASK (32 bytes)
-    DB  0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
-    DB  1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5
-
-IF TILE_OK_MASK != %00011111
-    FAIL "Fix this!"
-ENDC
-
-;-------------------------------------------------------------------------------
-
 C_WHITE  EQU 0 ; Not a building
 C_GREEN  EQU 1 ; All desired and needed flags ok
 C_YELLOW EQU 2 ; Needed flags ok, desired flags not ok
