@@ -21,7 +21,7 @@ you are interested please contact me at my email: antonio_nd at outlook dot com
 General to do list:
 
 - Adjust simulation parameters
-- Music - Allow to disable it from the options menu
+- Music
 - Sample cities
 - Improve graphics
 - Cleanup code and document

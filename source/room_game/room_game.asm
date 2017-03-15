@@ -379,6 +379,32 @@ WaitSimulationEnds:
 
 ;-------------------------------------------------------------------------------
 
+RoomGameMusicPlay::
+
+    call    rom_bank_push
+
+    ld      de,song_city_data
+    ld      a,5
+    ld      bc,BANK(song_city_data)
+    call    gbt_play ; This function changes the ROM bank to the one in BC
+
+    ld      a,1
+    call    gbt_loop
+
+    call    rom_bank_pop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
+RoomGameMusicStop::
+
+    call    gbt_stop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomGameVBLHandler:
 
     call    StatusBarHandlerVBL ; Update position and registers (bg+spr)
@@ -1691,6 +1717,10 @@ RoomGame::
     ld      a,0 ; load everything, not only graphics
     call    RoomGameLoad
 
+    ld      a,[game_music_disabled]
+    and     a,a
+    call    z,RoomGameMusicPlay
+
     ld      a,1
     ld      [first_simulation_iteration],a
 
@@ -1758,6 +1788,10 @@ RoomGame::
     ; End of game loop
 
 .end_game_loop:
+
+    ld      a,[game_music_disabled]
+    and     a,a
+    call    z,RoomGameMusicStop
 
     call    SetDefaultVBLHandler
 

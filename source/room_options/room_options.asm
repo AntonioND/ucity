@@ -279,8 +279,16 @@ OptionsMenuHandleOption: ; a = selected option
         ld      de,16*32+CURSOR_X+2+$9800
         call    OptionsMenuDrawEnabledStateAt ; hl = flag, de = VRAM ptr
 
-        ; TODO - Enable or disable music here
+        ; Enable or disable music
 
+        ld      a,[game_music_disabled]
+        and     a,a
+        jr      nz,.music_set_disabled
+            call    RoomGameMusicPlay
+            jr      .end_music_set
+.music_set_disabled:
+            call    RoomGameMusicStop
+.end_music_set:
         ret
 
 .not_music_enabled:
