@@ -384,7 +384,7 @@ RoomGameMusicPlay::
     call    rom_bank_push
 
     ld      de,song_city_data
-    ld      a,5
+    ld      a,6
     ld      bc,BANK(song_city_data)
     call    gbt_play ; This function changes the ROM bank to the one in BC
 
