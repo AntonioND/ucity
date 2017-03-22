@@ -1,0 +1,43 @@
+:Base GBMB.HLP
+:Title Gameboy Map Builder Help
+1 Designing maps
+2 Map properties=Map_properties
+2 Using the mouse=Using_the_mouse
+2 Draw types=Draw_types
+2 GBMB versus GBTD=GBMB_versus_GBTD
+2 Auto update=Auto_update
+1 Design tools
+2 Inserting and deleting rows and columns=InsDelRowCol
+2 Clear map=Clear_map
+2 Block fill=Block_fill
+1 Using location properties
+2 Introduction to location properties=Introduction_to_location_properties
+2 Location properties=Location_properties
+2 Default location properties=Default_location_properties
+2 Info panel=Info_panel
+2 Property colors=Property_colors
+1 Viewing maps
+2 Zoom=Zoom
+2 Info panel=Info_panel
+2 Grid=Grid
+2 Double markers=Double_markers
+2 Property colors=Property_colors
+2 Bookmarks=Bookmarks
+2 Color set=Color_set
+1 Clipboard functions
+2 Cutting and pasting=Cutting_and_Pasting
+2 Clipboard format=Clipboard_format
+2 Copy as bitmap=Copy_as_bitmap
+1 Exporting
+2 Export options=Export_options
+2 'Export' vs 'Export to...'=_Export__vs__Export_to_
+2 Export file types
+3 RGBDS Assembly file=RGBDS_Assembly_file
+3 RGBDS Object file=RGBDS_Object_file
+3 TASM Assembly file=TASM_Assembly_file
+3 GBDK C file=GBDK_C_file
+3 All-purpose binary file=All_purpose_binary_file
+3 ISAS Assembly file=ISAS_Assembly_file
+1 Miscellaneous
+2 INI file=INI_file
+2 Contacting me and others=Contacting_me_and_others

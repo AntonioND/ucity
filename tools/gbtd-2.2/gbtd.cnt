@@ -1,0 +1,49 @@
+:Base GBTD.HLP
+:Title Gameboy Tile Designer Help
+1 Designing tiles
+2 Using the mouse=Using_the_mouse
+2 Draw types=Draw_types
+2 Colors=Colors
+2 GBTD versus GBMB=GBTD_versus_GBMB
+2 Auto update=Auto_update
+1 Design tools
+2 Scrolling tiles=Scrolling_tiles
+2 Flipping tiles=Flipping_tiles
+2 Rotating tiles=Rotating_tiles
+2 Clear tiles=Clear_tiles
+2 Flip colors=Flip_colors
+1 Viewing tiles
+2 Tile size=Tile_size
+2 Tile count=Tile_count
+2 Simple=Simple
+2 Grid=Grid
+2 Nibble markers=Nibble_markers
+2 Color set=Color_set
+2 Palettes=Palettes
+2 Bookmarks=Bookmarks
+1 Clipboard functions
+2 Cutting and Pasting=Cutting_and_Pasting
+2 Split Copy and Paste=Split_Copy_and_Paste
+2 Split options=Split_options
+1 Importing
+2 Import options=Import_options
+2 Import file types
+3 GBE file=GBE_file
+3 Binary 8x8 tiles=Binary_8x8_tiles
+1 Exporting
+2 Export options=Export_options
+2 'Export' vs 'Export to...'=_Export__vs__Export_to_
+2 Compression=Compression
+2 Export data formats=Export_data_formats
+2 Export counter types=Export_counter_types
+2 Metatiles=Metatiles
+2 Export file types
+3 RGBDS Assembly file=RGBDS_Assembly_file
+3 RGBDS Object file=RGBDS_Object_file
+3 TASM Assembly file=TASM_Assembly_file
+3 GBDK C file=GBDK_C_file
+3 All-purpose binary file=All_purpose_binary_file
+3 ISAS Assembly file=ISAS_Assembly_file
+1 Miscellaneous
+2 INI file=INI_file
+2 Contacting me and others=Contacting_me_and_others
