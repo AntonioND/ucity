@@ -32,9 +32,11 @@
 
 ;-------------------------------------------------------------------------------
 
-; FIFO circular buffer
-queue_in_ptr:  DS 2 ; LSB first
-queue_out_ptr: DS 2 ; LSB first
+; The functions in this file implement a FIFO circular buffer that is stored in
+; WRAMX in BANK_SCRATCH_RAM_2 and uses the whole WRAMX bank ($1000 bytes).
+
+queue_in_ptr:  DS 2 ; LSB first - pointer to the place where to add elements
+queue_out_ptr: DS 2 ; LSB first - pointer to the place where to read elements
 
 ;###############################################################################
 

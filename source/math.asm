@@ -29,7 +29,9 @@
 
 ;-------------------------------------------------------------------------------
 
-; 255 is considered an invalid value
+; Calculates a aproximate percentage of 2 16-bit values by reducing them to
+; 8-bit values and operating on them.
+; It returns 255 on error, a value between 0 and 100 or success.
 CalculateAproxPercent:: ; a = de * 100 / hl
 
     ld      a,h
@@ -98,6 +100,8 @@ CalculateAproxPercent:: ; a = de * 100 / hl
 
 ;-------------------------------------------------------------------------------
 
+; Calculates a aproximate percentage of 2 16-bit values by reducing them to
+; 8-bit values and operating on them. It returns the value converted to BCD.
 CalculateAproxPercentBCD:: ; hl = de * 100 / hl, Result in BCD (H=MSB, L=LSB)
 
     call    CalculateAproxPercent ; a = de * 100 / hl
