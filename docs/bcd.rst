@@ -67,6 +67,17 @@ of them tests if a number is lower than zero, the other one tests if one of them
 is greater or equal than the other one. There's also a helper to multiply a BCD
 number by a 8-bit non-BCD value (it just adds the same value repeatidly).
 
+Addition of signed numbers works the same way as two's complement and it is as
+simple as addition of unsigned numbers. Note that, since the numbers are stored
+in BCD, after every addition or subtraction instruction (`add`, `adc`, `sub`,
+`sbc`) it is needed to add a `daa` instruction.
+
+                +---------------+-----------------+
+                | 5 + (-7) = -2 | $05 + $93 = $98 |
+                +---------------+-----------------+
+                |   -2 + 2 = 0  | $98 + $02 = $00 |
+                +---------------+-----------------+
+
 Of course, it is needed to convert from this format to something that can be
 represented on the screen. There are 3 helpers to achieve this. All of them read
 the original 5-byte value and output a 10-byte character string. One of them
