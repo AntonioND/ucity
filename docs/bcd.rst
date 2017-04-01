@@ -8,16 +8,16 @@ simplifies the display of the values on the screen for the player to see. As
 most of the operations that are done on huge numbers are really simple, this
 format doesn't cause a big loss in performance over plain binary.
 
-The code is located in :code:`source/bcd_math.asm`.
+The code is located in ``source/bcd_math.asm``.
 
 BCD numbers are 5 bytes wide, LSB stored first. Inside a byte, the lower nibble
 is the least significative digit of the two. They can be interpreted as signed
 or unsigned values.
 
-For example, the unsigned decimal value `123456789` would be stored in memory
+For example, the unsigned decimal value ``123456789`` would be stored in memory
 like this:
 
-    `DB $89,$67,$45,$23,$01`
+    ``DB $89,$67,$45,$23,$01``
 
 Signed values are stored in tens' complement format, similar to the two's
 complement format used for regular values:
@@ -69,8 +69,8 @@ number by a 8-bit non-BCD value (it just adds the same value repeatidly).
 
 Addition of signed numbers works the same way as two's complement and it is as
 simple as addition of unsigned numbers. Note that, since the numbers are stored
-in BCD, after every addition or subtraction instruction (`add`, `adc`, `sub`,
-`sbc`) it is needed to add a `daa` instruction.
+in BCD, after every addition or subtraction instruction (``add``, ``adc``,
+``sub``, ``sbc``) it is needed to add a ``daa`` instruction.
 
                 +---------------+-----------------+
                 | 5 + (-7) = -2 | $05 + $93 = $98 |

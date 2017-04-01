@@ -8,10 +8,10 @@ data processing, which takes a few seconds to complete.
 
 The code is located in:
 
-- :code:`source/room_gen_map/gen_map_circle.inc` : Look up tables with shapes
-  of quarter of circles of different radiuses.
-- :code:`source/room_gen_map/gen_map.asm` : File that contains the map
-  generation code.
+- ``source/room_gen_map/gen_map_circle.inc`` : Look up tables with shapes of
+  quarter of circles of different radiuses.
+- ``source/room_gen_map/gen_map.asm`` : File that contains the map generation
+  code.
 
 To avoid unnecesary copies between generation steps between WRAMX banks, all
 steps are hardcoded to use two WRAMX banks, using one of them as source and the
@@ -26,8 +26,8 @@ reasonably good random numbers but the most important thing is that the
 resulting sequence of numbers is always the same one for a given seed, unlike
 the random number generator used by the rest of the game. This way, if the
 player likes a specific map, the seed used to generate it can be used again and
-it will generate the same map. The two functions are :code:`gen_map_srand` and
-:code:`gen_map_rand`.
+it will generate the same map. The two functions are ``gen_map_srand`` and
+``gen_map_rand``.
 
 In short, the algorithm generates a map with random elevations, smooths it and
 adds a lot of circles of different radiuses and elevations. Then, the map is
@@ -47,7 +47,7 @@ temporary WRAMX bank is used to fill to the WRAMX banks where tiles and
 attributes are stored (instead of loading them from SRAM or from a predefined
 map stored in ROM, for example).
 
-Note: The file :code:`tools/mapgen/mapgen.c` has a C implementation of this
+Note: The file ``tools/mapgen/mapgen.c`` has a C implementation of this
 algorithm. This was used to test the map generation code before actually writing
 any assembly code in order not to waste more time than necessary, since it
 wasn't that easy to come up with a not-too-CPU-intensive way of generating
@@ -63,47 +63,47 @@ to convert each tile into water, field or forest.
 Algorithm
 =========
 
-Located in :code:`map_generate`.
+Located in ``map_generate``.
 
 This function receives a random seed and an elevation offset which is used to
 calculate elevation thresholds that are used to determine the elevation levels
 at which water, fields and forest are found. The way it works is explained
 below. Most steps get data from one WRAMX bank and write the result to the other
-one. The names used are :code:`BANK_TEMP1` and :code:`BANK_TEMP2`.
+one. The names used are ``BANK_TEMP1`` and ``BANK_TEMP2``.
 
-- :code:`map_initialize`: Initialize all tiles of the map to random variables.
+- ``map_initialize``: Initialize all tiles of the map to random variables.
 
-- :code:`map_smooth_1_to_2`: Get data from the first temporary bank, smooth it
-  and save it into bank 2. The formula used for each tile is:
+- ``map_smooth_1_to_2``: Get data from the first temporary bank, smooth it and
+  save it into bank 2. The formula used for each tile is:
 
-      :code:`R = ( Center + (Left + Right + Up + Down)/4 ) / 2`
+      ``R = ( Center + (Left + Right + Up + Down)/4 ) / 2``
 
   For tiles in the border of the map, instead of reading from an unexistent tile
   outside the map, the value of the central tile is used instead.
 
-- :code:`map_add_circle_all`: Add circles to the map. The list of circles added
-  is located in the array :code:`.circle_radius_array` local to
-  :code:`map_add_circle_all`. The first circle is added to the map, with a value
-  of :code:`STEP_INCREMENT`. The second one is subtracted by that same value.
-  The third one is added again, and so on until the end of the list. This
-  function works on data on the second bank.
+- ``map_add_circle_all``: Add circles to the map. The list of circles added is
+  located in the array ``.circle_radius_array`` local to ``map_add_circle_all``.
+  The first circle is added to the map, with a value of ``STEP_INCREMENT``. The
+  second one is subtracted by that same value. The third one is added again, and
+  so on until the end of the list. This function works on data on the second
+  bank.
 
-- :code:`map_normalize`: Calculate average value of the elevations of the map
-  and subtract that value from all tiles. 128 is also added to them, so the
-  average value is actually 128. This function works on data on the second bank.
+- ``map_normalize``: Calculate average value of the elevations of the map and
+  subtract that value from all tiles. 128 is also added to them, so the average
+  value is actually 128. This function works on data on the second bank.
 
-- :code:`map_smooth_2_to_1` and :code:`map_smooth_1_to_2`. Perform to smoothing
-  steps, going from bank 2 to bank 1 first and then going back to bank 2.
+- ``map_smooth_2_to_1`` and ``map_smooth_1_to_2``. Perform to smoothing steps,
+  going from bank 2 to bank 1 first and then going back to bank 2.
 
-- :code:`map_apply_height_threshold`: Using thresholds calculated at the
-  beginning of the functions, convert data in bank 2 to pure water, field and
-  forest tiles. Output is bank 2.
+- ``map_apply_height_threshold``: Using thresholds calculated at the beginning
+  of the functions, convert data in bank 2 to pure water, field and forest
+  tiles. Output is bank 2.
 
-- :code:`map_tilemap_fix`: This function makes sure that the distribution of
-  tiles results in a valid map that can be represented by the current tileset.
-  This function smooths the edges of the interfaces between different zones.
-  This is actually an iterative function that will check if a specific tile can
-  be converted to a valid tileset tile and, if not, it is changed. It will loop
+- ``map_tilemap_fix``: This function makes sure that the distribution of tiles
+  results in a valid map that can be represented by the current tileset. This
+  function smooths the edges of the interfaces between different zones. This is
+  actually an iterative function that will check if a specific tile can be
+  converted to a valid tileset tile and, if not, it is changed. It will loop
   until the first iteration that doesn't change any tile, which means that all
   tiles are valid. This is first done for water/field interfaces and then for
   field/forest because by fixing the water/field interface there will be less
@@ -111,29 +111,29 @@ one. The names used are :code:`BANK_TEMP1` and :code:`BANK_TEMP2`.
   it's better to try to preserve it as much as possible. This function works on
   bank 2 data.
 
-- :code:`map_draw`: This function reads data from bank 2 and calls the APA
-  functions to generate a minimap.
+- ``map_draw``: This function reads data from bank 2 and calls the APA functions
+  to generate a minimap.
 
-If the player selects this map, :code:`map_tilemap_to_real_tiles` is called:
+If the player selects this map, ``map_tilemap_to_real_tiles`` is called:
 
-- The data in bank 2 is copied to :code:`BANK_CITY_MAP_TILES`.
+- The data in bank 2 is copied to ``BANK_CITY_MAP_TILES``.
 
 - Tiles are converted to their smoothed versions by calling
-  :code:`fix_water_border_tiles` and :code:`fix_forest_border_tiles`. There is
-  no way this can fail because :code:`map_tilemap_fix` made sure that every tile
-  in the map had a correct translation.
+  ``fix_water_border_tiles`` and ``fix_forest_border_tiles``. There is no way
+  this can fail because ``map_tilemap_fix`` made sure that every tile in the map
+  had a correct translation.
 
 - Some random plain tiles are converted to the alternate version of themselves,
-  like :code:`T_GRASS` to :code:`T_GRASS_EXTRA`.
+  like ``T_GRASS`` to ``T_GRASS_EXTRA``.
 
-- Finally, :code:`BANK_CITY_MAP_ATTRS` is filled. It is only needed to set the
+- Finally, ``BANK_CITY_MAP_ATTRS`` is filled. It is only needed to set the
   palette of the tiles, they are all placed in the first 256 tile group so they
   are always in VRAM bank 0.
 
 Output Data
 ===========
 
-The map calculated during the first part is saved to :code:`BANK_TEMP2` and the
-minimap is saved to :code:`MINIMAP_BACKBUFFER_WRAMX_BANK`. The final map is
-saved to :code:`BANK_CITY_MAP_TILES` and :code:`BANK_CITY_MAP_ATTRS` so that the
-game can use this data right away.
+The map calculated during the first part is saved to ``BANK_TEMP2`` and the
+minimap is saved to ``MINIMAP_BACKBUFFER_WRAMX_BANK``. The final map is saved to
+``BANK_CITY_MAP_TILES`` and ``BANK_CITY_MAP_ATTRS`` so that the game can use
+this data right away.
