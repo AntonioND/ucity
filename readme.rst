@@ -1,5 +1,5 @@
 ==============
-µCity 0.4 beta
+µCity 0.5 beta
 ==============
 
 The open-source city building game for Game Boy Color.
@@ -12,11 +12,6 @@ Some of the functionality is missing, but most of the game is completed.
 
 It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
 every once in a while.
-
-This game was previously called BitCity.
-
-NOTE: I'm looking for a good pixel artist to help me with the game graphics. If
-you are interested please contact me at my email: antonio_nd at outlook dot com
 
 General to do list:
 
