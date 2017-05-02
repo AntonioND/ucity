@@ -184,15 +184,39 @@ Main:
 
     ; Start game
 
+    call    RoomMenuMusicPlay
+
     LONG_CALL   RoomTitle
 
 .main_loop:
 
         LONG_CALL   RoomMenu
 
+        call    gbt_stop
+
         LONG_CALL   RoomGame
 
+        call    RoomMenuMusicPlay
+
     jr      .main_loop
+
+;-------------------------------------------------------------------------------
+
+RoomMenuMusicPlay::
+
+    call    rom_bank_push
+
+    ld      de,song_menu_data
+    ld      a,6
+    ld      bc,BANK(song_menu_data)
+    call    gbt_play ; This function changes the ROM bank to the one in BC
+
+    ld      a,1
+    call    gbt_loop
+
+    call    rom_bank_pop
+
+    ret
 
 ;-------------------------------------------------------------------------------
 
