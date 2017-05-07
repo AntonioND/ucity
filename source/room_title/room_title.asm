@@ -301,6 +301,14 @@ SPR_X SET SPR_X + 1
 
 ;-------------------------------------------------------------------------------
 
+RoomTitleMusicStop::
+
+    call    gbt_stop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomTitle::
 
     xor     a,a
@@ -315,6 +323,8 @@ RoomTitle::
     call    irq_set_VBL
 
     call    RoomTitleLoadGraphics
+
+    call    RoomTitleMusicPlay
 
 .loop:
 
@@ -344,6 +354,8 @@ RoomTitle::
 
     ; Prepare to exit
 
+    call    RoomTitleMusicStop
+
     call    SetDefaultVBLHandler
 
     call    SetPalettesAllBlack
@@ -353,6 +365,24 @@ RoomTitle::
 ;###############################################################################
 
     SECTION "Room Title Code ROM0",ROM0
+
+;-------------------------------------------------------------------------------
+
+RoomTitleMusicPlay::
+
+    call    rom_bank_push
+
+    ld      de,song_title_data
+    ld      a,7
+    ld      bc,BANK(song_title_data)
+    call    gbt_play ; This function changes the ROM bank to the one in BC
+
+    ld      a,1
+    call    gbt_loop
+
+    call    rom_bank_pop
+
+    ret
 
 ;-------------------------------------------------------------------------------
 

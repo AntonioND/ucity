@@ -6,3 +6,6 @@ mv song_city.asm ../../data/music/
 
 $MOD2GBT menu.mod song_menu
 mv song_menu.asm ../../data/music/
+
+$MOD2GBT title.mod song_title
+mv song_title.asm ../../data/music/

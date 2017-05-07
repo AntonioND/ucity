@@ -491,6 +491,14 @@ RoomMenuLoadGraphics:
 
 ;-------------------------------------------------------------------------------
 
+RoomMenuMusicStop::
+
+    call    gbt_stop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 RoomMenu::
 
     xor     a,a
@@ -502,6 +510,8 @@ RoomMenu::
     call    SetDefaultVBLHandler
 
     call    RoomMenuLoadGraphics
+
+    call    RoomMenuMusicPlay
 
 .loop:
 
@@ -521,6 +531,30 @@ RoomMenu::
     call    WaitReleasedAllKeys
 
     call    SetPalettesAllBlack
+
+    call    RoomMenuMusicStop
+
+    ret
+
+;###############################################################################
+
+    SECTION "Room Menu Code ROM0",ROM0
+
+;-------------------------------------------------------------------------------
+
+RoomMenuMusicPlay::
+
+    call    rom_bank_push
+
+    ld      de,song_menu_data
+    ld      a,4
+    ld      bc,BANK(song_menu_data)
+    call    gbt_play ; This function changes the ROM bank to the one in BC
+
+    ld      a,1
+    call    gbt_loop
+
+    call    rom_bank_pop
 
     ret
 
