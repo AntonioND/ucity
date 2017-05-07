@@ -16,20 +16,11 @@ every once in a while.
 General to do list:
 
 - Adjust simulation parameters
-- Music
-- Sample cities
-- Improve graphics
-- Cleanup code and document
+- Improve sample cities
+- Document code
 - Game manual
 
 .. image:: screenshot.png
-
-Controls
-========
-
-- Start: Open pause menu.
-- Select: Open building select menu.
-- B: If held, fast scroll.
 
 Credits
 =======
