@@ -88,7 +88,7 @@ GenMapUpdateGUI:
 
     ; Clear type map cursor
 
-    ld      hl,$9800 + 14*32 + 1
+    ld      hl,$9800 + 10*32 + 1
     ld      de,32*2
     ld      b,O_SPACE
     di
@@ -107,7 +107,7 @@ GenMapUpdateGUI:
     ; a <<= 6 ( = 32 * 2)
     ld      e,a
     ld      d,0
-    ld      hl,$9800 + 14*32 + 1
+    ld      hl,$9800 + 10*32 + 1
     add     hl,de
 
     ld      b,O_ARROW
@@ -125,35 +125,27 @@ GenMapUpdateGUI:
 GenMapHandleInput: ; If it returns 1, exit room. If 0, continue
 
     ld      a,[joy_pressed]
-    and     a,PAD_UP
-    jr      z,.end_up
-        ld      hl,gen_map_seed
-        inc     [hl]
+    and     a,PAD_UP|PAD_DOWN
+    jr      z,.end_up_down
+        ld      hl,gen_map_selection
+        ld      a,[hl]
+        xor     a,1
+        ld      [hl],a
         call    GenMapUpdateGUI
-.end_up:
-    ld      a,[joy_pressed]
-    and     a,PAD_DOWN
-    jr      z,.end_down
-        ld      hl,gen_map_seed
-        dec     [hl]
-        call    GenMapUpdateGUI
-.end_down:
+.end_up_down:
+
     ld      a,[joy_pressed]
     and     a,PAD_RIGHT
     jr      z,.end_right
         ld      hl,gen_map_seed
-        ld      a,$10
-        add     [hl]
-        ld      [hl],a
+        inc     [hl]
         call    GenMapUpdateGUI
 .end_right:
     ld      a,[joy_pressed]
     and     a,PAD_LEFT
     jr      z,.end_left
         ld      hl,gen_map_seed
-        ld      a,-$10
-        add     [hl]
-        ld      [hl],a
+        dec     [hl]
         call    GenMapUpdateGUI
 .end_left:
 
@@ -180,16 +172,6 @@ GenMapHandleInput: ; If it returns 1, exit room. If 0, continue
         ld      a,1
         ld      [gen_map_generated],a
 .end_a:
-
-    ld      a,[joy_pressed]
-    and     a,PAD_SELECT
-    jr      z,.end_select
-        ld      hl,gen_map_selection
-        ld      a,[hl]
-        xor     a,1
-        ld      [hl],a
-        call    GenMapUpdateGUI
-.end_select:
 
     ; Exit if START is pressed and a map is generated
     ld      a,[joy_pressed]
