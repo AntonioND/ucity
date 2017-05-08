@@ -1456,10 +1456,10 @@ InputHandleModePauseMenu:
 InputHandleModeShowMessage:
 
     ld      a,[joy_released]
-    and     a,PAD_B
-    jr      z,.not_b
+    and     a,PAD_A|PAD_B
+    jr      z,.not_a_b
 
-        ; When pressing B, if there is another message waiting to be shown,
+        ; When closing the msg, if there is another message waiting to be shown,
         ; instead of closing the window and opening it again, replace its text.
 
         call    MessageRequestQueueNotEmpty ; returns a = 1 if queue isn't empty
@@ -1481,7 +1481,7 @@ InputHandleModeShowMessage:
         call    GameStateMachineStateSet
         ret
 
-.not_b:
+.not_a_b:
 
     ret
 
