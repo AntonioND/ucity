@@ -152,6 +152,10 @@ InputHandleScenarioSelect:
             xor     a,a
 .skip_right_reset:
         ld      [scenario_select_map_selection],a
+
+        LONG_CALL   APA_BufferFillColor3
+        call    APA_BufferUpdate
+
         call    RoomScenarioSelectRefresh
 .end_right:
 
@@ -165,6 +169,10 @@ InputHandleScenarioSelect:
             ld      a,CITY_MAP_TOTAL_NUM-1
 .skip_left_reset:
         ld      [scenario_select_map_selection],a
+
+        LONG_CALL   APA_BufferFillColor3
+        call    APA_BufferUpdate
+
         call    RoomScenarioSelectRefresh
 .end_left:
 
