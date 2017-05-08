@@ -47,6 +47,13 @@ first_simulation_iteration: DS 1 ; 1 for the first simulation iteration
 last_frame_x: DS 1
 last_frame_y: DS 1 ; in tiles. for autobuild when moving cursor
 
+; This is set to 0 when entering GAME_STATE_SHOW_MESSAGE and set to 1 when both
+; buttons A and B aren't held. The message can only be closed if button A or B
+; is released when this variable is 1. This way, if A or B were pressed right
+; before the message appeared, it won't be closed due to an unexpected movement
+; of the player.
+msg_ready_to_exit: DS 1
+
 ; Prevent the VBL handler from handling user input two frames in a row, don't
 ; allow any processing apart from graphic updates.
 vbl_handler_working: DS 1
@@ -741,6 +748,9 @@ GameStateMachineStateSet:: ; b = new state
         call    CursorHide
 
         LONG_CALL   Simulation_TransportAnimsHide
+
+        xor     a,a
+        ld      [msg_ready_to_exit],a
 
         call    MessageBoxShow
 
@@ -1455,9 +1465,24 @@ InputHandleModePauseMenu:
 
 InputHandleModeShowMessage:
 
+    ; The event that closes the message box is the 'release' one instead of
+    ; 'pressed' because, if not, when pressing B to close the message box, the
+    ; game would go from showing the message to showing the regular screen for
+    ; a frame and then enter fast movement mode, which looks weird. If the game
+    ; waits until the user releases the B button, fast movement mode won't start
+    ; until the user presses it again.
+
     ld      a,[joy_released]
     and     a,PAD_A|PAD_B
     jr      z,.not_a_b
+
+        ; Check if the message can be dismissed. This check is here to prevent
+        ; the message to be dismissed too early due to the user being surprised
+        ; by it and releasing the buttons.
+
+        ld      a,[msg_ready_to_exit]
+        and     a,a
+        jr      z,.not_a_b
 
         ; When closing the msg, if there is another message waiting to be shown,
         ; instead of closing the window and opening it again, replace its text.
@@ -1471,6 +1496,10 @@ InputHandleModeShowMessage:
             jr      z,.no_messages_left
 
                 call    MessageBoxPrintMessageID ; a = message ID
+
+                xor     a,a
+                ld      [msg_ready_to_exit],a
+
                 ret
 
 .no_messages_left
@@ -1482,6 +1511,19 @@ InputHandleModeShowMessage:
         ret
 
 .not_a_b:
+
+    ; Lock to prevent the user from dismissing the message until both A and B
+    ; buttons haven't been held for a frame.
+
+    ld      a,[joy_held]
+    and     a,PAD_A|PAD_B
+    jr      nz,.held_a_b
+
+        ; Allow the message to be dismissed
+        ld      a,1
+        ld      [msg_ready_to_exit],a
+
+.held_a_b:
 
     ret
 
