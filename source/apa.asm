@@ -497,16 +497,28 @@ ENDC
 
 ;-------------------------------------------------------------------------------
 
+APA_BufferFillColor3:: ; Fill buffer with color 3
+
+    ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
+    ld      [rSVBK],a
+
+    ld      a,$FF
+
+    jr      _apa_buffer_clear_set
+
 APA_BufferClear::
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
     ld      [rSVBK],a
 
+    xor     a,a ; fill with 0
+
+_apa_buffer_clear_set:
+
 IF APA_TILE_NUMBER != 256
     FAIL "APA_TILE_NUMBER should be 256!"
 ENDC
 
-    xor     a,a
     ld      b,APA_TILE_NUMBER & $FF ; 256 == 0
     ld      hl,MINIMAP_BACKBUFFER_BASE
 
