@@ -122,6 +122,28 @@ GenMapUpdateGUI:
 
 ;-------------------------------------------------------------------------------
 
+GenMapGenerate:
+
+    ld      a,[gen_map_seed] ; 21 is the default of the algorithm...
+    add     a,$80 ; I don't like the results of the seed 0 for water, so
+    ld      b,a ; let's hide it... :P
+    ld      c,229 ; b, c = seeds
+
+    ld      a,[gen_map_selection]
+    cp      a,GEN_MAP_SELECT_LAND
+    jr      nz,.not_land
+        ld      d,-$18 ; More land
+        jr      .end_selection
+.not_land:
+        ld      d,0 ; More water
+.end_selection: ; d = offset
+
+    LONG_CALL_ARGS  map_generate ; b = seed x, c = seed y (229), d = offset
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 GenMapHandleInput: ; If it returns 1, exit room. If 0, continue
 
     ld      a,[joy_pressed]
@@ -152,22 +174,10 @@ GenMapHandleInput: ; If it returns 1, exit room. If 0, continue
     ld      a,[joy_pressed]
     and     a,PAD_A
     jr      z,.end_a
+        LONG_CALL   APA_BufferClear
+        call    APA_BufferUpdate
 
-        ld      a,[gen_map_seed] ; 21 is the default of the algorithm...
-        add     a,$80 ; I don't like the results of the seed 0 for water, so
-        ld      b,a ; let's hide it... :P
-        ld      c,229 ; b, c = seeds
-
-        ld      a,[gen_map_selection]
-        cp      a,GEN_MAP_SELECT_LAND
-        jr      nz,.not_land
-            ld      d,-$18 ; More land
-            jr      .end_selection
-.not_land:
-            ld      d,0 ; More water
-.end_selection: ; d = offset
-
-        LONG_CALL_ARGS  map_generate ; b = seed x, c = seed y (229), d = offset
+        call    GenMapGenerate
 
         ld      a,1
         ld      [gen_map_generated],a
@@ -265,6 +275,9 @@ RoomGenMapLoadBG:
 
 ;-------------------------------------------------------------------------------
 
+EMTPY_MAP_PALETTE:
+    DW 0, 0, 0, (31<<10)|(31<<5)|31 ; BLACK, BLACK, BLACK, WHITE
+
 RoomGenerateMap::
 
     call    SetPalettesAllBlack
@@ -289,7 +302,13 @@ RoomGenerateMap::
 
     call    RoomGenMapLoadBG
 
+    LONG_CALL   APA_BufferFillColor3
+    call    APA_BufferUpdate
+
     call    LoadTextPalette
+
+    ld      hl,EMTPY_MAP_PALETTE
+    call    APA_LoadPalette
 
     xor     a,a
     ld      [gen_map_room_exit],a
