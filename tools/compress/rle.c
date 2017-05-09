@@ -68,8 +68,8 @@ int main(int argc, char **argv) {
   Title();
 
   if (argc < 2) Usage();
-  if      (!strcmpi(argv[1], "-d")) cmd = CMD_DECODE;
-  else if (!strcmpi(argv[1], "-e")) cmd = CMD_CODE_30;
+  if      (!strcmp(argv[1], "-d")) cmd = CMD_DECODE;
+  else if (!strcmp(argv[1], "-e")) cmd = CMD_CODE_30;
   else                              EXIT("Command not supported\n");
   if (argc < 3) EXIT("Filename not specified\n");
 
@@ -120,7 +120,9 @@ char *Load(char *filename, int *length, int min, int max) {
   char *fb;
 
   if ((fp = fopen(filename, "rb")) == NULL) EXIT("\nFile open error\n");
-  fs = filelength(fileno(fp));
+  fseek(fp, 0, SEEK_END);
+  fs = ftell(fp);
+  rewind(fp);
   if ((fs < min) || (fs > max)) EXIT("\nFile size error\n");
   fb = Memory(fs + 3, sizeof(char));
   if (fread(fb, 1, fs, fp) != fs) EXIT("\nFile read error\n");
