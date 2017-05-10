@@ -45,10 +45,6 @@ MINIMAP_BACKBUFFER_WRAMX_BANK EQU BANK_SCRATCH_RAM_2
 
 MINIMAP_VRAM_BASE EQU $8800
 
-;###############################################################################
-
-    SECTION "All Points Addressable Variables",WRAM0
-
 ;-------------------------------------------------------------------------------
 
 pixel_stream_ptr: DS 2 ; LSB first, pointer to part the buffer to be drawn
