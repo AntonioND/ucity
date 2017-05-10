@@ -174,8 +174,16 @@ GenMapHandleInput: ; If it returns 1, exit room. If 0, continue
     ld      a,[joy_pressed]
     and     a,PAD_A
     jr      z,.end_a
-        LONG_CALL   APA_BufferClear
-        call    APA_BufferUpdate
+
+        di ; Entering critical section
+
+        ld      b,$91
+        call    wait_ly
+
+        ld      hl,GEN_MAP_EMPTY_PALETTE_BLACK
+        call    APA_LoadPalette
+
+        ei ; End of critical section
 
         call    GenMapGenerate
 
@@ -275,8 +283,11 @@ RoomGenMapLoadBG:
 
 ;-------------------------------------------------------------------------------
 
-EMTPY_MAP_PALETTE:
-    DW 0, 0, 0, (31<<10)|(31<<5)|31 ; BLACK, BLACK, BLACK, WHITE
+GEN_MAP_EMPTY_PALETTE_BLACK:
+    DW 0, 0, 0, 0
+
+GEN_MAP_EMPTY_PALETTE_WHITE:
+    DW $7FFF, $7FFF, $7FFF, $7FFF
 
 RoomGenerateMap::
 
@@ -307,7 +318,7 @@ RoomGenerateMap::
 
     call    LoadTextPalette
 
-    ld      hl,EMTPY_MAP_PALETTE
+    ld      hl,GEN_MAP_EMPTY_PALETTE_WHITE
     call    APA_LoadPalette
 
     xor     a,a

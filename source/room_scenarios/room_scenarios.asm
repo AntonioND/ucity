@@ -153,8 +153,15 @@ InputHandleScenarioSelect:
 .skip_right_reset:
         ld      [scenario_select_map_selection],a
 
-        LONG_CALL   APA_BufferFillColor3
-        call    APA_BufferUpdate
+        di ; Entering critical section
+
+        ld      b,$91
+        call    wait_ly
+
+        ld      hl,MINIMAP_PALETTE_BLACK
+        call    APA_LoadPalette
+
+        ei ; End of critical section
 
         call    RoomScenarioSelectRefresh
 .end_right:
@@ -170,8 +177,15 @@ InputHandleScenarioSelect:
 .skip_left_reset:
         ld      [scenario_select_map_selection],a
 
-        LONG_CALL   APA_BufferFillColor3
-        call    APA_BufferUpdate
+        di ; Entering critical section
+
+        ld      b,$91
+        call    wait_ly
+
+        ld      hl,MINIMAP_PALETTE_BLACK
+        call    APA_LoadPalette
+
+        ei ; End of critical section
 
         call    RoomScenarioSelectRefresh
 .end_left:
@@ -347,6 +361,9 @@ C_BLUE  EQU 2
 C_WHITE EQU 3
 
 MINIMAP_PALETTE_BLACK:
+    DW  0, 0, 0, 0
+
+MINIMAP_PALETTE_WHITE:
     DW  0, 0, 0, 0
 
 MINIMAP_PALETTE: ; GREY, GREEN, BLUE, WHITE
