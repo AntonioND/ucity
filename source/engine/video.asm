@@ -67,13 +67,15 @@ screen_off::
     and     a,LCDCF_ON
     ret     z ; LCD already OFF
 
+    di ; Entering critical section
+
     ld      b,$91
     call    wait_ly
 
     xor     a,a
     ld      [rLCDC],a ;Shutdown LCD
 
-    ret
+    reti ; End of critical section
 
 ;-------------------------------------------------------------------------------
 ;- vram_nitro_copy()    b = size    de = source address    hl = dest address   -
