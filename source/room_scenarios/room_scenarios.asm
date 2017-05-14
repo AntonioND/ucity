@@ -395,34 +395,35 @@ MINIMAP_TYPE_COLOR_ARRAY:
 
 RoomScenarioSelectRefreshMinimap:
 
-    call    rom_bank_push ; (*) preserve bank
+    ; Uncompress map
+    ld      a,[scenario_select_map_selection]
+    call    ScenarioLoadMapData ; a = index
+
+    ; Prepare bank to get tile type
+    ld      b,BANK(TILESET_INFO)
+    call    rom_bank_push_set
 
     LONG_CALL   APA_BufferClear
     LONG_CALL   APA_PixelStreamStart
 
-    ld      a,[scenario_select_map_selection]
-    call    ScenarioGetMapPointerAndStartCoordinates ; a = number
-    ; returns b = bank of map, hl = pointer to map
-
     ld      de,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
+    ld      hl,CITY_MAP_TILES
 
 .loop:
 
-    push    bc
     push    de
     push    hl
 
         ; Get tile
 
-        LD_DE_HL
-        call    rom_bank_set ; preserves de
-        LD_HL_DE
+        ld      a,BANK_CITY_MAP_TILES
+        ld      [rSVBK],a
 
         ld      d,0
         ld      e,[hl]
 
-        ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-        add     hl,bc
+        ld      a,BANK_CITY_MAP_ATTR
+        ld      [rSVBK],a
 
         bit     3,[hl]
         jr      z,.dont_set
@@ -434,9 +435,6 @@ RoomScenarioSelectRefreshMinimap:
 IF TILESET_INFO_ELEMENT_SIZE != 4
     FAIL "room_scenarios.asm: Fix this!"
 ENDC
-
-        ld      b,BANK(TILESET_INFO)
-        call    rom_bank_set ; preserves de
 
         ld      hl,TILESET_INFO + 1 ; point to attributes
         add     hl,de ; Use full 9 bit tile number to access the array.
@@ -461,7 +459,6 @@ ENDC
 
     pop     hl
     pop     de
-    pop     bc
 
     inc     hl
     dec     de

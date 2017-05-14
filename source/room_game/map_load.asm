@@ -337,7 +337,7 @@ ScenarioSetupGameVariables: ; a = index
 
 ;-------------------------------------------------------------------------------
 
-ScenarioLoadMapData: ; a = index
+ScenarioLoadMapData:: ; a = index
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
 
