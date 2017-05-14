@@ -47,16 +47,20 @@ selected_map: DS 1
 
 ; Create a new section in ROMX for each map
 
-ADD_SCENARIO_MAP : MACRO ; \1 = label, \2 = file name
+FILE_SECTION : MACRO ; \1 = label, \2 = file name
     SECTION "\1",ROMX
 \1:
     INCBIN  \2
 ENDM
 
-    ADD_SCENARIO_MAP    SCENARIO_MAP_0_ROCK_RIVER, "scenario_0_rock_river.bin"
-    ADD_SCENARIO_MAP    SCENARIO_MAP_1_BORINGTOWN, "scenario_1_boringtown.bin"
-    ADD_SCENARIO_MAP    SCENARIO_MAP_2_PORTVILLE, "scenario_2_portville.bin"
-    ADD_SCENARIO_MAP    SCENARIO_MAP_3_TEST_MAP, "scenario_3_test_map.bin"
+    FILE_SECTION SCENARIO_MAP_0_ROCK_RIVER,  "scenario_0_rock_river_map.bin"
+    FILE_SECTION SCENARIO_ATTR_0_ROCK_RIVER, "scenario_0_rock_river_attr.bin"
+    FILE_SECTION SCENARIO_MAP_1_BORINGTOWN,  "scenario_1_boringtown_map.bin"
+    FILE_SECTION SCENARIO_ATTR_1_BORINGTOWN, "scenario_1_boringtown_attr.bin"
+    FILE_SECTION SCENARIO_MAP_2_PORTVILLE,  "scenario_2_portville_map.bin"
+    FILE_SECTION SCENARIO_ATTR_2_PORTVILLE, "scenario_2_portville_attr.bin"
+    FILE_SECTION SCENARIO_MAP_3_TEST_MAP,  "scenario_3_test_map_map.bin"
+    FILE_SECTION SCENARIO_ATTR_3_TEST_MAP, "scenario_3_test_map_attr.bin"
 
 ;###############################################################################
 
@@ -74,14 +78,19 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-SCEN_INFO_1 : MACRO ; \1 = map, \2 = start x, \3 = start y
-    DB  \2, \3 ; X, Y
+SCEN_INFO_1 : MACRO ; \1 = map, \2 = attr
     DB  BANK(\1)
     DW  \1 ; LSB first
-ENDM ; 5 bytes in total
+    DB  BANK(\2)
+    DW  \2 ; LSB first
+ENDM ; 6 bytes in total
+
+SCEN_INFO_2 : MACRO ; \1 = start x, \2 = start y
+    DB  \1, \2 ; X, Y
+ENDM ; 2 bytes in total
 
 ; All of the information in this struct should be placed in ROM bank 0
-SCEN_INFO_2 : MACRO ; \1=Name, \2=Name length, \3=Year, \4=Month, \5=Money
+SCEN_INFO_3 : MACRO ; \1=Name, \2=Name length, \3=Year, \4=Month, \5=Money
     DW  \1 ; LSB first
     DB  \2
     DW  \3
@@ -89,11 +98,11 @@ SCEN_INFO_2 : MACRO ; \1=Name, \2=Name length, \3=Year, \4=Month, \5=Money
     DW  \5
 ENDM ; 8 bytes in total
 
-SCEN_INFO_3 : MACRO ; \1=Technology level
+SCEN_INFO_4 : MACRO ; \1=Technology level
     DB  \1
 ENDM ; 1 byte in total
 
-SCEN_INFO_4 : MACRO ; \1=Flags of permanent msg ID to disable, \2=Same
+SCEN_INFO_5 : MACRO ; \1=Flags of permanent msg ID to disable, \2=Same
     DB  (\1)>>1
     DB  (\2)>>(8+1)
 ENDM ; 2 bytes in total
@@ -103,25 +112,29 @@ IF BYTES_SAVE_PERSISTENT_MSG != 2
 ENDC
 
 SCENARIO_MAP_INFO:
-    SCEN_INFO_1 SCENARIO_MAP_0_ROCK_RIVER, 14, 33
-    SCEN_INFO_2 ROCK_RIVER_NAME, ROCK_RIVER_NAME_LEN, $1950,0, MONEY_START_20000
-    SCEN_INFO_3 0
-    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
+    SCEN_INFO_1 SCENARIO_MAP_0_ROCK_RIVER, SCENARIO_ATTR_0_ROCK_RIVER
+    SCEN_INFO_2 14, 33
+    SCEN_INFO_3 ROCK_RIVER_NAME, ROCK_RIVER_NAME_LEN, $1950,0, MONEY_START_20000
+    SCEN_INFO_4 0
+    SCEN_INFO_5 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
-    SCEN_INFO_1 SCENARIO_MAP_1_BORINGTOWN, 24, 24
-    SCEN_INFO_2 BORINGTOWN_NAME, BORINGTOWN_NAME_LEN, $1975,3, MONEY_START_9000
-    SCEN_INFO_3 10
-    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)
+    SCEN_INFO_1 SCENARIO_MAP_1_BORINGTOWN, SCENARIO_ATTR_1_BORINGTOWN
+    SCEN_INFO_2 24, 24
+    SCEN_INFO_3 BORINGTOWN_NAME, BORINGTOWN_NAME_LEN, $1975,3, MONEY_START_9000
+    SCEN_INFO_4 10
+    SCEN_INFO_5 0, (1<<ID_MSG_CLASS_TOWN)
 
-    SCEN_INFO_1 SCENARIO_MAP_2_PORTVILLE, 7, 26
-    SCEN_INFO_2 PORTVILLE_NAME, PORTVILLE_NAME_LEN, $1960,0, MONEY_START_20000
-    SCEN_INFO_3 10
-    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
+    SCEN_INFO_1 SCENARIO_MAP_2_PORTVILLE, SCENARIO_ATTR_2_PORTVILLE
+    SCEN_INFO_2 7, 26
+    SCEN_INFO_3 PORTVILLE_NAME, PORTVILLE_NAME_LEN, $1960,0, MONEY_START_20000
+    SCEN_INFO_4 10
+    SCEN_INFO_5 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
-    SCEN_INFO_1 SCENARIO_MAP_3_TEST_MAP, 22, 23
-    SCEN_INFO_2 TEST_MAP_NAME, TEST_MAP_NAME_LEN, $1950,0, MONEY_START_20000
-    SCEN_INFO_3 0
-    SCEN_INFO_4 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
+    SCEN_INFO_1 SCENARIO_MAP_3_TEST_MAP, SCENARIO_ATTR_3_TEST_MAP
+    SCEN_INFO_2 22, 23
+    SCEN_INFO_3 TEST_MAP_NAME, TEST_MAP_NAME_LEN, $1950,0, MONEY_START_20000
+    SCEN_INFO_4 0
+    SCEN_INFO_5 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
 ;-------------------------------------------------------------------------------
 
@@ -133,6 +146,9 @@ SCENARIO_MAP_INFO_GET_INDEX : MACRO ; a = index, returns hl = pointer to info
     add     hl,hl
     add     hl,hl
     add     hl,hl ; hl = index * 16
+    add     hl,de
+    add     hl,de
+    add     hl,de ; hl = index * 19
 
     ld      de,SCENARIO_MAP_INFO
     add     hl,de
@@ -141,9 +157,12 @@ ENDM
 ;-------------------------------------------------------------------------------
 
 ; returns de = xy, b = bank of map, hl = pointer to map
-ScenarioGetMapPointerAndStartCoordinates:: ; a = number
+ScenarioGetStartCoordinates:: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
+
+    ld      de,6
+    add     hl,de
 
     ; Load coordinates
 
@@ -152,6 +171,14 @@ ScenarioGetMapPointerAndStartCoordinates:: ; a = number
     ld      e,[hl] ; e = y
     inc     hl
 
+    ret
+
+;-------------------------------------------------------------------------------
+
+; returns de = xy, b = bank of map, hl = pointer to map
+ScenarioGetMapPointerAndStartCoordinates:: ; a = number
+
+    SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
     ; Load pointer and bank
 
     ld      b,[hl]
@@ -169,7 +196,8 @@ ScenarioGetMapPointerAndStartCoordinates:: ; a = number
 ScenarioGetMapName:: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
-    ld      de,5
+
+    ld      de,8
     add     hl,de ; hl = ptr to info
 
     ld      c,[hl] ; bc = name
@@ -187,7 +215,8 @@ ScenarioGetMapName:: ; a = number
 ScenarioGetMapMoneyDate:: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
-    ld      de,8
+
+    ld      de,11
     add     hl,de ; hl = ptr to info
 
     ld      e,[hl] ; de = year
@@ -209,7 +238,8 @@ ScenarioGetMapMoneyDate:: ; a = number
 ScenarioGetTechnology: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
-    ld      de,13
+
+    ld      de,16
     add     hl,de ; hl = ptr to info
 
     ld      a,[hl]
@@ -222,7 +252,8 @@ ScenarioGetTechnology: ; a = number
 ScenarioGetMessageFlags: ; a = number
 
     SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
-    ld      de,14
+
+    ld      de,17
     add     hl,de ; hl = ptr to info
 
     ld      a,[hl+]
@@ -306,27 +337,54 @@ ScenarioSetupGameVariables: ; a = index
 
 ;-------------------------------------------------------------------------------
 
-ScenarioLoadMapData: ; b = bank, hl = tiles
+ScenarioLoadMapData: ; a = index
+
+    SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
+
+    ld      a,[hl+]
+    ld      b,a ; b = map bank
+    ld      a,[hl+]
+    ld      e,a
+    ld      a,[hl+]
+    ld      d,a ; de = map ptr
+
+    ld      a,[hl+]
+    ld      c,a ; c = attr bank
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a ; hl = attr ptr
+
+    push    bc
+    push    hl ; (*)
+
+    call    rom_bank_push_set ; b = bank, preserves de
 
     ; Load city from ROM into WRAM
 
-    LD_DE_HL
-    call    rom_bank_push_set ; preserves de
-    LD_HL_DE
-
     ld      a,BANK_CITY_MAP_TILES
     ld      [rSVBK],a
-    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ;ld      hl,MAP
-    ld      de,CITY_MAP_TILES
-    call    memcopy
+
+    LD_HL_DE
+    ld      bc,CITY_MAP_TILES
+    call    RLE_Uncompress ; hl = src, bc = dst. Returns de = siz
+    ld      hl,CITY_MAP_TILES
+    call    Diff_Uncompress ; hl = src = dst, de = size
+
+
+    pop     de ; (*) pop from hl
+    pop     bc
+
+    ld      b,c
+    call    rom_bank_set ; b = bank, preserves de
 
     ld      a,BANK_CITY_MAP_ATTR
     ld      [rSVBK],a
-    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ;ld      hl,MAP+CITY_MAP_WIDTH*CITY_MAP_HEIGHT
-    ld      de,CITY_MAP_ATTR
-    call    memcopy
+
+    LD_HL_DE
+    ld      bc,CITY_MAP_ATTR
+    call    RLE_Uncompress ; hl = src, bc = dst. Returns the size in DE
+    ld      hl,CITY_MAP_ATTR
+    call    Diff_Uncompress ; hl = src = dst, de = size
 
     call    rom_bank_pop
 
@@ -424,13 +482,10 @@ CityMapLoad:: ; returns de = xy start coordinates
         ; Scenarios
         ; ---------
 
-        ; This value is set in the room that selects scenarios, so it is
-        ; supposed to be within valid bounds
-        ld      a,[selected_map]
+        ; The value of selected_map is set in the room that selects scenarios so
+        ; it is supposed to be within valid bounds
 
-        ; returns de = xy, b = bank of map, hl = pointer to map
-        call    ScenarioGetMapPointerAndStartCoordinates
-        push    de ; (***) save coordinates
+        ld      a,[selected_map]
         call    ScenarioLoadMapData
 
         ld      a,[selected_map]
@@ -438,7 +493,8 @@ CityMapLoad:: ; returns de = xy start coordinates
 
         call    ScenarioAndRandomGameOptionsDefault
 
-        pop     de ; (***) restore coordinates
+        ld      a,[selected_map]
+        call    ScenarioGetStartCoordinates ; de = coordinates
 
         jr      .end_map_load
 
