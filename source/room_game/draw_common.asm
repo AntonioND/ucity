@@ -102,6 +102,59 @@ CityMapAddrToCoords:: ; Address = hl, Returns: e = x , d = y
 
 ;-------------------------------------------------------------------------------
 
+CityMapRefreshAttributeMap::
+
+    GLOBAL  TILESET_INFO
+    ld      b,BANK(TILESET_INFO)
+    call    rom_bank_push_set
+
+    ld      de,CITY_MAP_TILES
+    ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
+.loop:
+
+    ld      a,BANK_CITY_MAP_TILES
+    ld      [rSVBK],a
+
+    ld      a,[de] ; l = LSB tile
+    ld      l,a
+
+    ld      a,BANK_CITY_MAP_ATTR
+    ld      [rSVBK],a
+
+    ld      a,[de]
+    rla
+    swap    a ; move bit 3 (tile bank) to 0
+    and     a,1
+    ld      h,a ; h = MSB tile
+
+    IF TILESET_INFO_ELEMENT_SIZE != 4
+        FAIL "draw_city_map.asm: Fix this!"
+    ENDC
+
+    add     hl,hl
+    add     hl,hl ; tile number * 4
+
+    ld      a,TILESET_INFO>>8
+    or      a,h
+    ld      h,a ; TILESET_INFO base is $4000 -> TILESET_INFO + tile * 2
+    ; first byte is the palette and bank
+
+    ld      a,[hl]
+    ld      [de],a
+
+    inc     de ; next tile
+
+    dec     bc
+    ld      a,b
+    or      a,c
+    jr      nz,.loop
+
+    call    rom_bank_pop
+
+    ret
+
+;-------------------------------------------------------------------------------
+
 CityMapRefreshTypeMap::
 
     GLOBAL  TILESET_INFO

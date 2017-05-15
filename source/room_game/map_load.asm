@@ -386,6 +386,8 @@ ScenarioLoadMapData:: ; a = index
     ld      hl,CITY_MAP_ATTR
     call    Diff_Uncompress ; hl = src = dst, de = size
 
+    call    CityMapRefreshAttributeMap
+
     call    rom_bank_pop
 
     ret
