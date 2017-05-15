@@ -23,6 +23,9 @@
     INCLUDE "hardware.inc"
     INCLUDE "engine.inc"
 
+; Note: Don't include charmaps in this file or the game name in the ROM header
+; will be corrupted!
+
 ;###############################################################################
 ;#                                                                             #
 ;#                               RESTART VECTORS                               #
@@ -154,7 +157,7 @@ wait_vbl:
     NINTENDO_LOGO
 
     ;        0123456789ABC
-    DB      "UCITY        " ; Note: Don't include charmaps in this file!
+    DB      "MICROCITY    " ; Note: Don't include charmaps in this file!
     DW      $0000
     DB      CART_COMPATIBLE_GBC ; GBC flag
     DB      $00,$00,$00 ;Super Game Boy
