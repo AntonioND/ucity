@@ -29,7 +29,7 @@ Game made by AntonioND/SkyLyrac (Antonio Niño Díaz)
 
 Email:
 
-    antonio_nd@outlook.com / antonionidi@gmail.com
+    antonio_nd@outlook.com
 
 Web:
 
