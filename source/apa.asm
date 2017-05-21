@@ -82,7 +82,7 @@ APA_PixelStreamStart::
 
 ;-------------------------------------------------------------------------------
 
-APA_PixelStreamPlot2x2::
+APA_PixelStreamPlot2x2:: ; Buffer is 128x128
 
     ld      hl,pixel_stream_row_buffers
 
