@@ -9,13 +9,18 @@ The code for the compression tools is located in ``tools/compression``. It has
 the following files:
 
 - ``compile.sh``: Script to compile all tools in Linux.
+
 - ``convert.sh``: Script to convert a single binary file of a map into the two
   output compressed files (tile map and attribute map).
+
 - ``convert-all.sh``: Script used to convert all scenarios to the corresponding
   compressed files.
+
 - ``extractbit3.c``: Sets to 0 all bits but bit 3 of each byte of a file.
+
 - ``filediff.c``: Calculate file formed by the relative increments of each byte
   of the original file.
+
 - ``rle.c``: External RLE compressor licensed under the license GPLv3+ (with a
   few modifications to compile on Linux).
 
