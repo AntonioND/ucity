@@ -15,6 +15,8 @@ The code is located in:
   right and top to bottom), which is a lot faster if the final image is known
   beforehand.
 
+- ``source/apa.inc`` : Some definitions related to the implementation.
+
 Usage guide
 ===========
 

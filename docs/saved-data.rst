@@ -21,6 +21,8 @@ The relevant code is located in:
 - ``source/save_struct.asm`` : Format of the saved data. It is repeated in all
   SRAM banks.
 
+- ``source/save_struct.inc`` : Helpers to handle saved data.
+
 - ``source/room_game/map_load.asm`` : It uses the available routines to load
   cities from SRAM.
 
