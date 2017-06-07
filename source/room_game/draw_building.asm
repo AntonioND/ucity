@@ -168,7 +168,7 @@ MapUpdateBuildingSuroundingPowerLines::
 
 ;-------------------------------------------------------------------------------
 
-; Doesn't update VRAM map. Clears FLAGS of this tile.
+; Doesn't update VRAM map. Clears FLAGS of this tile. Doesn't play SFX.
 ; de = coordinates, b = B_xxx define
 MapDrawBuildingForcedCoords:: ; Puts a building
 
@@ -179,7 +179,7 @@ MapDrawBuildingForcedCoords:: ; Puts a building
     pop     de
     jr      _MapDrawBuildingForcedInner
 
-; Doesn't update VRAM map. Clears FLAGS of this tile.
+; Doesn't update VRAM map. Clears FLAGS of this tile. Doesn't play SFX.
 MapDrawBuildingForced:: ; Puts a building at the cursor. No checks.
 
     ; Get cursor position and building size
@@ -711,9 +711,15 @@ ENDC
 
 ENDM
 
+; Doesn't update VRAM map. Clears FLAGS of this tile.
+; d = y, e = x -> Coordinates of one of the tiles.
+; Returns b=0 if could remove building, b=1 if error.
 MapDeleteBuildingForced:: ; Removes a building. No checks. No SFX.
     MAP_DELETE_BUILDING 0
 
+; Doesn't update VRAM map. Clears FLAGS of this tile.
+; d = y, e = x -> Coordinates of one of the tiles.
+; Returns b=0 if could remove building, b=1 if error.
 MapDeleteBuilding:: ; Deletes a building. Checks money. Plays SFX.
     MAP_DELETE_BUILDING 1
 

@@ -46,6 +46,7 @@ building_temp_price: DS 5
 
 ;-------------------------------------------------------------------------------
 
+; Check technology level and city size to see if a building is available or not.
 ; Returns b = 1 if available, 0 if not (and shows an error message)
 BuildingIsAvailable:: ; b = B_xxxx define
 
@@ -83,7 +84,7 @@ BuildingIsAvailable:: ; b = B_xxxx define
 
 ;-------------------------------------------------------------------------------
 
-BuildingTypeSelect:: ; a = type, b != 0 to refresh cursor
+BuildingTypeSelect:: ; a = type. If b != 0, it refreshes cursor as well
 
     ld      [building_selected],a
 
@@ -203,7 +204,7 @@ BuildingUpdateCursorSize:: ; Updates cursor size to the selected building size.
 
 ;-------------------------------------------------------------------------------
 
-; Internal use, called from CityMapDraw
+; Top level player function, called from CityMapDraw
 BuildingBuildAtCursor:: ; B_Delete will remove instead
 
     ld      a,[building_selected]
@@ -264,6 +265,8 @@ BuildingBuildAtCursor:: ; B_Delete will remove instead
 
 ;-------------------------------------------------------------------------------
 
+; Roads, train tracks and power lines require special handling because it is
+; needed to handle bridges in a different way.
 BuildingRemoveRoadTrainPowerLines: ; de = coordinates, a = type
 
     ; Check if this is a bridge

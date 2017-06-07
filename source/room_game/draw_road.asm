@@ -407,7 +407,7 @@ MapDrawRoad:: ; Adds a road tile where the cursor is. Updates neighbours.
 ;-------------------------------------------------------------------------------
 
 ; de = coordinates
-MapUpdateNeighboursRoad::
+MapUpdateNeighboursRoad:: ; Updates neighbours and the tile in the center
 
     push    de
     dec     d
@@ -461,8 +461,10 @@ MapUpdateNeighboursRoad::
 
 ;-------------------------------------------------------------------------------
 
-; Arguments: e=x, d=y
-MapDeleteRoadTrainPowerlines:: ; Deletes, but doesn't update neighbours.
+; It deletes one tile of road, train or power lines, but it doesn't update
+; neighbours, that has to be done by the caller. It doesn't work to demolish
+; bridges.
+MapDeleteRoadTrainPowerlines:: ; Arguments: e=x, d=y
 
     ; Check if there is enough money
     ; ------------------------------

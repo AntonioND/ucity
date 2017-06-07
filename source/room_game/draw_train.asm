@@ -442,7 +442,7 @@ MapDrawTrain:: ; Adds a train tile where the cursor is. Updates neighbours.
 ;-------------------------------------------------------------------------------
 
 ; de = coordinates
-MapUpdateNeighboursTrain::
+MapUpdateNeighboursTrain:: ; Updates neighbours and the tile in the center
 
     push    de
     dec     d

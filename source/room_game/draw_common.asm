@@ -34,8 +34,8 @@
 
 ;-------------------------------------------------------------------------------
 
-; This should be used all around the code!
-CLAMP_0_63:: ; Clamps value to 0 ~ 63
+; This should be used all around the codebase!
+CLAMP_0_63:: ; Clamps any signed 8-byte value to 0 ~ 63.
 
 VAL SET 0 ; 0 to 63
     REPT 64
@@ -80,8 +80,7 @@ CityMapDraw::
     and     a,a
     ret     nz ; Don't draw if cursor is between tiles.
 
-    call    BuildingBuildAtCursor
-    ret
+    jp      BuildingBuildAtCursor ; Return from there.
 
 ;-------------------------------------------------------------------------------
 
@@ -211,7 +210,10 @@ CityMapRefreshTypeMap::
 
 ;-------------------------------------------------------------------------------
 
-; Expand type of the tile in the border (water or field).
+; This function is used to guess the type of the rows and columns right next to
+; the map (but out of it). They expand the type of the tile in the border (water
+; or field). For example, if the last tile at row 63 is a forest, row 64 would
+; have a field. If it was water, the result would be water as well.
 
 ; Internal function called by CityMapGetType and CityMapGetTypeAndTile
 ; The coordinates passed as arguments should be only a few tiles away from the
@@ -248,6 +250,11 @@ _CityMapFixBorderCoordinates: ; Arguments: e = x , d = y
 
 ;-------------------------------------------------------------------------------
 
+; This function can be used to guess the type of the rows and columns right next
+; to the map (but out of it). They expand the type of the tile in the border
+; (water or field). For example, if the last tile at row 63 is a forest, row 64
+; would have a field. If it was water, the result would be water as well.
+
 ; Returns type of the tile + extra flags -> register A
 ;          - Address -> Register HL
 CityMapGetType:: ; Arguments: e = x , d = y
@@ -268,6 +275,8 @@ CityMapGetType:: ; Arguments: e = x , d = y
     ret
 ;-------------------------------------------------------------------------------
 
+; Don't call this function with invalid coordinates or it will return garbage.
+
 ; Returns type of the tile + extra flags -> register A
 ;          - Address -> Register HL
 CityMapGetTypeNoBoundCheck:: ; Arguments: e = x , d = y. Preserves de
@@ -282,6 +291,11 @@ CityMapGetTypeNoBoundCheck:: ; Arguments: e = x , d = y. Preserves de
     ret
 
 ;-------------------------------------------------------------------------------
+
+; This function can be used to guess the type of the rows and columns right next
+; to the map (but out of it). They expand the type of the tile in the border
+; (water or field). For example, if the last tile at row 63 is a forest, row 64
+; would have a field. If it was water, the result would be water as well.
 
 ; Returns: - Tile -> Register DE
 ;          - Address -> Register HL
@@ -313,6 +327,8 @@ CityMapGetTile:: ; Arguments: e = x , d = y
 
 ;-------------------------------------------------------------------------------
 
+; Don't call this function with invalid coordinates or it will return garbage.
+
 ; Returns: - Tile -> Register DE
 ;          - Address -> Register HL
 CityMapGetTileNoBoundCheck:: ; Arguments: e = x , d = y
@@ -336,6 +352,11 @@ CityMapGetTileNoBoundCheck:: ; Arguments: e = x , d = y
     ret
 
 ;-------------------------------------------------------------------------------
+
+; This function can be used to guess the type of the rows and columns right next
+; to the map (but out of it). They expand the type of the tile in the border
+; (water or field). For example, if the last tile at row 63 is a forest, row 64
+; would have a field. If it was water, the result would be water as well.
 
 ; Returns: - Type of the tile + extra flags -> register A
 ;          - Tile -> Register DE
@@ -370,6 +391,7 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
     ld      a,[hl]
 
     ret
+
 ;-------------------------------------------------------------------------------
 
 ; Note: This doesn't check bounds or anything!
@@ -461,7 +483,11 @@ CityMapDrawTerrainTileAddress:: ; bc = tile, hl = address
 
 ;-------------------------------------------------------------------------------
 
-; Checks if a bridge of a certain type can be built.
+; Checks if a bridge of a certain type can be built. For that to be possible,
+; the coordinates must point at a water tile next to the ground, but with only
+; one tile of ground surounding it (or 2 at two opposite sides). It cannot leave
+; the map, it must end inside of it.
+
 ; Returns:
 ;    a = length of the bridge, 0 if error
 ;    b = x increment // c = y increment -> build direction
@@ -1042,7 +1068,8 @@ UpdateWater:: ; e = x, d = y
 ; Inputs: top or left bound of the bridge in de, and b=inc y, c=inc x
 ; It is assumed that at least the tile in de is a bridge.
 ; It will refresh the tiles at both ends of the bridge and all water tiles
-; affected by the demolition, but doesn't reload the VRAM map
+; affected by the demolition, but doesn't reload the VRAM map. It doesn't check
+; for funds or play SFX.
 DrawCityDeleteBridgeForce:
 
     push    bc
@@ -1171,7 +1198,7 @@ BRIDGE_TILE_INFO: ; All bridge tile indexes should be < 256
 
 ; Checks length of the bridge to see if there is money to delete. If so, it
 ; calls DrawCityDeleteBridgeForce and reduces the money. The money check
-; can be disabled.
+; can be disabled. If plays SFX.
 ; Input: d=y, e=x, a=1 will check if there is money, 0 will ignore the check
 DrawCityDeleteBridgeWithCheck:: ; Returns top or left bound in d=y, e=x.
 

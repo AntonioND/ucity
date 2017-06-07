@@ -113,7 +113,6 @@ TypeBuildingHasElectricity:: ; preserves c, de, hl
 
 ;-------------------------------------------------------------------------------
 
-
 POWER_LINES_MASK_TABLE: ; MASK, EXPECTED RESULT, RESULTING TILE
 
     ; From more restrictive to less restrictive
@@ -390,7 +389,7 @@ ENDC
 
 ;-------------------------------------------------------------------------------
 
-MapDrawPowerLines:: ; Adds a train tile in the cursor. Updates neighbours.
+MapDrawPowerLines:: ; Adds a train tile at the cursor. Updates neighbours.
 
     ; Check if enough money
     ; ---------------------
@@ -531,7 +530,7 @@ MapDrawPowerLines:: ; Adds a train tile in the cursor. Updates neighbours.
 ;-------------------------------------------------------------------------------
 
 ; de = coordinates
-MapUpdateNeighboursPowerLines::
+MapUpdateNeighboursPowerLines:: ; Updates neighbours and the tile in the center
 
     push    de
     dec     d

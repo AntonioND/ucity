@@ -38,7 +38,9 @@
 ; Arguments:
 ; e = x, d = y
 ; b = width, c = height
-MapCheckSurroundingWater: ; returns a=1 if there is water, 0 if not
+; Returns a=1 if there is water in any tile surounding this building (defined by
+; its coordinates and size), 0 if not.
+MapCheckSurroundingWater:
 
     ; Top row
     ; -------
@@ -176,8 +178,8 @@ MapCheckSurroundingWater: ; returns a=1 if there is water, 0 if not
 
 ;-------------------------------------------------------------------------------
 
-; This doesn't refresh the VRAM map
-
+; Checks all tiles surounding a port and builds docks on the water ones.
+; It doesn't refresh the VRAM map
 ; Arguments:
 ; e = x, d = y
 ; b = width, c = height
@@ -322,6 +324,9 @@ MapBuildDocksSurrounding:
 
 ;-------------------------------------------------------------------------------
 
+; It checks the tiles surounding this port. For each dock tile, if it is facing
+; this port, it sets it to water. Docks that belong to other ports are left
+; unchanged.
 ; Arguments:
 ; e = x, d = y
 ; b = width, c = height
@@ -479,8 +484,11 @@ MapConvertDocksIntoWater::
 
 ;-------------------------------------------------------------------------------
 
-; This doesn't refresh the VRAM map
-
+; Once the docks have been removed with MapConvertDocksIntoWater, this function
+; refreshes the water tiles so that the drawings are the correct ones. It is
+; needed to do it after converting all tiles to water to avoid partial updates
+; of tiles that have an adjacent tile that hasn't had time to be updated.
+; It doesn't refresh the VRAM map.
 ; Arguments:
 ; e = x, d = y
 ; b = width, c = height
@@ -618,6 +626,7 @@ MapRemoveDocksSurrounding::
 
 ;-------------------------------------------------------------------------------
 
+; Draws a port and as many docks as possible (docks are free).
 MapDrawPort::
 
     ; Check if there is water surrounding the building
@@ -666,8 +675,8 @@ MapDrawPort::
 
 ;-------------------------------------------------------------------------------
 
-; d = y, e = x -> Coordinates of one of the tiles.
-MapDeletePort:: ; Deletes a building. Checks money.
+; d = y, e = x -> Coordinates of one of the port tiles (not the docks!).
+MapDeletePort:: ; Deletes a port and its docks. Checks money (docks are free).
 
     ; Get origin of coordinates of the building
     ; -----------------------------------------
