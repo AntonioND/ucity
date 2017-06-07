@@ -384,24 +384,10 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
         and     a,TYPE_HAS_ROAD
         jr      z,.not_road ; Not road, skip
 
-            ld      a,BANK_CITY_MAP_TRAFFIC
-            ld      [rSVBK],a
-
-            ld      a,[hl]
-            bit     7,a
-            jr      z,.not_saturated ; if > 127, saturated
-            ld      a,255 ; saturated
-.not_saturated:
-            ; 8 bits to 2
-            rlca
-            rlca ; rotate no carry
-            and     a,3
-            ld      b,a ; b = traffic level
-
             ld      a,BANK_CITY_MAP_TILES
             ld      [rSVBK],a
 
-            ; All road tiles are < 256, that's why this works!
+            ; Load tile index. All road tiles have index < 256, so this is ok.
             ld      a,[hl]
 
             ; Ignore tiles with traffic level 0
