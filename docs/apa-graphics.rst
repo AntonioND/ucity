@@ -80,7 +80,14 @@ This mode is used by the following files:
   done in ``source/room_minimap/room_minimap.asm``). The list of all available
   maps is in ``source/room_minimap/room_minimap.inc``.
 
+  Note that ``source/room_minimap/minimap_menu.asm`` isn't included in this
+  category, that file has code to handle the menu that allows the player to
+  select the minimap to be shown.
+
 - ``source/room_graphs/graph_***.asm`` : 128x128 graphs shown in-game (funds,
   population, etc). In this case, ``APA_Plot`` is used, as most of the image is
   left blank. The list of all available graphs is in
   ``source/room_graphs/room_graphs.inc``.
+
+  Note that ``source/room_graphs/graphs_menu.asm`` isn't included either, it
+  handles the menu of this room.

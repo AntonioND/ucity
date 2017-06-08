@@ -63,3 +63,11 @@ the city. To make it easier, the message IDs of persistent and yearly messages
 are the first ones. Only one bit is needed to know the state of each message, so
 they are packed in bytes. The number of bytes needed to save them all is
 ``BYTES_SAVE_PERSISTENT_MSG``.
+
+Text input
+==========
+
+The file ``source/room_text_input/room_text_input.asm`` contains a room that
+allows the player to input a text string. It also lets the game show a string
+to explain shortly what the player is meant to input. It is currently used to
+input the names of cities in randomly generated maps.
