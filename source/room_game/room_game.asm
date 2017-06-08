@@ -451,8 +451,10 @@ RoomGameVBLHandler:
     and     a,a
     ret     nz ; already working
 
+    ; Flag as working to make a nested VBL handler exit right before reaching
+    ; this point.
     ld      a,1
-    ld      [vbl_handler_working],a ; flag as working
+    ld      [vbl_handler_working],a
 
     ld      a,[rSVBK]
     ld      b,a
@@ -472,7 +474,16 @@ RoomGameVBLHandler:
 
     LONG_CALL   GameStateMachineHandle
 
-    LONG_CALL   Simulation_TransportAnimsScroll ; After scroll regs are updated
+    ; If the map scrolls at this step (which is done by GameStateMachineHandle)
+    ; it is needed to update the position of the sprites for the next frame. At
+    ; this point we know the scroll of the background for the next frame, so
+    ; this function can calculate the position of the sprites for the next
+    ; frame. They both will be updated in the next VBL handler execution.
+    ;
+    ; This function also handles the non-critical parts of the animation
+    ; handling.
+    LONG_CALL   Simulation_TransportAnimsScroll
+
     pop     bc
     ld      a,b
     ld      [rSVBK],a
