@@ -74,10 +74,13 @@ This mode is used by the following files:
 
 - ``source/room_minimap/minimap_***.asm`` : 128x128 minimaps shown in-game from
   the pause menu (zones, traffic, population density, etc). It uses a pixel
-  stream of 2x2 blocks. Note that the map doesn't have the correct values to
-  display the final image, so ``APA_ResetBackgroundMapping`` is used (in
-  ``source/room_minimap/room_minimap.asm``).
+  stream of 2x2 blocks. Note that the tile map of this background doesn't have
+  the correct values to display the final image, so
+  ``APA_ResetBackgroundMapping`` must be used to update the tile indices (it is
+  done in ``source/room_minimap/room_minimap.asm``). The list of all available
+  maps is in ``source/room_minimap/room_minimap.inc``.
 
 - ``source/room_graphs/graph_***.asm`` : 128x128 graphs shown in-game (funds,
   population, etc). In this case, ``APA_Plot`` is used, as most of the image is
-  left blank.
+  left blank. The list of all available graphs is in
+  ``source/room_graphs/room_graphs.inc``.
