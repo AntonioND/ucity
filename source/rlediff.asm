@@ -24,6 +24,8 @@
 
 ;-------------------------------------------------------------------------------
 
+; Decompress data from a buffer into a different buffer, returning the
+; uncompressed size.
 ; If the size marked in the buffer header is incorrect bad things may happen.
 RLE_Uncompress:: ; hl = src, bc = dst. Returns de = size
 
@@ -107,6 +109,7 @@ RLE_Uncompress:: ; hl = src, bc = dst. Returns de = size
     ret
 ;-------------------------------------------------------------------------------
 
+; Undoes a diff filter. The source buffer is also used as destination.
 Diff_Uncompress:: ; hl = src = dst, de = size
 
     ld      b,0

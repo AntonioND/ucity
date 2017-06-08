@@ -62,3 +62,7 @@ The compression process is the following one:
    compressed buffer. If the bit 7 is 1, this is a compressed block. It is
    followed by a byte that has to be repeated N+3 times. N is the value of the
    low 7 bits of the header of the block.
+
+The routines to decompress the data are in ``source/rlediff.asm``. First,
+``RLE_Uncompress`` must be called, which will undo the RLE compression. Then,
+``Diff_Uncompress`` will undo the diff filter, recreating the original file.
