@@ -87,6 +87,10 @@ menu that appears when the player has to select a building to be built is in
 Note that it is possible to go back to the main menu room from here if the
 correct option is selected in the pause menu.
 
+This room is the only one that uses the code in ``source/room_game/cursor.asm``,
+with the routines that control the cursor used to scroll and build/demolish
+buildings in the map.
+
 Budget room
 ===========
 

@@ -24,7 +24,9 @@ The relevant code is located in:
 - ``source/save_struct.inc`` : Helpers to handle saved data.
 
 - ``source/room_game/map_load.asm`` : It uses the available routines to load
-  cities from SRAM.
+  cities from SRAM. Note that there are some useful definitions in
+  ``source/room_game/map_load.inc`` to select where to load the city (scenarios,
+  from ROM, or saved cities, from SRAM).
 
 - ``source/room_save_menu/room_save_menu.asm`` : It uses the available routines
   to load and print information about saved cities as well as the ones used to
