@@ -60,7 +60,8 @@ and functions are located in:
         - ``MapDeleteBuilding`` : Removes a building from the coordinates of any
           of its tiles. It checks if there is enough money to do so, and
           substracts the amount of money needed to do it from the city funds. It
-          plays SFX.
+          plays SFX (it is different if it is removing debris from a removed
+          building than when removing a building).
 
         - ``MapClearDemolishedTile`` : It converts a demolished tile into a
           field one checking money and substracting it from the city funds. It
@@ -77,6 +78,9 @@ and functions are located in:
 
         - ``BuildingIsAvailable`` : It returns 1 if the specified building type
           is available by checking the technology level and the city size.
+          Nuclear power plants (fission and fussion) can only be built after
+          reaching a specific technological level. Stadiums, ports and airports
+          can only be built in cities or bigger settlements.
 
         - ``BuildingTypeSelect`` : Sets the type of building that the player
           wants to build. It can update the cursor size to the building size if

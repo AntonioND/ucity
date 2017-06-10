@@ -93,7 +93,7 @@ IF CITY_TILE_MONEY_COST_SIZE != 1
 ENDC
 
 ; Cost and income is per-tile. The amount can be 0-$99 (BCD, watch out!)
-CITY_TILE_MONEY_COST:: ; 512 entries - BCD - LSB first - Cost / Income
+CITY_TILE_MONEY_COST:: ; 512 entries - Depending on the tile, cost or income.
 
     T_ADD   T_GRASS__FOREST_TL, 0
     T_ADD   T_GRASS__FOREST_TC, 0
@@ -275,7 +275,7 @@ POWER_MAINTENANCE EQU $1
 
 tile_money_destination: ; Pointer to variable to add money. LSB first
     DW  budget_transport  ; TYPE_FIELD - Roads, train tracks, power lines
-    DW  taxes_other       ; TYPE_FOREST
+    DW  taxes_other       ; TYPE_FOREST - Placeholder, unused
     DW  budget_transport  ; TYPE_WATER - Bridges
     DW  taxes_rci         ; TYPE_RESIDENTIAL
     DW  taxes_rci         ; TYPE_INDUSTRIAL
@@ -293,9 +293,9 @@ tile_money_destination: ; Pointer to variable to add money. LSB first
     DW  taxes_other       ; TYPE_AIRPORT
     DW  taxes_other       ; TYPE_PORT
     DW  taxes_other       ; TYPE_DOCK
-    DW  taxes_other       ; TYPE_POWER_PLANT
-    DW  taxes_other       ; TYPE_FIRE
-    DW  taxes_other       ; TYPE_RADIATION
+    DW  taxes_other       ; TYPE_POWER_PLANT - Placeholder, unused
+    DW  taxes_other       ; TYPE_FIRE - Placeholder, unused
+    DW  taxes_other       ; TYPE_RADIATION - Placeholder, unused
     ; End of valid types...
 
 ;-------------------------------------------------------------------------------
