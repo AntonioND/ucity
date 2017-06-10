@@ -19,7 +19,9 @@ hardware. It also describes a few other files that interact with them directly.
 
 - ``source/engine/utils.asm`` : Routines for Memory manipulation, some math
   operations, joypad handling and ROM stack handling (including routines for
-  cross-bank function calls).
+  cross-bank function calls). There are other math operations in
+  ``source/math.asm``, like approximate divisions for stats calculations, when
+  the actual result doesn't matter too much.
 
 - ``source/engine/video.asm`` : Helper functions to get the state of the LCD,
   copy data to the VRAM and manipulate backgrounds, sprites and palettes.
