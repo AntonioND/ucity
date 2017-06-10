@@ -27,11 +27,16 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "text.inc"
-    INCLUDE "building_density.inc"
 
 ;###############################################################################
 
     SECTION "Minimap Population Density Map Functions",ROMX
+
+;-------------------------------------------------------------------------------
+
+; 63-1 Because the value is rounded up to show tiles with value 1. If not, they
+; would be drawn as empty.
+MAX_DISPLAYABLE_POPULATION_DENSITY EQU 62
 
 ;-------------------------------------------------------------------------------
 

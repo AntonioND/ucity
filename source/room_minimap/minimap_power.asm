@@ -27,11 +27,16 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "text.inc"
-    INCLUDE "building_density.inc"
 
 ;###############################################################################
 
     SECTION "Minimap Power Grid Map Functions",ROMX
+
+;-------------------------------------------------------------------------------
+
+; Everything over this value is saturated and will be displayed with the same
+; color.
+MAX_DISPLAYABLE_POWER_DENSITY      EQU 14
 
 ;-------------------------------------------------------------------------------
 

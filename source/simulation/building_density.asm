@@ -27,11 +27,14 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "tileset_info.inc"
-    INCLUDE "building_density.inc"
 
 ;###############################################################################
 
     SECTION "Building Density Functions Bank 0",ROM0
+
+;-------------------------------------------------------------------------------
+
+CITY_TILE_DENSITY_ELEMENT_SIZE EQU 4 ; Size of elements of CITY_TILE_DENSITY
 
 ;-------------------------------------------------------------------------------
 
@@ -136,6 +139,7 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
+; Note: Add the following check when using this array:
 IF CITY_TILE_DENSITY_ELEMENT_SIZE != 4
     FAIL "Fix this!"
 ENDC

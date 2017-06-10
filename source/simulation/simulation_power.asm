@@ -27,7 +27,6 @@
 
     INCLUDE "room_game.inc"
     INCLUDE "tileset_info.inc"
-    INCLUDE "building_density.inc"
 
 ;###############################################################################
 
