@@ -35,7 +35,7 @@
 ;-------------------------------------------------------------------------------
 
 ; Total pollution in the city. LSB first
-pollution_total: DS 3 ; Max value = 255*64*64 (fits in 3 bytes!)
+pollution_total:: DS 3 ; Max value = 255*64*64 (fits in 3 bytes!)
 pollution_total_percent:: DS 1 ; percentage of pollution
 
 ;###############################################################################
