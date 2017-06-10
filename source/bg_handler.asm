@@ -37,17 +37,17 @@ bg_scy:: DS 1
 ;-------------------------------------------------------------------------------
 
 ; STATUS
-bg_x::        DS 1 ; x and y in tiles
-bg_y::        DS 1
-going_x:      DS 1 ; current direction
-going_y:      DS 1
-bg_x_in_tile: DS 1
-bg_y_in_tile: DS 1
+bg_x::         DS 1 ; x and y in tiles
+bg_y::         DS 1
+going_x::      DS 1 ; current direction
+going_y::      DS 1
+bg_x_in_tile:: DS 1
+bg_y_in_tile:: DS 1
 
 ; INFORMATION
-bg_w:    DS 1 ; width and height in tiles
-bg_h:    DS 1
-bg_size: DS 2 ; LSB first
+bg_w::     DS 1 ; width and height in tiles
+bg_h::     DS 1
+bg_size:: DS 2 ; LSB first
 
 bg_struct_bank: DS 1 ; Pointer to BG information.
 bg_struct_ptr:  DS 2 ; To be able to reload it.
@@ -60,7 +60,7 @@ bg_tiles_struct_ptr:  DS 2
 
 ;###############################################################################
 
-    SECTION "Map_Handling",ROM0
+    SECTION "Background Handling", ROM0
 
 ;-------------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ bg_update_scroll_registers::
 
 ;-------------------------------------------------------------------------------
 
-____vram_copy_row_wrap: ; b = x, c = y, hl = source address
+____vram_copy_row_wrap:: ; b = x, c = y, hl = source address
 
     ld      a,31 ; limit coordinates to 0-31
     and     a,c
@@ -145,7 +145,7 @@ ____vram_copy_row_wrap: ; b = x, c = y, hl = source address
 
 ;--------------------------------------------------------------------------
 
-____vram_copy_column_wrap: ; b = x, c = y, hl = source address
+____vram_copy_column_wrap:: ; b = x, c = y, hl = source address
 
     ld      a,31 ; limit coordinates to 0-31
     and     a,c
@@ -788,9 +788,5 @@ bg_scroll_up::
 
     ld      a,1 ; return 1
     ret
-
-;###############################################################################
-
-    INCLUDE "bg_handler_ex.inc"
 
 ;###############################################################################
