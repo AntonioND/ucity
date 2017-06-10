@@ -154,7 +154,7 @@ RoomTitleLoadGraphics:
 
     ; TODO - Select cities saved in SRAM too?
 
-    ld      a,CITY_MAP_TOTAL_NUM
+    ld      a,SCENARIOS_TOTAL_NUM
     ld      b,a
 
     ld      d,a
