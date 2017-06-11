@@ -13,6 +13,9 @@ Some of the functionality is missing, but most of the game is completed.
 It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
 every once in a while.
 
+The code has a lot of comments and there is a highly detailed documentation
+`here <docs/index.rst>`_.
+
 General to do list:
 
 - Adjust simulation parameters
