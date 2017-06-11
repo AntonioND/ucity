@@ -61,7 +61,7 @@ simulation and a VBL handler that handles everything else.
 
   The way the handler works is by having a critical section at the beginning.
   This section can't be interrupted by anything. It updates the status bar
-  position, the sprites, backround scroll, the critical part of the animations,
+  position, the sprites, background scroll, the critical part of the animations,
   music and SFXs. There's a debug check to make sure that the VBL period hasn't
   ended by the time updates are going to be done to the VRAM/OAM (that is,
   animations, music and SFXs are handled after the check). Note that this is

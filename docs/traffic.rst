@@ -8,7 +8,7 @@ buildings (any type but residential) until all the people of that building have
 left.
 
 Even buildings with no electricity generate/absorb traffic. The idea is that
-these buildings will eventually dissapear, but until that moment the people that
+these buildings will eventually disappear, but until that moment the people that
 live there need to go to work, etc.
 
 The code is located in:
@@ -92,9 +92,9 @@ would have made the algorithm even slower.
 
 - Get density and dimensions of this residential building.
 
-  Flag all the tiles as handled. Note tha the top left one will be overwriten at
-  the end of the function with the remaining amount of people that couldn't find
-  a destination.
+  Flag all the tiles as handled. Note that the top left one will be overwritten
+  at the end of the function with the remaining amount of people that couldn't
+  find a destination.
 
 - Init queue and clear temporary WRAMX scratch bank.
 
@@ -113,7 +113,7 @@ would have made the algorithm even slower.
 
 - While queue is not empty.
 
-  1. Check that there is population that needs to continue traveling.
+  1. Check that there is population that needs to continue travelling.
 
      Check that the variable holding the remaining population of the building is
      not 0. If it is, exit.
@@ -179,7 +179,7 @@ would have made the algorithm even slower.
 
 This means that the people from this residential building will be unhappy as
 they couldn't find a valid destination! The same happens for non-residential
-buildings: if its final density is not 0 it means that this building couldn'
+buildings: if its final density is not 0 it means that this building couldn't
 get all the people it needs for working on it, for example!
 
 Output Data

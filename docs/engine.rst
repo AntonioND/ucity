@@ -17,9 +17,9 @@ hardware. It also describes a few other files that interact with them directly.
 - ``source/engine/rand.asm`` : Code to generate random numbers in a quick and
   not too reliable way. It should be good enough for this game, though.
 
-- ``source/engine/utils.asm`` : Routines for Memory manipulation, some math
+- ``source/engine/utils.asm`` : Routines for Memory manipulation, some maths
   operations, joypad handling and ROM stack handling (including routines for
-  cross-bank function calls). There are other math operations in
+  cross-bank function calls). There are other maths operations in
   ``source/math.asm``, like approximate divisions for stats calculations, when
   the actual result doesn't matter too much.
 

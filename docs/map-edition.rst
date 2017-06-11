@@ -34,7 +34,7 @@ and functions are located in:
     - Building functions:
 
         - ``MapUpdateBuildingSuroundingPowerLines`` : When a building has been
-          built, it is possible that the surounding power lines have to be
+          built, it is possible that the surrounding power lines have to be
           updated to be joined to it. This function does that (otherwise
           cosmetic) change.
 
@@ -46,7 +46,7 @@ and functions are located in:
           at the current cursor coordinates. It doesn't play SFX.
 
         - ``MapDrawBuilding`` : Builds a building at the cursor coordinates. It
-          checks that the player has enough money to do it, and substracts that
+          checks that the player has enough money to do it, and subtracts that
           amount of money from the city funds. It also checks if the terrain
           allows a building to be built or not. It plays SFX.
 
@@ -59,12 +59,12 @@ and functions are located in:
 
         - ``MapDeleteBuilding`` : Removes a building from the coordinates of any
           of its tiles. It checks if there is enough money to do so, and
-          substracts the amount of money needed to do it from the city funds. It
+          subtracts the amount of money needed to do it from the city funds. It
           plays SFX (it is different if it is removing debris from a removed
           building than when removing a building).
 
         - ``MapClearDemolishedTile`` : It converts a demolished tile into a
-          field one checking money and substracting it from the city funds. It
+          field one checking money and subtracting it from the city funds. It
           plays SFX.
 
 - ``source/room_game/building_info.inc`` : List of building IDs.
@@ -78,7 +78,7 @@ and functions are located in:
 
         - ``BuildingIsAvailable`` : It returns 1 if the specified building type
           is available by checking the technology level and the city size.
-          Nuclear power plants (fission and fussion) can only be built after
+          Nuclear power plants (fission and fusion) can only be built after
           reaching a specific technological level. Stadiums, ports and airports
           can only be built in cities or bigger settlements.
 
@@ -187,13 +187,13 @@ and functions are located in:
 - ``source/room_game/draw_port.asm`` : Functions to draw and demolish ports.
 
     - ``MapCheckSurroundingWater`` : Returns 1 if there is water in any tile
-      surounding this building (defined by its coordinates and size).
+      surrounding this building (defined by its coordinates and size).
 
-    - ``MapBuildDocksSurrounding`` : Checks all tiles surounding a port and
+    - ``MapBuildDocksSurrounding`` : Checks all tiles surrounding a port and
       builds docks on the water ones. Called from ``MapDrawPort``. It doesn't
       refresh the VRAM map.
 
-    - ``MapConvertDocksIntoWater`` : It checks the tiles surounding this port.
+    - ``MapConvertDocksIntoWater`` : It checks the tiles surrounding this port.
       For each dock tile, if it is facing this port, it sets it to water. Docks
       that belong to other ports are left unchanged. Used by ``MapDeletePort``.
 
@@ -288,8 +288,8 @@ and functions are located in:
         - ``CityMapCheckBuildBridge`` : Checks if a bridge of a certain type can
           be built. For that to be possible the coordinates must point at a
           water tile next to the ground, but with only one tile of ground
-          surounding it (or 2 at two opposite sides). It cannot leave the map
-          (the bridge must end inside of the map). It returns the lenght of the
+          surrounding it (or 2 at two opposite sides). It cannot leave the map
+          (the bridge must end inside of the map). It returns the length of the
           bridge that could be built there.
 
         - ``CityMapBuildBridge`` : Builds a bridge of the specified type from

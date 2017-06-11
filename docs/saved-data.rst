@@ -42,7 +42,7 @@ available memory for saving data.
 
 In short, it saves the first byte of each SRAM bank (up to a max of 16) and then
 it writes a number from 15 to 0 to the first byte of them: 15 to SRAM bank 0, 14
-to bank 1, and so on until 0 is writen to SRAM bank 15.
+to bank 1, and so on until 0 is written to SRAM bank 15.
 
 If less than 16 banks are available, this will make the cartridge controller to
 ignore the top bits of the number and make it wrap. In that case, only the last

@@ -60,7 +60,7 @@ simulation layer (in ``BANK_SCRATCH_RAM``). This mask has a circular shape, with
 higher values in the center of the circle (where the building is). If, at some
 point, the addition of two masks makes the result overflow, it saturates to
 ``255`` instead of overflowing. This is easier to see by just opening one of the
-minimaps of any service and seing the resulting drawing.
+minimaps of any service and seeing the resulting drawing.
 
 Buildings must have power to work! If a building doesn't have power, it won't
 have any effect on the simulation, it will simply be ignored.
@@ -130,7 +130,7 @@ Costs are divided in a few groups:
 
   - Fire protection
 
-  - Heathcare
+  - Healthcare
 
   - Education (schools, high schools, universities, museums and libraries).
 
@@ -206,10 +206,10 @@ calculates different statistics:
     that the population of a building isn't tile-based, only the top left tile
     of each building should be added to the total population.
 
-  - Demand for residential, comercial and industrial zones (displayed in the
+  - Demand for residential, commercial and industrial zones (displayed in the
     status bar and plotted in one of the historical graphs).
 
-  - Sets flags signaling the availability of certain types of buildings.
+  - Sets flags signalling the availability of certain types of buildings.
 
 There is also the function ``Simulation_CalculateCityType``, which updates the
 class of the settlement depending on the total population and the availability

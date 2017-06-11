@@ -82,7 +82,7 @@ with the following formula:
 
 Note that the minimum value for ``PLANE_CHANGE_DIR_MIN`` should be high enough
 so that the plane doesn't rotate before leaving the runway of an airport. In
-practice, this means that the value should be higher than the lenght of the
+practice, this means that the value should be higher than the length of the
 runway in pixels. Planes spawn at tiles with index ``T_AIRPORT_RUNWAY``, defined
 in ``source/room_game/tileset_info.inc``.
 

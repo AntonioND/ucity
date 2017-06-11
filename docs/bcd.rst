@@ -11,8 +11,8 @@ format doesn't cause a big loss in performance over plain binary.
 The code is located in ``source/bcd_math.asm``.
 
 BCD numbers are 5 bytes wide, LSB stored first. Inside a byte, the lower nibble
-is the least significative digit of the two. They can be interpreted as signed
-or unsigned values.
+is the least significant digit of the two. They can be interpreted as signed or
+unsigned values.
 
 For example, the unsigned decimal value ``123456789`` would be stored in memory
 like this:
@@ -65,7 +65,7 @@ this kind of format. There are helpers for simple operations like addition,
 subtraction and sign change. There are also two helpers to compare numbers. One
 of them tests if a number is lower than zero, the other one tests if one of them
 is greater or equal than the other one. There's also a helper to multiply a BCD
-number by a 8-bit non-BCD value (it just adds the same value repeatidly).
+number by a 8-bit non-BCD value (it just adds the same value repeatedly).
 
 Addition of signed numbers works the same way as two's complement and it is as
 simple as addition of unsigned numbers. Note that, since the numbers are stored

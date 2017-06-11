@@ -49,7 +49,7 @@ Located in ``Simulation_PowerDistribution``.
 - For each tile, check if it is a power plant.
 
   If it is a power plant, call ``Simulation_PowerPlantFloodFill``, which will
-  power the buildings surounding the plant. After handling a power plant, all
+  power the buildings surrounding the plant. After handling a power plant, all
   the tiles of the plant is flagged as handled, so the only tile that is
   actually considered when simulating is the top left one. It will fill
   ``BANK_SCRATCH_RAM`` with the output of the simulation.
