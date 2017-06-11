@@ -255,8 +255,10 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
 
     ; For each nucler power plant, check if it explodes. If it does, search the
     ; map for its position and make it explode, force a fire there and start
-    ; disaster mode. When a nuclear plant is burned down, it generates
-    ; radiactivity, so it doesn't have to be done here.
+    ; disaster mode. When a nuclear plant catches fire it spreads radiactive
+    ; tiles (it is done in the function that burns buildings, there's a special
+    ; case for nuclear fission power plants), so the tiles don't have to be
+    ; spread in this function.
 
     ld      d,a ; d = num of nuclear power plants
     ld      e,0 ; loop counter
@@ -304,7 +306,7 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
 
             ld      a,[bc] ; Get attrs of tile (MSB)
             bit     3,a ; MSB of tile number
-IF T_POWER_PLANT_NUCLEAR_CENTER > 255
+IF T_POWER_PLANT_NUCLEAR_CENTER > 255 ; Different check if tile index > 255
             jr      z,.skip_check_restore
 ELSE
             jr      nz,.skip_check_restore
