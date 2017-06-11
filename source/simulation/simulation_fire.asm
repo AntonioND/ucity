@@ -38,10 +38,15 @@
 ; For a map created by a sane person this should reasonably be 1-16 (?) but it
 ; can actually go over 255, so the count saturates to 31-1. The number is always
 ; increased by 1 to make sure that fires end!
+; This is calculated before the fire starts. In case the fire starts in a fire
+; department, that department counts when calculating the probabilities of the
+; fire going off.
 initial_number_fire_stations: DS 1
 
 is_destroying_port: DS 1
 is_nuclear_power_plant: DS 1
+
+extinguish_fire_probability: DS 1
 
 ;###############################################################################
 
@@ -429,8 +434,8 @@ Simulation_Fire:: ; This doesn't refresh the BG
 
     call    ClearWRAMX
 
-    ; For each tile check if it is type TYPE_FIRE and flag to expand fire
-    ; -------------------------------------------------------------------
+    ; For each tile check if it is type TYPE_FIRE and try to expand fire
+    ; ------------------------------------------------------------------
 
     ld      a,BANK_CITY_MAP_TYPE
     ld      [rSVBK],a
@@ -473,6 +478,25 @@ Simulation_Fire:: ; This doesn't refresh the BG
     ; Remove fire
     ; -----------
 
+    ; Calculate probability of the fire in a tile being extinguished
+
+    ld      a,[initial_number_fire_stations]
+    ld      l,a
+    ld      h,0
+    inc     hl ; if not, fire would never end with no fire stations
+    add     hl,hl ; hl = (num + 1) * 2
+    ld      a,h
+    and     a,a
+    jr      nz,.saturated
+        ld      a,l
+        jr      .end_probabilities
+.saturated:
+        ld      a,255
+.end_probabilities:
+    ld      [extinguish_fire_probability],a
+
+    ; Check every tile...
+
     ld      bc,CITY_MAP_TILES ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
@@ -485,9 +509,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
         cp      a,TYPE_FIRE
         jr      nz,.loop_remove_not_fire
 
-            ld      a,[initial_number_fire_stations]
-            inc     a ; if not, fire would never end with no fire stations
-            add     a,a ; sla a
+            ld      a,[extinguish_fire_probability]
             ld      d,a
 
             call    GetRandom ; bc and de preserved

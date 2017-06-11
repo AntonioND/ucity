@@ -34,7 +34,7 @@
 
 ;-------------------------------------------------------------------------------
 
-; The values are clamped to 255
+; The values saturate to 255
 
 COUNT_AIRPORTS::        DS 1
 COUNT_PORTS::           DS 1
