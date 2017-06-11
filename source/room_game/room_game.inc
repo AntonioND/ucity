@@ -57,7 +57,7 @@ BANK_CITY_MAP_TILES   EQU 1
 BANK_CITY_MAP_ATTR    EQU 2
 BANK_CITY_MAP_TYPE    EQU 3
 BANK_CITY_MAP_TRAFFIC EQU 4
-BANK_CITY_MAP_FLAGS   EQU 5 ; How good each tile is, automatic build commands
+BANK_CITY_MAP_FLAGS   EQU 5 ; How 'happy' each tile is, automatic build commands
 BANK_SCRATCH_RAM      EQU 6 ; For temporary calculations (simulation)
 BANK_SCRATCH_RAM_2    EQU 7 ; For temporary calculations (APA, simulation)
 
@@ -123,8 +123,7 @@ TYPE_FLAGS_MASK EQU %11100000
 
 ; TYPE_FIELD must be 0 always so that TYPE_HAS_ROAD, TYPE_HAS_TRAIN and
 ; TYPE_HAS_POWER are always considered to be in TYPE_FIELD. The exceptions are
-; bridges, that allow them to be with TYPE_WATER, and sea ports, which have some
-; tiles in water.
+; bridges, that are a combination of ``TYPE_WATER`` and the corresponding flag.
 TYPE_FIELD              EQU 0 ; This one must be 0.
 TYPE_FOREST             EQU 1
 TYPE_WATER              EQU 2

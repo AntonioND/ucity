@@ -101,7 +101,7 @@ and functions are located in:
 
         - ``BuildingGetSizeFromBaseTile`` : Get size of a building from its base
           tile. If the specified tile isn't the base tile of a building, execute
-          an emulator breakpoint (instruction `ld b,b`) and return 1x1.
+          an emulator breakpoint (instruction :code:`ld b,b`) and return 1x1.
 
         - ``BuildingGetSizeFromBaseTileIgnoreErrors`` : Same as above, but
           without breakpoint.
