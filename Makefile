@@ -19,29 +19,26 @@
 ################################################################################
 ##                                ROM name                                    ##
 
-NAME = ucity
-EXT  = gbc
-
-################################################################################
-##                         Path to RGBDS binaries                             ##
-
-RGBDS   = ..
+NAME := ucity
+EXT  := gbc
 
 ################################################################################
 ##               Command to run resulting ROM in an emulator                  ##
 
-EMULATOR = wine ./tools/bgb.exe
+EMULATOR := wine ./tools/bgb.exe
 
 ################################################################################
 ##         Source, data and include folders - subfolders are included         ##
 
-SOURCE = source data
+SOURCE := source data
 
 ################################################################################
 
-RGBASM  = $(RGBDS)/rgbasm
-RGBLINK = $(RGBDS)/rgblink
-RGBFIX  = $(RGBDS)/rgbfix
+# RGBDS can be made to point at a specific folder with the binaries of RGBDS.
+
+RGBASM  := $(RGBDS)rgbasm
+RGBLINK := $(RGBDS)rgblink
+RGBFIX  := $(RGBDS)rgbfix
 
 BIN := $(NAME).$(EXT)
 
@@ -56,7 +53,7 @@ ASMFILES := $(foreach dir,$(SOURCE_ALL_DIRS),$(wildcard $(dir)/*.asm))
 INCLUDES := $(foreach dir,$(SOURCE_ALL_DIRS),-i$(CURDIR)/$(dir)/)
 
 # Prepare object paths from source files.
-OBJ = $(ASMFILES:.asm=.obj)
+OBJ := $(ASMFILES:.asm=.obj)
 
 # Targets
 .PHONY : all rebuild clean run
