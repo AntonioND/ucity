@@ -2,7 +2,7 @@
 Power Grid Simulation
 =====================
 
-The power grid simulation is quite CPU expensive. For each power plant a flood
+The power grid simulation is quite CPU intensive. For each power plant a flood
 fill algorithm is used centered on it. There is a limited amount of 'paint',
 which is the power output of the plant. This way, buildings close to the power
 plant are most likely to be powered if there is not enough power for all of the

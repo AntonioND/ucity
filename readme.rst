@@ -15,9 +15,7 @@ every once in a while.
 
 General to do list:
 
-- Adjust simulation parameters
 - Improve sample cities
-- Document code
 - Game manual
 
 .. image:: screenshot.png

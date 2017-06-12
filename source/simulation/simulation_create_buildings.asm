@@ -271,7 +271,7 @@ CREATE_BUILDING_LEVEL: ; Input = tile number
 
 ; c = type
 ; de = coords
-Simulation_CreateBuildingsTryBuild::
+Simulation_CreateBuildingsTryBuild:
 
     ; The tiles to test are arranged like this (0 is the origin):
 
@@ -289,6 +289,9 @@ Simulation_CreateBuildingsTryBuild::
     ; 3b. Check 4, 3, 1. If they fail, fall back to 1x1.
     ; 4. Check 0.
     ; 5. Build building.
+
+    ; The order of the checks has been chosen to minimize the number of checks
+    ; in a regular map.
 
     add     sp,-1
     ld      hl,sp+0
@@ -326,7 +329,7 @@ END_POS_TEST : MACRO
 
     LD_HL_BC ; restore address
 
-    ; Check if building has been requested or demolished has been requested
+    ; Check if building has been requested or demolishing has been requested
     ld      a,BANK_CITY_MAP_FLAGS
     ld      [rSVBK],a
 
@@ -509,7 +512,6 @@ ENDM
 
     ret
 
-
 ;-------------------------------------------------------------------------------
 
 ; Higher number = Higher probability (0-255)
@@ -580,14 +582,14 @@ Simulation_CreateBuildings::
     ; ----------------
 
     ; First, set a temporary map with information to expand buildings and
-    ; another one with information about the building size in order not to
-    ; build small buildings on top of a big one.
+    ; another one with the building size in order not to build small buildings
+    ; on top of a big one.
 
     ld      a,BANK_SCRATCH_RAM
     ld      [rSVBK],a
     call    ClearWRAMX
 
-    ; Not needed to clear SCRATCH_RAM_2 because it will only be used if a
+    ; Not needed to clear BANK_SCRATCH_RAM_2 because it will only be used if a
     ; building is being built in a tile, and to get to that point a few extra
     ; checks are needed.
 
@@ -684,8 +686,7 @@ Simulation_CreateBuildings::
 
                 ; This is a RCI tile, check that we got a request to build or
                 ; demolish.
-                ; - To build, all tiles must be at least ok (none of them can be
-                ;   flagged to demolish.
+                ; - To build, all tiles must be flagged to build.
                 ; - Demolish if even one single tile is flagged to demolish.
 
                 ld      a,BANK_CITY_MAP_FLAGS
