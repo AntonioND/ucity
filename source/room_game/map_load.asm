@@ -59,8 +59,8 @@ ENDM
     FILE_SECTION SCENARIO_ATTR_1_BORINGTOWN, "scenario_1_boringtown_attr.bin"
     FILE_SECTION SCENARIO_MAP_2_PORTVILLE,  "scenario_2_portville_map.bin"
     FILE_SECTION SCENARIO_ATTR_2_PORTVILLE, "scenario_2_portville_attr.bin"
-    FILE_SECTION SCENARIO_MAP_3_TEST_MAP,  "scenario_3_test_map_map.bin"
-    FILE_SECTION SCENARIO_ATTR_3_TEST_MAP, "scenario_3_test_map_attr.bin"
+    FILE_SECTION SCENARIO_MAP_3_NEWDALE,  "scenario_3_newdale_map.bin"
+    FILE_SECTION SCENARIO_ATTR_3_NEWDALE, "scenario_3_newdale_attr.bin"
 
 ;###############################################################################
 
@@ -74,7 +74,7 @@ ENDM
     STR_ADD "Rock River", ROCK_RIVER_NAME
     STR_ADD "Boringtown", BORINGTOWN_NAME
     STR_ADD "Portville", PORTVILLE_NAME
-    STR_ADD "Test Map", TEST_MAP_NAME
+    STR_ADD "Newdale", NEWDALE_NAME
 
 ;-------------------------------------------------------------------------------
 
@@ -130,9 +130,9 @@ SCENARIO_MAP_INFO:
     SCEN_INFO_4 10
     SCEN_INFO_5 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
-    SCEN_INFO_1 SCENARIO_MAP_3_TEST_MAP, SCENARIO_ATTR_3_TEST_MAP
+    SCEN_INFO_1 SCENARIO_MAP_3_NEWDALE, SCENARIO_ATTR_3_NEWDALE
     SCEN_INFO_2 22, 23
-    SCEN_INFO_3 TEST_MAP_NAME, TEST_MAP_NAME_LEN, $1950,0, MONEY_START_20000
+    SCEN_INFO_3 NEWDALE_NAME, NEWDALE_NAME_LEN, $1950,0, MONEY_START_20000
     SCEN_INFO_4 0
     SCEN_INFO_5 0, (1<<ID_MSG_CLASS_TOWN)|(1<<ID_MSG_CLASS_CITY)
 
