@@ -86,7 +86,7 @@ MSG_TECH_FUSION:
     STR_ADD "Scientists have<nl>invented fusion<nl>power plants!"
 
 MSG_FIRE_INITED:
-    STR_ADD "A fire has started<nl>in the city!"
+    STR_ADD "A fire has started<nl>somewhere!"
 MSG_NUCLEAR_MELTDOWN:
     STR_ADD "A nuclear power<nl>plant has had a<nl>meltdown!"
 
