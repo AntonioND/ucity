@@ -137,6 +137,8 @@ Costs are divided in a few groups:
   - Transportation (maintenance of roads, train tracks, power lines and
     bridges).
 
+  - Loan payments
+
 In short, for each tile of the map, the value in the ``CITY_TILE_MONEY_COST``
 array is added to a different variable pointed by the ``tile_money_destination``
 array. Then, each sum is added or removed from the funds as expected.
@@ -153,6 +155,10 @@ There are some helper functions to handle money in ``source/money.asm``, and
 some definitions in ``source/money.inc``. The macro ``DATA_MONEY_AMOUNT`` is
 specially useful. Money amounts are stored as BCD values, this macro helps the
 coder introduce new money amounts without having to do it manually.
+
+The only way to lose in this game is to have a negative budget 4 times in a row.
+If there is a positive budget, the counter decreases back to 0 once per positive
+budget. Note that having negative funds doesn't have any negative effect.
 
 Pollution
 =========

@@ -65,6 +65,9 @@ Once there is a fire, it starts to spread. The function that handles the fire is
 Note that nuclear fission power plants, when they explode, spread radiation
 tiles around them, the same way as they do when there's a nuclear meltdown.
 
+In practice, the best way to get rid of fires is to demolish every tile around a
+fire as soon as possible, as edit mode isn't disabled during disasters.
+
 Nuclear meltdowns
 =================
 
