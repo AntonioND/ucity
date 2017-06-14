@@ -15,6 +15,9 @@ elements.
 Disasters can appear at the end of any simulation step. If disaster mode is
 active, no more disasters can be triggered, not even by the player.
 
+While in disaster mode, there is only a minimap available to see, which shows
+the location of the fires.
+
 Fires
 =====
 
