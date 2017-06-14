@@ -1,30 +1,85 @@
-==============
-µCity 0.5 beta
-==============
-
-The open-source city building game for Game Boy Color.
+=========
+µCity 1.0
+=========
 
 Introduction
 ============
 
-This is a beta version of µCity (also spelled 'uCity', pronounced 'micro-city').
-Some of the functionality is missing, but most of the game is completed.
-
-It is developed using BGB (http://bgb.bircd.org/), and it's tested on hardware
-every once in a while.
-
-General to do list:
-
-- Improve sample cities
-- Game manual
+This is µCity (also spelled 'uCity', pronounced 'micro-city'), the open-source
+city-building game for Game Boy Color.
 
 .. image:: screenshot.png
+
+This game is completely free. Just download the ROM, install a Game Boy Color
+emulator, and play! The last release of the game should be here:
+
+    https://github.com/AntonioND/ucity/releases
+
+You can also play on real hardware. Even though the game has been developed
+using mainly emulators, it has been verified to work on hardware. The game
+detects how much available space there is and adjust the maximum number of saved
+cities acordingly.
+
+Manual
+======
+
+If needed, there is a short manual with instructions for the player
+`here <manual.rst>`_.
 
 Documentation
 =============
 
-The code has a lot of comments and there is a highly detailed documentation
-`here <docs/index.rst>`_.
+An open-source project is a lot worse without documentation! That's why the code
+has a lot of comments and why there is a highly detailed documentation
+`here <docs/index.rst>`_. And also because assembly code without comments can't
+be understood even by the developer who wrote it originally. :)
+
+Compiling
+=========
+
+This game needs a really recent version of ``RGBDS`` to correctly assemble the
+code. It is the only real dependency. This toolchain can be found here:
+
+      https://github.com/rednex/rgbds/
+
+Follow the instructions in that link to install it in your system.
+
+Once the ``RGBDS`` binaries are installed in your system, assembling the game is
+as simple as typing :code:`make` in a terminal.
+
+If the binaries aren't installed in any system path, the variable ``RGBDS`` of
+the Makefile has to point at the path where they are located:
+
+:code:`make RGBDS=path/to/binaries/`
+
+This should work on Linux, MinGW, Cygwin, etc. To remove all files that are
+generated during the assembly process, type :code:`make clean`.
+
+Tools
+=====
+
+- Open ModPlug Tracker
+
+  This is just a program to edit tracker style music. It has been used to
+  compose the music used by GBT Player.
+
+    https://openmpt.org/
+
+  GBT Player is my music player library. It is included in the code, and it can
+  be found here if you want to use it for your projects:
+
+    https://github.com/AntonioND/gbt-player
+
+- GBTD (Game Boy Tile Designer) and GBMB (Game Boy Map Builder)
+
+  Graphics edition tools (for Windows, but they run on Wine).
+
+  Note that both of them can be found in this repository in the ``tools`` folder
+  in case the following links are broken:
+
+    http://www.devrs.com/gb/hmgd/gbmb.html
+
+    http://www.devrs.com/gb/hmgd/gbtd.html
 
 Credits
 =======
@@ -43,46 +98,18 @@ Web:
 
     http://antoniond.drunkencoders.com/
 
-Dependencies:
+Thanks to:
 
-- RGBDS
+- beware: For the emulator BGB (http://bgb.bircd.org/), extremely useful tool
+  used to develop this game.
 
-  This game needs a really recent version of this toolchain to correctly
-  assemble the code. It is the only real dependency:
+- Pan of Anthrox, Marat Fayzullin, Pascal Felber, Paul Robson, Martin Korth
+  (nocash) and kOOPa for the pandocs.
 
-      https://github.com/rednex/rgbds/
+- Otaku No Zoku (Justin Lloyd) for the Gameboy Crib Sheet.
 
-- GBT Player
-
-  It uses GBT Player, my music player library. It is not needed to install it as
-  it comes with the game code, but it can be found here if you want to use it
-  for your projects:
-
-      https://github.com/AntonioND/gbt-player
-
-
-Tools (for Windows, but they run on Wine):
-
-- GBTD (Game Boy Tile Designer) and GBMB (Game Boy Map Builder)
-
-  Note that both of them can be found in this repository in case the following
-  links are broken:
-
-    http://www.devrs.com/gb/hmgd/gbmb.html
-
-    http://www.devrs.com/gb/hmgd/gbtd.html
-
-Compiling
-=========
-
-If the ``RGBDS`` binaries are installed in your system, assembling the game is
-as simple as typing :code:`make` in a terminal.
-
-If they aren't installed, the variable ``RGBDS`` of the Makefile has to point at
-the path where they are located: :code:`make RGBDS=path/to/binaries/`
-
-This should work on Linux, MinGW, Cygwin, etc. To remove all files that are
-generated during the assembly process, type :code:`make clean`.
+- Everyone that has contributed to develop ``RGBDS`` over the years, specially
+  Carsten Sorensen, Justin Lloyd, Vegard Nossum and Anthony J. Bentley.
 
 License
 =======
@@ -93,7 +120,7 @@ freely available at the following address:
 
     https://github.com/AntonioND/ucity
 
-Not all source code files are licensed under the GPL v3, though, only the ones
+Not all source code files are licensed under the GPL v3+, though, only the ones
 with the GPL header are. There other source files are licensed under different
 terms (for example, GBT Player is licensed under the 2-clause BSD license).
 
