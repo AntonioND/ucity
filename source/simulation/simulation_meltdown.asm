@@ -265,7 +265,7 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
 
     ld      a,b
     and     a,a
-    jr      nz,.explode ; force explosion at the first plant!
+    jr      nz,.force_explode ; force explosion at the first plant!
 
 .loop_rand:
     call    GetRandom ; de, bc preserved
@@ -284,6 +284,8 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
     call    GetRandom ; de, bc preserved
     and     a,7
     ret     nz ; Return 1/8 times
+
+.force_explode:
 
     ; e = index of power plant that exploded
 
