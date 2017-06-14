@@ -10,6 +10,8 @@ city-building game for Game Boy Color.
 
 .. image:: screenshot.png
 
+Video: https://www.youtube.com/watch?v=2rir-TVx020
+
 This game is completely free. Just download the ROM, install a Game Boy Color
 emulator, and play! The last release of the game should be here:
 
