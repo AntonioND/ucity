@@ -79,7 +79,8 @@ All code related to nuclear meltdowns is in the file
 
 At each simulation step, for every nuclear fission power plant in the map, there
 is a 1/256 chance that that particular power plant will explode. This is done in
-``Simulation_MeltdownTryStart``.
+``Simulation_MeltdownTryStart``. After this, another random number is calculated
+so that a nuclear meltdown is only triggered 1/8 of times.
 
 If the nuclear meltdown has been forced (by the player, for example), the first
 power plant to be found is used instead. Obviously, if there are no nuclear
