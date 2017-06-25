@@ -142,55 +142,23 @@ mul_u8u8u16:: ; super fast unrolled multiplication
 
     ; 4 + 7 * [7/6] + [9/6] = [62/52] Cycles, including return :)
 
-    ld      hl,$0000  ; 3   -> 4
-    ld      b,l       ; 1
+    ld      hl,$0000   ; 3   -> 4
+    ld      b,l        ; 1
 
-    rla ; bit 7       ; 1
-    jr      nc,.skip0 ; 3/2 -> 7/6
-    add     hl,bc     ; 2
-.skip0:
-    add     hl,hl     ; 2
+    REPT 7
 
-    rla ; bit 6       ; 1
-    jr      nc,.skip1 ; 3/2 -> 7/6
-    add     hl,bc     ; 2
-.skip1:
-    add     hl,hl     ; 2
+    rla ; bits 7 to 1  ; 1
+    jr      nc,.skip\@ ; 3/2 -> 7/6
+    add     hl,bc      ; 2
+.skip\@:
+    add     hl,hl      ; 2
 
-    rla ; bit 5       ; 1
-    jr      nc,.skip2 ; 3/2 -> 7/6
-    add     hl,bc     ; 2
-.skip2:
-    add     hl,hl     ; 2
+    ENDR
 
-    rla ; bit 4       ; 1
-    jr      nc,.skip3 ; 3/2 -> 7/6
-    add     hl,bc     ; 2
-.skip3:
-    add     hl,hl     ; 2
-
-    rla ; bit 3       ; 1
-    jr      nc,.skip4 ; 3/2 -> 7/6
-    add     hl,bc     ; 2
-.skip4:
-    add     hl,hl     ; 2
-
-    rla ; bit 2       ; 1
-    jr      nc,.skip5 ; 3/2 -> 7/6
-    add     hl,bc     ; 2
-.skip5:
-    add     hl,hl     ; 2
-
-    rla ; bit 1       ; 1
-    jr      nc,.skip6 ; 3/2 -> 7/6
-    add     hl,bc     ; 2
-.skip6:
-    add     hl,hl     ; 2
-
-    rla ; bit 0       ; 1
-    ret     nc        ; 5/2 -> 9/6
-    add     hl,bc     ; 2
-    ret               ; 4
+    rla ; bit 0        ; 1
+    ret     nc         ; 5/2 -> 9/6
+    add     hl,bc      ; 2
+    ret                ; 4
 
 IF    0 ; Old version
 
