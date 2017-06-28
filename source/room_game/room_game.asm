@@ -1718,6 +1718,10 @@ RoomGameSimulateStepNormal:
 
     LONG_CALL   GraphHandleRecords
 
+    ; Refresh BG to update the buildings, traffic levels, etc (no animations)
+
+    call    bg_refresh_main
+
     ; End of this simulation step
 
     ret
