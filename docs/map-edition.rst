@@ -3,8 +3,13 @@ Editing the map
 ===============
 
 This documentation file explains how the edition mode works: How the game
-handles it when buildings are built/demolished by the player. The relevant code
-and functions are located in:
+handles it when buildings are built/demolished by the player.
+
+Note that, for the player, it is only possible to build buildings on top of
+empty field tiles. However, if there are power lines, they will automatically be
+removed. That's the only exception.
+
+The relevant code and functions are located in:
 
 - ``source/room_game/tileset_info.inc`` : List of tiles that can be used in the
   map.
