@@ -22,6 +22,13 @@ using mainly emulators, it has been verified to work on hardware. The game
 detects how much available space there is and adjust the maximum number of saved
 cities acordingly.
 
+Note: A direct port of this game to the monochrome Game Boy isn't possible. This
+game uses most of the extra RAM that was added to the Game Boy Color, which
+isn't available in a regular Game Boy. While the Game Boy Color has 32 KiB of
+WRAM, the Game Boy only has 8 KB, and this game currently uses 30 KB more or
+less. Only a really limited version of this game with a much smaller map and
+much fewer features would fit in a Game Boy.
+
 Manual
 ======
 
