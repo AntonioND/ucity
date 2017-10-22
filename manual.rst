@@ -54,6 +54,30 @@ the building selection menu.
 There are some buildings that require specific things to be built (like having
 more than a certain number of people, having a specific technological level...).
 
+The type of the building can be checked by pressing A when the cursor is over
+it. However, as an additional help, this is the list of available buildings in
+the menu:
+
+- **Delete**: Demolish building.
+
+- **RCI Zones**: Residential, commercial, industrial.
+
+- **Roads and power**: Road, train tracks, power lines.
+
+- **Services**: Police department, fire department, hospital.
+
+- **Parks and Recreation**: Small park, big park, stadium.
+
+- **Education**: School, high school, university.
+
+- **Culture**: Museum, library.
+
+- **Transportation**: Port, airport.
+
+- **Fossil power plants**: Coal, oil, nuclear fission.
+
+- **Renewable power plants**: Solar, wind, nuclear fusion.
+
 Services
 ========
 
