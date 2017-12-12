@@ -1,5 +1,5 @@
 =========
-µCity 1.0
+µCity 1.1
 =========
 
 Introduction
