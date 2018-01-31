@@ -20,7 +20,7 @@ https://github.com/AntonioND/ucity/releases
 You can also play on real hardware. Even though the game has been developed
 using mainly emulators, it has been verified to work on hardware. The game
 detects how much available space there is and adjust the maximum number of saved
-cities acordingly.
+cities accordingly.
 
 Note: A direct port of this game to the monochrome Game Boy isn't possible. This
 game uses most of the extra RAM that was added to the Game Boy Color, which
