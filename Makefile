@@ -1,7 +1,7 @@
 ################################################################################
 #
 #    µCity - City building game for Game Boy Color.
-#    Copyright (C) 2017 Antonio Niño Díaz (AntonioND/SkyLyrac)
+#    Copyright (c) 2017-2018 Antonio Niño Díaz (AntonioND/SkyLyrac)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by

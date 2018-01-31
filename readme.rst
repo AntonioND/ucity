@@ -1,5 +1,5 @@
 =========
-µCity 1.1
+µCity 1.2
 =========
 
 Introduction
@@ -15,7 +15,7 @@ Video: https://www.youtube.com/watch?v=2rir-TVx020
 This game is completely free. Just download the ROM, install a Game Boy Color
 emulator, and play! The last release of the game should be here:
 
-    https://github.com/AntonioND/ucity/releases
+https://github.com/AntonioND/ucity/releases
 
 You can also play on real hardware. Even though the game has been developed
 using mainly emulators, it has been verified to work on hardware. The game
@@ -49,7 +49,7 @@ Compiling
 This game needs a really recent version of ``RGBDS`` to correctly assemble the
 code. It is the only real dependency. This toolchain can be found here:
 
-      https://github.com/rednex/rgbds/
+https://github.com/rednex/rgbds/
 
 Follow the instructions in that link to install it in your system.
 
@@ -103,9 +103,7 @@ Web:
 
     https://github.com/AntonioND
 
-    http://antoniond_blog.drunkencoders.com/
-
-    http://antoniond.drunkencoders.com/
+    www.skylyrac.net
 
 Thanks to:
 
@@ -140,7 +138,7 @@ GNU General Public License version 3+
 =====================================
 
     µCity - City building game for Game Boy Color.
-    Copyright (C) 2017 Antonio Niño Díaz (AntonioND/SkyLyrac)
+    Copyright (C) 2017-2018 Antonio Niño Díaz (AntonioND/SkyLyrac)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -156,4 +154,3 @@ GNU General Public License version 3+
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     Contact: antonio_nd@outlook.com
-
