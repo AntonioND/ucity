@@ -64,41 +64,31 @@
 ;#                                                                             #
 ;###############################################################################
 
-    SECTION "Interrupt Vectors",ROM0[$0040]
-
-;    SECTION "VBL Interrupt Vector",ROM0[$0040] ; No jr between SECTIONs
+    SECTION "VBL Interrupt Vector",ROM0[$0040]
     push    hl
     ld      hl,_is_vbl_flag
     ld      [hl],1
     jr      int_VBlank
 
-;    SECTION "LCD Interrupt Vector",ROM0[$0048]
+    SECTION "LCD Interrupt Vector",ROM0[$0048]
     push    hl
     ld      hl,LCD_handler
     jr      int_Common
-    nop
-    nop
 
-;    SECTION "TIM Interrupt Vector",ROM0[$0050]
+    SECTION "TIM Interrupt Vector",ROM0[$0050]
     push    hl
     ld      hl,TIM_handler
     jr      int_Common
-    nop
-    nop
 
-;    SECTION "SIO Interrupt Vector",ROM0[$0058]
+    SECTION "SIO Interrupt Vector",ROM0[$0058]
     push    hl
     ld      hl,SIO_handler
     jr      int_Common
-    nop
-    nop
 
-;    SECTION "JOY Interrupt Vector",ROM0[$0060]
+    SECTION "JOY Interrupt Vector",ROM0[$0060]
     push    hl
     ld      hl,JOY_handler
     jr      int_Common
-;    nop
-;    nop
 
 ;###############################################################################
 ;#                                                                             #
