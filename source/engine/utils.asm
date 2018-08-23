@@ -140,23 +140,23 @@ memcopy_inc:: ; hl and de should be incremented at the end of this
 
 mul_u8u8u16:: ; super fast unrolled multiplication
 
-    ; 4 + 7 * [7/6] + [9/6] = [62/52] Cycles, including return :)
+    ; 4 + 7 * [6/5] + [10/7] = [56/46] Cycles, including return :)
 
-    ld      hl,$0000   ; 3   -> 4
-    ld      b,l        ; 1
+    ld      b,$00      ; 2
+    ld      h,a        ; 1  -> 4
+    ld      l,b        ; 1
 
     REPT 7
 
-    rla ; bits 7 to 1  ; 1
-    jr      nc,.skip\@ ; 3/2 -> 7/6
+    add     hl,hl      ; 2            ; bits 7 to 1
+    jr      nc,.skip\@ ; 3/2 -> 6/5
     add     hl,bc      ; 2
 .skip\@:
-    add     hl,hl      ; 2
 
     ENDR
 
-    rla ; bit 0        ; 1
-    ret     nc         ; 5/2 -> 9/6
+    add     hl,hl      ; 2            ; bit 0
+    ret     nc         ; 5/2 -> 10/7
     add     hl,bc      ; 2
     ret                ; 4
 
