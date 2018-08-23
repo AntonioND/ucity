@@ -160,6 +160,8 @@ Main:
     xor     a,a
     ld      [rIE],a
 
+    LONG_CALL Test_Mult
+
     ; Enable interrupts forever. No code is allowed to disable them unless it is
     ; a critical section.
     ei
@@ -276,3 +278,47 @@ SetPalettesAllBlack::
     ret
 
 ;###############################################################################
+
+    SECTION "Test Mult",ROMX
+
+Test_Mult:
+VAL1 SET 0
+    REPT 128
+    ld b,VAL1 + 32
+    ld hl, $4000
+    call ___long_call
+VAL1 SET VAL1+1
+    ENDR
+    ret
+
+TEST_MUL : MACRO
+    ld a,\1
+    ld c,\2
+    call mul_u8u8u16
+    ld a,h
+    cp a,((\1 * \2) >> 8) & $FF
+.loop1_\@:
+    jr nz,.loop1_\@
+    ld a,l
+    cp a,(\1 * \2) & $FF
+.loop2_\@:
+    jr nz,.loop2_\@
+ENDM
+
+VAL1START SET 128 ; Set this to 0 or to 128 to test both 0-127 and 128-255
+
+VAL1 SET VAL1START
+    REPT 128
+
+    SECTION "Test Mult\@",ROMX[$4000], BANK[VAL1 + 32 - VAL1START]
+
+Test_Mult\@::
+VAL2 SET 0
+    REPT 256
+    TEST_MUL VAL1, VAL2
+VAL2 SET VAL2+1
+    ENDR
+    ret
+
+VAL1 SET VAL1+1
+    ENDR
