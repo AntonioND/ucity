@@ -55,8 +55,8 @@
     ret
 
     SECTION "RST_38",ROM0[$0038]
-    jp      Reset ; Undefined reads are $FF most times, so it's a good practice
-    ; to put a reset here.
+    jp      Reset ; Undefined reads are $FF most times, which corresponds to
+                  ; RST $38. It's good practice to put a reset here.
 
 ;###############################################################################
 ;#                                                                             #
