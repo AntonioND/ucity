@@ -1,7 +1,7 @@
 ################################################################################
 #
 #    µCity - City building game for Game Boy Color.
-#    Copyright (c) 2017-2018 Antonio Niño Díaz (AntonioND/SkyLyrac)
+#    Copyright (c) 2017-2019 Antonio Niño Díaz (AntonioND/SkyLyrac)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ RGBLINK := $(RGBDS)rgblink
 RGBFIX  := $(RGBDS)rgbfix
 
 BIN := $(NAME).$(EXT)
+COMPAT_BIN := $(NAME)_compat.$(EXT)
 
 # List of relative paths to all folders and subfolders with code or data.
 SOURCE_ALL_DIRS := $(shell find $(SOURCE) -type d -print)
@@ -58,7 +59,7 @@ OBJ := $(ASMFILES:.asm=.obj)
 # Targets
 .PHONY : all rebuild clean run
 
-all: $(BIN)
+all: $(BIN) $(COMPAT_BIN)
 
 rebuild:
 	@make -B
@@ -68,8 +69,8 @@ run: $(BIN)
 	$(EMULATOR) $(BIN)
 
 clean:
-	@echo rm $(OBJ) $(BIN) $(NAME).sym $(NAME).map
-	@rm -f $(OBJ) $(BIN) $(NAME).sym $(NAME).map
+	@echo rm $(OBJ) $(BIN) $(COMPAT_BIN) $(NAME).sym $(NAME).map
+	@rm -f $(OBJ) $(BIN) $(COMPAT_BIN) $(NAME).sym $(NAME).map
 
 %.obj : %.asm
 	@echo rgbasm $<
@@ -80,5 +81,10 @@ $(BIN): $(OBJ)
 	@$(RGBLINK) -o $(BIN) -p 0xFF -m $(NAME).map -n $(NAME).sym $(OBJ)
 	@echo rgbfix $(BIN)
 	@$(RGBFIX) -p 0xFF -v $(BIN)
+
+$(COMPAT_BIN): $(BIN)
+	@echo rgbfix $(COMPAT_BIN)
+	@cp $(BIN) $(COMPAT_BIN)
+	@$(RGBFIX) -r 3 $(COMPAT_BIN)
 
 ################################################################################

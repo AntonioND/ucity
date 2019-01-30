@@ -22,6 +22,13 @@ using mainly emulators, it has been verified to work on hardware. The game
 detects how much available space there is and adjust the maximum number of saved
 cities accordingly.
 
+There are two available ROMs. ``ucity.gbc`` is the preferred ROM that you should
+use. It can save up to 16 cities depending on the memory available in your
+emulator or flashcart. If your emulator fails to load this ROM because of an
+unknown RAM size or your flashcart fails to save data, try ``ucity_compat.gbc``.
+This ROM will only be able to save up to 4 cities, but it is more likely to work
+in all cases.
+
 Note: A direct port of this game to the monochrome Game Boy isn't possible. This
 game uses most of the extra RAM that was added to the Game Boy Color, which
 isn't available in a regular Game Boy. While the Game Boy Color has 32 KiB of
