@@ -103,7 +103,7 @@ CityMapAddrToCoords:: ; Address = hl, Returns: e = x , d = y
 
 CityMapRefreshAttributeMap::
 
-    GLOBAL  TILESET_INFO
+    EXPORT  TILESET_INFO
     ld      b,BANK(TILESET_INFO)
     call    rom_bank_push_set
 
@@ -156,7 +156,7 @@ CityMapRefreshAttributeMap::
 
 CityMapRefreshTypeMap::
 
-    GLOBAL  TILESET_INFO
+    EXPORT  TILESET_INFO
     ld      b,BANK(TILESET_INFO)
     call    rom_bank_push_set
 
@@ -429,7 +429,7 @@ CityMapDrawTerrainTileAddress:: ; bc = tile, hl = address
     push    bc ; (*) ; save tile
 
     push    hl
-    GLOBAL  TILESET_INFO
+    EXPORT  TILESET_INFO
     ld      b,BANK(TILESET_INFO)
     call    rom_bank_push_set
     pop     hl

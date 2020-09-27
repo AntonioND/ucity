@@ -445,7 +445,7 @@ SRAMMapLoad:: ; b = index to load from. This function doesn't check bank limits.
 SRAMMapLoadBank0:
 
     push    hl
-    GLOBAL  TILESET_INFO
+    EXPORT  TILESET_INFO
     ld      b,BANK(TILESET_INFO)
     call    rom_bank_push_set ; (*)
     pop     hl

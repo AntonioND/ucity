@@ -300,7 +300,7 @@ gbt_enable_channels:: ; a = channel flags (channel flag = (1<<(channel_num-1)))
 
 ;-------------------------------------------------------------------------------
 
-    GLOBAL  gbt_update_bank1
+    EXPORT  gbt_update_bank1
 
 gbt_update::
 
