@@ -52,8 +52,8 @@ circlecount: DS 1
 FIELD_DEFAULT_THRESHOLD  EQU 128
 FOREST_DEFAULT_THRESHOLD EQU 128+24
 
-field_threshold  DS 1
-forest_threshold DS 1
+field_threshold:  DS 1
+forest_threshold: DS 1
 
 ;###############################################################################
 
