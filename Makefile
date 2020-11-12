@@ -85,6 +85,6 @@ $(BIN): $(OBJ)
 $(COMPAT_BIN): $(BIN)
 	@echo rgbfix $(COMPAT_BIN)
 	@cp $(BIN) $(COMPAT_BIN)
-	@$(RGBFIX) -r 3 $(COMPAT_BIN)
+	@$(RGBFIX) -v -r 3 $(COMPAT_BIN)
 
 ################################################################################
