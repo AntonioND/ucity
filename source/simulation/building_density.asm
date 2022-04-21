@@ -103,11 +103,11 @@ ENDC
 
 ;###############################################################################
 
-CURTILE          SET 0
-POPULATION       SET 0
-ENERGY_COST      SET 0
-POLLUTION        SET 0
-FIRE_PROBABILITY SET 0 ; 0 = never catches fire, 255 = always catches fire
+CURTILE          = 0
+POPULATION       = 0
+ENERGY_COST      = 0
+POLLUTION        = 0
+FIRE_PROBABILITY = 0 ; 0 = never catches fire, 255 = always catches fire
 
 ; Tile Add - Base tile of the building to add information of
 ;            Will only fill the building when the next one is added!
@@ -125,11 +125,11 @@ T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost, 4=Pollution, 5=Fire %
     ENDC
 
     ; Set parameters for this building
-CURTILE             SET (\1)
-POPULATION          SET (\2)
-ENERGY_COST         SET (\3)
-POLLUTION           SET (\4)
-FIRE_PROBABILITY    SET (\5)
+CURTILE             = (\1)
+POPULATION          = (\2)
+ENERGY_COST         = (\3)
+POLLUTION           = (\4)
+FIRE_PROBABILITY    = (\5)
 
 ENDM
 

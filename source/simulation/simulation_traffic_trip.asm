@@ -45,7 +45,7 @@ source_building_remaining_density: DS 1
 
 TILE_TRANSPORT_INFO_ELEMENT_SIZE EQU 1
 
-CURTILE SET 0
+CURTILE = 0
 
 ; Tile Set Count
 TILE_SET_COUNT : MACRO ; 1 = Tile number
@@ -57,14 +57,14 @@ TILE_SET_COUNT : MACRO ; 1 = Tile number
             DS TILE_TRANSPORT_INFO_ELEMENT_SIZE ; Empty
         ENDR
     ENDC
-CURTILE SET (\1)
+CURTILE = (\1)
 ENDM
 
 ; Tile Add
 T_ADD : MACRO ; 1=Tile name, 2=Transit base cost
     TILE_SET_COUNT (\1)
     DB (\2)
-CURTILE SET CURTILE+1 ; Set cursor for next item
+CURTILE = CURTILE+1 ; Set cursor for next item
 ENDM
 
 IF TILE_TRANSPORT_INFO_ELEMENT_SIZE != 1

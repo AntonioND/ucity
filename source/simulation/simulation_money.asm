@@ -62,8 +62,8 @@ negative_budget_count:: DS 1
 
 CITY_TILE_MONEY_COST_SIZE EQU 1
 
-CURTILE       SET 0
-MONEY_AMOUNT  SET 0
+CURTILE       = 0
+MONEY_AMOUNT  = 0
 
 ; Tile Add - Base tile of the building to add information of
 ;            Will only fill the building when the next one is added!
@@ -81,8 +81,8 @@ T_ADD : MACRO ; 1=Tile index, 2=Money amount
     ENDC
 
     ; Set parameters for this building
-CURTILE       SET (\1)
-MONEY_AMOUNT  SET (\2)
+CURTILE       = (\1)
+MONEY_AMOUNT  = (\2)
 
 ENDM
 

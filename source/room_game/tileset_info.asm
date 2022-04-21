@@ -25,7 +25,7 @@
 
 ;###############################################################################
 
-CURTILE SET 0
+CURTILE = 0
 
 ; Tile Set Count
 TILE_SET_COUNT : MACRO ; 1 = Tile number
@@ -37,7 +37,7 @@ TILE_SET_COUNT : MACRO ; 1 = Tile number
             DS TILESET_INFO_ELEMENT_SIZE ; Empty
         ENDR
     ENDC
-CURTILE SET (\1)
+CURTILE = (\1)
 ENDM
 
 ; Tile Add
@@ -50,7 +50,7 @@ T_ADD : MACRO ; 1=Name Define, 2=Palette, 3=Type, 4=Base X delta, 5=Base Y delta
     ENDC
     DB (\3)
     DB (\4), (\5) ; Origin of coordinates of this building (if any)
-CURTILE SET CURTILE+1 ; Set cursor for next item
+CURTILE = CURTILE+1 ; Set cursor for next item
 ENDM
 
 ;###############################################################################

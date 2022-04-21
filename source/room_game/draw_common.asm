@@ -37,10 +37,10 @@
 ; This should be used all around the codebase!
 CLAMP_0_63:: ; Clamps any signed 8-byte value to 0 ~ 63.
 
-VAL SET 0 ; 0 to 63
+VAL = 0 ; 0 to 63
     REPT 64
     DB  VAL
-VAL SET VAL+1
+VAL = VAL+1
     ENDR
 
     REPT 64 ; 64 to 127, clamp to 63

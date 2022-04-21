@@ -48,10 +48,10 @@ pollution_total_percent:: DS 1 ; percentage of pollution
 
 DIV_BY_3: ; uint8_t = uint16_t / 3 (but only up to 255*3)
 
-VALUE SET 0
+VALUE = 0
     REPT 256 * 3
         DB VALUE / 3
-VALUE SET VALUE + 1
+VALUE = VALUE + 1
     ENDR
 
 ;-------------------------------------------------------------------------------

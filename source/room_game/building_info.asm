@@ -626,7 +626,7 @@ BuildingGetSizeFromBaseTileIgnoreErrors::
 
 ;###############################################################################
 
-CURINDEX SET 0
+CURINDEX = 0
 
 BUILDING_SET_INDEX : MACRO ; 1 = Index
     IF (\1) < CURINDEX ; check if going backwards and stop if so
@@ -637,13 +637,13 @@ BUILDING_SET_INDEX : MACRO ; 1 = Index
             DW $0000
         ENDR
     ENDC
-CURINDEX SET (\1)
+CURINDEX = (\1)
 ENDM
 
 BUILDING_ADD_ENTRY : MACRO ; 1=Name, 2=Width, 3=Height
     BUILDING_SET_INDEX \1
     DW  \2
-CURINDEX SET CURINDEX + 1
+CURINDEX = CURINDEX + 1
 ENDM
 
 ;-------------------------------------------------------------------------------
@@ -735,7 +735,7 @@ BUILDING_INFO_POINTERS_ARRAY:: ; Pointers to structs. Indexes are B_Xxxxxx
 
 ;###############################################################################
 
-CURINDEX SET 0
+CURINDEX = 0
 
 BUILDING_SET_PRICE : MACRO ; 1 = Index, 2=Pointer to price
     IF (\1) < CURINDEX ; check if going backwards and stop if so
@@ -747,7 +747,7 @@ BUILDING_SET_PRICE : MACRO ; 1 = Index, 2=Pointer to price
         ENDR
     ENDC
     DW (\2) ; Add data for this element
-CURINDEX SET (\1)+1
+CURINDEX = (\1)+1
 ENDM
 
 ;-------------------------------------------------------------------------------

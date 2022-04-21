@@ -764,7 +764,7 @@ BoatsWriteOAM:
 
     ld      hl,OAM_Copy+BOAT_SPR_OAM_BASE*4
 
-INDEX SET 0
+INDEX = 0
     REPT    SIMULATION_MAX_BOATS
 
     ld      a,[BOAT_ENABLED+INDEX]
@@ -821,7 +821,7 @@ INDEX SET 0
 
 .next\@:
 
-INDEX SET INDEX+1
+INDEX = INDEX+1
     ENDR
 
     ret
@@ -840,7 +840,7 @@ INDEX SET INDEX+1
 
 BoatsUpdateVisibility:
 
-INDEX SET 0
+INDEX = 0
     REPT    SIMULATION_MAX_BOATS
 
     ld      a,[BOAT_ENABLED+INDEX]
@@ -897,7 +897,7 @@ INDEX SET 0
 
 .next\@:
 
-INDEX SET INDEX+1
+INDEX = INDEX+1
     ENDR
 
     ret
@@ -986,7 +986,7 @@ BoatsShow:
 
 BoatsCheckOutOfWater:
 
-INDEX SET 0
+INDEX = 0
     REPT    SIMULATION_MAX_BOATS
 
     ld      a,[BOAT_ENABLED+INDEX]
@@ -1022,7 +1022,7 @@ INDEX SET 0
 
 .next\@:
 
-INDEX SET INDEX+1
+INDEX = INDEX+1
     ENDR
 
     ret
@@ -1031,7 +1031,7 @@ INDEX SET INDEX+1
 
 BoatsSpawnIfEnabled: ; spawn boats that are enabled but not spawned
 
-INDEX SET 0
+INDEX = 0
     REPT    SIMULATION_MAX_BOATS
 
     ld      a,[BOAT_ENABLED+INDEX]
@@ -1047,7 +1047,7 @@ INDEX SET 0
 
 .next\@:
 
-INDEX SET INDEX+1
+INDEX = INDEX+1
     ENDR
 
     ret
@@ -1056,7 +1056,7 @@ INDEX SET INDEX+1
 
 BoatsRestartMovement:
 
-INDEX SET 0
+INDEX = 0
     REPT    SIMULATION_MAX_BOATS
 
     ld      a,[BOAT_ENABLED+INDEX]
@@ -1082,7 +1082,7 @@ INDEX SET 0
 
 .next\@:
 
-INDEX SET INDEX+1
+INDEX = INDEX+1
     ENDR
 
     ret
@@ -1133,13 +1133,13 @@ BoatsHandle:
 
 BoatsHandleScroll: ; d = value to add to y, e = value to add to x
 
-INDEX SET 0
+INDEX = 0
     REPT    SIMULATION_MAX_BOATS
     ld      bc,INDEX
     push    de
     call    BoatScroll ; bc = index, e = value to add to X, d = add to Y
     pop     de
-INDEX SET INDEX+1
+INDEX = INDEX+1
     ENDR
 
     call    BoatsUpdateVisibility
