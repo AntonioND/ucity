@@ -199,22 +199,22 @@ RoomTitleLoadGraphics:
 SPR_X_BASE EQU (160-10*8)/2
 SPR_Y_BASE EQU (144-4*16)/2
 
-SPR_Y = 0
+    DEF SPR_Y = 0
     REPT    4
-SPR_X = 0
+        DEF SPR_X = 0
         REPT    10
-           ld       a,SPR_Y*16 + SPR_Y_BASE + 16
-           ld       [hl+],a
-           ld       a,SPR_X*8 + SPR_X_BASE + 8
-           ld       [hl+],a
-           ld       a,( SPR_X + SPR_Y * 10 ) * 2
-           ld       [hl+],a
-           ld       a,[de]
-           inc      de
-           ld       [hl+],a
-SPR_X = SPR_X + 1
+            ld      a,SPR_Y*16 + SPR_Y_BASE + 16
+            ld      [hl+],a
+            ld      a,SPR_X*8 + SPR_X_BASE + 8
+            ld      [hl+],a
+            ld      a,( SPR_X + SPR_Y * 10 ) * 2
+            ld      [hl+],a
+            ld      a,[de]
+            inc     de
+            ld      [hl+],a
+            DEF SPR_X = SPR_X + 1
         ENDR
-SPR_Y = SPR_Y + 1
+        DEF SPR_Y = SPR_Y + 1
     ENDR
 
     ; Load palettes of bg and sprites
@@ -287,11 +287,11 @@ TitleBlinkHandle:
 
     ld      de,4
 
-SPR_X = 0
+    DEF SPR_X = 0
     REPT    10
-    ld      [hl],a
-    add     hl,de
-SPR_X = SPR_X + 1
+        ld      [hl],a
+        add     hl,de
+        DEF SPR_X = SPR_X + 1
     ENDR
 
     ret

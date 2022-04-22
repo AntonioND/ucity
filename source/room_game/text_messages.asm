@@ -34,7 +34,7 @@
 
 ;-------------------------------------------------------------------------------
 
-CURINDEX = 0
+    DEF CURINDEX = 0
 
 MSG_SET_INDEX : MACRO ; 1 = Index
     IF (\1) < CURINDEX ; check if going backwards and stop if so
@@ -45,13 +45,13 @@ MSG_SET_INDEX : MACRO ; 1 = Index
             DW $0000
         ENDR
     ENDC
-CURINDEX = (\1)
+    DEF CURINDEX = (\1)
 ENDM
 
 MSG_ADD : MACRO ; 1=Name of label where the text is
     MSG_SET_INDEX ID_\1
     DW  \1
-CURINDEX = CURINDEX + 1
+    DEF CURINDEX = CURINDEX + 1
 ENDM
 
 ;-------------------------------------------------------------------------------

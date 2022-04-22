@@ -66,20 +66,20 @@ forest_threshold: DS 1
 ABS_CLAMP_ARRAY_GEN : MACRO ; \1 = number to clamp to
 
 abs_clamp_array_\1: ; returns absolute value up to N-1, clamped to N-1
-VAL = 0 ; 0 to 63
+    DEF VAL = 0 ; 0 to 63
     REPT \1
-    DB  VAL
-VAL = VAL+1
+        DB  VAL
+        DEF VAL = VAL+1
     ENDR
 
     REPT 257+(-\1-\1) ; 64 - 191 (64 to 123, -64 to -128
     DB  \1-1
     ENDR
 
-VAL = \1+(-1) ; -63 to -1
+    DEF VAL = \1+(-1) ; -63 to -1
     REPT \1-1
-    DB  VAL
-VAL = VAL+(-1) ; WTF, RGBDS, really?
+        DB  VAL
+        DEF VAL = VAL+(-1) ; WTF, RGBDS, really?
     ENDR
 
 ENDM

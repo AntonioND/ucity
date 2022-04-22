@@ -102,7 +102,7 @@ BUILD_SELECT_SPRITES_PALETTES:
 
 ;-------------------------------------------------------------------------------
 
-CURINDEX = 0
+    DEF CURINDEX = 0
 
 ICON_SET_BUILDING : MACRO ; 1 = Index, 2 = B_xxxxx (or B_None), 3 and 4 = pal
 \1  EQU CURINDEX
@@ -112,7 +112,7 @@ ICON_SET_BUILDING : MACRO ; 1 = Index, 2 = B_xxxxx (or B_None), 3 and 4 = pal
     ELSE
         DB (\3),(\4) ; Palettes for left half and right half
     ENDC
-CURINDEX = (\1)+1
+    DEF CURINDEX = (\1)+1
 ENDM
 
 ICON_SET_GROUP_NUMBER : MACRO ; 1 = Equate

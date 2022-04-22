@@ -540,7 +540,7 @@ Simulation_CalculateStatistics::
     ld      d,0
     ld      hl,0
 
-COUNT = 0
+    DEF COUNT = 0
     REPT    4
 
         ; l = previous overflow
@@ -564,7 +564,7 @@ COUNT = 0
         ld      l,h
         ld      h,0
 
-COUNT = COUNT + 1
+        DEF COUNT = COUNT + 1
     ENDR
 
     ; Save city type to variable

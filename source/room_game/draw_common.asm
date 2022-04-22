@@ -37,18 +37,18 @@
 ; This should be used all around the codebase!
 CLAMP_0_63:: ; Clamps any signed 8-byte value to 0 ~ 63.
 
-VAL = 0 ; 0 to 63
+    DEF VAL = 0 ; 0 to 63
     REPT 64
-    DB  VAL
-VAL = VAL+1
+        DB  VAL
+        DEF VAL = VAL+1
     ENDR
 
     REPT 64 ; 64 to 127, clamp to 63
-    DB  63
+        DB  63
     ENDR
 
     REPT 128 ; -128 to -1, clamp to 0
-    DB  0
+        DB  0
     ENDR
 
 IF CITY_MAP_WIDTH != 64

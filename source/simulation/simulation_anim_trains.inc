@@ -677,7 +677,7 @@ TrainsWriteOAM:
 
     ld      hl,OAM_Copy+TRAIN_SPR_OAM_BASE*4
 
-INDEX = 0
+    DEF INDEX = 0
     REPT    SIMULATION_MAX_TRAINS
 
     ld      a,[TRAIN_DIRECTION+INDEX]
@@ -730,7 +730,7 @@ INDEX = 0
 
 .next\@:
 
-INDEX = INDEX+1
+        DEF INDEX = INDEX+1
     ENDR
 
     ret
@@ -745,7 +745,7 @@ INDEX = INDEX+1
 
 TrainsUpdateVisibility:
 
-INDEX = 0
+    DEF INDEX = 0
     REPT    SIMULATION_MAX_TRAINS
 
     ld      a,[TRAIN_DIRECTION+INDEX]
@@ -796,7 +796,7 @@ INDEX = 0
 
 .next\@:
 
-INDEX = INDEX+1
+        DEF INDEX = INDEX+1
     ENDR
 
     ret
@@ -883,7 +883,7 @@ TrainsShow:
 
 TrainsCheckOutOfTrack:
 
-INDEX = 0
+    DEF INDEX = 0
     REPT    SIMULATION_MAX_TRAINS
 
     ld      a,[TRAIN_DIRECTION+INDEX]
@@ -953,7 +953,7 @@ INDEX = 0
 
 .next\@:
 
-INDEX = INDEX+1
+        DEF INDEX = INDEX+1
     ENDR
 
     ret
@@ -994,13 +994,13 @@ TrainsHandle:
 
 TrainsHandleScroll: ; d = value to add to y, e = value to add to x
 
-INDEX = 0
+    DEF INDEX = 0
     REPT    SIMULATION_MAX_TRAINS
-    ld      bc,INDEX
-    push    de
-    call    TrainScroll ; bc = index, e = value to add to X, d = add to Y
-    pop     de
-INDEX = INDEX+1
+        ld      bc,INDEX
+        push    de
+        call    TrainScroll ; bc = index, e = value to add to X, d = add to Y
+        pop     de
+        DEF INDEX = INDEX+1
     ENDR
 
     call    TrainsUpdateVisibility

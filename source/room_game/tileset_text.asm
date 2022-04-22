@@ -30,7 +30,7 @@
 
 ;###############################################################################
 
-CURTILE = 0
+    DEF CURTILE = 0
 
 ; Tile Set Count
 TILE_SET_COUNT : MACRO ; 1 = Tile number
@@ -42,14 +42,14 @@ TILE_SET_COUNT : MACRO ; 1 = Tile number
             DW $0000 ; Empty
         ENDR
     ENDC
-CURTILE = (\1)
+    DEF CURTILE = (\1)
 ENDM
 
 ; Tile Add
 T_ADD : MACRO ; 1=Name Define, 2=Pointer to name string
     TILE_SET_COUNT (\1)
     DW (\2) ; LSB first
-CURTILE = CURTILE+1 ; Set cursor for next item
+    DEF CURTILE = CURTILE+1 ; Set cursor for next item
 ENDM
 
 ;###############################################################################

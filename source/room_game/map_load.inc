@@ -21,7 +21,7 @@
 ;###############################################################################
 
     IF !DEF(MAP_LOAD_INC)
-MAP_LOAD_INC = 1
+    DEF MAP_LOAD_INC = 1
 
 ;###############################################################################
 
@@ -33,7 +33,7 @@ CITY_MAP_SRAM_FLAG       EQU %10000000
 
 CITY_MAP_NUMBER_MASK     EQU %01111111
 
-SCENARIOS_TOTAL_NUM       EQU 4 ; Total number of scenarios included in the ROM
+SCENARIOS_TOTAL_NUM      EQU 4 ; Total number of scenarios included in the ROM
 
 ;###############################################################################
 
