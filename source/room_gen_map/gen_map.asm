@@ -49,8 +49,8 @@ fix_map_changed: DS 1
 
 circlecount: DS 1
 
-FIELD_DEFAULT_THRESHOLD  EQU 128
-FOREST_DEFAULT_THRESHOLD EQU 128+24
+    DEF FIELD_DEFAULT_THRESHOLD  EQU 128
+    DEF FOREST_DEFAULT_THRESHOLD EQU 128+24
 
 field_threshold:  DS 1
 forest_threshold: DS 1
@@ -63,7 +63,7 @@ forest_threshold: DS 1
 
 ; Aligned to $100
 
-ABS_CLAMP_ARRAY_GEN : MACRO ; \1 = number to clamp to
+MACRO ABS_CLAMP_ARRAY_GEN ; \1 = number to clamp to
 
 abs_clamp_array_\1: ; returns absolute value up to N-1, clamped to N-1
     DEF VAL = 0 ; 0 to 63
@@ -138,7 +138,7 @@ shift_left_five: ; LSB first, MSB second
 
 ; X and Y are signed 8 bit values
 ; b = x, a = y
-IS_INSIDE_CIRCLE : MACRO ; \1 = radius
+MACRO IS_INSIDE_CIRCLE ; \1 = radius
 
     ; Get absolute clamped value
 
@@ -264,14 +264,14 @@ gen_map_rand:: ; returns a = random number. Preserves DE
 
 ;###############################################################################
 
-; Allocate banks for the intermediate and final stages of the map generation
-BANK_TEMP1 EQU BANK_CITY_MAP_TYPE
-BANK_TEMP2 EQU BANK_CITY_MAP_TRAFFIC
-BANK_TILES EQU BANK_CITY_MAP_TILES
+    ; Allocate banks for the intermediate and final stages of the map generation
+    DEF BANK_TEMP1 EQU BANK_CITY_MAP_TYPE
+    DEF BANK_TEMP2 EQU BANK_CITY_MAP_TRAFFIC
+    DEF BANK_TILES EQU BANK_CITY_MAP_TILES
 
 ;-------------------------------------------------------------------------------
 
-MAP_READ_CLAMPED : MACRO ; e = x, d = y, returns value in a, preserves bc
+MACRO MAP_READ_CLAMPED ; e = x, d = y, returns value in a, preserves bc
 
     ld      h,CLAMP_0_63>>8
     ld      l,e
@@ -293,7 +293,7 @@ map_initialize: ; result saved to bank 1
     ; initialize tile bank to random values
 
     ld      a,BANK_TEMP1
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,CITY_MAP_TILES
 
@@ -313,9 +313,9 @@ map_initialize: ; result saved to bank 1
 
 ;-------------------------------------------------------------------------------
 
-STEP_INCREMENT EQU 16 ; Amount to be added with each circle
+    DEF STEP_INCREMENT EQU 16 ; Amount to be added with each circle
 
-ADD_CIRCLE : MACRO ; \1 = radius
+MACRO ADD_CIRCLE ; \1 = radius
 
 map_add_circle_\1:
 
@@ -451,7 +451,7 @@ map_add_circle_all:
     ld      [circlecount],a
 
     ld      a,BANK_TEMP2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,.circle_radius_array
 
@@ -551,7 +551,7 @@ map_add_circle_all:
 map_normalize: ; normalizes bank 2
 
     ld      a,BANK_TEMP2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; Calculate average value
     ; -----------------------
@@ -647,7 +647,7 @@ map_normalize: ; normalizes bank 2
 
 ;-------------------------------------------------------------------------------
 
-MAP_SMOOTH_FN : MACRO ; \1 = src bank, \2 = dst bank
+MACRO MAP_SMOOTH_FN ; \1 = src bank, \2 = dst bank
 
     ld      hl,CITY_MAP_TILES ; Base address of the map!
 
@@ -663,7 +663,7 @@ MAP_SMOOTH_FN : MACRO ; \1 = src bank, \2 = dst bank
             ; Read source data first
 
             ld      a,\1
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      bc,0 ; bc = accumulator
 
@@ -722,7 +722,7 @@ MAP_SMOOTH_FN : MACRO ; \1 = src bank, \2 = dst bank
             rr      l ; divide by 2
 
             ld      a,\2 ; set destination bank
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,l
 
@@ -755,7 +755,7 @@ map_smooth_2_to_1:
 map_apply_height_threshold:
 
     ld      a,BANK_TEMP2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,CITY_MAP_TILES
 
@@ -791,7 +791,7 @@ map_apply_height_threshold:
 
 ;-------------------------------------------------------------------------------
 
-FIX_TILE_TYPE : MACRO ; \1 = T_WATER or T_FOREST
+MACRO FIX_TILE_TYPE ; \1 = T_WATER or T_FOREST
 
 .start:
     xor     a,a
@@ -977,7 +977,7 @@ map_fix_forest:
 map_tilemap_fix: ; fix invalid patterns of tiles
 
     ld      a,BANK_TEMP2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; Fix water and forest tiles
 
@@ -988,12 +988,12 @@ map_tilemap_fix: ; fix invalid patterns of tiles
 
 ;-------------------------------------------------------------------------------
 
-COARSE_TILES_TO_TILESET : MACRO ; \1 = T_WATER/T_FOREST, \2 = array
+MACRO COARSE_TILES_TO_TILESET ; \1 = T_WATER/T_FOREST, \2 = array
 
     ; Switch to bank with original data
 
     ld      a,BANK_TEMP2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,CITY_MAP_TILES ; Base address of the map!
 
@@ -1104,14 +1104,14 @@ COARSE_TILES_TO_TILESET : MACRO ; \1 = T_WATER/T_FOREST, \2 = array
         ; Switch to bank with destination data
 
         ld      a,BANK_TILES
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      [hl],e
 
         ; Switch to bank with original data
 
         ld      a,BANK_TEMP2
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         pop     hl
         pop     de ; (*)
@@ -1233,7 +1233,7 @@ map_tilemap_to_real_tiles::
     ; -----------------------------------------------------
 
     ld      a,BANK_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      de,CITY_MAP_TILES
 .loop_rand:
@@ -1283,7 +1283,7 @@ map_tilemap_to_real_tiles::
 .loop_fill_attrs:
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      c,[hl]
     ld      b,0
@@ -1320,7 +1320,7 @@ map_draw:
 .loop:
 
     ld      a,BANK_TEMP2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl+]
 

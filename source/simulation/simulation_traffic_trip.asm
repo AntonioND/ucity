@@ -43,12 +43,12 @@ source_building_remaining_density: DS 1
 
 ;-------------------------------------------------------------------------------
 
-TILE_TRANSPORT_INFO_ELEMENT_SIZE EQU 1
+    DEF TILE_TRANSPORT_INFO_ELEMENT_SIZE EQU 1
 
     DEF CURTILE = 0
 
 ; Tile Set Count
-TILE_SET_COUNT : MACRO ; 1 = Tile number
+MACRO TILE_SET_COUNT ; 1 = Tile number
     IF (\1) < CURTILE ; check if going backwards and stop if so
         FAIL "ERROR : building_info.asm : Tile already in use!"
     ENDC
@@ -61,7 +61,7 @@ TILE_SET_COUNT : MACRO ; 1 = Tile number
 ENDM
 
 ; Tile Add
-T_ADD : MACRO ; 1=Tile name, 2=Transit base cost
+MACRO T_ADD ; 1=Tile name, 2=Transit base cost
     TILE_SET_COUNT (\1)
     DB (\2)
     DEF CURTILE = CURTILE+1 ; Set cursor for next item
@@ -141,7 +141,7 @@ TrafficTryExpand: ; d=y, e=x => current position
     pop     de ; de = coords
 
     ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; Check if current density is small enough to fit in this road/train track.
     ; If adding the density to this tile overflows 256, we can't go through
@@ -179,7 +179,7 @@ ENDC
     ld      c,a ; c = real cost of moving from this tile
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl] ; get current accumulated cost
 
@@ -229,7 +229,7 @@ TrafficAdd:
     ; it means that we have reached a destination.
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     ld      a,[hl]
     and     a,TYPE_MASK
 
@@ -271,7 +271,7 @@ TrafficAdd:
     ; c = accumulated cost
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      [hl],c ; set cost
 
@@ -299,7 +299,7 @@ TrafficTryMoveUp: ; preserves bc,de,hl
     ; than the previous one.
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     and     a,a
@@ -354,7 +354,7 @@ TrafficTryMoveDown: ; preserves bc,de,hl
     ; than the previous one.
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     and     a,a
@@ -407,7 +407,7 @@ TrafficTryMoveLeft: ; preserves bc,de,hl
     ; than the previous one.
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     and     a,a
@@ -460,7 +460,7 @@ TrafficTryMoveRight: ; preserves bc,de,hl
     ; than the previous one.
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     and     a,a
@@ -517,7 +517,7 @@ TrafficAddStart:
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      [hl],1
 
@@ -661,7 +661,7 @@ TrafficGetBuildingiRemainingDensityAndPointer:
     GET_MAP_ADDRESS ; Preserves DE and BC
 
     ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
 
@@ -682,7 +682,7 @@ TrafficGetAccumulatedCost: ; d=y, e=x. preserves de
 .ok:
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     GET_MAP_ADDRESS ; preserves de
     ld      a,[hl]
@@ -702,14 +702,14 @@ TrafficRetraceStep:
     GET_MAP_ADDRESS ; preserves DE and BC
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     and     a,TYPE_HAS_ROAD|TYPE_HAS_TRAIN
     jr      z,.skip_write
 
         ld      a,BANK_CITY_MAP_TRAFFIC
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
         add     a,c
@@ -723,7 +723,7 @@ TrafficRetraceStep:
     ; If the cost of this tile is 1 it is the initial one, return!
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     cp      a,1
@@ -763,7 +763,7 @@ TrafficRetraceStep:
         ; get min value higher than 0
 
 ; returns the min of A and B in A. B must be non-zero, A can be zero
-LD_A_MIN_NON_ZERO_A_B : MACRO
+MACRO LD_A_MIN_NON_ZERO_A_B
     and     a,a
     jr      z,.a_is_zero\@
     cp      a,b ; cy = 1 if b > a
@@ -908,7 +908,7 @@ Simulation_TrafficHandleSource::
         ld      c,a ; c = height
 
         ld      a,BANK_CITY_MAP_TRAFFIC
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ; e = x, d = width
         ; b = y, c = height
@@ -958,7 +958,7 @@ Simulation_TrafficHandleSource::
     call    QueueInit
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    ClearWRAMX
 
@@ -1077,7 +1077,7 @@ Simulation_TrafficHandleSource::
 
             ; HL should hold the top left tile of the destination building
             ld      a,BANK_CITY_MAP_TRAFFIC
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      [hl],b
 
@@ -1114,7 +1114,7 @@ Simulation_TrafficHandleSource::
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[source_building_remaining_density]
     ld      [hl],a

@@ -58,7 +58,7 @@ QueueInit:: ; Reset pointers
 QueueAdd:: ; Add register DE to the queue. Preserves DE and BC
 
     ld      a,BANK_SCRATCH_RAM_2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ldh     a,[queue_in_ptr+0] ; Get pointer to next empty space
     ld      l,a
@@ -84,7 +84,7 @@ IF 0
 QueueAddEx:: ; Add registers BC and DE to the queue. Preserves BC and DE
 
     ld      a,BANK_SCRATCH_RAM_2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ldh     a,[queue_in_ptr+0] ; Get pointer to next empty space
     ld      l,a
@@ -115,7 +115,7 @@ ENDC
 QueueGet:: ; Get value from queue into DE.
 
     ld      a,BANK_SCRATCH_RAM_2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ldh     a,[queue_out_ptr+0] ; Get pointer to next element to get
     ld      l,a
@@ -141,7 +141,7 @@ IF 0
 QueueGetEx:: ; Get values from queue into BC and DE.
 
     ld      a,BANK_SCRATCH_RAM_2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ldh     a,[queue_out_ptr+0] ; Get pointer to next element to get
     ld      l,a

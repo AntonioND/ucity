@@ -33,7 +33,7 @@
 
     SECTION "Room Save Menu Variables",WRAM0
 
-SAVE_MENU_CURSOR_BLINK_FRAMES EQU 30
+    DEF SAVE_MENU_CURSOR_BLINK_FRAMES EQU 30
 save_menu_cursor_x:      DS 1 ; page
 save_menu_cursor_y:      DS 1 ; selection inside page
 save_menu_exit_error:    DS 1 ; 0 if selection is ok, $FF if error
@@ -42,7 +42,7 @@ save_menu_cursor_frames: DS 1 ; number of frames left before switching blink
 
 save_menu_exit:    DS 1 ; set to 1 to exit
 
-SAVE_MENU_MAX_SLOTS_PER_PAGE EQU 4
+    DEF SAVE_MENU_MAX_SLOTS_PER_PAGE EQU 4
 save_menu_num_pages:        DS 1 ; calculated when loading the room
 save_menu_elements_in_page: DS 1 ; calculated when changing page
 
@@ -166,10 +166,10 @@ SaveMenuMoveUp:
 
 ;-------------------------------------------------------------------------------
 
-WRITE_B_TO_HL_VRAM : MACRO ; Clobbers A and C
+MACRO WRITE_B_TO_HL_VRAM ; Clobbers A and C
     di ; critical section
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
         ld      [hl],b
     ei ; end of critical section
@@ -217,7 +217,7 @@ SaveMenuPrintSRAMBankInfo:
     inc     de
 
     ld      a,CART_RAM_DISABLE
-    ld      [rRAMG],a
+    ldh     [rRAMG],a
 
     pop     bc
 
@@ -571,7 +571,7 @@ SaveMenuRedrawPage:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -619,7 +619,7 @@ SaveMenuDrawCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -637,7 +637,7 @@ SaveMenuClearCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -809,10 +809,10 @@ RoomSaveMenuError: ; always returns -1!
     call    wait_ly
 
     xor     a,a
-    ld      [rIF],a
+    ldh     [rIF],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     call    LoadTextPalette
 
@@ -891,10 +891,10 @@ RoomSaveMenu:: ; returns A = selected SRAM bank, -1 if error
     call    wait_ly
 
     xor     a,a
-    ld      [rIF],a
+    ldh     [rIF],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     call    LoadTextPalette
 
@@ -941,8 +941,8 @@ RoomSaveMenuLoadErrorBG:
     ; ------------
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ; Load graphics
     ; -------------
@@ -953,7 +953,7 @@ RoomSaveMenuLoadErrorBG:
     ; Tiles
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
     ld      hl,SAVE_MENU_ERROR_BG_MAP
@@ -979,7 +979,7 @@ RoomSaveMenuLoadErrorBG:
     ; Attributes
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
 
@@ -1013,8 +1013,8 @@ RoomSaveMenuLoadBG:
     ; ------------
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ; Load graphics
     ; -------------
@@ -1025,7 +1025,7 @@ RoomSaveMenuLoadBG:
     ; Tiles
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
     ld      hl,SAVE_MENU_BG_MAP
@@ -1061,7 +1061,7 @@ RoomSaveMenuLoadBG:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -1074,7 +1074,7 @@ RoomSaveMenuLoadBG:
     ; Attributes
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
 
@@ -1097,7 +1097,7 @@ RoomSaveMenuLoadBG:
     jr      nz,.loop2
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     call    rom_bank_pop
 

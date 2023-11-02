@@ -133,9 +133,9 @@ __bg_load_map_main:
     push    hl
 
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a ; set correct WRAM bank
+        ldh     [rSVBK],a ; set correct WRAM bank
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         push    bc
         push    hl
@@ -144,9 +144,9 @@ __bg_load_map_main:
         pop     bc
 
         ld      a,BANK_CITY_MAP_ATTR
-        ld      [rSVBK],a ; set correct WRAM bank
+        ldh     [rSVBK],a ; set correct WRAM bank
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         call    ____vram_copy_row_wrap
 
@@ -243,9 +243,9 @@ bg_refresh_main:: ; refresh tiles but don't scroll or anything
     push    hl
 
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a ; set correct WRAM bank
+        ldh     [rSVBK],a ; set correct WRAM bank
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         push    bc
         push    hl
@@ -254,9 +254,9 @@ bg_refresh_main:: ; refresh tiles but don't scroll or anything
         pop     bc
 
         ld      a,BANK_CITY_MAP_ATTR
-        ld      [rSVBK],a ; set correct WRAM bank
+        ldh     [rSVBK],a ; set correct WRAM bank
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         call    ____vram_copy_row_wrap
 
@@ -357,12 +357,12 @@ bg_load_main:: ; This doesn't load palettes
     ld      b,BANK(CITY_TILESET)
     call    rom_bank_push_set
 
-CITY_TILESET_NUMBER_TILES EQU 512
-HALF_TILES_ONE_BANK EQU 128
-TILE_SIZE EQU (8*8/4)
+    DEF CITY_TILESET_NUMBER_TILES EQU 512
+    DEF HALF_TILES_ONE_BANK EQU 128
+    DEF TILE_SIZE EQU (8*8/4)
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,HALF_TILES_ONE_BANK
     ld      de,256
@@ -374,7 +374,7 @@ TILE_SIZE EQU (8*8/4)
     call    vram_copy_tiles
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,HALF_TILES_ONE_BANK
     ld      de,256
@@ -519,10 +519,10 @@ bg_main_scroll_right::
     ; ---------------
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     push    bc
     push    hl
@@ -531,10 +531,10 @@ bg_main_scroll_right::
     pop     bc
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     call    ____vram_copy_column_wrap ; b = x, c = y, hl = source address
 
@@ -629,10 +629,10 @@ bg_main_scroll_left::
     ; ---------------
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     push    bc
     push    hl
@@ -641,10 +641,10 @@ bg_main_scroll_left::
     pop     bc
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     call    ____vram_copy_column_wrap ; b = x, c = y, hl = source address
 
@@ -741,10 +741,10 @@ bg_main_scroll_down::
     ; ---------------
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     push    bc
     push    hl
@@ -753,10 +753,10 @@ bg_main_scroll_down::
     pop     bc
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     call    ____vram_copy_row_wrap ; b = x, c = y, hl = source address
 
@@ -852,10 +852,10 @@ bg_main_scroll_up::
     ; ---------------
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     push    bc
     push    hl
@@ -864,10 +864,10 @@ bg_main_scroll_up::
     pop     bc
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a ; set correct WRAM bank
+    ldh     [rSVBK],a ; set correct WRAM bank
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     call    ____vram_copy_row_wrap ; b = x, c = y, hl = source address
 

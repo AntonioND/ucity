@@ -34,10 +34,10 @@
 
 ;-------------------------------------------------------------------------------
 
-C_WHITE  EQU 0 ; Other tiles (not road nor train)
-C_GREEN  EQU 1 ; Levels of traffic
-C_YELLOW EQU 2
-C_RED    EQU 3
+    DEF C_WHITE  EQU 0 ; Other tiles (not road nor train)
+    DEF C_GREEN  EQU 1 ; Levels of traffic
+    DEF C_YELLOW EQU 2
+    DEF C_RED    EQU 3
 
 MINIMAP_TRAFFIC_TILE_COLORS:
     DB 1,1,1,1
@@ -78,7 +78,7 @@ MinimapDrawTrafficMap::
         push    hl
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             ld      a,[hl] ; Get type
 
             ld      b,a
@@ -113,7 +113,7 @@ MinimapDrawTrafficMap::
                     GET_MAP_ADDRESS ; Preserves DE
 
                     ld      a,BANK_CITY_MAP_TRAFFIC
-                    ld      [rSVBK],a
+                    ldh     [rSVBK],a
 
                     ld      a,[hl]
 
@@ -149,7 +149,7 @@ MinimapDrawTrafficMap::
 
                 ; Has road or train
                 ld      a,BANK_CITY_MAP_TRAFFIC
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
                 ld      a,[hl] ; get traffic density
 
                 swap    a

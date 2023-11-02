@@ -40,11 +40,11 @@
 
 ;-------------------------------------------------------------------------------
 
-SIMULATION_MAX_PLANES   EQU 4 ; They all must be greater than 0
-SIMULATION_MAX_TRAINS   EQU 5
-SIMULATION_MAX_BOATS    EQU 4
+    DEF SIMULATION_MAX_PLANES   EQU 4 ; They all must be greater than 0
+    DEF SIMULATION_MAX_TRAINS   EQU 5
+    DEF SIMULATION_MAX_BOATS    EQU 4
 
-SIMULATION_OBJECTS_OAM_BASE EQU 20 ; First OAM index to use for transportation
+    DEF SIMULATION_OBJECTS_OAM_BASE EQU 20 ; First OAM index to use for transportation
 
 SIMULATION_SPRITES_SHOWN: DS 1 ; 0 if sprites are hidden, 1 if not
 
@@ -60,11 +60,11 @@ simulation_scy_old: DS 1
 ; Planes
 ; ------
 
-PLANE_SPR_OAM_BASE EQU SIMULATION_OBJECTS_OAM_BASE
+    DEF PLANE_SPR_OAM_BASE EQU SIMULATION_OBJECTS_OAM_BASE
 
-PLANE_SPRITE_TILE_START EQU (147-128)
+    DEF PLANE_SPRITE_TILE_START EQU (147-128)
 
-PLANE_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
+    DEF PLANE_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
 
 OLD_NUM_AIRPORTS: DS 1
 
@@ -83,21 +83,21 @@ PLANE_DIRECTION: DS SIMULATION_MAX_PLANES
 PLANE_DIRECTION_CHANGE_COUNTDOWN: DS SIMULATION_MAX_PLANES
 PLANE_VISIBLE:   DS SIMULATION_MAX_PLANES ; 1 = Visible on screen
 
-PLANE_TAKEOFF_DIRECTION EQU 2 ; Right
+    DEF PLANE_TAKEOFF_DIRECTION EQU 2 ; Right
 
-; Number of movement steps to change direction. The minimum should be the lenght
-; of the runway of the airport for simplicity.
-PLANE_CHANGE_DIR_RANGE EQU 128 ; Power of 2
-PLANE_CHANGE_DIR_MIN   EQU 60 ; Not needed to be a power of 2
+    ; Number of movement steps to change direction. The minimum should be the
+    ; length of the runway of the airport for simplicity.
+    DEF PLANE_CHANGE_DIR_RANGE EQU 128 ; Power of 2
+    DEF PLANE_CHANGE_DIR_MIN   EQU 60 ; Not needed to be a power of 2
 
 ; Trains
 ; ------
 
-TRAIN_SPR_OAM_BASE EQU PLANE_SPR_OAM_BASE+SIMULATION_MAX_PLANES
+    DEF TRAIN_SPR_OAM_BASE EQU PLANE_SPR_OAM_BASE+SIMULATION_MAX_PLANES
 
-TRAIN_SPRITE_TILE_START EQU (150-128)
+    DEF TRAIN_SPRITE_TILE_START EQU (150-128)
 
-TRAIN_NUM_DIRECTIONS EQU 4
+    DEF TRAIN_NUM_DIRECTIONS EQU 4
 
 OLD_NUM_TRAINS: DS 1
 
@@ -117,11 +117,11 @@ TRAIN_VISIBLE:   DS SIMULATION_MAX_TRAINS ; 1 = Visible on screen
 ; Boats
 ; -----
 
-BOAT_SPR_OAM_BASE EQU TRAIN_SPR_OAM_BASE+SIMULATION_MAX_TRAINS
+    DEF BOAT_SPR_OAM_BASE EQU TRAIN_SPR_OAM_BASE+SIMULATION_MAX_TRAINS
 
-BOAT_SPRITE_TILE_START EQU (152-128)
+    DEF BOAT_SPRITE_TILE_START EQU (152-128)
 
-BOAT_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
+    DEF BOAT_NUM_DIRECTIONS EQU 8 ; 4 directions + 4 diagonals
 
 ; Coordinates in tiles of the plane. There is one extra row and column at each
 ; border.

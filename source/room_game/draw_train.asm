@@ -72,7 +72,7 @@ MapTileUpdateTrain: ; e = x, d = y
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,TYPE_HAS_TRAIN ; not a train, exit
     and     a,[hl]
@@ -92,7 +92,7 @@ MapTileUpdateTrain: ; e = x, d = y
     and     a,[hl]
     jr      z,.not_road
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         ld      a,[hl]
         cp      a,T_ROAD_TB
         jr      z,.is_tb
@@ -131,7 +131,7 @@ MapTileUpdateTrain: ; e = x, d = y
     and     a,[hl]
     jr      z,.not_electricity
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         ld      a,[hl]
         cp      a,T_POWER_LINES_TB
         jr      nz,.not_tb_elec
@@ -337,7 +337,7 @@ MapDrawTrain:: ; Adds a train tile where the cursor is. Updates neighbours.
     jr      z,.end_road_check
     GET_MAP_ADDRESS ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     ld      a,[hl] ; get tile from map
 
     cp      a,T_ROAD_TB ; valid road tile
@@ -367,7 +367,7 @@ MapDrawTrain:: ; Adds a train tile where the cursor is. Updates neighbours.
     jr      z,.end_electricity_check
     GET_MAP_ADDRESS ; preserves de and bc
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     ld      a,[hl] ; get tile from map
     cp      a,T_POWER_LINES_TB ; valid tile
     jr      z,.end_electricity_check
@@ -405,7 +405,7 @@ MapDrawTrain:: ; Adds a train tile where the cursor is. Updates neighbours.
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,TYPE_HAS_TRAIN
     or      a,[hl] ; Mark as having train

@@ -34,16 +34,16 @@
 
 ;-------------------------------------------------------------------------------
 
-APA_BUFFER_ROWS    EQU 2
-APA_BUFFER_COLUMNS EQU 2
+    DEF APA_BUFFER_ROWS    EQU 2
+    DEF APA_BUFFER_COLUMNS EQU 2
 
 ; Colors being used to draw (left to right, top to bottom)
 apa_colors: DS (APA_BUFFER_ROWS*APA_BUFFER_COLUMNS)
 
-MINIMAP_BACKBUFFER_BASE       EQU $D000
-MINIMAP_BACKBUFFER_WRAMX_BANK EQU BANK_SCRATCH_RAM_2
+    DEF MINIMAP_BACKBUFFER_BASE       EQU $D000
+    DEF MINIMAP_BACKBUFFER_WRAMX_BANK EQU BANK_SCRATCH_RAM_2
 
-MINIMAP_VRAM_BASE EQU $8800
+    DEF MINIMAP_VRAM_BASE EQU $8800
 
 ;-------------------------------------------------------------------------------
 
@@ -178,7 +178,7 @@ APA_PixelStreamPlot2x2:: ; Buffer is 128x128
     ; change map
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; completed row, draw and advance
 
@@ -270,7 +270,7 @@ APA_64x64PixelStreamPlot::
     ; change map
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; completed row, draw and advance
 
@@ -326,7 +326,7 @@ APA_64x64PixelStreamPlot::
 APA_Plot:: ; b = x, c = y (0-127!)
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,b
     sra     a
@@ -440,7 +440,7 @@ ENDC
     push    hl ; (*)
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      b,128 ; b = tile counter
 
@@ -469,7 +469,7 @@ ENDC
 
     ; Attributes - fill with the desired palette
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      d,APA_TILE_HEIGHT
 .loop2_out:
@@ -496,7 +496,7 @@ ENDC
 APA_BufferFillColor3:: ; Fill buffer with color 3
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,$FF
 
@@ -505,7 +505,7 @@ APA_BufferFillColor3:: ; Fill buffer with color 3
 APA_BufferClear::
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     xor     a,a ; fill with 0
 
@@ -536,10 +536,10 @@ ENDC
 APA_BufferUpdate::
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,MINIMAP_BACKBUFFER_WRAMX_BANK
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      bc,APA_TILE_NUMBER ; bc = tiles
     ld      de,128 ; de = start index

@@ -33,11 +33,11 @@
 
     SECTION "Room Menu Variables",WRAM0
 
-MENU_NUMBER_ELEMENTS EQU 4
+    DEF MENU_NUMBER_ELEMENTS EQU 4
 menu_selection: DS 1
 menu_exit:      DS 1
 
-MENU_CURSOR_BLINK_FRAMES EQU 30
+    DEF MENU_CURSOR_BLINK_FRAMES EQU 30
 menu_cursor_blink:  DS 1
 menu_cursor_frames: DS 1 ; number of frames left before switching blink
 
@@ -139,10 +139,10 @@ MenuLoadCitySRAM: ; returns 1 if loaded correctly, 0 if not
 
 ;-------------------------------------------------------------------------------
 
-WRITE_B_TO_HL_VRAM : MACRO ; Clobbers A and C
+MACRO WRITE_B_TO_HL_VRAM ; Clobbers A and C
     di ; critical section
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
         ld      [hl],b
     ei ; end of critical section
@@ -150,7 +150,7 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-CURSOR_X EQU 4
+    DEF CURSOR_X EQU 4
 MENU_CURSOR_COORDINATE_OFFSET:
     DW 6*32+CURSOR_X+$9800 ; Budget
     DW 8*32+CURSOR_X+$9800 ; Bank
@@ -186,7 +186,7 @@ MenuDrawCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -204,7 +204,7 @@ MenuClearCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -389,8 +389,8 @@ RoomMenuLoadBG:
     ; ------------
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ; Load graphics
     ; -------------
@@ -398,7 +398,7 @@ RoomMenuLoadBG:
     ; Tiles
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
     ld      hl,MAIN_MENU_BG_MAP
@@ -424,7 +424,7 @@ RoomMenuLoadBG:
     ; Attributes
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
 
@@ -475,10 +475,10 @@ RoomMenuLoadGraphics:
     call    wait_ly
 
     xor     a,a
-    ld      [rIF],a
+    ldh     [rIF],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     call    LoadTextPalette
 

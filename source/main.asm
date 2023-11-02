@@ -34,8 +34,8 @@ PadDownCount:   DS  1
 PadLeftCount:   DS  1
 PadRightCount:  DS  1
 
-PAD_AUTOREPEAT_WAIT_INITIAL EQU 10
-PAD_AUTOREPEAT_WAIT_REPEAT  EQU 4
+    DEF PAD_AUTOREPEAT_WAIT_INITIAL EQU 10
+    DEF PAD_AUTOREPEAT_WAIT_REPEAT  EQU 4
 
 ;###############################################################################
 
@@ -158,7 +158,7 @@ NotGBC:
 Main:
 
     xor     a,a
-    ld      [rIE],a
+    ldh     [rIE],a
 
     ; Enable interrupts forever. No code is allowed to disable them unless it is
     ; a critical section.
@@ -175,7 +175,7 @@ Main:
     call    SFX_InitSystem
 
     ld      a,LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     call    SetDefaultVBLHandler
 
@@ -242,7 +242,7 @@ SetDefaultVBLHandler::
 SetPalettesAllBlack::
 
     ld      a,$FF
-    ld      [rBGP],a
+    ldh     [rBGP],a
     ld      a,[EnabledGBC]
     and     a,a
     ret     z
@@ -253,8 +253,8 @@ SetPalettesAllBlack::
     call    wait_ly
 
     ld      a,$80 ; auto increment
-    ld      [rBCPS],a
-    ld      [rOCPS],a
+    ldh     [rBCPS],a
+    ldh     [rOCPS],a
 
     ld      hl,rBCPD
     ld      c,rOCPD&$FF

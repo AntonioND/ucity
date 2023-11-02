@@ -27,18 +27,18 @@
 
 ; This APA Library uses tiles 128-383 of VRAM bank 1
 
-APA_FB_WIDTH  EQU 128
-APA_FB_HEIGHT EQU 128
+    DEF APA_FB_WIDTH  EQU 128
+    DEF APA_FB_HEIGHT EQU 128
 
-APA_TILE_WIDTH  EQU 16
-APA_TILE_HEIGHT EQU 16
+    DEF APA_TILE_WIDTH  EQU 16
+    DEF APA_TILE_HEIGHT EQU 16
 
-APA_TILE_NUMBER EQU (APA_TILE_WIDTH*APA_TILE_HEIGHT)
+    DEF APA_TILE_NUMBER EQU (APA_TILE_WIDTH*APA_TILE_HEIGHT)
 
-APA_TILE_OFFSET_X EQU ((20-APA_TILE_WIDTH)/2) ; Center of the screen
-APA_TILE_OFFSET_Y EQU (18-APA_TILE_HEIGHT) ; Bottom of the screen
+    DEF APA_TILE_OFFSET_X EQU ((20-APA_TILE_WIDTH)/2) ; Center of the screen
+    DEF APA_TILE_OFFSET_Y EQU (18-APA_TILE_HEIGHT) ; Bottom of the screen
 
-APA_PALETTE_INDEX EQU 6 ; Palette index used by the minimap
+    DEF APA_PALETTE_INDEX EQU 6 ; Palette index used by the minimap
 
 ;###############################################################################
 

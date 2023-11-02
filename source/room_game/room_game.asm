@@ -69,12 +69,12 @@ simulation_disaster_disabled:: DS 1 ; 0 if disasters are enabled, 1 if not
 game_animations_disabled:: DS 1 ; 0 if animations are enabled, 1 if not
 game_music_disabled:: DS 1 ; 0 if music is enabled, 1 if not
 
-; Must be a power of 2
-ANIMATION_TRANSPORT_COUNT_FRAMES EQU 4
-; Must be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES
-ANIMATION_COUNT_FRAMES_NORMAL    EQU 60
-; Doesn't need to be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES
-ANIMATION_COUNT_FRAMES_DISASTER  EQU 15
+    ; Must be a power of 2
+    DEF ANIMATION_TRANSPORT_COUNT_FRAMES EQU 4
+    ; Must be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES
+    DEF ANIMATION_COUNT_FRAMES_NORMAL    EQU 60
+    ; Doesn't need to be a multiple of ANIMATION_TRANSPORT_COUNT_FRAMES
+    DEF ANIMATION_COUNT_FRAMES_DISASTER  EQU 15
 
 animation_has_to_update_transport:  DS 1
 animation_has_to_update_map:        DS 1
@@ -429,7 +429,7 @@ RoomGameVBLHandler:
     ld      [game_sprites_8x16],a
 
     ; Assert that the LCD is still in VBL mode!
-    ld      a,[rLY]
+    ldh     a,[rLY]
     cp      a,144 ; cy = 1 if n > a
     jr      nc,.ok
     ld      b,b ; Breakpoint
@@ -456,9 +456,9 @@ RoomGameVBLHandler:
     ld      a,1
     ld      [vbl_handler_working],a
 
-    ld      a,[rSVBK]
+    ldh     a,[rSVBK]
     ld      b,a
-    ld      a,[rVBK]
+    ldh     a,[rVBK]
     ld      c,a
     push    bc
 
@@ -486,9 +486,9 @@ RoomGameVBLHandler:
 
     pop     bc
     ld      a,b
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     ld      a,c
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     xor     a,a
     ld      [vbl_handler_working],a ; flag as finished working
@@ -518,8 +518,8 @@ RoomGameLoad:
         call    InitKeyAutorepeat
 
         ld      a,$FF
-        ld      [rWX],a
-        ld      [rWY],a
+        ldh     [rWX],a
+        ldh     [rWY],a
 
         xor     a,a
         ld      [joy_held],a
@@ -536,7 +536,7 @@ RoomGameLoad:
 
         ld      a,3 ; Do not clear tile and attribute map, they may contain
 .clear_wramx_loop:  ; a randomly generated map.
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         push    af
         call    ClearWRAMX
         pop     af
@@ -581,7 +581,7 @@ RoomGameLoad:
 
         ld      a,[game_sprites_8x16]
         or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
         call    CursorShow
 
@@ -589,7 +589,7 @@ RoomGameLoad:
         call    irq_set_VBL
 
         xor     a,a
-        ld      [rIF],a
+        ldh     [rIF],a
 
         ld      b,GAME_STATE_WATCH
         LONG_CALL_ARGS  GameStateMachineStateSet ; After loading gfx
@@ -620,7 +620,7 @@ RoomGameLoad:
 
 ;        ld      a,[game_sprites_8x16]
 ;        or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON
-;        ld      [rLCDC],a
+;        ldh     [rLCDC],a
 
         ld      bc,RoomGameVBLHandler
         call    irq_set_VBL
@@ -637,6 +637,7 @@ RoomGameLoad:
 
     ld      b,b ; Panic!
     halt
+    nop
 
     jr      .not_one
 
@@ -884,15 +885,15 @@ GameStateMachineHandle::
 
 ;-------------------------------------------------------------------------------
 
-PAUSE_MENU_BUDGET    EQU 0
-PAUSE_MENU_BANK      EQU 1
-PAUSE_MENU_MINIMAPS  EQU 2
-PAUSE_MENU_GRAPHS    EQU 3
-PAUSE_MENU_STATS     EQU 4
-PAUSE_MENU_OPTIONS   EQU 5
-PAUSE_MENU_PAUSE     EQU 6
-PAUSE_MENU_SAVE_GAME EQU 7
-PAUSE_MENU_MAIN_MENU EQU 8
+    DEF PAUSE_MENU_BUDGET    EQU 0
+    DEF PAUSE_MENU_BANK      EQU 1
+    DEF PAUSE_MENU_MINIMAPS  EQU 2
+    DEF PAUSE_MENU_GRAPHS    EQU 3
+    DEF PAUSE_MENU_STATS     EQU 4
+    DEF PAUSE_MENU_OPTIONS   EQU 5
+    DEF PAUSE_MENU_PAUSE     EQU 6
+    DEF PAUSE_MENU_SAVE_GAME EQU 7
+    DEF PAUSE_MENU_MAIN_MENU EQU 8
 
 PauseMenuHandleOption:
 
@@ -1458,7 +1459,7 @@ InputHandleModePauseMenu:
 
     call    StatusBarShow
 
-    ld      a,[rLY]
+    ldh     a,[rLY]
     cp      a,144 ; cy = 0 if a >= n (LY >= 144 // cy = 0 if LY = 144 ~ 154)
     jr      nz,.in_vbl
         call    StatusBarHandlerSTAT

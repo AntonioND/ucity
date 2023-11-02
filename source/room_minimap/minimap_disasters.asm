@@ -34,10 +34,10 @@
 
 ;-------------------------------------------------------------------------------
 
-C_WHITE EQU 0 ; Other tiles
-C_GREEN EQU 1 ; Vegetation, burnable things...
-C_RED   EQU 2 ; Fire
-C_BLUE  EQU 3 ; Water
+    DEF C_WHITE EQU 0 ; Other tiles
+    DEF C_GREEN EQU 1 ; Vegetation, burnable things...
+    DEF C_RED   EQU 2 ; Fire
+    DEF C_BLUE  EQU 3 ; Water
 
 MINIMAP_DISASTERS_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(0<<0)

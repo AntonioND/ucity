@@ -35,7 +35,7 @@
 text_prompt_string: DS TEXT_PROMPT_STRING_LENGTH
 text_input_buffer:: DS (TEXT_INPUT_LENGTH+1) ; Add 1 for the null terminator
 
-TEXT_CURSOR_BLINK_FRAMES EQU 30
+    DEF TEXT_CURSOR_BLINK_FRAMES EQU 30
 text_cursor_x:      DS 1 ; keyboard cursor coordinates
 text_cursor_y:      DS 1
 text_cursor_blink:  DS 1
@@ -56,8 +56,8 @@ TEXT_INPUT_BG_MAP::
 
 ;-------------------------------------------------------------------------------
 
-TEXT_KEYBOARD_ROWS    EQU 6
-TEXT_KEYBOARD_COLUMNS EQU 18
+    DEF TEXT_KEYBOARD_ROWS    EQU 6
+    DEF TEXT_KEYBOARD_COLUMNS EQU 18
 
 TEXT_KEYBOARD_POSITION_INFO: ; Rows padded to 32 bytes
     DB 1,1,1,1, 1,1,1,1, 0,0, 1,1,1,1, 1,1,1,1,  0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -215,14 +215,14 @@ TextInputDrawKeyboardCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
         ld      [hl],O_UNDERSCORE
 
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         set     6,[hl] ; Y flip
 
@@ -239,7 +239,7 @@ TextInputClearKeyboardCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -270,7 +270,7 @@ TextInputGetSelectedChar: ; returns A = selected char (-1 = End)
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -424,7 +424,7 @@ TextClearChar:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -464,7 +464,7 @@ TextPutChar: ; A = char to draw
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -510,10 +510,10 @@ RoomTextInput:: ; returns a = 0 if empty, not 0 if valid text
     call    wait_ly
 
     xor     a,a
-    ld      [rIF],a
+    ldh     [rIF],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8000|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     call    LoadTextPalette
 
@@ -584,8 +584,8 @@ RoomTextInputLoadBG:
     ; ------------
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ; Load graphics
     ; -------------
@@ -596,7 +596,7 @@ RoomTextInputLoadBG:
     ; Tiles
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
     ld      hl,TEXT_INPUT_BG_MAP
@@ -633,7 +633,7 @@ RoomTextInputLoadBG:
     ; Attributes
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
 

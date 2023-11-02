@@ -285,7 +285,7 @@ SRL32: ; a = shift value, bcde = value (B = MSB, E = LSB), return value = bcde
 
 ;-------------------------------------------------------------------------------
 
-ADD_RECORD_POPULATION : MACRO ; \1 = name in lowercase, \2 = name in uppercase
+MACRO ADD_RECORD_POPULATION ; \1 = name in lowercase, \2 = name in uppercase
 
     ; Calculate value
     ; ---------------
@@ -422,7 +422,7 @@ GraphMoneyAddRecord:
 
 .greater_than_zero:
 
-BCDE_ADD_A : MACRO ; BCDE += A
+MACRO BCDE_ADD_A ; BCDE += A
     add     a,e
     ld      e,a
     ld      a,0
@@ -433,7 +433,7 @@ BCDE_ADD_A : MACRO ; BCDE += A
 .no_carry\@:
 ENDM
 
-BCD_2_BIN_ADD_LOW_NIBBLE : MACRO ; \1 = byte inside money array
+MACRO BCD_2_BIN_ADD_LOW_NIBBLE ; \1 = byte inside money array
     call    MultBy10 ; BCDE = value, returned value in BCDE, clobbers HL
 
     ld      a,[MoneyWRAM+\1]
@@ -442,7 +442,7 @@ BCD_2_BIN_ADD_LOW_NIBBLE : MACRO ; \1 = byte inside money array
     BCDE_ADD_A ; BCDE += A
 ENDM
 
-BCD_2_BIN_ADD_HIGH_NIBBLE : MACRO ; \1 = byte inside money array
+MACRO BCD_2_BIN_ADD_HIGH_NIBBLE ; \1 = byte inside money array
     call    MultBy10 ; BCDE = value, returned value in BCDE, clobbers HL
 
     ld      a,[MoneyWRAM+\1]

@@ -49,28 +49,28 @@ minimap_cursor_y_offset_countdown: DS 1 ; frames to move
 MINIMAP_MENU_MAP:
     INCBIN "minimap_menu_map.bin"
 
-MINIMAP_MENU_WIDTH  EQU 32
-MINIMAP_MENU_HEIGHT EQU 2
+    DEF MINIMAP_MENU_WIDTH  EQU 32
+    DEF MINIMAP_MENU_HEIGHT EQU 2
 
 MINIMAP_MENU_TILES:
     INCBIN "minimap_menu_tiles.bin"
 .e:
 
-MINIMAP_MENU_NUM_TILES EQU (.e-MINIMAP_MENU_TILES)/16
-MINIMAP_MENU_BASE_Y    EQU 144-16
-MINIMAP_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
-MINIMAP_MENU_NUM_ICONS_BORDER EQU ((160/16)/2)-2 ; Icons to allow to overflow
+    DEF MINIMAP_MENU_NUM_TILES EQU (.e-MINIMAP_MENU_TILES)/16
+    DEF MINIMAP_MENU_BASE_Y    EQU 144-16
+    DEF MINIMAP_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
+    DEF MINIMAP_MENU_NUM_ICONS_BORDER EQU ((160/16)/2)-2 ; Icons to allow to overflow
 
-MINIMAP_SPRITE_TILE_INDEX     EQU 184 ; After the menu icons
-MINIMAP_SPRITE_PALETTE_INDEX  EQU 1 ; Palette slot to be used by the cursor
-MINIMAP_SPRITE_BASE_Y         EQU (144-16-16)+16
-MINIMAP_SPRITE_OAM_INDEX      EQU 4
-MINIMAP_CURSOR_COUNTDOWN_MOVEMENT EQU 20 ; frames to wait to move
+    DEF MINIMAP_SPRITE_TILE_INDEX     EQU 184 ; After the menu icons
+    DEF MINIMAP_SPRITE_PALETTE_INDEX  EQU 1 ; Palette slot to be used by the cursor
+    DEF MINIMAP_SPRITE_BASE_Y         EQU (144-16-16)+16
+    DEF MINIMAP_SPRITE_OAM_INDEX      EQU 4
+    DEF MINIMAP_CURSOR_COUNTDOWN_MOVEMENT EQU 20 ; frames to wait to move
 
 ;-------------------------------------------------------------------------------
 
-WHITE EQU (31<<10)|(31<<5)|(31<<0)
-BLACK EQU (0<<10)|(0<<5)|(0<<0)
+    DEF WHITE EQU (31<<10)|(31<<5)|(31<<0)
+    DEF BLACK EQU (0<<10)|(0<<5)|(0<<0)
 
 MINIMAP_MENU_PALETTES:
     DW WHITE, (21<<10)|(21<<5)|(21<<0), (10<<10)|(10<<5)|(10<<0), BLACK
@@ -259,7 +259,7 @@ MinimapMenuShow::
     ld      [minimap_cursor_y_offset_countdown],a
 
     xor     a,a
-    ld      [rIF],a ; clear pending interrupts
+    ldh     [rIF],a ; clear pending interrupts
 
     ld      hl,rIE
     set     1,[hl] ; IEF_LCDC
@@ -305,9 +305,9 @@ MinimapMenuHide::
 
 MinimapMenuLoadGFX::
 
-    ld      a,[rLCDC]
+    ldh     a,[rLCDC]
     or      a,LCDCF_OBJON|LCDCF_OBJ16
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     call    MinimapMenuHide
 
@@ -318,7 +318,7 @@ MinimapMenuLoadGFX::
     ; --------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      hl,MINIMAP_MENU_MAP
 
@@ -329,7 +329,7 @@ MinimapMenuLoadGFX::
     ; Attributes
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9C00
     ld      b,MINIMAP_MENU_WIDTH*MINIMAP_MENU_HEIGHT
@@ -340,7 +340,7 @@ MinimapMenuLoadGFX::
     ; ----------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,MINIMAP_MENU_NUM_TILES
     ld      de,MINIMAP_MENU_TILE_BASE
@@ -384,14 +384,14 @@ MinimapMenuLCDHandler:: ; Only called when it is active, no need to check
 
     WAIT_SCREEN_BLANK
 
-    ld      a,[rLCDC]
+    ldh     a,[rLCDC]
     or      a,LCDCF_BG9C00 ; set 9C00h = menu
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      a,[minimap_scroll_x]
-    ld      [rSCX],a
+    ldh     [rSCX],a
     ld      a,MINIMAP_MENU_BASE_Y
-    ld      [rSCY],a
+    ldh     [rSCY],a
 
     ret
 
@@ -400,8 +400,8 @@ MinimapMenuLCDHandler:: ; Only called when it is active, no need to check
 MinimapMenuVBLHandler::
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,[minimap_menu_active]
     and     a,a
@@ -409,9 +409,9 @@ MinimapMenuVBLHandler::
 
     ; It is active, handle bg base swaps
 
-    ld      a,[rLCDC]
+    ldh     a,[rLCDC]
     and     a,(~LCDCF_BG9C00) & $FF ; set 9800h = minimap
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ; Update sprites if needed
 
@@ -455,9 +455,9 @@ MinimapMenuReset::
     call    irq_set_LCD
 
     ld      a,STATF_LYC
-    ld      [rSTAT],a
+    ldh     [rSTAT],a
     ld      a,MINIMAP_MENU_BASE_Y-1
-    ld      [rLYC],a
+    ldh     [rLYC],a
 
     ret
 

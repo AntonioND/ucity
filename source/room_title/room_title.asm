@@ -36,12 +36,12 @@ title_scroll_dir_x:     DS  1
 title_scroll_dir_y:     DS  1
 title_scroll_countdown: DS  1
 
-SCROLL_COUNTDOWN_TICKS  EQU 2
+    DEF SCROLL_COUNTDOWN_TICKS  EQU 2
 
 title_blink_countdown:  DS  1
 title_blink_state:      DS  1
 
-TITLE_BLINK_COUNTDOWN_TICKS EQU 45
+    DEF TITLE_BLINK_COUNTDOWN_TICKS EQU 45
 
 ;###############################################################################
 
@@ -184,7 +184,7 @@ RoomTitleLoadGraphics:
     ; ------------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,40*2 ; 40 sprites * 2 tiles per sprites
     ld      de,0
@@ -196,8 +196,8 @@ RoomTitleLoadGraphics:
 
     ld      de,TITLE_SCREEN_MAP
 
-SPR_X_BASE EQU (160-10*8)/2
-SPR_Y_BASE EQU (144-4*16)/2
+    DEF SPR_X_BASE EQU (160-10*8)/2
+    DEF SPR_Y_BASE EQU (144-4*16)/2
 
     DEF SPR_Y = 0
     REPT    4
@@ -238,10 +238,10 @@ SPR_Y_BASE EQU (144-4*16)/2
     ; -----------
 
     xor     a,a
-    ld      [rIF],a
+    ldh     [rIF],a
 
     ld      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_BG8800|LCDCF_OBJ16|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ret
 

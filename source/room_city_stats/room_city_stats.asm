@@ -49,8 +49,8 @@ city_stats_room_exit:  DS 1 ; set to 1 to exit room
 CITY_STATS_MENU_BG_MAP:
     INCBIN "city_stats_bg_map.bin"
 
-CITY_STATS_MENU_WIDTH  EQU 20
-CITY_STATS_MENU_HEIGHT EQU 18
+    DEF CITY_STATS_MENU_WIDTH  EQU 20
+    DEF CITY_STATS_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
@@ -100,7 +100,7 @@ RoomCityStatsCalculateLand:
     ld      hl,CITY_MAP_TILES
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop:
     push    hl
@@ -146,7 +146,7 @@ RoomCityStatsCalculateLand:
 RoomCityStatsPrintInfo:
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     add     sp,-10 ; (*)
 
@@ -211,7 +211,7 @@ RoomCityStatsPrintInfo:
 
     ; Print percentage helper
 
-PRINT_PERCENTAGE : MACRO ; hl = percentage (BCD), \3 = ptr to VRAM
+MACRO PRINT_PERCENTAGE ; hl = percentage (BCD), \3 = ptr to VRAM
 
     LD_DE_HL ; de = percentage, BCD
 
@@ -363,7 +363,7 @@ RoomCityStatsMenuLoadBG:
 
         ; Tiles
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
         ld      hl,CITY_STATS_MENU_BG_MAP
@@ -388,7 +388,7 @@ RoomCityStatsMenuLoadBG:
 
         ; Attributes
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
 
@@ -423,11 +423,11 @@ RoomCityStats::
     call    SetDefaultVBLHandler
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText

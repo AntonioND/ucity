@@ -25,95 +25,95 @@
 
 ;###############################################################################
 
-; Array of pointers to each building information
+    ; Array of pointers to each building information
     EXPORT BUILDING_INFO_POINTERS_ARRAY
-BUILDING_INFO_POINTERS_ARRAY_ELEMENT_SIZE EQU 4
+    DEF BUILDING_INFO_POINTERS_ARRAY_ELEMENT_SIZE EQU 4
 
-; Index of every building
-B_Residential    EQU 0
-B_Commercial     EQU 1
-B_Industrial     EQU 2
+    ; Index of every building
+    DEF B_Residential    EQU 0
+    DEF B_Commercial     EQU 1
+    DEF B_Industrial     EQU 2
 
-B_PoliceDept     EQU 3
-B_FireDept       EQU 4
-B_Hospital       EQU 5
+    DEF B_PoliceDept     EQU 3
+    DEF B_FireDept       EQU 4
+    DEF B_Hospital       EQU 5
 
-B_ParkSmall      EQU 6
-B_ParkBig        EQU 7
-B_Stadium        EQU 8
+    DEF B_ParkSmall      EQU 6
+    DEF B_ParkBig        EQU 7
+    DEF B_Stadium        EQU 8
 
-B_School         EQU 9
-B_HighSchool     EQU 10
-B_University     EQU 11
+    DEF B_School         EQU 9
+    DEF B_HighSchool     EQU 10
+    DEF B_University     EQU 11
 
-B_Museum         EQU 12
-B_Library        EQU 13
+    DEF B_Museum         EQU 12
+    DEF B_Library        EQU 13
 
-B_TrainStation   EQU 14
-B_Airport        EQU 15
+    DEF B_TrainStation   EQU 14
+    DEF B_Airport        EQU 15
 
-B_PowerPlantCoal    EQU 16
-B_PowerPlantOil     EQU 17
-B_PowerPlantWind    EQU 18
-B_PowerPlantSolar   EQU 19
-B_PowerPlantNuclear EQU 20
-B_PowerPlantFusion  EQU 21
+    DEF B_PowerPlantCoal    EQU 16
+    DEF B_PowerPlantOil     EQU 17
+    DEF B_PowerPlantWind    EQU 18
+    DEF B_PowerPlantSolar   EQU 19
+    DEF B_PowerPlantNuclear EQU 20
+    DEF B_PowerPlantFusion  EQU 21
 
-; Number of buildings. Everything past this are special "meta buildings"
-B_BuildingMax    EQU 22
+    ; Number of buildings. Everything past this are special "meta buildings"
+    DEF B_BuildingMax    EQU 22
 
-B_None           EQU 22 ; Size is 1x1, which is useful, but it doesn't exist.
+    DEF B_None           EQU 22 ; Size is 1x1, which is useful, but it doesn't exist.
 
-B_Road           EQU 23
-B_Train          EQU 24
-B_PowerLines     EQU 25
-B_Port           EQU 26
+    DEF B_Road           EQU 23
+    DEF B_Train          EQU 24
+    DEF B_PowerLines     EQU 25
+    DEF B_Port           EQU 26
 
-B_MetabuildingMax EQU 26
+    DEF B_MetabuildingMax EQU 26
 
-B_ResidentialS1A EQU 30
-B_ResidentialS1B EQU 31
-B_ResidentialS1C EQU 32
-B_ResidentialS1D EQU 33
-B_ResidentialS2A EQU 34
-B_ResidentialS2B EQU 35
-B_ResidentialS2C EQU 36
-B_ResidentialS2D EQU 37
-B_ResidentialS3A EQU 38
-B_ResidentialS3B EQU 39
-B_ResidentialS3C EQU 40
-B_ResidentialS3D EQU 41
+    DEF B_ResidentialS1A EQU 30
+    DEF B_ResidentialS1B EQU 31
+    DEF B_ResidentialS1C EQU 32
+    DEF B_ResidentialS1D EQU 33
+    DEF B_ResidentialS2A EQU 34
+    DEF B_ResidentialS2B EQU 35
+    DEF B_ResidentialS2C EQU 36
+    DEF B_ResidentialS2D EQU 37
+    DEF B_ResidentialS3A EQU 38
+    DEF B_ResidentialS3B EQU 39
+    DEF B_ResidentialS3C EQU 40
+    DEF B_ResidentialS3D EQU 41
 
-B_CommercialS1A EQU 42
-B_CommercialS1B EQU 43
-B_CommercialS1C EQU 44
-B_CommercialS1D EQU 45
-B_CommercialS2A EQU 46
-B_CommercialS2B EQU 47
-B_CommercialS2C EQU 48
-B_CommercialS2D EQU 49
-B_CommercialS3A EQU 50
-B_CommercialS3B EQU 51
-B_CommercialS3C EQU 52
-B_CommercialS3D EQU 53
+    DEF B_CommercialS1A EQU 42
+    DEF B_CommercialS1B EQU 43
+    DEF B_CommercialS1C EQU 44
+    DEF B_CommercialS1D EQU 45
+    DEF B_CommercialS2A EQU 46
+    DEF B_CommercialS2B EQU 47
+    DEF B_CommercialS2C EQU 48
+    DEF B_CommercialS2D EQU 49
+    DEF B_CommercialS3A EQU 50
+    DEF B_CommercialS3B EQU 51
+    DEF B_CommercialS3C EQU 52
+    DEF B_CommercialS3D EQU 53
 
-B_IndustrialS1A EQU 54
-B_IndustrialS1B EQU 55
-B_IndustrialS1C EQU 56
-B_IndustrialS1D EQU 57
-B_IndustrialS2A EQU 58
-B_IndustrialS2B EQU 59
-B_IndustrialS2C EQU 60
-B_IndustrialS2D EQU 61
-B_IndustrialS3A EQU 62
-B_IndustrialS3B EQU 63
-B_IndustrialS3C EQU 64
-B_IndustrialS3D EQU 65
+    DEF B_IndustrialS1A EQU 54
+    DEF B_IndustrialS1B EQU 55
+    DEF B_IndustrialS1C EQU 56
+    DEF B_IndustrialS1D EQU 57
+    DEF B_IndustrialS2A EQU 58
+    DEF B_IndustrialS2B EQU 59
+    DEF B_IndustrialS2C EQU 60
+    DEF B_IndustrialS2D EQU 61
+    DEF B_IndustrialS3A EQU 62
+    DEF B_IndustrialS3B EQU 63
+    DEF B_IndustrialS3C EQU 64
+    DEF B_IndustrialS3D EQU 65
 
-B_RadiationGround EQU 66
-B_RadiationWater  EQU 67
+    DEF B_RadiationGround EQU 66
+    DEF B_RadiationWater  EQU 67
 
-B_Delete         EQU 255 ; Special type
+    DEF B_Delete         EQU 255 ; Special type
 
 ;###############################################################################
 

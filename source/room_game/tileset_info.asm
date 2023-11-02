@@ -28,7 +28,7 @@
     DEF CURTILE = 0
 
 ; Tile Set Count
-TILE_SET_COUNT : MACRO ; 1 = Tile number
+MACRO TILE_SET_COUNT ; 1 = Tile number
     IF (\1) < CURTILE ; check if going backwards and stop if so
         FAIL "ERROR : tileset_info.asm : Tile already in use!"
     ENDC
@@ -41,7 +41,7 @@ TILE_SET_COUNT : MACRO ; 1 = Tile number
 ENDM
 
 ; Tile Add
-T_ADD : MACRO ; 1=Name Define, 2=Palette, 3=Type, 4=Base X delta, 5=Base Y delta
+MACRO T_ADD ; 1=Name Define, 2=Palette, 3=Type, 4=Base X delta, 5=Base Y delta
     TILE_SET_COUNT (\1)
     IF CURTILE < 256
         DB (\2) ; Bank 0

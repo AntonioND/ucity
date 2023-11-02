@@ -367,7 +367,7 @@ MapDrawBuilding:: ; Puts a building at the cursor. Check money and terrain.
 
 ;-------------------------------------------------------------------------------
 
-MapDeleteBuildingSetTileDestroyed : MACRO ; BC = tile
+MACRO MapDeleteBuildingSetTileDestroyed ; BC = tile
 
     ld      a,c
     ld      [delete_tile+0],a ; LSB First
@@ -376,7 +376,7 @@ MapDeleteBuildingSetTileDestroyed : MACRO ; BC = tile
 
 ENDM
 
-MapDeleteBuildingGetTileDestroyed : MACRO ; returns BC = tile, destroys A
+MACRO MapDeleteBuildingGetTileDestroyed ; returns BC = tile, destroys A
 
     ld      a,[delete_tile+0] ; LSB First
     ld      c,a
@@ -495,7 +495,7 @@ BuildingGetCoordinateOriginAndSize::
 ; Doesn't update VRAM map. Clears FLAGS of this tile.
 ; d = y, e = x -> Coordinates of one of the tiles.
 ; Returns b=0 if could remove building, b=1 if error.
-MAP_DELETE_BUILDING : MACRO ; \1 = check money and play SFX if != 0
+MACRO MAP_DELETE_BUILDING ; \1 = check money and play SFX if != 0
 
     ; Get building type and set corresponding "destroyed tile"
     ; --------------------------------------------------------

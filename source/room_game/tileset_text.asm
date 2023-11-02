@@ -33,7 +33,7 @@
     DEF CURTILE = 0
 
 ; Tile Set Count
-TILE_SET_COUNT : MACRO ; 1 = Tile number
+MACRO TILE_SET_COUNT ; 1 = Tile number
     IF (\1) < CURTILE ; check if going backwards and stop if so
         FAIL "ERROR : tileset_text.asm : Tile already in use!"
     ENDC
@@ -46,7 +46,7 @@ TILE_SET_COUNT : MACRO ; 1 = Tile number
 ENDM
 
 ; Tile Add
-T_ADD : MACRO ; 1=Name Define, 2=Pointer to name string
+MACRO T_ADD ; 1=Name Define, 2=Pointer to name string
     TILE_SET_COUNT (\1)
     DW (\2) ; LSB first
     DEF CURTILE = CURTILE+1 ; Set cursor for next item

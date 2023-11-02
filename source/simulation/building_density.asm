@@ -34,7 +34,7 @@
 
 ;-------------------------------------------------------------------------------
 
-CITY_TILE_DENSITY_ELEMENT_SIZE EQU 4 ; Size of elements of CITY_TILE_DENSITY
+    DEF CITY_TILE_DENSITY_ELEMENT_SIZE EQU 4 ; Size of elements of CITY_TILE_DENSITY
 
 ;-------------------------------------------------------------------------------
 
@@ -111,7 +111,7 @@ ENDC
 
 ; Tile Add - Base tile of the building to add information of
 ;            Will only fill the building when the next one is added!
-T_ADD : MACRO ; 1=Tile index, 2=Population, 3=Energy Cost, 4=Pollution, 5=Fire %
+MACRO T_ADD ; 1=Tile index, 2=Population, 3=Energy Cost, 4=Pollution, 5=Fire %
 
     IF (\1) < CURTILE ; check if going backwards and stop if so
         FAIL "ERROR : building_density.asm : Tile already in use!"

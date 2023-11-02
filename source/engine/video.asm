@@ -63,7 +63,7 @@ wait_frames::
 
 screen_off::
 
-    ld      a,[rLCDC]
+    ldh     a,[rLCDC]
     and     a,LCDCF_ON
     ret     z ; LCD already OFF
 
@@ -73,7 +73,7 @@ screen_off::
     call    wait_ly
 
     xor     a,a
-    ld      [rLCDC],a ;Shutdown LCD
+    ldh     [rLCDC],a ;Shutdown LCD
 
     reti ; End of critical section
 
@@ -123,7 +123,7 @@ vram_copy_fast::
 
 vram_copy::
 
-    ld      a,[rSTAT]
+    ldh     a,[rSTAT]
     bit     1,a
     jr      nz,vram_copy ; Not mode 0 or 1
 
@@ -143,7 +143,7 @@ vram_copy::
 
 vram_memset::
 
-    ld      a,[rSTAT]
+    ldh     a,[rSTAT]
     bit     1,a
     jr      nz,vram_memset ; Not mode 0 or 1
 
@@ -184,7 +184,7 @@ vram_copy_tiles::
 
     REPT    16
 .vram_wait\@:
-        ld      a,[rSTAT]
+        ldh     a,[rSTAT]
         bit     1,a
         jr      nz,.vram_wait\@ ; Not mode 0 or 1
         ld      a,[hl+]
@@ -278,11 +278,11 @@ spr_set_palette::
     swap    a
     rra ; multiply palette by 8
     set     7,a ; auto increment
-    ld      [rOCPS],a
+    ldh     [rOCPS],a
 
     REPT 8
         ld      a,[hl+]
-        ld      [rOCPD],a
+        ldh     [rOCPD],a
     ENDR
 
     ret
@@ -297,7 +297,7 @@ spr_set_palette_safe::
     rrca      ; /  palette by 8
 
     set     7,a ; auto increment
-    ld      [rOCPS],a
+    ldh     [rOCPS],a
 
     ld      b,8
 .loop:
@@ -305,7 +305,7 @@ spr_set_palette_safe::
     di ; Entering critical section
     WAIT_SCREEN_BLANK
     ld      a,[hl+]
-    ld      [rOCPD],a
+    ldh     [rOCPD],a
     ei ; End of critical section
 
     dec b
@@ -328,7 +328,7 @@ init_OAM::
 
 __refresh_OAM:
 
-    ld      [rDMA],a
+    ldh     [rDMA],a
     ld      a,$28      ;delay 200ms
 .delay:
     dec     a
@@ -380,11 +380,11 @@ bg_set_palette::
     rrca      ; /  palette by 8
 
     set     7,a ; auto increment
-    ld      [rBCPS],a
+    ldh     [rBCPS],a
 
     REPT 8
         ld      a,[hl+]
-        ld      [rBCPD],a
+        ldh     [rBCPD],a
     ENDR
 
     ret
@@ -399,7 +399,7 @@ bg_set_palette_safe::
     rrca      ; /  palette by 8
 
     set     7,a ; auto increment
-    ld      [rBCPS],a
+    ldh     [rBCPS],a
 
     ld      b,8
 .loop:
@@ -407,7 +407,7 @@ bg_set_palette_safe::
     di ; Entering critical section
     WAIT_SCREEN_BLANK
     ld      a,[hl+]
-    ld      [rBCPD],a
+    ldh     [rBCPD],a
     ei ; End of critical section
 
     dec b

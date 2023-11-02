@@ -302,7 +302,7 @@ Simulation_FireExpand: ; e = x, d = y, hl = address
         pop     hl
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,d
         add     a,[hl]
@@ -334,7 +334,7 @@ Simulation_FireExpand: ; e = x, d = y, hl = address
         pop     hl
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,d
         add     a,[hl]
@@ -365,7 +365,7 @@ Simulation_FireExpand: ; e = x, d = y, hl = address
         pop     hl
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,d
         add     a,[hl]
@@ -396,7 +396,7 @@ Simulation_FireExpand: ; e = x, d = y, hl = address
         pop     hl
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,d
         add     a,[hl]
@@ -430,7 +430,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
     ; fire or not.
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    ClearWRAMX
 
@@ -438,7 +438,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
     ; ------------------------------------------------------------------
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,CITY_MAP_TYPE ; Map base
 
@@ -460,7 +460,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
         pop     de
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
 .skip_tile:
         inc     hl
@@ -500,7 +500,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
     ld      bc,CITY_MAP_TILES ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop_remove:
 
@@ -523,7 +523,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
                 call    CityMapDrawTerrainTileAddress ; bc = tile, hl = address
 
                 ld      a,BANK_CITY_MAP_TYPE
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
                 pop     bc
 
@@ -538,7 +538,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
     ; -------------------------------------------------------
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,CITY_MAP_TILES ; Map base
 
@@ -566,7 +566,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
                 pop     hl
 
                 ld      a,BANK_SCRATCH_RAM
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
 .over_threshold:
 
@@ -590,7 +590,7 @@ Simulation_Fire:: ; This doesn't refresh the BG
     ld      hl,CITY_MAP_TILES ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop_extinguish:
 
@@ -628,7 +628,7 @@ Simulation_FireAnimate:: ; This doesn't refresh tile map!
     ld      hl,CITY_MAP_TILES ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop:
 
@@ -638,7 +638,7 @@ Simulation_FireAnimate:: ; This doesn't refresh tile map!
         jr      nz,.not_fire
 
             ld      a,BANK_CITY_MAP_TILES
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
 ; Actually, this could check if T_FIRE_1 is greater than 255 or T_FIRE_2 is
 ; lower than 256.
@@ -651,7 +651,7 @@ ENDC
             ld      [hl],a
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
 .not_fire:
 

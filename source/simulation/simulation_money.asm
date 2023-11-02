@@ -60,14 +60,14 @@ negative_budget_count:: DS 1
 
 ;###############################################################################
 
-CITY_TILE_MONEY_COST_SIZE EQU 1
+    DEF CITY_TILE_MONEY_COST_SIZE EQU 1
 
     DEF CURTILE       = 0
     DEF MONEY_AMOUNT  = 0
 
 ; Tile Add - Base tile of the building to add information of
 ;            Will only fill the building when the next one is added!
-T_ADD : MACRO ; 1=Tile index, 2=Money amount
+MACRO T_ADD ; 1=Tile index, 2=Money amount
 
     IF (\1) < CURTILE ; check if going backwards and stop if so
         FAIL "ERROR : simulation_money.asm : Tile already in use!"
@@ -132,9 +132,9 @@ CITY_TILE_MONEY_COST:: ; 512 entries - Depending on the tile, cost or income.
     T_ADD   T_INDUSTRIAL,  $1
     T_ADD   T_DEMOLISHED,  0
 
-ROAD_MAINTENANCE  EQU $1
-TRAIN_MAINTENANCE EQU $2
-POWER_MAINTENANCE EQU $1
+    DEF ROAD_MAINTENANCE  EQU $1
+    DEF TRAIN_MAINTENANCE EQU $2
+    DEF POWER_MAINTENANCE EQU $1
 
     T_ADD   T_ROAD_TB,   ROAD_MAINTENANCE
     T_ADD   T_ROAD_TB_1, ROAD_MAINTENANCE
@@ -351,7 +351,7 @@ Simulation_CalculateBudgetAndTaxes::
     push    hl
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl] ; get type
         and     a,TYPE_MASK ; without flags!
@@ -416,7 +416,7 @@ ENDC
 
     add     sp,-4 ; (**) reserve space for temporary calculations + 1 byte
 
-MULTIPLY_TAX : MACRO ; \1 = pointer to the amount to multiply
+MACRO MULTIPLY_TAX ; \1 = pointer to the amount to multiply
     xor     a,a
     ld      hl,sp+0
     REPT    4
@@ -513,10 +513,10 @@ ENDM
 
     add     sp,-MONEY_AMOUNT_SIZE*2 ; (*) save space for 2 money amounts
 
-MONEY_DEST EQU 0 ; add to sp to get the pointer to this variable
-MONEY_TEMP EQU 5
+    DEF MONEY_DEST EQU 0 ; add to sp to get the pointer to this variable
+    DEF MONEY_TEMP EQU 5
 
-EXPAND_MONEY : MACRO ; de = ptr to 3 byte amount, hl = ptr to 5 byte dest
+MACRO EXPAND_MONEY ; de = ptr to 3 byte amount, hl = ptr to 5 byte dest
     REPT    3
         ld      a,[de]
         ld      [hl+],a
@@ -535,7 +535,7 @@ ENDM
         ld      [hl+],a
     ENDR
 
-ADD_TAXES : MACRO ; \1 = pointer to 3-byte money amount
+MACRO ADD_TAXES ; \1 = pointer to 3-byte money amount
     ld      de,\1
     ld      hl,sp+MONEY_TEMP
     EXPAND_MONEY
@@ -552,7 +552,7 @@ ENDM
     ; Add other taxes
     ADD_TAXES   taxes_other
 
-PAY_COST : MACRO ; \1 = pointer to 3-byte money amount
+MACRO PAY_COST ; \1 = pointer to 3-byte money amount
     ld      de,\1
     ld      hl,sp+MONEY_TEMP
     EXPAND_MONEY

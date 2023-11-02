@@ -45,8 +45,8 @@ budget_room_exit:  DS 1 ; set to 1 to exit room
 BUDGET_MENU_BG_MAP:
     INCBIN "budget_menu_bg_map.bin"
 
-BUDGET_MENU_WIDTH  EQU 20
-BUDGET_MENU_HEIGHT EQU 18
+    DEF BUDGET_MENU_WIDTH  EQU 20
+    DEF BUDGET_MENU_HEIGHT EQU 18
 
 ;###############################################################################
 
@@ -136,7 +136,7 @@ BudgetMenuPrintMoneyAmounts:
 
     add     sp,-10 ; (*) reserve max space
 
-PRINT_MONEY : MACRO ; \1 = pointer to amount of money, \2 = Y coordinate
+MACRO PRINT_MONEY ; \1 = pointer to amount of money, \2 = Y coordinate
     ld      de,\1
     ld      hl,sp+0
     call    PrintMoneyAmount ; [hl] = Print [de]
@@ -238,7 +238,7 @@ ENDM
 BudgetMenuPrintTaxPercent:
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,[tax_percentage]
     sla     a
@@ -312,7 +312,7 @@ RoomBudgetMenuLoadBG:
 
         ; Tiles
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
         ld      hl,BUDGET_MENU_BG_MAP
@@ -337,7 +337,7 @@ RoomBudgetMenuLoadBG:
 
         ; Attributes
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
 
@@ -375,11 +375,11 @@ RoomBudgetMenu::
     LONG_CALL   Simulation_CalculateBudgetAndTaxes
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText

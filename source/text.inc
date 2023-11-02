@@ -30,34 +30,34 @@
 
 ;###############################################################################
 
-; Offsets
-O_PLUS          EQU 34
-O_MICRO         EQU 35
-O_PERCENT       EQU 39
-O_DASH          EQU 40
-O_CURSOR        EQU 41
-O_RCI_BASE_BAR  EQU 42
-O_SPACE         EQU 53
-O_BAR           EQU 54
-O_COPYRIGHT     EQU 55 ; Mapped to "$"
-O_COMMA         EQU 56
-O_DOT           EQU 57
-O_UNDERSCORE    EQU 58
-O_AT            EQU 59
-O_COLON         EQU 60
-O_ARROW         EQU 61 ; Mapped to "#"
-O_APOSTROPHE    EQU 62
-O_QUESTION      EQU 63
-O_EXCLAMATION   EQU 64
-O_NTILDE        EQU 65 ; Mapped to "~"
-O_ZERO          EQU 66
-O_A_UPPERCASE   EQU 76
-O_A_LOWERCASE   EQU 102
-O_NONE          EQU O_QUESTION
+    ; Offsets
+    DEF O_PLUS          EQU 34
+    DEF O_MICRO         EQU 35
+    DEF O_PERCENT       EQU 39
+    DEF O_DASH          EQU 40
+    DEF O_CURSOR        EQU 41
+    DEF O_RCI_BASE_BAR  EQU 42
+    DEF O_SPACE         EQU 53
+    DEF O_BAR           EQU 54
+    DEF O_COPYRIGHT     EQU 55 ; Mapped to "$"
+    DEF O_COMMA         EQU 56
+    DEF O_DOT           EQU 57
+    DEF O_UNDERSCORE    EQU 58
+    DEF O_AT            EQU 59
+    DEF O_COLON         EQU 60
+    DEF O_ARROW         EQU 61 ; Mapped to "#"
+    DEF O_APOSTROPHE    EQU 62
+    DEF O_QUESTION      EQU 63
+    DEF O_EXCLAMATION   EQU 64
+    DEF O_NTILDE        EQU 65 ; Mapped to "~"
+    DEF O_ZERO          EQU 66
+    DEF O_A_UPPERCASE   EQU 76
+    DEF O_A_LOWERCASE   EQU 102
+    DEF O_NONE          EQU O_QUESTION
 
 ;-------------------------------------------------------------------------------
 
-BCD2Tile : MACRO ; a = number from 0 to 9. Returns tile number in a
+MACRO BCD2Tile ; a = number from 0 to 9. Returns tile number in a
     add     a,O_ZERO
 ENDM
 
@@ -150,13 +150,13 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-STR_ADD : MACRO ; \1 = String, \2 = Name (optional)
+MACRO STR_ADD ; \1 = String, \2 = Name (optional)
 IF _NARG == 2
 \2:
 ENDC
     DB \1,0
 IF _NARG == 2
-\2_LEN EQU STRLEN(\1)+1
+    DEF \2_LEN EQU STRLEN(\1)+1
 ENDC
 ENDM
 

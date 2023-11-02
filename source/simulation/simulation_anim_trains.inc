@@ -390,7 +390,7 @@ TrainSpawn: ; c = index of the train
     ld      hl,CITY_MAP_TILES
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop2:
 

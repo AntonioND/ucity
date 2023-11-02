@@ -36,10 +36,10 @@
 
 ;-------------------------------------------------------------------------------
 
-TECH_LEVEL_NUCLEAR  EQU 10
-TECH_LEVEL_FUSION   EQU 40
+    DEF TECH_LEVEL_NUCLEAR  EQU 10
+    DEF TECH_LEVEL_FUSION   EQU 40
 
-TECH_LEVEL_MAX      EQU 40
+    DEF TECH_LEVEL_MAX      EQU 40
 
 ;-------------------------------------------------------------------------------
 

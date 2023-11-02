@@ -32,8 +32,8 @@
 ONLY_FOR_GBC_BG_MAP:
     INCBIN "only_for_gbc_bg_map.bin"
 
-ONLY_FOR_GBC_WIDTH  EQU 20
-ONLY_FOR_GBC_HEIGHT EQU 18
+    DEF ONLY_FOR_GBC_WIDTH  EQU 20
+    DEF ONLY_FOR_GBC_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
@@ -82,16 +82,16 @@ OnlyForGBCLoadBG:
 RoomOnlyForGBC::
 
     xor     a,a ; White screen
-    ld      [rBGP],a
+    ldh     [rBGP],a
 
     call    SetDefaultVBLHandler
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_BGON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText
@@ -99,7 +99,7 @@ RoomOnlyForGBC::
     call    OnlyForGBCLoadBG
 
     ld      a,$1B
-    ld      [rBGP],a
+    ldh     [rBGP],a
 
 .loop:
     halt

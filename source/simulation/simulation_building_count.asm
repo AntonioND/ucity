@@ -87,7 +87,7 @@ Simulation_CountBuildings::
         ; Returns: - Tile -> Register DE
         call    CityMapGetTileAtAddress ; Arg: hl = address. Preserves BC, HL
 
-CHECK_TILE : MACRO ; 1 = Tile number, 2 = Variable to increase
+MACRO CHECK_TILE ; 1 = Tile number, 2 = Variable to increase
 
         ld      a,(\1)&$FF ; Check low byte first because it changes more often
         cp      a,e
@@ -129,7 +129,7 @@ ENDM
     ld      hl,CITY_MAP_TILES
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop2:
 

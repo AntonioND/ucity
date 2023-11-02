@@ -40,10 +40,10 @@ Simulation_Radiation::
     ; Clear
     ; -----
 
-    ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ;ld      a,BANK_SCRATCH_RAM ; Is this even needed?
+    ;ldh     [rSVBK],a
 
-    call    ClearWRAMX
+    ;call    ClearWRAMX
 
     ; Remove radiation
     ; ----------------
@@ -51,7 +51,7 @@ Simulation_Radiation::
     ld      bc,CITY_MAP_TILES ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop_remove:
 
@@ -129,7 +129,7 @@ ENDC
 .end_replace_tile:
 
                 ld      a,BANK_CITY_MAP_TYPE
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
                 pop     bc
 
@@ -212,7 +212,7 @@ Simulation_RadiationSpread:: ; d = y, e = x -> Spread radiation around here
             GET_MAP_ADDRESS ; preserves de and bc
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl]
             and     a,TYPE_MASK
@@ -295,7 +295,7 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
     ld      bc,CITY_MAP_TILES ; Map base
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop_check:
 
@@ -304,7 +304,7 @@ Simulation_MeltdownTryStart:: ; b = 1 to force disaster, 0 to make it random
         jr      nz,.skip_check
 
             ld      a,BANK_CITY_MAP_ATTR
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[bc] ; Get attrs of tile (MSB)
             bit     3,a ; MSB of tile number
@@ -321,7 +321,7 @@ ENDC
 .skip_check_restore:
 
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
 .skip_check:
 

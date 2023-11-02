@@ -107,11 +107,11 @@ RoomGraphs::
     call    irq_set_VBL
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText

@@ -234,16 +234,16 @@ gbt_channel_1_handle:: ; de = info
 channel1_refresh_registers:
 
     xor     a,a
-    ld      [rNR10],a
+    ldh     [rNR10],a
     ld      a,[gbt_instr+0]
-    ld      [rNR11],a
+    ldh     [rNR11],a
     ld      a,[gbt_vol+0]
-    ld      [rNR12],a
+    ldh     [rNR12],a
     ld      a,[gbt_freq+0*2+0]
-    ld      [rNR13],a
+    ldh     [rNR13],a
     ld      a,[gbt_freq+0*2+1]
     or      a,$80 ; start
-    ld      [rNR14],a
+    ldh     [rNR14],a
 
     ret
 
@@ -263,9 +263,9 @@ channel1_update_effects: ; returns 1 in a if it needed to update sound registers
     ld      [gbt_cut_note_tick+0],a ; disable cut note
 
     xor     a,a ; vol = 0
-    ld      [rNR12],a
+    ldh     [rNR12],a
     ld      a,$80 ; start
-    ld      [rNR14],a
+    ldh     [rNR14],a
 
 .dont_cut:
 
@@ -569,14 +569,14 @@ gbt_channel_2_handle:: ; de = info
 channel2_refresh_registers:
 
     ld      a,[gbt_instr+1]
-    ld      [rNR21],a
+    ldh     [rNR21],a
     ld      a,[gbt_vol+1]
-    ld      [rNR22],a
+    ldh     [rNR22],a
     ld      a,[gbt_freq+1*2+0]
-    ld      [rNR23],a
+    ldh     [rNR23],a
     ld      a,[gbt_freq+1*2+1]
     or      a,$80 ; start
-    ld      [rNR24],a
+    ldh     [rNR24],a
 
     ret
 
@@ -596,9 +596,9 @@ channel2_update_effects: ; returns 1 in a if it needed to update sound registers
     ld      [gbt_cut_note_tick+1],a ; disable cut note
 
     xor     a,a ; vol = 0
-    ld      [rNR22],a
+    ldh     [rNR22],a
     ld      a,$80 ; start
-    ld      [rNR24],a
+    ldh     [rNR24],a
 
 .dont_cut:
 
@@ -891,7 +891,7 @@ gbt_channel_3_handle:: ; de = info
 channel3_refresh_registers:
 
     xor     a,a
-    ld      [rNR30],a ; disable
+    ldh     [rNR30],a ; disable
 
     ld      a,[gbt_channel3_loaded_instrument]
     ld      b,a
@@ -900,17 +900,17 @@ channel3_refresh_registers:
     call    nz,gbt_channel3_load_instrument ; a = instrument
 
     ld      a,$80
-    ld      [rNR30],a ; enable
+    ldh     [rNR30],a ; enable
 
     xor     a,a
-    ld      [rNR31],a
+    ldh     [rNR31],a
     ld      a,[gbt_vol+2]
-    ld      [rNR32],a
+    ldh     [rNR32],a
     ld      a,[gbt_freq+2*2+0]
-    ld      [rNR33],a
+    ldh     [rNR33],a
     ld      a,[gbt_freq+2*2+1]
     or      a,$80 ; start
-    ld      [rNR34],a
+    ldh     [rNR34],a
 
     ret
 
@@ -953,12 +953,12 @@ channel3_update_effects: ; returns 1 in a if it needed to update sound registers
     ld      [gbt_cut_note_tick+2],a ; disable cut note
 
     ld      a,$80
-    ld      [rNR30],a ; enable
+    ldh     [rNR30],a ; enable
 
     xor     a,a ; vol = 0
-    ld      [rNR32],a
+    ldh     [rNR32],a
     ld      a,$80 ; start
-    ld      [rNR34],a
+    ldh     [rNR34],a
 
 .dont_cut:
 
@@ -1236,13 +1236,13 @@ gbt_channel_4_handle:: ; de = info
 channel4_refresh_registers:
 
     xor     a,a
-    ld      [rNR41],a
+    ldh     [rNR41],a
     ld      a,[gbt_vol+3]
-    ld      [rNR42],a
+    ldh     [rNR42],a
     ld      a,[gbt_instr+3]
-    ld      [rNR43],a
+    ldh     [rNR43],a
     ld      a,$80 ; start
-    ld      [rNR44],a
+    ldh     [rNR44],a
 
     ret
 
@@ -1262,9 +1262,9 @@ channel4_update_effects: ; returns 1 in a if it needed to update sound registers
     ld      [gbt_cut_note_tick+3],a ; disable cut note
 
     xor     a,a ; vol = 0
-    ld      [rNR42],a
+    ldh     [rNR42],a
     ld      a,$80 ; start
-    ld      [rNR44],a
+    ldh     [rNR44],a
 
 .dont_cut:
 
@@ -1380,7 +1380,7 @@ gbt_update_bank1::
     or      a,[hl]
     inc     hl
     or      a,[hl]
-    ld      [rNR51],a ; handle panning...
+    ldh     [rNR51],a ; handle panning...
 
     ret
 

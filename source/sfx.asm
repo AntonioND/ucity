@@ -48,11 +48,11 @@ SFX_InitSystem::
     ld      [sfx_active],a
 
     ld      a,$80
-    ld      [rNR52],a ; sound on
+    ldh     [rNR52],a ; sound on
     ld      a,$77
-    ld      [rNR50],a ; volume max for both speakers
+    ldh     [rNR50],a ; volume max for both speakers
     ld      a,$FF
-    ld      [rNR51],a ; enable all channels in both speakers
+    ldh     [rNR51],a ; enable all channels in both speakers
 
     ret
 
@@ -68,9 +68,9 @@ SFX_EndSound:
     jr      z,.not_0
 
         xor     a,a ; vol = 0
-        ld      [rNR12],a
+        ldh     [rNR12],a
         ld      a,$80 ; start
-        ld      [rNR14],a
+        ldh     [rNR14],a
 
 .not_0:
 
@@ -79,18 +79,18 @@ IF 0
     jr      z,.not_1
 
         xor     a,a ; vol = 0
-        ld      [rNR22],a
+        ldh     [rNR22],a
         ld      a,$80 ; start
-        ld      [rNR24],a
+        ldh     [rNR24],a
 
 .not_1:
     bit     2,[hl]
     jr      z,.not_2
 
         xor     a,a ; vol = 0
-        ld      [rNR32],a
+        ldh     [rNR32],a
         ld      a,$80 ; start
-        ld      [rNR34],a
+        ldh     [rNR34],a
 
 .not_2:
 ENDC
@@ -99,9 +99,9 @@ ENDC
     jr      z,.not_3
 
         xor     a,a ; vol = 0
-        ld      [rNR42],a
+        ldh     [rNR42],a
         ld      a,$80 ; start
-        ld      [rNR44],a
+        ldh     [rNR44],a
 
 .not_3:
 
@@ -142,7 +142,7 @@ SFX_Handler::
 
 ;-------------------------------------------------------------------------------
 
-SFX_INIT : MACRO
+MACRO SFX_INIT
     ld      a,[game_music_disabled]
     and     a,a
     ret     nz
@@ -153,12 +153,12 @@ SFX_INIT : MACRO
     call    nz,SFX_EndSound
 ENDM
 
-SFX_TIME : MACRO ; \1=frames
+MACRO SFX_TIME ; \1=frames
     ld      a,\1
     ld      [sfx_countdown_stop],a
 ENDM
 
-SFX_END_WITH_CALLBACK : MACRO ; \1=function
+MACRO SFX_END_WITH_CALLBACK ; \1=function
     ld      a,(\1) & $FF
     ld      [sfx_end_callback+0],a
     ld      a,(\1) >> 8
@@ -168,7 +168,7 @@ SFX_END_WITH_CALLBACK : MACRO ; \1=function
     ld      [sfx_active],a
 ENDM
 
-SFX_END_NO_CALLBACK : MACRO
+MACRO SFX_END_NO_CALLBACK
     xor     a,a
     ld      [sfx_end_callback+0],a
     ld      [sfx_end_callback+1],a
@@ -177,7 +177,7 @@ SFX_END_NO_CALLBACK : MACRO
     ld      [sfx_active],a
 ENDM
 
-SFX_CHANNEL_1 : MACRO ; \1=sweep, \2=duty, \3=volume, \4=freq
+MACRO SFX_CHANNEL_1 ; \1=sweep, \2=duty, \3=volume, \4=freq
     ld      a,\1
     ld      b,(\2)<<6
     ld      c,(\3)<<4
@@ -187,18 +187,18 @@ ENDM
 
 SFX_Channel1: ; a = sweep, b = duty, lenght, c = volume, hl = freq
 
-    ld      [rNR10],a ; sweep
+    ldh     [rNR10],a ; sweep
 
     ld      a,b ; duty, lenght (unused)
-    ld      [rNR11],a
+    ldh     [rNR11],a
     ld      a,c ; 50% volume, no envelope
-    ld      [rNR12],a
+    ldh     [rNR12],a
 
     ld      a,l
-    ld      [rNR13],a
+    ldh     [rNR13],a
     ld      a,h
     or      a,$80 ; start
-    ld      [rNR14],a
+    ldh     [rNR14],a
 
     ld      hl,sfx_used_channels
     set     0,[hl]
@@ -206,7 +206,7 @@ SFX_Channel1: ; a = sweep, b = duty, lenght, c = volume, hl = freq
     ret
 
 IF 0
-SFX_CHANNEL_2 : MACRO ; \1=duty, \2=volume, \3=freq
+MACRO SFX_CHANNEL_2 ; \1=duty, \2=volume, \3=freq
     ld      b,(\1)<<6
     ld      c,(\2)<<4
     ld      hl,\3
@@ -216,15 +216,15 @@ ENDM
 SFX_Channel2: ; b = duty, lenght, c = volume, hl = freq
 
     ld      a,b ; duty, lenght (unused)
-    ld      [rNR21],a
+    ldh     [rNR21],a
     ld      a,c ; 50% volume, no envelope
-    ld      [rNR22],a
+    ldh     [rNR22],a
 
     ld      a,l
-    ld      [rNR23],a
+    ldh     [rNR23],a
     ld      a,h
     or      a,$80 ; start
-    ld      [rNR24],a
+    ldh     [rNR24],a
 
     ld      hl,sfx_used_channels
     set     1,[hl]
@@ -232,7 +232,7 @@ SFX_Channel2: ; b = duty, lenght, c = volume, hl = freq
     ret
 ENDC
 
-SFX_CHANNEL_4 : MACRO ; \1=instrument, \2=volume
+MACRO SFX_CHANNEL_4 ; \1=instrument, \2=volume
     ld      b,\1
     ld      c,(\2)<<4
     call    SFX_Channel4 ; b = instrument, c = volume
@@ -241,16 +241,16 @@ ENDM
 SFX_Channel4: ; b = instrument, c = volume
 
     xor     a,a
-    ld      [rNR41],a
+    ldh     [rNR41],a
 
     ld      a,c
-    ld      [rNR42],a
+    ldh     [rNR42],a
 
     ld      a,b
-    ld      [rNR43],a
+    ldh     [rNR43],a
 
     ld      a,$80 ; start
-    ld      [rNR44],a
+    ldh     [rNR44],a
 
     ld      hl,sfx_used_channels
     set     3,[hl]

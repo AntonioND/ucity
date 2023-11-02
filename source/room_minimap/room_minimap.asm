@@ -47,19 +47,20 @@ minimap_selected_map: DS 1
 MINIMAP_PALETTES:
     DW (31<<10)|(31<<5)|(31<<0), (21<<10)|(21<<5)|(21<<0)
     DW (10<<10)|(10<<5)|(10<<0), (0<<10)|(0<<5)|(0<<0)
-MINIMAP_PALETTE_NUM EQU 1
+
+    DEF MINIMAP_PALETTE_NUM EQU 1
 
 MINIMAP_BG_MAP:
     INCBIN "minimap_bg_map.bin"
 
-MINIMAP_WIDTH  EQU 20
-MINIMAP_HEIGHT EQU 18
+    DEF MINIMAP_WIDTH  EQU 20
+    DEF MINIMAP_HEIGHT EQU 18
 
 MINIMAP_TILES:
     INCBIN "minimap_tiles.bin"
 .e:
 
-MINIMAP_TILE_NUM EQU ((.e-MINIMAP_TILES)/16)
+    DEF MINIMAP_TILE_NUM EQU ((.e-MINIMAP_TILES)/16)
 
 ;-------------------------------------------------------------------------------
 
@@ -75,7 +76,7 @@ RoomMinimapLoadBG:: ; Also used for the graphs room. Loads BG + Palettes
     ; ----------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,MINIMAP_TILE_NUM
     ld      de,256
@@ -87,7 +88,7 @@ RoomMinimapLoadBG:: ; Also used for the graphs room. Loads BG + Palettes
 
     ; Tiles
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
     ld      hl,MINIMAP_BG_MAP
@@ -112,7 +113,7 @@ RoomMinimapLoadBG:: ; Also used for the graphs room. Loads BG + Palettes
 
     ; Attributes
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9800
 
@@ -384,11 +385,11 @@ RoomMinimap::
     call    irq_set_VBL
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText
@@ -478,7 +479,7 @@ RoomMinimapVBLHandler:
 RoomMinimapDrawTitle:: ; hl = ptr to text string
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     push    hl ; save string (*)
 

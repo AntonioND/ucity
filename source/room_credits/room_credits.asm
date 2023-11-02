@@ -46,8 +46,8 @@ credits_map_selection: DS 1 ; $FF for invalid value
 CREDITS_SELECT_BG_MAP:
     INCBIN "credits_bg_map.bin"
 
-CREDITS_SELECT_WIDTH  EQU 20
-CREDITS_SELECT_HEIGHT EQU 18
+    DEF CREDITS_SELECT_WIDTH  EQU 20
+    DEF CREDITS_SELECT_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
@@ -104,7 +104,7 @@ RoomCreditsLoadBG:
 
         ; Tiles
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
         ld      hl,CREDITS_SELECT_BG_MAP
@@ -129,7 +129,7 @@ RoomCreditsLoadBG:
 
         ; Attributes
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
 
@@ -167,11 +167,11 @@ RoomCredits::
     ld      [credits_map_selection],a
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText

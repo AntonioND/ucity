@@ -50,8 +50,8 @@ scenario_select_map_selection:: DS 1 ; $FF for invalid value
 SCENARIO_SELECT_BG_MAP:
     INCBIN "map_scenario_select_bg_map.bin"
 
-SCENARIO_SELECT_WIDTH  EQU 20
-SCENARIO_SELECT_HEIGHT EQU 18
+    DEF SCENARIO_SELECT_WIDTH  EQU 20
+    DEF SCENARIO_SELECT_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ RoomScenarioSelectRefresh:
 RoomScenarioSelectRefreshText:
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ; Print name of the city
     ; ----------------------
@@ -230,7 +230,7 @@ RoomScenarioSelectLoadBG:
 
         ; Tiles
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
         ld      hl,SCENARIO_SELECT_BG_MAP
@@ -255,7 +255,7 @@ RoomScenarioSelectLoadBG:
 
         ; Attributes
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
 
@@ -302,11 +302,11 @@ RoomScenarioSelect::
     ld      [scenario_select_map_selection],a
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText
@@ -355,10 +355,10 @@ RoomScenarioSelect::
 
 ;-------------------------------------------------------------------------------
 
-C_GREY EQU 0
-C_GREEN EQU 1
-C_BLUE  EQU 2
-C_WHITE EQU 3
+    DEF C_GREY EQU 0
+    DEF C_GREEN EQU 1
+    DEF C_BLUE  EQU 2
+    DEF C_WHITE EQU 3
 
 MINIMAP_PALETTE_BLACK:
     DW  0, 0, 0, 0
@@ -417,13 +417,13 @@ RoomScenarioSelectRefreshMinimap:
         ; Get tile
 
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      d,0
         ld      e,[hl]
 
         ld      a,BANK_CITY_MAP_ATTR
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         bit     3,[hl]
         jr      z,.dont_set

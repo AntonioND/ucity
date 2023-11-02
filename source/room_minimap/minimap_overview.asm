@@ -34,10 +34,10 @@
 
 ;-------------------------------------------------------------------------------
 
-C_WHITE EQU 0
-C_BLUE  EQU 1
-C_GREEN EQU 2
-C_BLACK EQU 3
+    DEF C_WHITE EQU 0
+    DEF C_BLUE  EQU 1
+    DEF C_GREEN EQU 2
+    DEF C_BLACK EQU 3
 
 MINIMAP_OVERVIEW_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (31<<10)|(0<<5)|(0<<0)

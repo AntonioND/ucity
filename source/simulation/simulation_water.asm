@@ -37,7 +37,7 @@
 Simulation_WaterAnimate:: ; This doesn't refresh tile map!
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    GetRandom ; preserves bc, de
     ; a = counter until the next change
@@ -61,13 +61,13 @@ ENDC
         jr      nz,.not_water
 
             ld      a,BANK_CITY_MAP_ATTR
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             bit     3,[hl]
             jr      nz,.next
 
                 ld      a,BANK_CITY_MAP_TILES
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
                 ld      [hl],T_WATER_EXTRA & $FF
 
@@ -77,13 +77,13 @@ ENDC
         jr      nz,.not_water_extra
 
             ld      a,BANK_CITY_MAP_ATTR
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             bit     3,[hl]
             jr      nz,.next
 
                 ld      a,BANK_CITY_MAP_TILES
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
                 ld      [hl],T_WATER & $FF
 

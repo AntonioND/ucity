@@ -43,8 +43,8 @@ menu_cursor_oam_base:  DS 1 ; first oam index, for movement. $FF = disable
 menu_cursor_y_base:    DS 1 ; base y
 menu_cursor_y_inc:     DS 1 ; increment to the Y coordinate
 menu_cursor_countdown: DS 1
-MENU_CURSOR_MOVEMENT_RANGE EQU 1
-MENU_CURSOR_MOVEMENT_SPEED EQU 10
+    DEF MENU_CURSOR_MOVEMENT_RANGE EQU 1
+    DEF MENU_CURSOR_MOVEMENT_SPEED EQU 10
 
 menu_active:    DS 1
 
@@ -63,34 +63,34 @@ BUILD_SELECT_SPRITES_TILESET:
     INCBIN "build_select_sprites.bin"
 .e:
 
-NUM_TILES   EQU (.e - .s) / (8*8/4)
-NUM_SPRITES EQU NUM_TILES / 2
+    DEF NUM_TILES   EQU (.e - .s) / (8*8/4)
+    DEF NUM_SPRITES EQU NUM_TILES / 2
 
-SPRITE_TILE_BASE    EQU 0 ; 2 VRAM banks, start at 1 and continue at 0
+    DEF SPRITE_TILE_BASE    EQU 0 ; 2 VRAM banks, start at 1 and continue at 0
 
-NUM_ROWS_MENU   EQU (144/16) ; scrn height / icon height
+    DEF NUM_ROWS_MENU   EQU (144/16) ; scrn height / icon height
 
-OVERLAY_ICON_TILE_BASE EQU 4 ; Sprite base for overlay icon (4 needed)
+    DEF OVERLAY_ICON_TILE_BASE EQU 4 ; Sprite base for overlay icon (4 needed)
 
-MENU_BASE_X EQU 8+(4) ; 4 pixels from left
-MENU_BASE_Y EQU 16+(-8) ; 8 pixels overflow from top
+    DEF MENU_BASE_X EQU 8+(4) ; 4 pixels from left
+    DEF MENU_BASE_Y EQU 16+(-8) ; 8 pixels overflow from top
 
-; Building selection menu arrow icon equates
-BUILD_SELECT_CURSOR_TILE    EQU $10
-BUILD_SELECT_CURSOR_PALETTE EQU 5
+    ; Building selection menu arrow icon equates
+    DEF BUILD_SELECT_CURSOR_TILE    EQU $10
+    DEF BUILD_SELECT_CURSOR_PALETTE EQU 5
 
-; CPU busy icon equates
-CPU_BUSY_ICON_OAM_BASE      EQU 39
-CPU_BUSY_ICON_XCOORD        EQU ((160-8)+8)
-CPU_BUSY_ICON_YCOORD_TOP    EQU ((0)+16)
-CPU_BUSY_ICON_YCOORD_BOTTOM EQU ((144-8)+16)
-CPU_BUSY_ICON_TILE          EQU $12 ; Made of 2 8x8 tiles, the second one empty
-CPU_BUSY_ICON_PALETTE       EQU 1
+    ; CPU busy icon equates
+    DEF CPU_BUSY_ICON_OAM_BASE      EQU 39
+    DEF CPU_BUSY_ICON_XCOORD        EQU ((160-8)+8)
+    DEF CPU_BUSY_ICON_YCOORD_TOP    EQU ((0)+16)
+    DEF CPU_BUSY_ICON_YCOORD_BOTTOM EQU ((144-8)+16)
+    DEF CPU_BUSY_ICON_TILE          EQU $12 ; Made of 2 8x8 tiles, the second one empty
+    DEF CPU_BUSY_ICON_PALETTE       EQU 1
 
 ;-------------------------------------------------------------------------------
 
-WHITE   EQU (31<<10)|(31<<5)|(31<<0)
-BLACK   EQU (0<<10)|(0<<5)|(0<<0)
+    DEF WHITE   EQU (31<<10)|(31<<5)|(31<<0)
+    DEF BLACK   EQU (0<<10)|(0<<5)|(0<<0)
 
 BUILD_SELECT_SPRITES_PALETTES:
     DW 0, WHITE, (15<<10)|(15<<5)|(15<<0), BLACK
@@ -104,8 +104,8 @@ BUILD_SELECT_SPRITES_PALETTES:
 
     DEF CURINDEX = 0
 
-ICON_SET_BUILDING : MACRO ; 1 = Index, 2 = B_xxxxx (or B_None), 3 and 4 = pal
-\1  EQU CURINDEX
+MACRO ICON_SET_BUILDING ; 1 = Index, 2 = B_xxxxx (or B_None), 3 and 4 = pal
+    DEF \1  EQU CURINDEX
     DB (\2) ; Add data for this element
     IF CURINDEX < 32
         DB (\3)|OAMF_BANK1,(\4)|OAMF_BANK1 ; Palettes
@@ -115,12 +115,12 @@ ICON_SET_BUILDING : MACRO ; 1 = Index, 2 = B_xxxxx (or B_None), 3 and 4 = pal
     DEF CURINDEX = (\1)+1
 ENDM
 
-ICON_SET_GROUP_NUMBER : MACRO ; 1 = Equate
-\1 EQU CURINDEX
+MACRO ICON_SET_GROUP_NUMBER ; 1 = Equate
+    DEF \1 EQU CURINDEX
 ENDM
 
-; If this changes, fix all references to ICON_TO_BUILDING_PAL.
-Icon_Number_Icons_Per_Groups EQU 3
+    ; If this changes, fix all references to ICON_TO_BUILDING_PAL.
+    DEF Icon_Number_Icons_Per_Groups EQU 3
 
 ICON_TO_BUILDING_PAL: ; Get palette and building from icon
     ICON_SET_BUILDING Icon_Group_Delete, B_None, 5,5
@@ -992,7 +992,7 @@ BuildSelectMenuLoadGfx::
 IF NUM_TILES > 128
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,128
     ld      de,SPRITE_TILE_BASE ; Bank at 8000h
@@ -1000,7 +1000,7 @@ IF NUM_TILES > 128
     call    vram_copy_tiles
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,NUM_TILES-128
     ld      de,SPRITE_TILE_BASE ; Bank at 8000h
@@ -1010,7 +1010,7 @@ IF NUM_TILES > 128
 ELSE
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,NUM_TILES
     ld      de,SPRITE_TILE_BASE ; Bank at 8000h

@@ -42,12 +42,12 @@ power_plant_energy_left: DS 2 ; LSB first
 
 ;-------------------------------------------------------------------------------
 
-TILE_HANDLED_BIT             EQU 7
-TILE_HANDLED_POWER_PLANT_BIT EQU 6
+    DEF TILE_HANDLED_BIT             EQU 7
+    DEF TILE_HANDLED_POWER_PLANT_BIT EQU 6
 
-TILE_HANDLED                 EQU %10000000
-TILE_HANDLED_POWER_PLANT     EQU %01000000
-TILE_POWER_LEVEL_MASK        EQU %00111111 ; How much power there is now
+    DEF TILE_HANDLED                 EQU %10000000
+    DEF TILE_HANDLED_POWER_PLANT     EQU %01000000
+    DEF TILE_POWER_LEVEL_MASK        EQU %00111111 ; How much power there is now
 
 POWER_PLANT_POWER: ; Base tile, energetic power - LSB first, x delta, y delta
 
@@ -95,7 +95,7 @@ AddPowerToTile: ; de = coordinates, hl = address
 
     ; If this is a power plant, flag as handled and return right away
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     bit     TILE_HANDLED_POWER_PLANT_BIT,[hl]
     jr      z,.not_power_plant
     set     TILE_HANDLED_BIT,[hl]
@@ -110,7 +110,7 @@ AddPowerToTile: ; de = coordinates, hl = address
 
         ; Now, get what the tile has right now and subtract from the total
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         pop     hl
         push    hl
         ld      a,[hl]
@@ -159,7 +159,7 @@ AddPowerToTile: ; de = coordinates, hl = address
         ; Add to tile energy
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         pop     hl
         push    hl ; get address
         ld      a,[hl]
@@ -183,7 +183,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     ; ------------------------------------------
 
     ld      a,BANK_SCRATCH_RAM ; Get current state
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     GET_MAP_ADDRESS ; e=x , d=y ret: address=hl, preserves DE and BC
     ld      a,[hl]
@@ -242,7 +242,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
         ; Flag that square as a power plant
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
 .height_loop:
 
@@ -379,7 +379,7 @@ Simulation_PowerPlantFloodFill: ; d = y, e = x
     GET_MAP_ADDRESS ; Preserves DE and BC
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl] ; Already handled by this power plant, ignore
     and     a,TILE_HANDLED
@@ -478,7 +478,7 @@ AddToQueueVerticalDisplacement: ; d=y e=x
     ret     nz
 
     ld      a,BANK_SCRATCH_RAM ; Check if already handled
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     GET_MAP_ADDRESS ; preserves de and bc
     ld      a,[hl]
     bit     TILE_HANDLED_BIT,a
@@ -519,7 +519,7 @@ AddToQueueHorizontalDisplacement: ; d=y e=x
     ret     nz
 
     ld      a,BANK_SCRATCH_RAM ; Check if already handled
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     GET_MAP_ADDRESS ; preserves de and bc
     ld      a,[hl]
     bit     TILE_HANDLED_BIT,a
@@ -562,7 +562,7 @@ Simulation_PowerDistribution::
     ; -----
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    ClearWRAMX
 
@@ -579,7 +579,7 @@ Simulation_PowerDistribution::
         push    hl
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             ld      a,[hl] ; Get type
 
             cp      a,TYPE_POWER_PLANT
@@ -610,7 +610,7 @@ Simulation_PowerDistribution::
     ; -------------------------
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,SCRATCH_RAM
     ld      c,(SCRATCH_RAM+$1000)>>8
@@ -657,7 +657,7 @@ Simulation_PowerCheckBuildingTileOkFlag:
     push    de ; save for later (***)
 
     ld      a,BANK_CITY_MAP_FLAGS
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; Loop rows
 
@@ -771,7 +771,7 @@ Simulation_PowerDistributionSetTileOkFlag::
         push    hl
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             ld      a,[hl] ; Get type
 
             cp      a,TYPE_POWER_PLANT
@@ -780,7 +780,7 @@ Simulation_PowerDistributionSetTileOkFlag::
             ; Not a power plant, let's check
 
             ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      b,[hl] ; b = current energy
             push    bc
@@ -803,13 +803,13 @@ Simulation_PowerDistributionSetTileOkFlag::
 
 .tile_set_flag:
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             set     TILE_OK_POWER_BIT,[hl]
             jr      .tile_end
 
 .tile_res_flag:
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             res     TILE_OK_POWER_BIT,[hl]
 
 .tile_end:

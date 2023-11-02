@@ -29,7 +29,7 @@
 ;#                                                                             #
 ;###############################################################################
 
-DMA_COPY : MACRO ; src, dst, size, is_hdma
+MACRO DMA_COPY ; src, dst, size, is_hdma
     ld      a, ( \1 >> 8 )& $FF
     ld      [rHDMA1],a
     ld      a, \1 & $F0 ; Lower 4 bits ignored
@@ -46,13 +46,13 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-LONG_CALL : MACRO ; function to call
+MACRO LONG_CALL ; function to call
     ld      b,BANK(\1)
     ld      hl,\1
     call    ___long_call
 ENDM
 
-LONG_CALL_ARGS : MACRO ; function to call. Slower than LONG_CALL
+MACRO LONG_CALL_ARGS ; function to call. Slower than LONG_CALL
     ld      a,BANK(\1)
     ld      hl,\1
     ; It can use BC and DE for passing arguments
@@ -60,13 +60,13 @@ LONG_CALL_ARGS : MACRO ; function to call. Slower than LONG_CALL
     call    ___long_call_args
 ENDM
 
-CALL_HL : MACRO ; Calls hl through rst 8 vector (which has a 'jp hl')
+MACRO CALL_HL ; Calls hl through rst 8 vector (which has a 'jp hl')
     rst     $08
 ENDM
 
 ;-------------------------------------------------------------------------------
 
-WAIT_SCREEN_BLANK : MACRO ; Clobbers registers A and C
+MACRO WAIT_SCREEN_BLANK ; Clobbers registers A and C
     ld      c,rSTAT & $FF
 .loop\@:
     ld      a,[$FF00+c]
@@ -76,32 +76,32 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-LD_DE_HL : MACRO ; de = hl
+MACRO LD_DE_HL ; de = hl
     ld      d,h
     ld      e,l
 ENDM
 
-LD_BC_HL : MACRO ; bc = hl
+MACRO LD_BC_HL ; bc = hl
     ld      b,h
     ld      c,l
 ENDM
 
-LD_HL_DE : MACRO ; hl = de
+MACRO LD_HL_DE ; hl = de
     ld      h,d
     ld      l,e
 ENDM
 
-LD_HL_BC : MACRO ; hl = bc
+MACRO LD_HL_BC ; hl = bc
     ld      h,b
     ld      l,c
 ENDM
 
-LD_DE_BC : MACRO ; de = bc
+MACRO LD_DE_BC ; de = bc
     ld      d,b
     ld      e,c
 ENDM
 
-LD_BC_DE : MACRO ; bc = de
+MACRO LD_BC_DE ; bc = de
     ld      b,d
     ld      c,e
 ENDM
@@ -235,23 +235,23 @@ ENDM
 ;=                                 DEFINITIONS                                 =
 ;===============================================================================
 
-PAD_START   EQU $80
-PAD_SELECT  EQU $40
-PAD_B       EQU $20
-PAD_A       EQU $10
-PAD_DOWN    EQU $08
-PAD_UP      EQU $04
-PAD_LEFT    EQU $02
-PAD_RIGHT   EQU $01
+    DEF PAD_START   EQU $80
+    DEF PAD_SELECT  EQU $40
+    DEF PAD_B       EQU $20
+    DEF PAD_A       EQU $10
+    DEF PAD_DOWN    EQU $08
+    DEF PAD_UP      EQU $04
+    DEF PAD_LEFT    EQU $02
+    DEF PAD_RIGHT   EQU $01
 
-PAD_BIT_START   EQU 7
-PAD_BIT_SELECT  EQU 6
-PAD_BIT_B       EQU 5
-PAD_BIT_A       EQU 4
-PAD_BIT_DOWN    EQU 3
-PAD_BIT_UP      EQU 2
-PAD_BIT_LEFT    EQU 1
-PAD_BIT_RIGHT   EQU 0
+    DEF PAD_BIT_START   EQU 7
+    DEF PAD_BIT_SELECT  EQU 6
+    DEF PAD_BIT_B       EQU 5
+    DEF PAD_BIT_A       EQU 4
+    DEF PAD_BIT_DOWN    EQU 3
+    DEF PAD_BIT_UP      EQU 2
+    DEF PAD_BIT_LEFT    EQU 1
+    DEF PAD_BIT_RIGHT   EQU 0
 
 ;-------------------------------------------------------------------------------
 ;- rom_handler_init()                                                          -

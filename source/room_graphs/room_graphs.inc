@@ -25,18 +25,18 @@
 
 ;###############################################################################
 
-GRAPHS_SELECTION_POPULATION EQU 0
-GRAPHS_SELECTION_RCI        EQU 1
-GRAPHS_SELECTION_MONEY      EQU 2
+    DEF GRAPHS_SELECTION_POPULATION EQU 0
+    DEF GRAPHS_SELECTION_RCI        EQU 1
+    DEF GRAPHS_SELECTION_MONEY      EQU 2
 
-GRAPHS_SELECTION_MAX        EQU 2
+    DEF GRAPHS_SELECTION_MAX        EQU 2
 
 ;-------------------------------------------------------------------------------
 
-; Valid values are 0-127
-GRAPH_INVALID_ENTRY EQU -1 ; Entries that should be considered empty
+    ; Valid values are 0-127
+    DEF GRAPH_INVALID_ENTRY EQU -1 ; Entries that should be considered empty
 
-GRAPH_SIZE EQU 128 ; Entries per graph. It must be a power of 2
+    DEF GRAPH_SIZE EQU 128 ; Entries per graph. It must be a power of 2
 
 ;###############################################################################
 

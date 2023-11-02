@@ -47,7 +47,7 @@ selected_map: DS 1
 
 ; Create a new section in ROMX for each map
 
-FILE_SECTION : MACRO ; \1 = label, \2 = file name
+MACRO FILE_SECTION ; \1 = label, \2 = file name
     SECTION "\1",ROMX
 \1:
     INCBIN  \2
@@ -78,19 +78,19 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-SCEN_INFO_1 : MACRO ; \1 = map, \2 = attr
+MACRO SCEN_INFO_1 ; \1 = map, \2 = attr
     DB  BANK(\1)
     DW  \1 ; LSB first
     DB  BANK(\2)
     DW  \2 ; LSB first
 ENDM ; 6 bytes in total
 
-SCEN_INFO_2 : MACRO ; \1 = start x, \2 = start y
+MACRO SCEN_INFO_2 ; \1 = start x, \2 = start y
     DB  \1, \2 ; X, Y
 ENDM ; 2 bytes in total
 
 ; All of the information in this struct should be placed in ROM bank 0
-SCEN_INFO_3 : MACRO ; \1=Name, \2=Name length, \3=Year, \4=Month, \5=Money
+MACRO SCEN_INFO_3 ; \1=Name, \2=Name length, \3=Year, \4=Month, \5=Money
     DW  \1 ; LSB first
     DB  \2
     DW  \3
@@ -98,11 +98,11 @@ SCEN_INFO_3 : MACRO ; \1=Name, \2=Name length, \3=Year, \4=Month, \5=Money
     DW  \5
 ENDM ; 8 bytes in total
 
-SCEN_INFO_4 : MACRO ; \1=Technology level
+MACRO SCEN_INFO_4 ; \1=Technology level
     DB  \1
 ENDM ; 1 byte in total
 
-SCEN_INFO_5 : MACRO ; \1=Flags of permanent msg ID to disable, \2=Same
+MACRO SCEN_INFO_5 ; \1=Flags of permanent msg ID to disable, \2=Same
     DB  (\1)>>1
     DB  (\2)>>(8+1)
 ENDM ; 2 bytes in total
@@ -138,7 +138,7 @@ SCENARIO_MAP_INFO:
 
 ;-------------------------------------------------------------------------------
 
-SCENARIO_MAP_INFO_GET_INDEX : MACRO ; a = index, returns hl = pointer to info
+MACRO SCENARIO_MAP_INFO_GET_INDEX ; a = index, returns hl = pointer to info
     ld      l,a
     ld      h,0
     LD_DE_HL
@@ -362,7 +362,7 @@ ScenarioLoadMapData:: ; a = index
     ; Load city from ROM into WRAM
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     LD_HL_DE
     ld      bc,CITY_MAP_TILES
@@ -378,7 +378,7 @@ ScenarioLoadMapData:: ; a = index
     call    rom_bank_set ; b = bank, preserves de
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     LD_HL_DE
     ld      bc,CITY_MAP_ATTR
@@ -509,7 +509,7 @@ CityMapLoad:: ; returns de = xy start coordinates
 
     ; Clear type map
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     call    ClearWRAMX
 
     ; Refresh type map from tiles and attributes

@@ -86,7 +86,7 @@ PersistentMessageShow:: ; a = message ID
     and     a,b ; (*) get bit inside the byte (must be preserved a bit more)
 
 ; Test if bit \1 is set and sets it to 1
-TEST_AND_SET_FLAG : MACRO ; \1 = bit
+MACRO TEST_AND_SET_FLAG ; \1 = bit
     cp      a,\1
     jr      nz,.not_set\@
         bit     \1,[hl] ; set or reset Z flag

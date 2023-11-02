@@ -58,11 +58,11 @@ DIV_BY_3: ; uint8_t = uint16_t / 3 (but only up to 255*3)
 
 ; Input pointer to central tile in HL
 ; Returns the value in C
-DIFFUMINATE_CENTRAL_TILE : MACRO ; 1=Source bank, 2=Destination bank
-                                 ; 3=Top, 4=Left, 5=Right, 6=Bottom
+MACRO DIFFUMINATE_CENTRAL_TILE ; 1=Source bank, 2=Destination bank
+                               ; 3=Top, 4=Left, 5=Right, 6=Bottom
 
     ld      a,(\1) ; Source bank
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     push    hl
 
@@ -139,7 +139,7 @@ ENDC
     pop     hl
 
     ld      a,(\2) ; Destination bank
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      [hl],c
 
@@ -148,7 +148,7 @@ ENDM
 ;-------------------------------------------------------------------------------
 
 ; Valid pollution values:  0-255
-DIFFUMINATE_LOOP : MACRO ; \1=Source Bank, \2=Destination bank
+MACRO DIFFUMINATE_LOOP ; \1=Source Bank, \2=Destination bank
 
     ld      hl,SCRATCH_RAM ; Base address of the map!
 
@@ -232,7 +232,7 @@ Simulation_Pollution::
     ; -----
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    ClearWRAMX
 
@@ -255,11 +255,11 @@ Simulation_Pollution::
         ; - If building, check if the building has power and add pollution
         ;   if so. If it is a power plant, add the corresponding pollution
         ;   level.
-        ; - If park, forest or water set a negative level of pollution (they
+        ; - If park, forest or water set a neutral level of pollution (they
         ;   reduce it)
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
 
@@ -267,7 +267,7 @@ Simulation_Pollution::
         jr      z,.not_road
 
             ld      a,BANK_CITY_MAP_TRAFFIC
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      b,[hl]
 
@@ -291,7 +291,7 @@ Simulation_Pollution::
 .save_value:
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      [hl],b
 
@@ -361,8 +361,8 @@ Simulation_Pollution::
 
 ;###############################################################################
 
-; Max valid pollution for zones that need non-polluted air
-POLLUTION_MAX_VALID_LEVEL EQU (256/2)
+    ; Max valid pollution for zones that need non-polluted air
+    DEF POLLUTION_MAX_VALID_LEVEL EQU (256/2)
 
 ;-------------------------------------------------------------------------------
 
@@ -379,7 +379,7 @@ Simulation_PollutionSetTileOkFlag::
     push    hl
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl] ; get type
         and     a,TYPE_MASK ; remove flags
@@ -403,21 +403,21 @@ Simulation_PollutionSetTileOkFlag::
         ; If the building actually requires a pollution level check...
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl] ; get pollution
         cp      a,POLLUTION_MAX_VALID_LEVEL ; carry flag is set if n > a
         jr      c,.non_polluted
             ; Polluted - Clear "valid pollution level" bit
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             res     TILE_OK_POLLUTION_BIT,[hl]
             jr      .end_pollution_check
 .non_polluted:
 .ignore_pollution:
             ; Non-polluted - Set "valid pollution level" bit
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             set     TILE_OK_POLLUTION_BIT,[hl]
             ;jr      .end_pollution_check
 .end_pollution_check:

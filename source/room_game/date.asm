@@ -36,7 +36,7 @@
 date_year::  DS 2 ; BCD, LSB first, LSB in lower nibble
 date_month:: DS 1 ; 0 (Jan) - 11 (Dec)
 
-MONTHS_IN_YEAR EQU 12
+    DEF MONTHS_IN_YEAR EQU 12
 
 ;###############################################################################
 

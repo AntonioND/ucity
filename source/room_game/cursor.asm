@@ -45,9 +45,9 @@ CursorY::           DS  1
 CursorSizeX::       DS  1 ; Size in pixels
 CursorSizeY::       DS  1
 
-CURSOR_ANIMATION_TICKS  EQU 10
+    DEF CURSOR_ANIMATION_TICKS  EQU 10
 
-CURSOR_SCROLL_MARGIN    EQU 4
+    DEF CURSOR_SCROLL_MARGIN    EQU 4
 
 ;###############################################################################
 
@@ -58,17 +58,17 @@ CURSOR_SCROLL_MARGIN    EQU 4
 CursorTilesData:
     INCBIN  "cursor_tiles.bin"
 
-CursorTilesNumber  EQU 1
-CURSOR_CORNER_TILE    EQU O_CURSOR
+    DEF CursorTilesNumber   EQU 1
+    DEF CURSOR_CORNER_TILE    EQU O_CURSOR
 
-CURSOR_SPR_PAL     EQU 0
-CURSOR_OAM_BASE    EQU 0
+    DEF CURSOR_SPR_PAL     EQU 0
+    DEF CURSOR_OAM_BASE    EQU 0
 
 ;-------------------------------------------------------------------------------
 ; Don't modify any constant of this group!
 
-SCREEN_COLUMNS   EQU 20
-SCREEN_ROWS      EQU 18
+    DEF SCREEN_COLUMNS   EQU 20
+    DEF SCREEN_ROWS      EQU 18
 
 cursor_palette:
     DW  $0000,$7FFF,$3DEF,$0000
@@ -84,7 +84,7 @@ CursorLoad::
     ; Load tiles - Not needed, loaded with text tiles
 
 ;    xor     a,a
-;    ld      [rVBK],a
+;    ldh     [rVBK],a
 
 ;    ld      bc,CursorTilesNumber
 ;    ld      de,CURSOR_CORNER_TILE

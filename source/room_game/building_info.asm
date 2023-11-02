@@ -462,7 +462,7 @@ BuildingRemoveAtCoords:: ; d = y, e = x
 
 ;###############################################################################
 
-BUILDING_ADD : MACRO ; 1=Name, 2=Width, 3=Height, 4=Base Tile
+MACRO BUILDING_ADD ; 1=Name, 2=Width, 3=Height, 4=Base Tile
 \1: ; Name = address
     DB  \2,\3 ; Width, Height
     DW  \4 ; Save base tile
@@ -569,7 +569,7 @@ IF BUILDING_INFO_POINTERS_ARRAY_ELEMENT_SIZE != 4
     FAIL "ERROR: Modify element size at building_info.inc"
 ENDC
 
-BUILDING_GET_SIZE_FROM_BASE_TILE : MACRO ; \1 = ignore debug errors if this is 0
+MACRO BUILDING_GET_SIZE_FROM_BASE_TILE ; \1 = ignore debug errors if this is 0
 
     ; Search!
     ld      hl,BUILDING_INFO_STRUCTS_ARRAY+2 ; start from tile info
@@ -628,7 +628,7 @@ BuildingGetSizeFromBaseTileIgnoreErrors::
 
     DEF CURINDEX = 0
 
-BUILDING_SET_INDEX : MACRO ; 1 = Index
+MACRO BUILDING_SET_INDEX ; 1 = Index
     IF (\1) < CURINDEX ; check if going backwards and stop if so
         FAIL "ERROR : building_info.asm : Index already in use!"
     ENDC
@@ -640,7 +640,7 @@ BUILDING_SET_INDEX : MACRO ; 1 = Index
     DEF CURINDEX = (\1)
 ENDM
 
-BUILDING_ADD_ENTRY : MACRO ; 1=Name, 2=Width, 3=Height
+MACRO BUILDING_ADD_ENTRY ; 1=Name, 2=Width, 3=Height
     BUILDING_SET_INDEX \1
     DW  \2
     DEF CURINDEX = CURINDEX + 1
@@ -737,7 +737,7 @@ BUILDING_INFO_POINTERS_ARRAY:: ; Pointers to structs. Indexes are B_Xxxxxx
 
     DEF CURINDEX = 0
 
-BUILDING_SET_PRICE : MACRO ; 1 = Index, 2=Pointer to price
+MACRO BUILDING_SET_PRICE ; 1 = Index, 2=Pointer to price
     IF (\1) < CURINDEX ; check if going backwards and stop if so
         FAIL "ERROR : building_info.asm : Index already in use!"
     ENDC

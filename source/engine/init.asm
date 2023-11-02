@@ -128,6 +128,7 @@ wait_vbl:
 
 .not_yet:
     halt
+    nop
     bit     0,[hl]
     jr      z,.not_yet
 
@@ -179,7 +180,7 @@ StartPoint:
     push    bc
 
     xor     a,a
-    ld      [rNR52],a ; Switch off sound
+    ldh     [rNR52],a ; Switch off sound
 
     ; Add all ram values to get a random seed
     ld      hl,_RAM
@@ -308,33 +309,33 @@ irq_set_handler:  ; hl = dest handler    bc = function pointer
 
 CPU_fast::
 
-    ld      a,[rKEY1]
+    ldh     a,[rKEY1]
     bit     7,a
     jr      z,__CPU_switch
     ret
 
 CPU_slow::
 
-    ld      a,[rKEY1]
+    ldh     a,[rKEY1]
     bit     7,a
     jr      nz,__CPU_switch
     ret
 
 __CPU_switch:
 
-    ld      a,[rIE]
+    ldh     a,[rIE]
     ld      b,a ; save IE
     xor     a,a
-    ld      [rIE],a
+    ldh     [rIE],a
     ld      a,$30
-    ld      [rP1],a
+    ldh     [rP1],a
     ld      a,$01
-    ld      [rKEY1],a
+    ldh     [rKEY1],a
 
     stop
 
     ld      a,b
-    ld      [rIE],a ; restore IE
+    ldh     [rIE],a ; restore IE
 
     ret
 

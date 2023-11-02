@@ -24,8 +24,8 @@
 
 ;###############################################################################
 
-; Max distance to travel at one go
-BOAT_MAX_CONTINUOUS_DISTANCE EQU 5
+    ; Max distance to travel at one go
+    DEF BOAT_MAX_CONTINUOUS_DISTANCE EQU 5
 
 ;-------------------------------------------------------------------------------
 
@@ -201,7 +201,7 @@ BoatSetValidRandomDirection: ; sets valid direction of this boat
 
         and     a,b ; remove a few random directions
 
-CHECK_DIR : MACRO ; \1 = dir
+MACRO CHECK_DIR ; \1 = dir
     cp      a,1 << (\1)
     jr      nz,.skip_this\@
         ld      a,\1
@@ -418,7 +418,7 @@ BoatSpawnDock: ; c = index of the boat
     ; Look for the correct dock
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,CITY_MAP_TILES
 

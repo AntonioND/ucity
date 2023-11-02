@@ -112,13 +112,13 @@ CityMapRefreshAttributeMap::
 .loop:
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[de] ; l = LSB tile
     ld      l,a
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[de]
     rla
@@ -165,13 +165,13 @@ CityMapRefreshTypeMap::
 .loop:
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[de] ; l = LSB tile
     ld      l,a
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[de]
     rla
@@ -192,7 +192,7 @@ CityMapRefreshTypeMap::
     inc     hl ; first byte is the palette, second one is the type
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     ld      [de],a
@@ -230,7 +230,7 @@ _CityMapFixBorderCoordinates: ; Arguments: e = x , d = y
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     and     a,TYPE_MASK
@@ -268,7 +268,7 @@ CityMapGetType:: ; Arguments: e = x , d = y
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
 
@@ -284,7 +284,7 @@ CityMapGetTypeNoBoundCheck:: ; Arguments: e = x , d = y. Preserves de
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
 
@@ -310,12 +310,12 @@ CityMapGetTile:: ; Arguments: e = x , d = y
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      e,[hl]
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     rla
@@ -336,12 +336,12 @@ CityMapGetTileNoBoundCheck:: ; Arguments: e = x , d = y
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      e,[hl]
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     rla
@@ -372,12 +372,12 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
     GET_MAP_ADDRESS ; preserves de and bc
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      e,[hl]
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     rla
@@ -386,7 +386,7 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
     ld      d,a
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
 
@@ -399,12 +399,12 @@ CityMapGetTypeAndTile:: ; Arguments: e = x , d = y
 CityMapGetTileAtAddress:: ; Arguments: hl = address. Preserves BC and HL
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      e,[hl]
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     rla
@@ -435,11 +435,11 @@ CityMapDrawTerrainTileAddress:: ; bc = tile, hl = address
     pop     hl
 
     ld      a,BANK_CITY_MAP_FLAGS
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     ld      [hl],0 ; Clear tile simulation flags when modifying it
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     pop     bc ; (*) restore bc = tile
 
@@ -466,14 +466,14 @@ CityMapDrawTerrainTileAddress:: ; bc = tile, hl = address
     ; Save attributes
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      [hl],d
 
     ; Save type
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      [hl],e
 
@@ -794,7 +794,7 @@ CityMapBuildBridge::
         ; Check if water. If not, exit loop! -> Exit: A=1 // Continue: A=0
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
         cp      a,TYPE_WATER

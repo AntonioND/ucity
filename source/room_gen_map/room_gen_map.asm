@@ -38,8 +38,8 @@ gen_map_generated: DS 1 ; set to 1 after generating a map
 
 gen_map_room_exit:  DS 1 ; set to 1 to exit room
 
-GEN_MAP_SELECT_WATER EQU 0
-GEN_MAP_SELECT_LAND  EQU 1
+    DEF GEN_MAP_SELECT_WATER EQU 0
+    DEF GEN_MAP_SELECT_LAND  EQU 1
 gen_map_selection: DS 1
 
 ;###############################################################################
@@ -51,15 +51,15 @@ gen_map_selection: DS 1
 GEN_MAP_BG_MAP:
     INCBIN "map_gen_minimap_bg_map.bin"
 
-GEN_MAP_MENU_WIDTH  EQU 20
-GEN_MAP_MENU_HEIGHT EQU 18
+    DEF GEN_MAP_MENU_WIDTH  EQU 20
+    DEF GEN_MAP_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
 GenMapUpdateGUI:
 
     xor     a,a
-    ld      [rVBK],a ; Tile map
+    ldh     [rVBK],a ; Tile map
 
     ; Draw seed
 
@@ -230,7 +230,7 @@ RoomGenMapLoadBG:
 
         ; Tiles
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
         ld      hl,GEN_MAP_BG_MAP
@@ -255,7 +255,7 @@ RoomGenMapLoadBG:
 
         ; Attributes
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
 
@@ -302,11 +302,11 @@ RoomGenerateMap::
     call    SetDefaultVBLHandler
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText

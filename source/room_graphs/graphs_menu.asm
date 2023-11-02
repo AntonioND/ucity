@@ -49,28 +49,28 @@ graphs_cursor_y_offset_countdown: DS 1 ; frames to move
 GRAPHS_MENU_MAP:
     INCBIN "graphs_menu_map.bin"
 
-GRAPHS_MENU_WIDTH  EQU 32
-GRAPHS_MENU_HEIGHT EQU 2
+    DEF GRAPHS_MENU_WIDTH  EQU 32
+    DEF GRAPHS_MENU_HEIGHT EQU 2
 
 GRAPHS_MENU_TILES:
     INCBIN "graphs_menu_tiles.bin"
 .e:
 
-GRAPHS_MENU_NUM_TILES EQU (.e-GRAPHS_MENU_TILES)/16
-GRAPHS_MENU_BASE_Y    EQU 144-16
-GRAPHS_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
-GRAPHS_MENU_NUM_ICONS_BORDER EQU ((160/16)/2)-5 ; Icons to allow to overflow
+    DEF GRAPHS_MENU_NUM_TILES EQU (.e-GRAPHS_MENU_TILES)/16
+    DEF GRAPHS_MENU_BASE_Y    EQU 144-16
+    DEF GRAPHS_MENU_TILE_BASE EQU 128 ; Tile 128 onwards
+    DEF GRAPHS_MENU_NUM_ICONS_BORDER EQU ((160/16)/2)-5 ; Icons to allow to overflow
 
-GRAPHS_SPRITE_TILE_INDEX     EQU 140 ; After the menu icons
-GRAPHS_SPRITE_PALETTE_INDEX  EQU 0 ; Palette slot to be used by the cursor
-GRAPHS_SPRITE_BASE_Y         EQU (144-16-16)+16
-GRAPHS_SPRITE_OAM_INDEX      EQU 0
-GRAPHS_CURSOR_COUNTDOWN_MOVEMENT EQU 20 ; frames to wait to move
+    DEF GRAPHS_SPRITE_TILE_INDEX     EQU 140 ; After the menu icons
+    DEF GRAPHS_SPRITE_PALETTE_INDEX  EQU 0 ; Palette slot to be used by the cursor
+    DEF GRAPHS_SPRITE_BASE_Y         EQU (144-16-16)+16
+    DEF GRAPHS_SPRITE_OAM_INDEX      EQU 0
+    DEF GRAPHS_CURSOR_COUNTDOWN_MOVEMENT EQU 20 ; frames to wait to move
 
 ;-------------------------------------------------------------------------------
 
-WHITE EQU (31<<10)|(31<<5)|(31<<0)
-BLACK EQU (0<<10)|(0<<5)|(0<<0)
+    DEF WHITE EQU (31<<10)|(31<<5)|(31<<0)
+    DEF BLACK EQU (0<<10)|(0<<5)|(0<<0)
 
 GRAPHS_MENU_PALETTES:
     DW WHITE, (21<<10)|(21<<5)|(21<<0), (10<<10)|(10<<5)|(10<<0), BLACK
@@ -256,7 +256,7 @@ GraphsMenuShow::
     ld      [graphs_cursor_y_offset_countdown],a
 
     xor     a,a
-    ld      [rIF],a ; clear pending interrupts
+    ldh     [rIF],a ; clear pending interrupts
 
     ld      hl,rIE
     set     1,[hl] ; IEF_LCDC
@@ -310,9 +310,9 @@ GraphsMenuReset::
     call    irq_set_LCD
 
     ld      a,STATF_LYC
-    ld      [rSTAT],a
+    ldh     [rSTAT],a
     ld      a,GRAPHS_MENU_BASE_Y-1
-    ld      [rLYC],a
+    ldh     [rLYC],a
 
     ret
 
@@ -320,9 +320,9 @@ GraphsMenuReset::
 
 GraphsMenuLoadGFX::
 
-    ld      a,[rLCDC]
+    ldh     a,[rLCDC]
     or      a,LCDCF_OBJON|LCDCF_OBJ16
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     call    GraphsMenuHide
 
@@ -336,7 +336,7 @@ GraphsMenuLoadGFX::
     ; --------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      hl,GRAPHS_MENU_MAP
 
@@ -347,7 +347,7 @@ GraphsMenuLoadGFX::
     ; Attributes
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      de,$9C00
     ld      b,GRAPHS_MENU_WIDTH*GRAPHS_MENU_HEIGHT
@@ -358,7 +358,7 @@ GraphsMenuLoadGFX::
     ; ----------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      bc,GRAPHS_MENU_NUM_TILES
     ld      de,GRAPHS_MENU_TILE_BASE
@@ -404,14 +404,14 @@ GraphsMenuLCDHandler:: ; Only called when it is active, no need to check
 
     WAIT_SCREEN_BLANK
 
-    ld      a,[rLCDC]
+    ldh     a,[rLCDC]
     or      a,LCDCF_BG9C00 ; set 9C00h = menu
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      a,[graphs_scroll_x]
-    ld      [rSCX],a
+    ldh     [rSCX],a
     ld      a,GRAPHS_MENU_BASE_Y
-    ld      [rSCY],a
+    ldh     [rSCY],a
 
     ret
 
@@ -420,8 +420,8 @@ GraphsMenuLCDHandler:: ; Only called when it is active, no need to check
 GraphsMenuVBLHandler::
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,[graphs_menu_active]
     and     a,a
@@ -429,9 +429,9 @@ GraphsMenuVBLHandler::
 
     ; It is active, handle bg base swaps
 
-    ld      a,[rLCDC]
+    ldh     a,[rLCDC]
     and     a,(~LCDCF_BG9C00) & $FF ; set 9800h = graphs
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ; Update sprites if needed
 

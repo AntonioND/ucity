@@ -41,7 +41,7 @@ LOAN_PAYMENTS_AMOUNT::    DS 2 ; BCD, LSB first
 ; exited.
 bank_room_loan_active: DS 1
 
-BANK_ROOM_CURSOR_BLINK_FRAMES EQU 30
+    DEF BANK_ROOM_CURSOR_BLINK_FRAMES EQU 30
 bank_room_cursor: DS 1
 bank_room_cursor_blink:  DS 1
 bank_room_cursor_frames: DS 1 ; number of frames left before switching blink
@@ -60,8 +60,8 @@ BANK_OFFER_MENU_BG_MAP:
 BANK_REPAY_MENU_BG_MAP:
     INCBIN "bank_repay_menu_bg_map.bin"
 
-BANK_MENU_WIDTH  EQU 20
-BANK_MENU_HEIGHT EQU 18
+    DEF BANK_MENU_WIDTH  EQU 20
+    DEF BANK_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
@@ -185,7 +185,7 @@ RoomBankMenuDrawCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -203,7 +203,7 @@ RoomBankMenuClearCursor:
     di ; critical section
 
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
 
@@ -244,10 +244,10 @@ RoomBankMenuCursorBlinkHandle:
 
 ;-------------------------------------------------------------------------------
 
-WRITE_B_TO_HL_VRAM : MACRO ; Clobbers A and C
+MACRO WRITE_B_TO_HL_VRAM ; Clobbers A and C
     di ; critical section
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
         WAIT_SCREEN_BLANK ; Clobbers registers A and C
         ld      [hl],b
     ei ; end of critical section
@@ -262,7 +262,7 @@ RoomBankPresentLoanInfoPrint:
     ret     z ; return if loan not present
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ; Print number of payments left
 
@@ -403,7 +403,7 @@ RoomBankMenuLoadBG:
 
         ; Tiles
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
         ;HL = pointer to map
@@ -428,7 +428,7 @@ RoomBankMenuLoadBG:
 
         ; Attributes
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
 
@@ -480,11 +480,11 @@ RoomBankMenu::
     ld      [bank_room_cursor_frames],a
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText

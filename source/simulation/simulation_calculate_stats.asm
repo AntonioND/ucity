@@ -37,21 +37,21 @@
 
 ;-------------------------------------------------------------------------------
 
-CITY_HAS_STADIUM    EQU 1
-CITY_HAS_UNIVERSITY EQU 2
-CITY_HAS_MUSEUM     EQU 4
-CITY_HAS_LIBRARY    EQU 8
-CITY_HAS_AIRPORT    EQU 16
-CITY_HAS_PORT       EQU 32
+    DEF CITY_HAS_STADIUM    EQU 1
+    DEF CITY_HAS_UNIVERSITY EQU 2
+    DEF CITY_HAS_MUSEUM     EQU 4
+    DEF CITY_HAS_LIBRARY    EQU 8
+    DEF CITY_HAS_AIRPORT    EQU 16
+    DEF CITY_HAS_PORT       EQU 32
 
-CITY_HAS_STADIUM_BIT    EQU 0
-CITY_HAS_UNIVERSITY_BIT EQU 1
-CITY_HAS_MUSEUM_BIT     EQU 2
-CITY_HAS_LIBRARY_BIT    EQU 3
-CITY_HAS_AIRPORT_BIT    EQU 4
-CITY_HAS_PORT_BIT       EQU 5
-CITY_HAS_unused1_BIT    EQU 6
-CITY_HAS_unused2_BIT    EQU 7
+    DEF CITY_HAS_STADIUM_BIT    EQU 0
+    DEF CITY_HAS_UNIVERSITY_BIT EQU 1
+    DEF CITY_HAS_MUSEUM_BIT     EQU 2
+    DEF CITY_HAS_LIBRARY_BIT    EQU 3
+    DEF CITY_HAS_AIRPORT_BIT    EQU 4
+    DEF CITY_HAS_PORT_BIT       EQU 5
+    DEF CITY_HAS_unused1_BIT    EQU 6
+    DEF CITY_HAS_unused2_BIT    EQU 7
 ; Each flag is set if the city has at least one of that kind of building
 city_services_flags: DS 1
 
@@ -147,7 +147,7 @@ Simulation_CalculateRCIDemand::
     push    hl
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl] ; get type
         and     a,TYPE_MASK ; without flags!
@@ -249,7 +249,7 @@ ENDC
     ; Calculate proportion of land used
 
 ; The more percentage of area is used, the higher the demand!
-CALCULATE_GRAPH : MACRO ; \1 = empty ptr, \2 = used ptr, \3 = destination
+MACRO CALCULATE_GRAPH ; \1 = empty ptr, \2 = used ptr, \3 = destination
 
     ld      a,[\1+0] ; LSB first
     ld      l,a
@@ -423,7 +423,7 @@ Simulation_CalculateStatistics::
     push    hl
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl] ; get type
         and     a,TYPE_MASK ; without flags!

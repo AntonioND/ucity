@@ -40,8 +40,8 @@ simulation_traffic_jam_num_tiles:: DS 2 ; LSB first
 
 simulation_traffic_jam_num_tiles_percent:: DS 1
 
-TRAFFIC_MAX_LEVEL     EQU (256/6) ; Max level of adequate traffic
-TRAFFIC_JAM_MAX_TILES EQU 30 ; Max percent of tiles with high traffic
+    DEF TRAFFIC_MAX_LEVEL     EQU (256/6) ; Max level of adequate traffic
+    DEF TRAFFIC_JAM_MAX_TILES EQU 30 ; Max percent of tiles with high traffic
 
 ;###############################################################################
 
@@ -61,7 +61,7 @@ Simulation_TrafficGetMapValue: ; d=y, e=x
 
 .ok:
     ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     GET_MAP_ADDRESS ; preserves de and bc
     ld      a,[hl]
@@ -80,7 +80,7 @@ Simulation_Traffic::
     ; --------------------------------------------------------------------
 
     ld      a,BANK_CITY_MAP_TRAFFIC
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    ClearWRAMX
 
@@ -99,7 +99,7 @@ Simulation_Traffic::
 .loopx_init:
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         ld      a,[hl] ; Get type
         and     a,TYPE_MASK
 
@@ -133,7 +133,7 @@ Simulation_Traffic::
                 pop     hl
 
                 ld      a,BANK_CITY_MAP_TRAFFIC
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
                 ld      [hl],d
 
                 pop     de
@@ -168,7 +168,7 @@ Simulation_Traffic::
     ld      hl,CITY_MAP_TRAFFIC ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      d,0 ; y
 .loopy:
@@ -185,7 +185,7 @@ Simulation_Traffic::
                 ; Check if handled (1). If so, skip
 
                 ld      a,BANK_CITY_MAP_TRAFFIC
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
                 ld      a,[hl]
                 and     a,a
@@ -200,7 +200,7 @@ Simulation_Traffic::
 .skip_call:
 
                 ld      a,BANK_CITY_MAP_TYPE
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
 .skip_tile:
 
@@ -220,7 +220,7 @@ Simulation_Traffic::
     ld      hl,CITY_MAP_TRAFFIC ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop_map:
 
@@ -230,7 +230,7 @@ Simulation_Traffic::
         jr      z,.not_road ; Not road, skip
 
             ld      a,BANK_CITY_MAP_TRAFFIC
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl]
             bit     7,a
@@ -247,7 +247,7 @@ Simulation_Traffic::
             ld      b,a ; b = traffic level
 
             ld      a,BANK_CITY_MAP_TILES
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ; All road tiles are < 256, that's why this works!
             ld      a,[hl]
@@ -286,7 +286,7 @@ Simulation_Traffic::
 .not_valid_road:
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 .not_road:
 
     inc     hl
@@ -306,7 +306,7 @@ Simulation_Traffic::
 Simulation_TrafficRemoveAnimationTiles:: ; This doesn't refresh tile map!
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      hl,CITY_MAP_TILES
 
@@ -317,7 +317,7 @@ Simulation_TrafficRemoveAnimationTiles:: ; This doesn't refresh tile map!
     jr      nz,.skip ; all tiles for road are < 256
 
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
 
@@ -354,7 +354,7 @@ Simulation_TrafficRemoveAnimationTiles:: ; This doesn't refresh tile map!
 .end_change:
 
         ld      a,BANK_CITY_MAP_ATTR
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
 .skip:
 
@@ -375,7 +375,7 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
     ld      hl,CITY_MAP_TRAFFIC ; Map base
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop:
 
@@ -385,7 +385,7 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
         jr      z,.not_road ; Not road, skip
 
             ld      a,BANK_CITY_MAP_TILES
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ; Load tile index. All road tiles have index < 256, so this is ok.
             ld      a,[hl]
@@ -411,7 +411,7 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 .rlr:
             ; Left-Right
             ld      a,BANK_CITY_MAP_ATTR
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             ld      a,1<<5 ; X flip
             xor     a,[hl]
             ld      [hl],a
@@ -420,7 +420,7 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 .rtb:
             ; Top-Bottom
             ld      a,BANK_CITY_MAP_ATTR
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             ld      a,1<<6 ; Y flip
             xor     a,[hl]
             ld      [hl],a
@@ -428,7 +428,7 @@ Simulation_TrafficAnimate:: ; This doesn't refresh tile map!
 .not_valid_road:
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 .not_road:
 
     inc     hl
@@ -467,7 +467,7 @@ Simulation_TrafficSetTileOkFlag::
         push    hl
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl]
             ld      b,a
@@ -477,7 +477,7 @@ Simulation_TrafficSetTileOkFlag::
                 ; Road or train
 
                 ld      a,BANK_CITY_MAP_TRAFFIC
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
                 ld      a,[hl] ; get traffic level
                 cp      a,TRAFFIC_MAX_LEVEL ; carry flag is set if n > a
                 jr      c,.tile_set_flag ; set flag to ok
@@ -524,7 +524,7 @@ Simulation_TrafficSetTileOkFlag::
             GET_MAP_ADDRESS ; preserves de and bc
 
             ld      a,BANK_CITY_MAP_TRAFFIC
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             ld      a,[hl] ; get remaining population of this building
 
             pop     hl ; restore current tile address
@@ -535,12 +535,12 @@ Simulation_TrafficSetTileOkFlag::
 
 .tile_res_flag:
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             res     TILE_OK_TRAFFIC_BIT,[hl]
             jr      .tile_end
 .tile_set_flag:
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             set     TILE_OK_TRAFFIC_BIT,[hl]
             ;jr      .tile_end
 .tile_end:

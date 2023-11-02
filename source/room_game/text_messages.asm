@@ -36,7 +36,7 @@
 
     DEF CURINDEX = 0
 
-MSG_SET_INDEX : MACRO ; 1 = Index
+MACRO MSG_SET_INDEX ; 1 = Index
     IF (\1) < CURINDEX ; check if going backwards and stop if so
         FAIL "ERROR : text_messages.asm : Index already in use!"
     ENDC
@@ -48,7 +48,7 @@ MSG_SET_INDEX : MACRO ; 1 = Index
     DEF CURINDEX = (\1)
 ENDM
 
-MSG_ADD : MACRO ; 1=Name of label where the text is
+MACRO MSG_ADD ; 1=Name of label where the text is
     MSG_SET_INDEX ID_\1
     DW  \1
     DEF CURINDEX = CURINDEX + 1
@@ -136,13 +136,14 @@ MSG_POINTERS: ; Array of pointer to messages. LSB first
 
 ;-------------------------------------------------------------------------------
 
-MSG_QUEUE_DEPTH EQU 16 ; must be a power of 2
+    DEF MSG_QUEUE_DEPTH EQU 16 ; must be a power of 2
 
 msg_stack:   DS MSG_QUEUE_DEPTH ; emtpy elements must be set to 0
 msg_in_ptr:  DS 1
 msg_out_ptr: DS 1
 
-MSG_CUSTOM_LENGTH EQU ((20-2)*3) ; text box size
+    DEF MSG_CUSTOM_LENGTH EQU ((20-2)*3) ; text box size
+
 msg_custom_text: DS MSG_CUSTOM_LENGTH+1 ; storage for custom msg + terminator
 
 ;###############################################################################

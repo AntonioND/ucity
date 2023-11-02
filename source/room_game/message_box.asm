@@ -37,11 +37,11 @@
 saved_scx: DS 1
 saved_scy: DS 1
 
-MESSAGE_BOX_HEIGHT EQU 8*5
-MESSAGE_BOX_MSG_TILES_HEIGHT EQU 3 ; 2 tiles for the border
+    DEF MESSAGE_BOX_HEIGHT EQU 8*5
+    DEF MESSAGE_BOX_MSG_TILES_HEIGHT EQU 3 ; 2 tiles for the border
 
-MESSAGE_BOX_Y   EQU (((144-MESSAGE_BOX_HEIGHT)/2)&(~7)) ; Align to 8 pixels
-MESSAGE_BOX_SCY EQU (144-MESSAGE_BOX_Y)
+    DEF MESSAGE_BOX_Y   EQU (((144-MESSAGE_BOX_HEIGHT)/2)&(~7)) ; Align to 8 pixels
+    DEF MESSAGE_BOX_SCY EQU (144-MESSAGE_BOX_Y)
 
 message_box_enabled: DS 1 ; 1 if enabled
 
@@ -58,7 +58,7 @@ MessageBoxHandlerSTAT:
     ; This is a critical section, but as we are inside an interrupt handler
     ; there is no need to use 'di' and 'ei' with WAIT_SCREEN_BLANK.
 
-    ld      a,[rLYC]
+    ldh     a,[rLYC]
     cp      a,MESSAGE_BOX_Y-1
     jr      nz,.hide
 
@@ -66,22 +66,22 @@ MessageBoxHandlerSTAT:
 
         WAIT_SCREEN_BLANK
 
-        ld      a,[rLCDC]
+        ldh     a,[rLCDC]
         and     a,(~LCDCF_BG9C00) & $FF
         or      a,LCDCF_BG8000
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
-        ld      a,[rLCDC]
+        ldh     a,[rLCDC]
         and     a,(~LCDCF_BG9C00|LCDCF_BG8000) & $FF
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
         xor     a,a
-        ld      [rSCX],a
+        ldh     [rSCX],a
         ld      a,MESSAGE_BOX_SCY
-        ld      [rSCY],a
+        ldh     [rSCY],a
 
         ld      a,MESSAGE_BOX_Y+MESSAGE_BOX_HEIGHT-1
-        ld      [rLYC],a
+        ldh     [rLYC],a
 
         ret
 
@@ -90,18 +90,18 @@ MessageBoxHandlerSTAT:
 
         WAIT_SCREEN_BLANK
 
-        ld      a,[rLCDC]
+        ldh     a,[rLCDC]
         or      a,LCDCF_BG9C00
         and     a,(~LCDCF_BG8000) & $FF
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
         ld      a,[saved_scx]
-        ld      [rSCX],a
+        ldh     [rSCX],a
         ld      a,[saved_scy]
-        ld      [rSCY],a
+        ldh     [rSCY],a
 
         ld      a,MESSAGE_BOX_Y-1
-        ld      [rLYC],a
+        ldh     [rLYC],a
 
         ret
 
@@ -114,17 +114,17 @@ MessageBoxHide::
     WAIT_SCREEN_BLANK
 
     ld      a,[saved_scx]
-    ld      [rSCX],a
+    ldh     [rSCX],a
     ld      a,[saved_scy]
-    ld      [rSCY],a
+    ldh     [rSCY],a
 
-        ld      a,[rLCDC]
+        ldh     a,[rLCDC]
         or      a,LCDCF_BG9C00
         and     a,(~LCDCF_BG8000) & $FF
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
     xor     a,a
-    ld      [rSTAT],a
+    ldh     [rSTAT],a
 
     ld      bc,$0000
     call    irq_set_LCD
@@ -143,16 +143,16 @@ MessageBoxShow::
     ld      a,1
     ld      [message_box_enabled],a
 
-    ld      a,[rSCX]
+    ldh     a,[rSCX]
     ld      [saved_scx],a
-    ld      a,[rSCY]
+    ldh     a,[rSCY]
     ld      [saved_scy],a
 
     ld      bc,MessageBoxHandlerSTAT
     call    irq_set_LCD
 
     ld      a,STATF_LYC
-    ld      [rSTAT],a
+    ldh     [rSTAT],a
 
     ld      hl,rIE
     set     1,[hl] ; enable STAT interrupt
@@ -172,7 +172,7 @@ MessageBoxIsShowing::
 MessageBoxClear::
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      hl,$9800 + 32*19 + 1
 
@@ -208,7 +208,7 @@ MessageBoxPrint:: ; bc = pointer to string
     ; Print message
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      hl,$9800 + 32*19 + 1
 

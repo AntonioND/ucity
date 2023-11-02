@@ -168,7 +168,7 @@ CityMapSave:: ; b = SRAM BANK to save the data to, doesn't check limits
     ; --------
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
     ld      de,SAV_MAP_TILE_BASE
     ld      hl,CITY_MAP_TILES
@@ -180,7 +180,7 @@ CityMapSave:: ; b = SRAM BANK to save the data to, doesn't check limits
     ; Pack bits
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT/8 ; size/8
     ld      hl,CITY_MAP_ATTR ; src
@@ -328,7 +328,7 @@ SRAMMapLoad:: ; b = index to load from. This function doesn't check bank limits.
     ; --------
 
     ld      a,BANK_CITY_MAP_TILES
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT
     ld      hl,SAV_MAP_TILE_BASE
     ld      de,CITY_MAP_TILES
@@ -340,7 +340,7 @@ SRAMMapLoad:: ; b = index to load from. This function doesn't check bank limits.
     ; Unpack bits
 
     ld      a,BANK_CITY_MAP_ATTR
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      bc,CITY_MAP_WIDTH*CITY_MAP_HEIGHT/8 ; size/8
     ld      hl,CITY_MAP_ATTR ; dst
@@ -456,12 +456,12 @@ SRAMMapLoadBank0:
 .loop_fix:
 
         ld      a,BANK_CITY_MAP_TILES
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      e,[hl]
 
         ld      a,BANK_CITY_MAP_ATTR
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
         and     a,1

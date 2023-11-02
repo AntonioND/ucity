@@ -34,16 +34,16 @@
 
 ;-------------------------------------------------------------------------------
 
-; Everything over this value is saturated and will be displayed with the same
-; color.
-MAX_DISPLAYABLE_POWER_DENSITY      EQU 14
+    ; Everything over this value is saturated and will be displayed with the
+    ; same color.
+    DEF MAX_DISPLAYABLE_POWER_DENSITY      EQU 14
 
 ;-------------------------------------------------------------------------------
 
-C_WHITE EQU 0 ; Other tiles
-C_GREEN EQU 1 ; Tile power OK
-C_RED   EQU 2 ; Tile with not enough power
-C_BLUE  EQU 3 ; Power plants
+    DEF C_WHITE EQU 0 ; Other tiles
+    DEF C_GREEN EQU 1 ; Tile power OK
+    DEF C_RED   EQU 2 ; Tile with not enough power
+    DEF C_BLUE  EQU 3 ; Power plants
 
 MINIMAP_POWER_GRID_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(0<<0)
@@ -95,7 +95,7 @@ MinimapDrawPowerGridMap::
 
             ; Energy expected!
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl] ; b = current energy
             bit     TILE_OK_POWER_BIT,a

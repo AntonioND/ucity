@@ -31,7 +31,7 @@
 
 sram_num_available_banks:: DS 1 ; number of detected available SRAM banks
 
-SRAM_BANK_NUM_MAX EQU 16 ; Max number of banks supported by any mapper
+    DEF SRAM_BANK_NUM_MAX EQU 16 ; Max number of banks supported by any mapper
 
 sram_bank_status:: DS SRAM_BANK_NUM_MAX ; 0 = not avail. 1 = ok, 2 = empty/bad
 

@@ -66,9 +66,9 @@ bg_tiles_struct_ptr:  DS 2
 
 bg_update_scroll_registers::
     ld      a,[bg_scx]
-    ld      [rSCX],a
+    ldh     [rSCX],a
     ld      a,[bg_scy]
-    ld      [rSCY],a
+    ldh     [rSCY],a
     ret
 
 ;-------------------------------------------------------------------------------
@@ -378,7 +378,7 @@ bg_scroll_right::
     ; ---------------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
     push    bc
     push    hl
     call    ____vram_copy_column_wrap ; b = x, c = y, hl = source address
@@ -386,7 +386,7 @@ bg_scroll_right::
     pop     bc
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,[bg_size+0]
     ld      e,a
@@ -397,7 +397,7 @@ bg_scroll_right::
     call    ____vram_copy_column_wrap ; b = x, c = y, hl = source address
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ; --------
 
@@ -503,7 +503,7 @@ bg_scroll_left::
     ; ---------------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
     push    bc
     push    hl
     call    ____vram_copy_column_wrap ; b = x, c = y, hl = source address
@@ -511,7 +511,7 @@ bg_scroll_left::
     pop     bc
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,[bg_size+0]
     ld      e,a
@@ -522,7 +522,7 @@ bg_scroll_left::
     call    ____vram_copy_column_wrap ; b = x, c = y, hl = source address
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ; --------
 
@@ -630,7 +630,7 @@ bg_scroll_down::
     ; ---------------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
     push    bc
     push    hl
     call    ____vram_copy_row_wrap ; b = x, c = y, hl = source address
@@ -638,7 +638,7 @@ bg_scroll_down::
     pop     bc
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,[bg_size+0]
     ld      e,a
@@ -649,7 +649,7 @@ bg_scroll_down::
     call    ____vram_copy_row_wrap ; b = x, c = y, hl = source address
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ; --------
 
@@ -756,7 +756,7 @@ bg_scroll_up::
     ; ---------------
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
     push    bc
     push    hl
     call    ____vram_copy_row_wrap ; b = x, c = y, hl = source address
@@ -764,7 +764,7 @@ bg_scroll_up::
     pop     bc
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,[bg_size+0]
     ld      e,a
@@ -775,7 +775,7 @@ bg_scroll_up::
     call    ____vram_copy_row_wrap ; b = x, c = y, hl = source address
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ; --------
 

@@ -41,7 +41,7 @@ STATUS_BAR_MAP:
     INCBIN "info_bar_game_map.bin"
 .e:
 
-STATUS_BAR_MAP_ROWS EQU (((.e-.s)/20)/2)
+    DEF STATUS_BAR_MAP_ROWS EQU (((.e-.s)/20)/2)
 
 ;###############################################################################
 
@@ -55,9 +55,9 @@ status_bar_on_top:: DS 1 ; 1 if on top, 0 if on the bottom
 status_menu_active::   DS 1 ; if 1, show menu
 status_menu_selection: DS 1
 
-MENU_NUMBER_ELEMENTS EQU 9
+    DEF MENU_NUMBER_ELEMENTS EQU 9
 
-STATUS_MENU_BLINK_FRAMES EQU 30
+    DEF STATUS_MENU_BLINK_FRAMES EQU 30
 status_menu_blink_status: DS 1
 status_menu_blink_frames: DS 1 ; frames left to change status
 
@@ -104,12 +104,12 @@ StatusBarRefreshStatRegisters:
         ld      [status_bar_on_top],a
 
         ld      a,144-16-1
-        ld      [rLYC],a
+        ldh     [rLYC],a
 
         ld      a,144-16
-        ld      [rWY],a
+        ldh     [rWY],a
         ld      a,7
-        ld      [rWX],a
+        ldh     [rWX],a
 
     jr      .end_config
 .on_top:
@@ -119,12 +119,12 @@ StatusBarRefreshStatRegisters:
         ld      [status_bar_on_top],a
 
         ld      a,16-1
-        ld      [rLYC],a
+        ldh     [rLYC],a
 
         ld      a,0
-        ld      [rWY],a
+        ldh     [rWY],a
         ld      a,7
-        ld      [rWX],a
+        ldh     [rWX],a
 
     ; End configuration
 .end_config:
@@ -158,10 +158,10 @@ StatusBarHandlerSTAT::
         or      a,b
         or      a,LCDCF_BG9C00|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8000
 
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
         ld      a,7
-        ld      [rWX],a
+        ldh     [rWX],a
 
     ret
 .on_top:
@@ -172,10 +172,10 @@ StatusBarHandlerSTAT::
 
         ld      a,[game_sprites_8x16]
         or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8800
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
         ld      a,255
-        ld      [rWX],a
+        ldh     [rWX],a
 
     ret
 
@@ -196,25 +196,25 @@ StatusBarHandlerVBL::
 
         ; At the bottom
         ld      a,255
-        ld      [rWX],a
+        ldh     [rWX],a
 
         ld      a,[game_sprites_8x16]
         or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8800
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
         jr      .end
 .on_top:
 
         ; On top
         ld      a,7
-        ld      [rWX],a
+        ldh     [rWX],a
 
         ld      a,[status_bar_overlay_sprites_active]
         ld      b,a
         ld      a,[game_sprites_8x16]
         or      a,b
         or      a,LCDCF_BG9C00|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8000
-        ld      [rLCDC],a
+        ldh     [rLCDC],a
 
 .end:
 
@@ -239,17 +239,17 @@ StatusBarHide::
 
     ld      a,[game_sprites_8x16]
     or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8800
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     xor     a,a
-    ld      [rSTAT],a
+    ldh     [rSTAT],a
 
     ld      bc,$0000
     call    irq_set_LCD
 
     ld      a,255
-    ld      [rWX],a
-    ld      [rWY],a
+    ldh     [rWX],a
+    ldh     [rWY],a
 
     ret
 
@@ -271,7 +271,7 @@ StatusBarShow::
     call    StatusBarRefreshStatRegisters
 
     ld      a,STATF_LYC
-    ld      [rSTAT],a
+    ldh     [rSTAT],a
 
     ld      bc,StatusBarHandlerSTAT
     call    irq_set_LCD
@@ -305,11 +305,11 @@ StatusBarMenuHide::
 
     ld      a,[game_sprites_8x16]
     or      a,LCDCF_BG9C00|LCDCF_OBJON|LCDCF_WIN9800|LCDCF_WINON|LCDCF_ON|LCDCF_BG8800
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      a,255
-    ld      [rWX],a
-    ld      [rWY],a
+    ldh     [rWX],a
+    ldh     [rWY],a
 
     ei ; (*) critical section end
 
@@ -338,14 +338,14 @@ StatusBarMenuForceShow::
     ; corner and garbage will be shown during that frame. The Y coordinate of
     ; the window seems to be refreshed at LY=0 only.
     xor     a,a
-    ld      [rWY],a
-    ;ld      [rSCY],a
-    ;ld      [rSCX],a
+    ldh     [rWY],a
+    ;ldh     [rSCY],a
+    ;ldh     [rSCX],a
     ld      a,7
-    ld      [rWX],a
+    ldh     [rWX],a
 
     ld      a,LCDCF_BG8000|LCDCF_WIN9800|LCDCF_WINON|LCDCF_OBJON|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ei ; (*) critical section end
 
@@ -389,7 +389,7 @@ StatusBarMenuLoadGfx::
     call    rom_bank_push_set
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,STATUS_BAR_MAP_ROWS
     ld      hl,STATUS_BAR_MAP
@@ -409,7 +409,7 @@ StatusBarMenuLoadGfx::
     jr      nz,.loop_tiles
 
     ld      a,1
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,STATUS_BAR_MAP_ROWS
     ;ld      hl,STATUS_BAR_MAP+(STATUS_BAR_MAP_ROWS/2)*20
@@ -510,7 +510,7 @@ StatusBarUpdate::
 
     ; Copy to VRAM
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      b,10
     ld      hl,sp+2
@@ -535,7 +535,7 @@ StatusBarUpdate::
 
     ; Copy to VRAM
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      b,10
     ld      hl,sp+2
@@ -601,7 +601,7 @@ StatusBarUpdate::
 
     ; Copy to VRAM
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      b,10
     ld      hl,sp+2
@@ -676,7 +676,7 @@ StatusBarUpdate::
 
 ;-------------------------------------------------------------------------------
 
-CURSOR_X EQU 4
+    DEF CURSOR_X EQU 4
 STATUS_BAR_CURSOR_COORDINATE_OFFSET:
     DW 7*32+CURSOR_X+$9800 ; Budget
     DW 8*32+CURSOR_X+$9800 ; Bank
@@ -716,7 +716,7 @@ StatusBarMenuPlaceAtCursor: ; b = tile number
     ld      d,[hl]
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      b,1
     ld      hl,sp+0
@@ -795,7 +795,7 @@ StatusBarMenuHandle:: ; ret A = menu selection if the user presses A, $FF if not
 StatusBarMenuDrawPauseState::
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,[simulation_paused]
     and     a,a

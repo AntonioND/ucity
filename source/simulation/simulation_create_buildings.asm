@@ -35,26 +35,26 @@
 
 ;-------------------------------------------------------------------------------
 
-; Flags: Power | Services | Education | Pollution | Traffic
-FPOW EQU TILE_OK_POWER
-FSER EQU TILE_OK_SERVICES
-FEDU EQU TILE_OK_EDUCATION
-FPOL EQU TILE_OK_POLLUTION
-FTRA EQU TILE_OK_TRAFFIC
+    ; Flags: Power | Services | Education | Pollution | Traffic
+    DEF FPOW EQU TILE_OK_POWER
+    DEF FSER EQU TILE_OK_SERVICES
+    DEF FEDU EQU TILE_OK_EDUCATION
+    DEF FPOL EQU TILE_OK_POLLUTION
+    DEF FTRA EQU TILE_OK_TRAFFIC
 
-; The needed flags must be a subset of the desired ones
+    ; The needed flags must be a subset of the desired ones
 
-; TYPE_RESIDENTIAL
-R_NEEDED  EQU FPOW|FPOL|FTRA
-R_DESIRED EQU FPOW|FSER|FEDU|FPOL|FTRA
+    ; TYPE_RESIDENTIAL
+    DEF R_NEEDED  EQU FPOW|FPOL|FTRA
+    DEF R_DESIRED EQU FPOW|FSER|FEDU|FPOL|FTRA
 
-; TYPE_COMMERCIAL
-C_NEEDED  EQU FPOW|FSER|FPOL|FTRA
-C_DESIRED EQU FPOW|FPOL|FTRA
+    ; TYPE_COMMERCIAL
+    DEF C_NEEDED  EQU FPOW|FSER|FPOL|FTRA
+    DEF C_DESIRED EQU FPOW|FPOL|FTRA
 
-; TYPE_INDUSTRIAL
-I_NEEDED  EQU FPOW|FSER|FTRA
-I_DESIRED EQU FPOW|FTRA
+    ; TYPE_INDUSTRIAL
+    DEF I_NEEDED  EQU FPOW|FSER|FTRA
+    DEF I_DESIRED EQU FPOW|FTRA
 
 ; Flags are only calculated for RCI type zones!
 Simulation_FlagCreateBuildings::
@@ -65,11 +65,11 @@ Simulation_FlagCreateBuildings::
     push    hl
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      b,[hl]
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         ld      a,b
 
         cp      a,TYPE_RESIDENTIAL
@@ -168,29 +168,29 @@ Simulation_FlagCreateBuildings::
 ; SCRATCH_RAM_2 is filled with the size of the building (being 0 for RCI tiles,
 ; 1 for the 1x1 buildings, 2 for 2x2 and 3 for 3x3).
 
-F_TL EQU 1 ; Top left
-F_TC EQU 2 ; Top center
-F_TR EQU 4 ; Top right
-F_CL EQU 8 ; Center left
-F_CR EQU 16 ; Center right
-F_BL EQU 32 ; Bottom left
-F_BC EQU 64 ; Bottom center
-F_BR EQU 128 ; Bottom right
+    DEF F_TL EQU 1 ; Top left
+    DEF F_TC EQU 2 ; Top center
+    DEF F_TR EQU 4 ; Top right
+    DEF F_CL EQU 8 ; Center left
+    DEF F_CR EQU 16 ; Center right
+    DEF F_BL EQU 32 ; Bottom left
+    DEF F_BC EQU 64 ; Bottom center
+    DEF F_BR EQU 128 ; Bottom right
 
-F_CC EQU F_TL|F_TC|F_TR|F_CL|F_CR|F_BL|F_BC|F_BR ; Center center
+    DEF F_CC EQU F_TL|F_TC|F_TR|F_CL|F_CR|F_BL|F_BC|F_BR ; Center center
 
-BUILDING1X1FLAGS : MACRO
+MACRO BUILDING1X1FLAGS
     DB F_CC ; Center center / All
 ENDM
 
-BUILDING2X2FLAGS : MACRO
+MACRO BUILDING2X2FLAGS
     DB F_TL|F_TC|F_CL ; Top left
     DB F_TC|F_TR|F_CR ; Top right
     DB F_CL|F_BL|F_BC ; Bottom left
     DB F_CR|F_BC|F_BR ; Bottom right
 ENDM
 
-BUILDING3X3FLAGS : MACRO
+MACRO BUILDING3X3FLAGS
     DB F_TL ; Top left
     DB F_TC ; Top center
     DB F_TR ; Top right
@@ -310,12 +310,12 @@ Simulation_CreateBuildingsTryBuild:
 
     ; 2b. Check 8, 7, 5, 6, 2. If any of them fails, fall back to 2x2.
 
-START_POS_TEST : MACRO
+MACRO START_POS_TEST
     push    de
 ENDM
 
 ; 1 = check position flags, 2 = this building level, 3 = jump here if failed
-END_POS_TEST : MACRO
+MACRO END_POS_TEST
     call    CityMapGetTypeNoBoundCheck ; coords = de
     ; returns a = type, hl = address
 
@@ -331,7 +331,7 @@ END_POS_TEST : MACRO
 
     ; Check if building has been requested or demolishing has been requested
     ld      a,BANK_CITY_MAP_FLAGS
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl] ; get flags
 
@@ -343,7 +343,7 @@ END_POS_TEST : MACRO
 
     ; Make sure that the position flags allow us to build here
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     and     a,\1
@@ -353,7 +353,7 @@ END_POS_TEST : MACRO
     ; the one we are trying to build. This will also prevent a building to be
     ; built on top of another one of the same size.
     ld      a,BANK_SCRATCH_RAM_2
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ld      a,[hl]
     cp      a,\2 ; carry flag is set if \2 > a (new level > old level)
@@ -586,7 +586,7 @@ Simulation_CreateBuildings::
     ; on top of a big one.
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
     call    ClearWRAMX
 
     ; Not needed to clear BANK_SCRATCH_RAM_2 because it will only be used if a
@@ -594,13 +594,13 @@ Simulation_CreateBuildings::
     ; checks are needed.
 
     ;ld      a,BANK_SCRATCH_RAM_2
-    ;ld      [rSVBK],a
+    ;ldh     [rSVBK],a
     ;call    ClearWRAMX
 
     ld      hl,CITY_MAP_TILES ; Base address of the map!
 
     ld      a,BANK_CITY_MAP_TYPE
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
 .loop_set_flags:
 
@@ -629,15 +629,15 @@ Simulation_CreateBuildings::
         pop     hl
 
         ld      a,BANK_SCRATCH_RAM
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         ld      [hl],c ; save flags
 
         ld      a,BANK_SCRATCH_RAM_2
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         ld      [hl],b ; save level
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
 .skip_set_flags:
 
@@ -662,7 +662,7 @@ Simulation_CreateBuildings::
         push    hl
 
             ld      a,BANK_CITY_MAP_TYPE
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl] ; a = type
 
@@ -690,7 +690,7 @@ Simulation_CreateBuildings::
                 ; - Demolish if even one single tile is flagged to demolish.
 
                 ld      a,BANK_CITY_MAP_FLAGS
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
                 ld      a,[hl] ; get flags
 
@@ -771,7 +771,7 @@ ENDC
 
 .demolish:
                 ld      a,BANK_CITY_MAP_FLAGS
-                ld      [rSVBK],a
+                ldh     [rSVBK],a
 
                 ld      a,[hl] ; get flags
 

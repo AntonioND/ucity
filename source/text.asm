@@ -38,8 +38,8 @@ TextTilesData:
     INCBIN "text_tiles.bin"
 .e:
 
-TextTilesNumber EQU (.e - .s) / (8*8/4)
-TEXT_BASE_TILE  EQU (128-TextTilesNumber)
+    DEF TextTilesNumber EQU (.e - .s) / (8*8/4)
+    DEF TEXT_BASE_TILE  EQU (128-TextTilesNumber)
 
 ;###############################################################################
 
@@ -62,7 +62,7 @@ LoadTextPalette:: ; Load text palette into slot 7
 LoadText:: ; b = 1 -> load at bank 8800h, b = 0 -> load at bank at 8000h
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     LD_DE_BC ; (*)
 

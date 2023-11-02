@@ -34,9 +34,9 @@
 
 ;-------------------------------------------------------------------------------
 
-; 63-1 Because the value is rounded up to show tiles with value 1. If not, they
-; would be drawn as empty.
-MAX_DISPLAYABLE_POPULATION_DENSITY EQU 62
+    ; 63-1 Because the value is rounded up to show tiles with value 1. If not,
+    ; they would be drawn as empty.
+    DEF MAX_DISPLAYABLE_POPULATION_DENSITY EQU 62
 
 ;-------------------------------------------------------------------------------
 

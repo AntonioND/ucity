@@ -34,10 +34,10 @@
 
 ;-------------------------------------------------------------------------------
 
-C_WHITE  EQU 0 ; Not a building
-C_GREEN  EQU 1 ; All desired and needed flags ok
-C_YELLOW EQU 2 ; Needed flags ok, desired flags not ok
-C_RED    EQU 3 ; Not even the needed flags ok
+    DEF C_WHITE  EQU 0 ; Not a building
+    DEF C_GREEN  EQU 1 ; All desired and needed flags ok
+    DEF C_YELLOW EQU 2 ; Needed flags ok, desired flags not ok
+    DEF C_RED    EQU 3 ; Not even the needed flags ok
 
 MINIMAP_HAPPINESS_MAP_PALETTE:
     DW (31<<10)|(31<<5)|(31<<0), (0<<10)|(31<<5)|(0<<0)
@@ -62,7 +62,7 @@ MinimapDrawHappinessMap::
     push    hl
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl] ; get type
 
@@ -133,7 +133,7 @@ MinimapDrawHappinessMap::
         ; Register B = desired flags. Register C = needed flags
 
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl] ; get flags
         and     a,TILE_OK_MASK
@@ -203,11 +203,11 @@ MinimapDrawHappinessMap::
 
 ; Flags: Power | Services | Education | Pollution | Traffic
 
-FPOW EQU TILE_OK_POWER
-FSER EQU TILE_OK_SERVICES
-FEDU EQU TILE_OK_EDUCATION
-FPOL EQU TILE_OK_POLLUTION
-FTRA EQU TILE_OK_TRAFFIC
+    DEF FPOW EQU TILE_OK_POWER
+    DEF FSER EQU TILE_OK_SERVICES
+    DEF FEDU EQU TILE_OK_EDUCATION
+    DEF FPOL EQU TILE_OK_POLLUTION
+    DEF FTRA EQU TILE_OK_TRAFFIC
 
 .needed_flags_info: ; Desired flags | Needed flags
 ; The needed flags must be a subset of the desired ones

@@ -33,11 +33,11 @@
 
 ;-------------------------------------------------------------------------------
 
-SERVICES_MASK_WIDTH  EQU 32
-SERVICES_MASK_HEIGHT EQU 32
+    DEF SERVICES_MASK_WIDTH  EQU 32
+    DEF SERVICES_MASK_HEIGHT EQU 32
 
-SERVICES_MASK_CENTER_X EQU 16
-SERVICES_MASK_CENTER_Y EQU 16
+    DEF SERVICES_MASK_CENTER_X EQU 16
+    DEF SERVICES_MASK_CENTER_Y EQU 16
 
 SERVICES_INFLUENCE_MASK: ; 32x32
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -112,7 +112,7 @@ Simulation_ServicesApplyMask: ; e=x d=y (center)
     add     sp,-1
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; Get top left corner
 
@@ -215,7 +215,7 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
     ; -----
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    ClearWRAMX
 
@@ -248,7 +248,7 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
             GET_MAP_ADDRESS ; preserves de and bc
 
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             bit     TILE_OK_POWER_BIT,[hl]
             jr      z,.not_tile ; If there is no power, the building can't work
 
@@ -278,11 +278,11 @@ Simulation_Services:: ; BC = central tile of the building (tileset_info.inc)
 
 ;-------------------------------------------------------------------------------
 
-SERVICES_MASK_BIG_WIDTH  EQU 64
-SERVICES_MASK_BIG_HEIGHT EQU 64
+    DEF SERVICES_MASK_BIG_WIDTH  EQU 64
+    DEF SERVICES_MASK_BIG_HEIGHT EQU 64
 
-SERVICES_MASK_BIG_CENTER_X EQU 32
-SERVICES_MASK_BIG_CENTER_Y EQU 32
+    DEF SERVICES_MASK_BIG_CENTER_X EQU 32
+    DEF SERVICES_MASK_BIG_CENTER_Y EQU 32
 
 SERVICES_INFLUENCE_MASK_BIG: ; 64x64
     DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -549,7 +549,7 @@ Simulation_ServicesApplyMaskBig: ; e=x d=y (center)
     add     sp,-1
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     ; Get top left corner
 
@@ -651,7 +651,7 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
     ; -----
 
     ld      a,BANK_SCRATCH_RAM
-    ld      [rSVBK],a
+    ldh     [rSVBK],a
 
     call    ClearWRAMX
 
@@ -684,7 +684,7 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
             GET_MAP_ADDRESS ; preserves de and bc
 
             ld      a,BANK_CITY_MAP_FLAGS
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
             bit     TILE_OK_POWER_BIT,[hl]
             jr      z,.not_tile ; If there is no power, the building can't work
 
@@ -710,7 +710,7 @@ Simulation_ServicesBig:: ; BC = central tile of the building (tileset_info.inc)
 
 ;###############################################################################
 
-SERVICE_MIN_LEVEL EQU (256/4) ; Min level of adequate service coverage
+    DEF SERVICE_MIN_LEVEL EQU (256/4) ; Min level of adequate service coverage
 
 ;-------------------------------------------------------------------------------
 
@@ -724,7 +724,7 @@ Simulation_ServicesSetTileOkFlag::
 .loop:
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
         and     a,TYPE_MASK
@@ -744,7 +744,7 @@ Simulation_ServicesSetTileOkFlag::
             ; Building, check!
 
             ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl] ; Get coverage value
 
@@ -754,13 +754,13 @@ Simulation_ServicesSetTileOkFlag::
 
 .tile_set_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         set     TILE_OK_SERVICES_BIT,[hl]
         jr      .tile_end
 
 .tile_res_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         res     TILE_OK_SERVICES_BIT,[hl]
         ;jr      .tile_end
 
@@ -788,7 +788,7 @@ Simulation_ServicesAddTileOkFlag::
 .loop:
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
         and     a,TYPE_MASK
@@ -808,7 +808,7 @@ Simulation_ServicesAddTileOkFlag::
             ; Building, check!
 
             ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl] ; Get coverage value
 
@@ -818,7 +818,7 @@ Simulation_ServicesAddTileOkFlag::
 
 .tile_set_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         bit     TILE_OK_SERVICES_BIT,[hl]
         jr      z,.tile_end ; if it was 0, don't set to 1!
         set     TILE_OK_SERVICES_BIT,[hl]
@@ -826,7 +826,7 @@ Simulation_ServicesAddTileOkFlag::
 
 .tile_res_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         res     TILE_OK_SERVICES_BIT,[hl]
         ;jr      .tile_end
 
@@ -851,7 +851,7 @@ Simulation_EducationSetTileOkFlag::
 .loop:
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
         and     a,TYPE_MASK
@@ -865,7 +865,7 @@ Simulation_EducationSetTileOkFlag::
             ; Residential, check!
 
             ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl] ; Get coverage value
 
@@ -875,13 +875,13 @@ Simulation_EducationSetTileOkFlag::
 
 .tile_set_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         set     TILE_OK_EDUCATION_BIT,[hl]
         jr      .tile_end
 
 .tile_res_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         res     TILE_OK_EDUCATION_BIT,[hl]
         ;jr      .tile_end
 
@@ -909,7 +909,7 @@ Simulation_EducationAddTileOkFlag::
 .loop:
 
         ld      a,BANK_CITY_MAP_TYPE
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
 
         ld      a,[hl]
         and     a,TYPE_MASK
@@ -923,7 +923,7 @@ Simulation_EducationAddTileOkFlag::
             ; Residential, check!
 
             ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl] ; Get coverage value
 
@@ -933,7 +933,7 @@ Simulation_EducationAddTileOkFlag::
 
 .tile_set_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         bit     TILE_OK_EDUCATION_BIT,[hl]
         jr      z,.tile_end ; if it was 0, don't set to 1!
         set     TILE_OK_EDUCATION_BIT,[hl]
@@ -941,7 +941,7 @@ Simulation_EducationAddTileOkFlag::
 
 .tile_res_flag:
         ld      a,BANK_CITY_MAP_FLAGS
-        ld      [rSVBK],a
+        ldh     [rSVBK],a
         res     TILE_OK_EDUCATION_BIT,[hl]
         ;jr      .tile_end
 

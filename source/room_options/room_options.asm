@@ -41,7 +41,7 @@ options_menu_selection: DS 1
 
 options_room_exit:  DS 1 ; set to 1 to exit room
 
-OPTIONS_MENU_BLINK_FRAMES EQU 30
+    DEF OPTIONS_MENU_BLINK_FRAMES EQU 30
 options_menu_blink_status: DS 1
 options_menu_blink_frames: DS 1 ; frames left to change status
 
@@ -54,22 +54,23 @@ options_menu_blink_frames: DS 1 ; frames left to change status
 OPTIONS_MENU_BG_MAP:
     INCBIN "options_menu_bg_map.bin"
 
-OPTIONS_MENU_WIDTH  EQU 20
-OPTIONS_MENU_HEIGHT EQU 18
+    DEF OPTIONS_MENU_WIDTH  EQU 20
+    DEF OPTIONS_MENU_HEIGHT EQU 18
 
 ;-------------------------------------------------------------------------------
 
-OPTIONS_MENU_NUMBER_ELEMENTS EQU 5
+    DEF OPTIONS_MENU_NUMBER_ELEMENTS EQU 5
 
-OPTIONS_DISASTERS_ENABLED         EQU 0
-OPTIONS_DISASTER_START_FIRE       EQU 1
-OPTIONS_DISASTER_NUCLEAR_MELTDOWN EQU 2
-OPTIONS_ANIMATIONS_ENABLED        EQU 3
-OPTIONS_MUSIC_ENABLED             EQU 4
+    DEF OPTIONS_DISASTERS_ENABLED         EQU 0
+    DEF OPTIONS_DISASTER_START_FIRE       EQU 1
+    DEF OPTIONS_DISASTER_NUCLEAR_MELTDOWN EQU 2
+    DEF OPTIONS_ANIMATIONS_ENABLED        EQU 3
+    DEF OPTIONS_MUSIC_ENABLED             EQU 4
 
 ;-------------------------------------------------------------------------------
 
-CURSOR_X EQU 1
+    DEF CURSOR_X EQU 1
+
 OPTIONS_MENU_CURSOR_COORDINATE_OFFSET:
     DW 5*32+CURSOR_X+$9800 ; Disasters Enable/Disable
     DW 7*32+CURSOR_X+$9800 ; Start Fire
@@ -105,7 +106,7 @@ OptionsMenuPlaceAtCursor: ; b = tile number
     ld      d,[hl]
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      b,1
     ld      hl,sp+0
@@ -301,7 +302,7 @@ OptionsMenuHandleOption: ; a = selected option
 OptionsMenuDrawEnabledStateAt: ; hl = ptr to flag, de = ptr to VRAM destination
 
     xor     a,a
-    ld      [rVBK],a
+    ldh     [rVBK],a
 
     ld      a,[hl]
     and     a,a
@@ -339,7 +340,7 @@ RoomOptionsMenuLoadBG:
 
         ; Tiles
         xor     a,a
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
         ld      hl,OPTIONS_MENU_BG_MAP
@@ -364,7 +365,7 @@ RoomOptionsMenuLoadBG:
 
         ; Attributes
         ld      a,1
-        ld      [rVBK],a
+        ldh     [rVBK],a
 
         ld      de,$9800
 
@@ -407,11 +408,11 @@ RoomOptionsMenu::
     call    SetDefaultVBLHandler
 
     xor     a,a
-    ld      [rSCX],a
-    ld      [rSCY],a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
 
     ld      a,LCDCF_BG9800|LCDCF_OBJON|LCDCF_BG8800|LCDCF_ON
-    ld      [rLCDC],a
+    ldh     [rLCDC],a
 
     ld      b,1 ; bank at 8800h
     call    LoadText

@@ -78,7 +78,7 @@ MinimapDrawPollutionMap::
         push    hl
 
             ld      a,BANK_SCRATCH_RAM
-            ld      [rSVBK],a
+            ldh     [rSVBK],a
 
             ld      a,[hl]
             rlca

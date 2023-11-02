@@ -51,7 +51,7 @@ GraphDrawRCI::
     ; Draw graph
     ; ----------
 
-DRAW_GRAPH : MACRO ; \1 = name of sector
+MACRO DRAW_GRAPH ; \1 = name of sector
 
     ld      hl,GRAPH_\1_DATA
     ld      d,0

@@ -25,17 +25,17 @@
 
 ;###############################################################################
 
-TAX_PERCENTAGE_MAX EQU 20
+    DEF TAX_PERCENTAGE_MAX EQU 20
 
 ;-------------------------------------------------------------------------------
 
-MONEY_AMOUNT_SIZE EQU 5 ; 5 bytes
+    DEF MONEY_AMOUNT_SIZE EQU 5 ; 5 bytes
 
 ;-------------------------------------------------------------------------------
 
 ; Create an array of bytes consisting on the money amount passed as argument
 ; Up to 10 digits!
-DATA_MONEY_AMOUNT : MACRO ; \1 = Label, \2 = Amount
+MACRO DATA_MONEY_AMOUNT ; \1 = Label, \2 = Amount
     IF \2 > 9999999999
         FAIL "Invalid amount of money."
     ENDC
