@@ -70,7 +70,7 @@ population_total::       DS 4 ; binary, LSB first
 residential_area_empty:: DS 2 ; LSB first. Area in tiles
 residential_area_used::  DS 2
 commercial_area_empty::  DS 2
-commercial_area_used: :  DS 2
+commercial_area_used::   DS 2
 industrial_area_empty::  DS 2
 industrial_area_used::   DS 2
 
