@@ -141,8 +141,8 @@ terms (for example, GBT Player is licensed under the 2-clause BSD license).
 The media files (graphics and music) are licensed under a Creative Commons
 license (CC BY-SA 4.0).
 
-GNU General Public License version 3+
-=====================================
+GNU General Public License version 3
+====================================
 
     µCity - City building game for Game Boy Color.
     Copyright (C) 2017-2018 Antonio Niño Díaz (AntonioND/SkyLyrac)
