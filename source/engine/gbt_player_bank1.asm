@@ -930,7 +930,7 @@ gbt_channel3_load_instrument:
     ld      b,16
 .loop:
     ld      a,[hl+]
-    ld      [$FF00+c],a
+    ldh     [$FF00+c],a
     inc     c
     dec     b
     jr      nz,.loop
