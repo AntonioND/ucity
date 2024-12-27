@@ -117,7 +117,7 @@ ____vram_copy_row_wrap:: ; b = x, c = y, hl = source address
         di ; Entering critical section
 
 .wait\@: ; wait until mode 0 or 1
-        ld      a,[$FF00+c]
+        ldh     a,[$FF00+c]
         bit     1,a
         jr      nz,.wait\@
 
@@ -216,7 +216,7 @@ ____vram_copy_column_wrap:: ; b = x, c = y, hl = source address
         di ; Entering critical section
 
 .wait\@: ; wait until mode 0 or 1
-        ld      a,[$FF00+c]
+        ldh     a,[$FF00+c]
         bit     1,a
         jr      nz,.wait\@
 

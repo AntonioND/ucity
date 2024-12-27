@@ -69,7 +69,7 @@ ENDM
 MACRO WAIT_SCREEN_BLANK ; Clobbers registers A and C
     ld      c,rSTAT & $FF
 .loop\@:
-    ld      a,[$FF00+c]
+    ldh     a,[$FF00+c]
     bit     1,a
     jr      nz,.loop\@ ; Not mode 0 or 1
 ENDM

@@ -217,7 +217,7 @@ SaveMenuPrintSRAMBankInfo:
     inc     de
 
     ld      a,CART_RAM_DISABLE
-    ldh     [rRAMG],a
+    ld      [rRAMG],a
 
     pop     bc
 

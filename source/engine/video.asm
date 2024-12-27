@@ -40,7 +40,7 @@ wait_ly::
     ld      c,rLY & $FF
 
 .loop:
-    ld      a,[$FF00+c]
+    ldh     a,[$FF00+c]
     cp      a,b
     ret     z
     jr      .loop
@@ -105,7 +105,7 @@ vram_copy_fast::
     ld      c,rSTAT & $FF
 
 .loop:
-    ld      a,[$FF00+c]
+    ldh     a,[$FF00+c]
     bit     1,a
     jr      nz,.loop ; Not mode 0 or 1
 

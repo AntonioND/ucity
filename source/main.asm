@@ -265,8 +265,8 @@ SetPalettesAllBlack::
     ld      [hl],a
     ld      [hl],a
 
-    ld      [$FF00+c],a
-    ld      [$FF00+c],a
+    ldh     [$FF00+c],a
+    ldh     [$FF00+c],a
     ENDR
     dec     b
     jr      nz,.loop
