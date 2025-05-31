@@ -56,7 +56,7 @@ Compiling
 This game needs a really recent version of ``RGBDS`` to correctly assemble the
 code. It is the only real dependency. This toolchain can be found here:
 
-https://github.com/rednex/rgbds/
+https://github.com/gbdev/rgbds/
 
 Follow the instructions in that link to install it in your system.
 
