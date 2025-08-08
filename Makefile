@@ -74,7 +74,7 @@ clean:
 
 %.obj : %.asm
 	@echo rgbasm $<
-	@$(RGBASM) $(INCLUDES) -E -o$@ $<
+	@$(RGBASM) $(INCLUDES) -E -Wall -o$@ $<
 
 $(BIN): $(OBJ)
 	@echo rgblink $(BIN)
