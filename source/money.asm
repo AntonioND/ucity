@@ -41,8 +41,8 @@ MoneyWRAM:: DS MONEY_AMOUNT_SIZE ; BCD, LSB first, LSB in lower nibbles
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT MONEY_SATURATE_POSITIVE,0999999999
-    DATA_MONEY_AMOUNT MONEY_SATURATE_NEGATIVE,9000000001 ; -0999999999
+    DATA_MONEY_AMOUNT MONEY_SATURATE_POSITIVE, 09, 99999999
+    DATA_MONEY_AMOUNT MONEY_SATURATE_NEGATIVE, 90, 00000001 ; Equals -0999999999
 
 ;-------------------------------------------------------------------------------
 

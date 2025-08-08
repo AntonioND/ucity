@@ -573,10 +573,10 @@ Simulation_CalculateStatistics::
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT   POPULATION_TOWN,        500
-    DATA_MONEY_AMOUNT   POPULATION_CITY,       1000
-    DATA_MONEY_AMOUNT   POPULATION_METROPOLIS, 3000
-    DATA_MONEY_AMOUNT   POPULATION_CAPITAL,    6000
+    DATA_MONEY_AMOUNT   POPULATION_TOWN,       0,  500
+    DATA_MONEY_AMOUNT   POPULATION_CITY,       0, 1000
+    DATA_MONEY_AMOUNT   POPULATION_METROPOLIS, 0, 3000
+    DATA_MONEY_AMOUNT   POPULATION_CAPITAL,    0, 6000
 
 Simulation_CalculateCityType::
 

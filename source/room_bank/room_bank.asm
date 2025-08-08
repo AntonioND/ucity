@@ -65,8 +65,8 @@ BANK_REPAY_MENU_BG_MAP:
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT LOAN_AMOUNT_10000, 10000
-    DATA_MONEY_AMOUNT LOAN_AMOUNT_20000, 20000
+    DATA_MONEY_AMOUNT LOAN_AMOUNT_10000, 0, 10000
+    DATA_MONEY_AMOUNT LOAN_AMOUNT_20000, 0, 20000
 
 ;-------------------------------------------------------------------------------
 

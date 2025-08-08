@@ -78,7 +78,7 @@ CityStatsMenuHandle:
 
     ret
 
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT,0999999999
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_CHEAT, 09, 99999999
 
 ;-------------------------------------------------------------------------------
 

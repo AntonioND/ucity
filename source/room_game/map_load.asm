@@ -68,8 +68,8 @@ ENDM
 
 ;-------------------------------------------------------------------------------
 
-    DATA_MONEY_AMOUNT MONEY_START_20000, 20000
-    DATA_MONEY_AMOUNT MONEY_START_9000,  9000
+    DATA_MONEY_AMOUNT MONEY_START_20000, 0, 20000
+    DATA_MONEY_AMOUNT MONEY_START_9000, 0, 9000
 
     STR_ADD "Rock River", ROCK_RIVER_NAME
     STR_ADD "Boringtown", BORINGTOWN_NAME
@@ -422,7 +422,7 @@ RandomMapSetupGameVariables:
 
     ret
 
-    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_RANDOM_MAP,20000
+    DATA_MONEY_AMOUNT MONEY_AMOUNT_START_RANDOM_MAP, 0, 20000
 
 ;-------------------------------------------------------------------------------
 

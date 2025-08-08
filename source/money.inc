@@ -35,19 +35,27 @@
 
 ; Create an array of bytes consisting on the money amount passed as argument
 ; Up to 10 digits!
-MACRO DATA_MONEY_AMOUNT ; \1 = Label, \2 = Amount
-    IF \2 > 9999999999
-        FAIL "Invalid amount of money."
+;
+; \1 = Label, \2 = Amount (top two digits), \3 = Amount (bottom 8 digits)
+MACRO DATA_MONEY_AMOUNT
+    IF \2 > 99
+        FAIL "Invalid amount of money (top)."
     ENDC
     IF \2 < 0
-        FAIL "Invalid amount of money."
+        FAIL "Invalid amount of money (top)."
+    ENDC
+    IF \3 > 99999999
+        FAIL "Invalid amount of money (bottom)."
+    ENDC
+    IF \3 < 0
+        FAIL "Invalid amount of money (bottom)."
     ENDC
 \1:
-    DB   (\2              % 10)  |  (((\2 / 10)         % 10) << 4)
-    DB  ((\2 / 100)       % 10)  |  (((\2 / 1000)       % 10) << 4)
-    DB  ((\2 / 10000)     % 10)  |  (((\2 / 100000)     % 10) << 4)
-    DB  ((\2 / 1000000)   % 10)  |  (((\2 / 10000000)   % 10) << 4)
-    DB  ((\2 / 100000000) % 10)  |  (((\2 / 1000000000) % 10) << 4)
+    DB   (\3            % 10)  |  (((\3 / 10)       % 10) << 4)
+    DB  ((\3 / 100)     % 10)  |  (((\3 / 1000)     % 10) << 4)
+    DB  ((\3 / 10000)   % 10)  |  (((\3 / 100000)   % 10) << 4)
+    DB  ((\3 / 1000000) % 10)  |  (((\3 / 10000000) % 10) << 4)
+    DB   (\2            % 10)  |  (((\2 / 10)       % 10) << 4)
 ENDM
 
 ;###############################################################################
