@@ -74,17 +74,17 @@ clean:
 
 %.obj : %.asm
 	@echo rgbasm $<
-	@$(RGBASM) $(INCLUDES) -E -Wall -o$@ $<
+	@$(RGBASM) $(INCLUDES) -E -Weverything -Wno-export-undefined -o$@ $<
 
 $(BIN): $(OBJ)
 	@echo rgblink $(BIN)
 	@$(RGBLINK) -o $(BIN) -p 0xFF -m $(NAME).map -n $(NAME).sym $(OBJ)
 	@echo rgbfix $(BIN)
-	@$(RGBFIX) -p 0xFF -v $(BIN)
+	@$(RGBFIX) -p 0xFF -v -Weverything $(BIN)
 
 $(COMPAT_BIN): $(BIN)
 	@echo rgbfix $(COMPAT_BIN)
 	@cp $(BIN) $(COMPAT_BIN)
-	@$(RGBFIX) -v -Wno-overwrite -r 3 $(COMPAT_BIN)
+	@$(RGBFIX) -v -Weverything -Wno-overwrite -r 3 $(COMPAT_BIN)
 
 ################################################################################
