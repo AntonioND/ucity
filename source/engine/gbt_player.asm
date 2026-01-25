@@ -3,7 +3,7 @@
 ;#                                                                             #
 ;#                              GBT PLAYER  3.0.5                              #
 ;#                                                                             #
-;#                                             Contact: antonio_nd@outlook.com #
+;# Contact: antonio_nd@outlook.com and antonio_nd@proton.me                    #
 ;###############################################################################
 
 ; Copyright (c) 2009-2016, Antonio Niño Díaz (AntonioND)

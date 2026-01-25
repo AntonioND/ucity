@@ -2,7 +2,7 @@
  *                                                                            *
  *                       mod2gbt v3.0 (part of GBT Player)                    *
  *                                                                            *
- *                                            Contact: antonio_nd@outlook.com *
+ * Contact: antonio_nd@outlook.com and antonio_nd@proton.me                   *
  ******************************************************************************/
 /*
 
@@ -876,6 +876,7 @@ int main(int argc, char * argv[])
     printf("     |                      All rights reserved. |\n");
     printf("     |                                           |\n");
     printf("     |                   antonio_nd@outlook.com  |\n");
+    printf("     |                   antonio_nd@proton.me    |\n");
     printf("     |                                           |\n");
     printf("     +-------------------------------------------+\n");
     printf("\n");

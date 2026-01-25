@@ -15,7 +15,7 @@ Video: https://www.youtube.com/watch?v=2rir-TVx020
 This game is completely free. Just download the ROM, install a Game Boy Color
 emulator, and play! The last release of the game should be here:
 
-https://github.com/AntonioND/ucity/releases
+https://codeberg.org/SkyLyrac/ucity/releases
 
 You can also play on real hardware. Even though the game has been developed
 using mainly emulators, it has been verified to work on hardware. The game
@@ -84,7 +84,7 @@ Tools
   GBT Player is my music player library. It is included in the code, and it can
   be found here if you want to use it for your projects:
 
-    https://github.com/AntonioND/gbt-player
+    https://codeberg.org/SkyLyrac/gbt-player
 
 - GBTD (Game Boy Tile Designer) and GBMB (Game Boy Map Builder)
 
@@ -108,7 +108,7 @@ Email:
 
 Web:
 
-    https://github.com/AntonioND
+    https://codeberg.org/SkyLyrac
 
     www.skylyrac.net
 
@@ -132,7 +132,7 @@ This game is licensed under the GPLv3+ license. You should have received the
 source code of this game along with the ROM file. If not, the source code is
 freely available at the following address:
 
-    https://github.com/AntonioND/ucity
+    https://codeberg.org/SkyLyrac/ucity
 
 Not all source code files are licensed under the GPL v3+, though, only the ones
 with the GPL header are. There other source files are licensed under different
